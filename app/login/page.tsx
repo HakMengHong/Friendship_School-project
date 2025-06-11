@@ -19,14 +19,10 @@ export default function LoginPage() {
   const router = useRouter()
 
   const userOptions = [
-    "john_doe",
-    "jane_smith",
-    "admin_user",
-    "student_123",
-    "teacher_456",
-    "mary_johnson",
-    "david_wilson",
-    "sarah_brown",
+    "ហាក់​ ម៉េងហុង",
+    "ហេង​ សុនី",
+    "ស្រួយ​ ស៊ីណាត",
+    "ស្រួយ ចាន់នាត",
   ]
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,7 +74,7 @@ export default function LoginPage() {
 
           {/* Heading */}
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0082c8]">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
             <p className="text-gray-600 text-sm">សូមបញ្ចូលឈ្មេាះនិងលេខកូដសម្ងាត់</p>
           </div>
 

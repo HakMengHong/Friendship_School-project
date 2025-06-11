@@ -209,19 +209,19 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
   }
 
   return (
-    <Card className="bg-white rounded-2xl shadow-sm border-0">
+    <Card className="bg-white rounded-2xl">
       <CardHeader className={compact ? "pb-2" : "pb-3"}>
         <div className="flex items-center justify-between">
-          <CardTitle className={`text-[#0082c8] font-medium ${compact ? "text-xs" : "text-sm"}`}>
-            កាលបរិច្ឆេទ
+          <CardTitle className={`text-[#0082c8] font-medium ${compact ? "text-lg" : "text-x1"}`}>
+            ប្រតិទិនខ្មែរ
           </CardTitle>
         </div>
-        <div className={`font-bold text-gray-900 ${compact ? "text-sm" : "text-lg"}`}>
+        <div className={`font-bold text-gray-900 ${compact ? "text-base" : "text-lg"}`}>
           {formatSelectedDate() ||
             `${getKhmerDayName(today)} ទី${toKhmerNumber(today.getDate())} ខែ${KHMER_MONTHS[today.getMonth()]} ឆ្នាំ${toKhmerNumber(today.getFullYear())}`}
         </div>
         <div className="flex items-center justify-between mt-2">
-          <div className={`text-[#0082c8] font-medium ${compact ? "text-xs" : "text-sm"}`}>
+          <div className={`text-[#0082c8] font-medium ${compact ? "text-sm" : "text-base"}`}>
             {KHMER_MONTHS[currentMonth]} {toKhmerNumber(currentYear)}
           </div>
           <div className="flex gap-1">

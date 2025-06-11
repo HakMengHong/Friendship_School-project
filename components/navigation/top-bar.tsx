@@ -15,18 +15,26 @@ export function TopBar({ className, username }: TopBarProps) {
     switch (pathname) {
       case "/dashboard":
         return "ផ្ទាំងគ្រប់គ្រង"
-      case "/schedule":
-        return "កាលវិភាគសិស្ស"
+      case "/attendance":
+      case "/attendance/daily":
+      case "/attendance/monthly":
+      case "/attendance/report":
+        return "វត្តមានសិស្ស"
       case "/scores":
+      case "/scores/exam":
+      case "/scores/assignment":
+      case "/scores/final":
         return "ពិន្ទុសិស្ស"
-      case "/grades":
-        return "ពិន្ទុតាមមុខវិជ្ជា"
-      case "/subjects":
-        return "មុខវិជ្ជា"
       case "/student-info":
+      case "/student-info/list":
+      case "/student-info/profile":
+      case "/student-info/documents":
         return "ព័ត៌មានសិស្ស"
       case "/registration":
-        return "ចុះឈ្មោះសិស្ស"
+      case "/registration/new":
+      case "/registration/review":
+      case "/registration/history":
+        return "ចុះឈ្មេាះសិស្ស"
       default:
         return "ផ្ទាំងគ្រប់គ្រង"
     }
