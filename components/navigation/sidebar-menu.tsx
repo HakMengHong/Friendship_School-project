@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import {
@@ -80,6 +80,17 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
     },
   ]
 
+  useEffect(() => {
+    // Auto-open dropdown for active menu items on mount
+    menuItems.forEach((item) => {
+      if (item.subItems && (isActive(item.href) || hasActiveSubItem(item.subItems))) {
+        if (!openDropdowns.includes(item.id)) {
+          setOpenDropdowns((prev) => [...prev, item.id])
+        }
+      }
+    })
+  }, [pathname])
+
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed)
     // Close all dropdowns when collapsing
@@ -94,6 +105,26 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
     setOpenDropdowns((prev) => (prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]))
   }
 
+  const handleParentItemClick = (item: typeof menuItems[0], e: React.MouseEvent) => {
+    // Check if the click was on the chevron icon
+    const isChevronClick = (e.target as HTMLElement).closest('.chevron-icon') !== null
+    
+    if (item.subItems && !isCollapsed && isChevronClick) {
+      // Only toggle dropdown if clicking on the chevron icon
+      toggleDropdown(item.id)
+    } else if (!item.subItems || isCollapsed) {
+      // Navigate to the parent href if:
+      // 1. It's a simple item without sub-items
+      // 2. The sidebar is collapsed
+      handleNavigation(item.href)
+    }
+    // If it's a parent item with sub-items and sidebar is expanded, but not clicking on chevron,
+    // just navigate without toggling dropdown
+    else {
+      handleNavigation(item.href)
+    }
+  }
+
   const handleNavigation = (href: string) => {
     router.push(href)
   }
@@ -104,14 +135,23 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
     router.push("/login")
   }
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/")
+  // Check if a menu item is active (including its sub-items)
+  const isActive = (href: string) => {
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
+  // Check if any sub-item is active to highlight the parent
+  const hasActiveSubItem = (subItems?: { href: string }[]) => {
+    return subItems?.some((subItem) => isActive(subItem.href)) ?? false
+  }
+
   const isDropdownOpen = (itemId: string) => openDropdowns.includes(itemId)
 
   return (
     <div
       className={cn(
         "bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out rounded-[20px] m-[10px]",
-        isCollapsed ? "w-[92px]" : "w-[280px]",
+        isCollapsed ? "w-[92px]" : "w-[240px]",
         className,
       )}
     >
@@ -148,63 +188,62 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       {/* Menu items */}
       <nav className="flex-1 overflow-y-auto py-4">
         <div className="space-y-1 px-4">
-          {menuItems.map((item) => (
-            <div key={item.id}>
-              {/* Main menu item */}
-              <div className="flex items-center">
-                <button
-                  onClick={() => handleNavigation(item.href)}
-                  className={cn(
-                    "flex items-center flex-1 rounded-lg py-3 px-4 text-base transition-colors duration-200",
-                    isActive(item.href)
-                      ? "bg-[#0082c8] text-white font-medium"
-                      : "text-gray-700 hover:bg-gray-100 font-normal",
-                    isCollapsed && "justify-center px-3",
-                  )}
-                >
-                  <item.icon className={`w-6 h-6 ${isActive(item.href) ? "text-white" : "text-[#0082c8]"}`} />
-                  {!isCollapsed && <span className="ml-3">{item.label}</span>}
-                </button>
+          {menuItems.map((item) => {
+            const active = isActive(item.href) || hasActiveSubItem(item.subItems)
+            const hasSubItems = item.subItems && !isCollapsed
 
-                {/* Dropdown toggle button */}
-                {item.subItems && !isCollapsed && (
+            return (
+              <div key={item.id}>
+                {/* Main menu item */}
+                <div className="flex items-center">
                   <button
-                    onClick={() => toggleDropdown(item.id)}
+                    onClick={(e) => handleParentItemClick(item, e)}
                     className={cn(
-                      "p-2 rounded-lg transition-colors duration-200 ml-1",
-                      isActive(item.href) ? "text-white hover:bg-white/20" : "text-gray-500 hover:bg-gray-100",
+                      "flex items-center flex-1 rounded-lg py-3 px-4 text-base transition-colors duration-200 group",
+                      active ? "bg-[#0082c8] text-white font-medium" : "text-gray-700 hover:bg-gray-100 font-normal",
+                      isCollapsed && "justify-center px-3",
                     )}
                   >
-                    {isDropdownOpen(item.id) ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
+                    <item.icon className={`w-6 h-6 ${active ? "text-white" : "text-[#0082c8]"}`} />
+                    {!isCollapsed && (
+                      <div className="flex items-center justify-between w-full">
+                        <span className="ml-3">{item.label}</span>
+                        {hasSubItems && (
+                          <ChevronDown
+                            className={cn(
+                              "w-4 h-4 transition-transform duration-200 chevron-icon",
+                              isDropdownOpen(item.id) ? "rotate-180" : "",
+                              active ? "text-white" : "text-gray-500 group-hover:text-gray-700"
+                            )}
+                          />
+                        )}
+                      </div>
                     )}
                   </button>
+                </div>
+
+                {/* Dropdown submenu */}
+                {hasSubItems && isDropdownOpen(item.id) && (
+                  <div className="ml-6 mt-1 space-y-1 border-l-2 border-gray-200 pl-4">
+                    {item.subItems.map((subItem) => (
+                      <button
+                        key={subItem.id}
+                        onClick={() => handleNavigation(subItem.href)}
+                        className={cn(
+                          "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-colors duration-200",
+                          isActive(subItem.href)
+                            ? "bg-[#0082c8] text-white font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                        )}
+                      >
+                        <span>{subItem.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
-
-              {/* Dropdown submenu */}
-              {item.subItems && !isCollapsed && isDropdownOpen(item.id) && (
-                <div className="ml-6 mt-1 space-y-1 border-l-2 border-gray-200 pl-4">
-                  {item.subItems.map((subItem) => (
-                    <button
-                      key={subItem.id}
-                      onClick={() => handleNavigation(subItem.href)}
-                      className={cn(
-                        "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-colors duration-200",
-                        isActive(subItem.href)
-                          ? "bg-blue-50 text-[#0082c8] font-medium"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                      )}
-                    >
-                      <span>{subItem.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
       </nav>
 
