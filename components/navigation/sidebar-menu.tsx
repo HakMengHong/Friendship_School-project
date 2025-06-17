@@ -35,14 +35,13 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       href: "/dashboard",
     },
     {
-      id: "attendance",
+      id: "absence",
       icon: UserCheck,
-      label: "វត្តមានសិស្ស",
-      href: "/attendance",
+      label: "អវត្តមានសិស្ស",
+      href: "/absence",
       subItems: [
-        { id: "daily-attendance", label: "វត្តមានប្រចាំថ្ងៃ", href: "/attendance/daily" },
-        { id: "monthly-attendance", label: "វត្តមានប្រចាំខែ", href: "/attendance/monthly" },
-        { id: "attendance-report", label: "របាយការណ៍វត្តមាន", href: "/attendance/report" },
+        { id: "daily-absence", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/absence/daily" },
+        { id: "absence-report", label: "របាយការណ៍អវត្តមាន", href: "/absence/report" },
       ],
     },
     {
