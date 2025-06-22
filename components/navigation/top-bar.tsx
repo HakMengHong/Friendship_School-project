@@ -15,26 +15,30 @@ export function TopBar({ className, username }: TopBarProps) {
     switch (pathname) {
       case "/dashboard":
         return "ផ្ទាំងគ្រប់គ្រង"
-      case "/attendance":
-      case "/attendance/daily":
-      case "/attendance/monthly":
-      case "/attendance/report":
-        return "វត្តមានសិស្ស"
+      case "/absence":
+        return "អវត្តមានសិស្ស"
+      case "/absence/daily":
+        return "អវត្តមានសិស្សប្រចាំថ្ងៃ"
+      case "/absence/report":
+        return "របាយការណ៍អវត្តមានសិស្ស"
+
       case "/scores":
-      case "/scores/exam":
-      case "/scores/assignment":
-      case "/scores/final":
         return "ពិន្ទុសិស្ស"
+      case "/scores/addscore":
+        return "បញ្ចូលពិន្ទុសិស្ស"
+      case "/scores/report":
+        return "របាយការណ៍ពិន្ទុ"
+      case "/scores/gradebook":
+        return "សៀវភៅតាមដាន"
+
       case "/student-info":
-      case "/student-info/list":
-      case "/student-info/profile":
-      case "/student-info/documents":
         return "ព័ត៌មានសិស្ស"
+      case "/student-info/list":
+        return "បញ្ញីឈ្មោះសិស្ស"
+
       case "/registration":
-      case "/registration/new":
-      case "/registration/review":
-      case "/registration/history":
         return "ចុះឈ្មេាះសិស្ស"
+        
       default:
         return "ផ្ទាំងគ្រប់គ្រង"
     }
@@ -42,7 +46,7 @@ export function TopBar({ className, username }: TopBarProps) {
 
   return (
     <div className={`border-b border-white/20 p-5 flex justify-between items-center ${className}`}>
-      <h1 className="text-xl font-semibold text-white">{getPageTitle()}</h1>
+      <h1 className="text-2xl font-semibold text-white">{getPageTitle()}</h1>
 
       {/* User profile */}
       <div className="flex items-center space-x-4">

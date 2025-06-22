@@ -104,8 +104,7 @@ export default function AbsencePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">អវត្តមានសិស្ស</h2>
+  <>
 
       {/* Today's Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -231,6 +230,6 @@ export default function AbsencePage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </>
   )
 }

@@ -9,21 +9,21 @@ export default function SplashScreen() {
   const router = useRouter()
 
   useEffect(() => {
-    // Progress animation
+    // Progress animation - faster to reach 100% in 1 second
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(progressInterval)
           return 100
         }
-        return prev + 2
+        return prev + 10 // Increased from +2 to +10 for faster progress
       })
     }, 60)
 
-    // Auto-redirect to login after 3 seconds
+    // Auto-redirect to login after 1 second
     const timer = setTimeout(() => {
       router.push("/login")
-    }, 3000)
+    }, 1000)
 
     return () => {
       clearInterval(progressInterval)
@@ -33,8 +33,6 @@ export default function SplashScreen() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#0082c8] from-blue-500 to-blue-700 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fillRule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fillOpacity=&quot;0.1&quot;%3E%3Ccircle cx=&quot;30&quot; cy=&quot;30&quot; r=&quot;2&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
 
       {/* Main content container */}
       <div className="flex flex-col items-center justify-center space-y-8 z-10">

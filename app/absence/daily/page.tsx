@@ -1,10 +1,10 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { UserCheck, UserX, Clock, Edit, Trash2 } from "lucide-react"
+import { User, UserCheck, UserX, Clock, Edit, Trash2 } from "lucide-react"
 import { useState } from "react"
 
-export default function DailyAttendancePage() {
+export default function DailyAbsencePage() {
   const [formData, setFormData] = useState({
     schoolYear: "",
     grade: "",
@@ -45,29 +45,21 @@ export default function DailyAttendancePage() {
     }
   ])
   
+
+
   const handleTimeInput = (e) => {
-    const input = e.target.value.replace(/[^0-9០-៩]/g, ''); // Remove non-digits and non-Khmer numerals
-    let formattedValue = '';
-    
-    if (input.length > 0) {
-      // Convert Khmer numerals to Western if present
-      const westernInput = input.replace(/[០-៩]/g, (match) => 
-        String.fromCharCode(match.charCodeAt(0) - 0x17E0)
+      const input = e.target.value.replace(/\D/g, ''); // Remove non-digits
+      let formattedValue = '';
       
-      formattedValue = westernInput.substring(0, 2);
-      if (westernInput.length > 2) {
-        formattedValue += ':' + westernInput.substring(2, 4);
+      if (input.length > 0) {
+        formattedValue = input.substring(0, 2);
+        if (input.length > 2) {
+          formattedValue += ':' + input.substring(2, 4);
+        }
       }
       
-      // Convert back to Khmer numerals if the original input had them
-      if (/[០-៩]/.test(input)) {
-        formattedValue = formattedValue.replace(/[0-9]/g, (match) => 
-          String.fromCharCode(parseInt(match) + 0x17E0)
-      }
-    }
-    
-    e.target.value = formattedValue;
-  };
+      e.target.value = formattedValue;
+    };
 
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [showAbsenceForm, setShowAbsenceForm] = useState(false)
@@ -199,8 +191,6 @@ export default function DailyAttendancePage() {
 
   return (
     <>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">ការបញ្ចូលអវត្តមានសិស្ស</h2>
-
       {/* School information form */}
       <Card className="mb-6">
         <CardHeader>
@@ -361,7 +351,7 @@ export default function DailyAttendancePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <span className="h-5 w-5 text-center">៣០</span>
+              <User className="h-5 w-5 text-center" />
               <span>សរុបសិស្ស</span>
             </CardTitle>
           </CardHeader>
@@ -541,16 +531,6 @@ export default function DailyAttendancePage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">ស្ថានភាព</label>
                       <div className="space-y-2">
-                        <label className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            name="absenceType"
-                            value=""
-                            defaultChecked={!editingAbsence?.absenceType}
-                            className="h-4 w-4 text-blue-600"
-                          />
-                          <span>វត្តមាន</span>
-                        </label>
                         {absenceTypes.map(type => (
                           <label key={type} className="flex items-center space-x-2">
                             <input

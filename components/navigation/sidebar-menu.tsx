@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import {
+  Printer 
   ChevronLeft,
   LayoutDashboard,
   BarChart2,
@@ -41,7 +42,8 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       href: "/absence",
       subItems: [
         { id: "daily-absence", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/absence/daily" },
-        { id: "absence-report", label: "របាយការណ៍អវត្តមាន", href: "/absence/report" },
+        { 
+        id: "absence-report", label: "របាយការណ៍អវត្តមាន", href: "/absence/report", icon: Printer },
       ],
     },
     {
@@ -50,9 +52,9 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       label: "ពិន្ទុសិស្ស",
       href: "/scores",
       subItems: [
-        { id: "exam-scores", label: "ពិន្ទុប្រលង", href: "/scores/exam" },
-        { id: "assignment-scores", label: "ពិន្ទុកិច្ចការ", href: "/scores/assignment" },
-        { id: "final-scores", label: "ពិន្ទុចុងក្រោយ", href: "/scores/final" },
+        { id: "add-scores", label: "បញ្ចូលពិន្ទុ", href: "/scores/addscore" },
+        { id: "scores-report", label: "របាយការណ៍ពិន្ទុ", href: "/scores/report" },
+        { id: "record-book-report", label: "សៀវភៅតាមដាន", href: "/scores/gradebook" },
       ],
     },
     {
@@ -61,9 +63,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       label: "ព័ត៌មានសិស្ស",
       href: "/student-info",
       subItems: [
-        { id: "student-list", label: "បញ្ជីសិស្ស", href: "/student-info/list" },
-        { id: "student-profile", label: "ប្រវត្តិរូបសិស្ស", href: "/student-info/profile" },
-        { id: "student-documents", label: "ឯកសារសិស្ស", href: "/student-info/documents" },
+        { id: "student-list", label: "បញ្ជីឈ្មោះសិស្ស", href: "/student-info/list" },
       ],
     },
     {
@@ -71,11 +71,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       icon: ClipboardList,
       label: "ចុះឈ្មេាះសិស្ស",
       href: "/registration",
-      subItems: [
-        { id: "new-registration", label: "ចុះឈ្មេាះថ្មី", href: "/registration/new" },
-        { id: "registration-review", label: "ពិនិត្យការចុះឈ្មេាះ", href: "/registration/review" },
-        { id: "registration-history", label: "ប្រវត្តិការចុះឈ្មេាះ", href: "/registration/history" },
-      ],
     },
   ]
 
