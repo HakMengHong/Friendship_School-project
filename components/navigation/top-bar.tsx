@@ -34,7 +34,7 @@ export function TopBar({ className, username }: TopBarProps) {
       case "/student-info":
         return "ព័ត៌មានសិស្ស"
       case "/student-info/list":
-        return "បញ្ញីឈ្មោះសិស្ស"
+        return "បញ្ជីឈ្មោះសិស្ស"
 
       case "/registration":
         return "ចុះឈ្មេាះសិស្ស"
