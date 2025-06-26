@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import {
-  Printer 
+  Printer,
   ChevronLeft,
   LayoutDashboard,
   BarChart2,
