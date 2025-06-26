@@ -43,7 +43,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       subItems: [
         { id: "daily-absence", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/absence/daily" },
         { 
-        id: "absence-report", label: "របាយការណ៍អវត្តមាន", href: "/absence/report", icon: Printer },
+        id: "absence-report", label: "របាយការណ៍អវត្តមាន", href: "/absence/report" },
       ],
     },
     {
