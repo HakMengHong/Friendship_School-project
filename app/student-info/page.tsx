@@ -113,8 +113,8 @@ const tabs = [
   { id: 'registration', label: 'ចុះឈ្មោះ', icon: <ScrollText className="h-4 w-4" /> },
   { id: 'scholarship', label: 'អាហារូបករណ៍', icon: <Utensils className="h-4 w-4" /> },
   { id: 'family', label: 'គ្រួសារ', icon: <Home className="h-4 w-4" /> },
-  { id: 'attendance', label: 'ក្រាហ្វិចអវត្តមាន', icon: <CalendarCheck className="h-4 w-4" /> },
-  { id: 'grades', label: 'ក្រាហ្វិចពិន្ទុ', icon: <Award className="h-4 w-4" /> },
+  { id: 'attendance', label: 'អវត្តមាន', icon: <CalendarCheck className="h-4 w-4" /> },
+  { id: 'grades', label: 'ពិន្ទុ', icon: <Award className="h-4 w-4" /> },
   { id: 'religion', label: 'សាសនា', icon: <Grape className="h-4 w-4" /> },
   { id: 'health', label: 'សុខភាព', icon: <HeartPulse className="h-4 w-4" /> }
 ];
@@ -158,304 +158,374 @@ export default function StudentInfoPage() {
   };
 
   return (
-  <>
-      {/* Search and Filter Section */}
-    <div className="grid grid-cols-1 gap-6 mb-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Users className="h-5 w-5 text-[#0082c8]" />
-            <span>ស្វែងរកសិស្ស</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-end gap-4">
-            <div className="flex-1 min-w-[300px]">
-              <Label htmlFor="student-search">សូមបញ្ចូលឈ្មោះសិស្ស</Label>
-              <div className="relative mt-1">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0082c8]" />
-                <Input
-                  id="student-search"
-                  placeholder="ជ្រើសរើស ឬ សរសេរឈ្មោះសិស្ស"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onFocus={() => setShowDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                  className="pl-10 pr-10"
-                />
-                <ChevronDown 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0082c8] cursor-pointer"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                />
-                {showDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden animate-in fade-in-0 zoom-in-95">
-                    <div className="max-h-60 overflow-auto">
-                      {filteredStudents.length > 0 ? (
-                        filteredStudents.map(student => (
-                          <div
-                            key={student.id}
-                            className="flex items-center p-2 hover:bg-gray-100 cursor-pointer transition-colors"
-                            onClick={() => {
-                              setSearchTerm(`${student.lastName} ${student.firstName}`);
-                              handleStudentSelect(student);
-                              setShowDropdown(false);
-                            }}
-                          >
-                            <User className="mr-2 h-4 w-4 text-[#0082c8]" />
-                            <div>
-                              <p>{student.lastName} {student.firstName}</p>
+    <>
+      {/* Search Section */}
+      <div className="grid grid-cols-1 gap-6 mb-8">
+        <Card className="shadow-sm bg-white rounded-xl">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-medium text-gray-800">
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5 text-[#0082c8]" />
+                <span>ស្វែងរកសិស្ស</span>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row md:items-end gap-4">
+              <div className="flex-1 min-w-[300px]">
+                <Label className="text-gray-600 mb-1">សូមបញ្ចូលឈ្មោះសិស្ស</Label>
+                <div className="relative mt-1">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0082c8]" />
+                  <Input
+                    placeholder="សរសេរឈ្មោះសិស្ស"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onFocus={() => setShowDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                    className="pl-10 pr-10 rounded-lg border-gray-300 focus:border-[#0082c8] focus:ring-[#0082c8]"
+                  />
+                  <ChevronDown 
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0082c8] cursor-pointer"
+                    onClick={() => setShowDropdown(!showDropdown)}
+                  />
+                  {showDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                      <div className="max-h-60 overflow-auto">
+                        {filteredStudents.length > 0 ? (
+                          filteredStudents.map(student => (
+                            <div
+                              key={student.id}
+                              className="flex items-center p-3 hover:bg-indigo-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                              onClick={() => {
+                                setSearchTerm(`${student.lastName} ${student.firstName}`);
+                                handleStudentSelect(student);
+                                setShowDropdown(false);
+                              }}
+                            >
+                              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                                <User className="h-4 w-4 text-[#0082c8]" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-800">{student.lastName} {student.firstName}</p>
+                                <p className="text-xs text-gray-500">{student.class} • {student.academicYear}</p>
+                              </div>
                             </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-2 text-gray-500 text-center">រកមិនឃើញឈ្មោះសិស្ស</div>
-                      )}
+                          ))
+                        ) : (
+                          <div className="p-3 text-gray-500 text-center">រកមិនឃើញឈ្មោះសិស្ស</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-center items-center space-x-4 w-[400px] -translate-y-1/2">
+                  <Checkbox
+                    id="filter-toggle"
+                    checked={filterByYearClass}
+                    onCheckedChange={(checked) => {
+                      setFilterByYearClass(checked);
+                      if (!checked) {
+                        setSelectedYear("");
+                        setSelectedClass("");
+                      }
+                    }}
+                    className="h-5 w-5 rounded border-gray-300 text-[#0082c8] focus:ring-[#0082c8]"
+                  />
+                  <Label htmlFor="filter-toggle" className="text-gray-600 cursor-pointer">
+                    រកតាមឆ្នាំសិក្សា និងថ្នាក់
+                  </Label>
+                </div>
+
+                {filterByYearClass && (
+                  <div className="flex space-x-3">
+                    <div className="w-[180px]">
+                      <Select value={selectedYear} onValueChange={setSelectedYear}>
+                        <SelectTrigger className="rounded-lg border-gray-300 focus:border-[#0082c8] focus:ring-[#0082c8]">
+                          <Calendar className="mr-2 h-4 w-4 text-[#0082c8]" />
+                          <SelectValue placeholder="ឆ្នាំសិក្សា" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-lg border-gray-300 shadow-lg">
+                          {academicYears.map(year => (
+                            <SelectItem key={year} value={year} className="hover:bg-indigo-50">
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="w-[180px]">
+                      <Select value={selectedClass} onValueChange={setSelectedClass}>
+                        <SelectTrigger className="rounded-lg border-gray-300 focus:border-[#0082c8] focus:ring-[#0082c8]">
+                          <BookOpen className="mr-2 h-4 w-4 text-[#0082c8]" />
+                          <SelectValue placeholder="ថ្នាក់" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-lg border-gray-300 shadow-lg">
+                          {classes.map(cls => (
+                            <SelectItem key={cls} value={cls} className="hover:bg-indigo-50">
+                              {cls}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-
-            <div className="space-y-2">
-              {/* Checkbox and Label - Centered */}
-              <div className="flex justify-center items-center space-x-4 w-[400px] -translate-y-1/2">
-                <Checkbox
-                  id="filter-toggle"
-                  checked={filterByYearClass}
-                  onCheckedChange={(checked) => {
-                    setFilterByYearClass(checked);
-                    if (!checked) {
-                      setSelectedYear("");
-                      setSelectedClass("");
-                    }
-                  }}
-                />
-                <Label htmlFor="filter-toggle" className="cursor-pointer whitespace-nowrap">
-                  រកតាមឆ្នាំសិក្សា និងថ្នាក់
-                </Label>
-              </div>
-
-              {/* Year and Class Filters - Centered when shown */}
-              {filterByYearClass && (
-                <div className="flex justify-center space-x-4">
-                  <div className="w-[180px]">
-                    <Select value={selectedYear} onValueChange={setSelectedYear}>
-                      <SelectTrigger>
-                        <Calendar className="mr-2 h-4 w-4" />
-                        <SelectValue placeholder="ឆ្នាំសិក្សា" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {academicYears.map(year => (
-                          <SelectItem key={year} value={year}>{year}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="w-[180px]">
-                    <Select value={selectedClass} onValueChange={setSelectedClass}>
-                      <SelectTrigger>
-                        <BookOpen className="mr-2 h-4 w-4" />
-                        <SelectValue placeholder="ថ្នាក់" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {classes.map(cls => (
-                          <SelectItem key={cls} value={cls}>{cls}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Student Details Section */}
       {selectedStudent ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <User className="h-5 w-5 text-[#0082c8]" />
-                <span>ព័ត៌មានលម្អិត</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Student Photo and Basic Info */}
-                <div className="space-y-4">
-                  <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto overflow-hidden">
+          {/* Student Profile Card */}
+          <div className="lg:col-span-1">
+            <Card className="shadow-sm bg-white rounded-xl h-full">
+              <CardContent className="p-6">
+                <div className="flex flex-col items-center">
+                  <div className="w-32 h-32 bg-gray-100 rounded-full overflow-hidden mb-4 border-4 border-indigo-50">
                     <img 
                       src={selectedStudent.photo} 
                       alt={`${selectedStudent.lastName} ${selectedStudent.firstName}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="text-center">
-                    <h3 className="text-lg font-bold">{selectedStudent.lastName} {selectedStudent.firstName}</h3>
-                    <p className="text-gray-600">អាយុ: {selectedStudent.age} ឆ្នាំ</p>
-                    <p className="text-gray-600">ថ្នាក់ទី: {selectedStudent.class}</p>
-                    <p className="text-gray-600">ឆ្នាំសិក្សា: {selectedStudent.academicYear}</p>
+                  <h3 className="text-xl font-bold text-gray-800 text-center">
+                    {selectedStudent.lastName} {selectedStudent.firstName}
+                  </h3>
+                  <p className="text-gray-600 text-center">{selectedStudent.age} ឆ្នាំ • {selectedStudent.gender}</p>
+                  
+                  <div className="mt-6 w-full space-y-4">
+                    <div className="bg-indigo-50 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-800 flex items-center">
+                        <BookOpen className="h-4 w-4 text-[#0082c8] mr-2" />
+                        ព័ត៌មានសិក្សា
+                      </h4>
+                      <div className="mt-2 space-y-1 text-sm text-gray-600">
+                        <p>ថ្នាក់: {selectedStudent.class}</p>
+                        <p>ឆ្នាំសិក្សា: {selectedStudent.academicYear}</p>
+                        <p className={selectedStudent.education.registered ? "text-green-600" : "text-red-600"}>
+                          ស្ថានភាព: {selectedStudent.education.registered ? "កំពុងសិក្សា" : "បោះបង់"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-indigo-50 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-800 flex items-center">
+                        <Home className="h-4 w-4 text-[#0082c8] mr-2" />
+                        អាសយដ្ឋាន
+                      </h4>
+                      <div className="mt-2 space-y-1 text-sm text-gray-600">
+                        <p>{selectedStudent.address.houseNo}, {selectedStudent.address.village}</p>
+                        <p>{selectedStudent.address.commune}, {selectedStudent.address.district}</p>
+                        <p>{selectedStudent.address.province}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Personal Information */}
-                <div className="space-y-2">
-                  <h4 className="font-semibold">ព័ត៌មានផ្ទាល់ខ្លួន</h4>
-                  <p><span className="font-medium">ភេទ:</span> {selectedStudent.gender}</p>
-                  <p><span className="font-medium">ថ្ងៃខែឆ្នាំកំណើត:</span> {selectedStudent.dob}</p>
-                  <p><span className="font-medium">កំណើត:</span> {selectedStudent.birthPlace}</p>
-                </div>
-
-                {/* Address Information */}
-                <div className="space-y-2">
-                  <h4 className="font-semibold">អាសយដ្ឋាន</h4>
-                  <p><span className="font-medium">ផ្ទះលេខ:</span> {selectedStudent.address.houseNo}</p>
-                  <p><span className="font-medium">ភូមិ/ឃុំ:</span> {selectedStudent.address.village}</p>
-                  <p><span className="font-medium">សង្កាត់:</span> {selectedStudent.address.commune}</p>
-                  <p><span className="font-medium">ស្រុក/ខណ្ឌ:</span> {selectedStudent.address.district}</p>
-                  <p><span className="font-medium">ខេត្ត/ក្រុង:</span> {selectedStudent.address.province}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Education Info */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <BookOpen className="h-5 w-5 text-[#0082c8]" />
-                <span>ព័ត៌មានការសិក្សា</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p><span className="font-medium">ចុះឈ្មោះចូលរៀន:</span> {selectedStudent.education.registered ? 'បាទ/ចាស' : 'ទេ'}</p>
-                  <p><span className="font-medium">ថ្នាក់ទី:</span> {selectedStudent.education.grade}</p>
-                  <p><span className="font-medium">ថ្ងៃចុះឈ្មោះ:</span> {selectedStudent.education.registrationDate}</p>
-                </div>
-                <div>
-                  {selectedStudent.education.dropoutDate ? (
-                    <>
-                      <p><span className="font-medium">ថ្ងៃបោះបង់ការសិក្សា:</span> {selectedStudent.education.dropoutDate}</p>
-                      <p><span className="font-medium">មូលហេតុ:</span> {selectedStudent.education.dropoutReason}</p>
-                    </>
-                  ) : (
-                    <p className="text-green-600">កំពុងសិក្សា</p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tabs Navigation */}
-         <div className="col-span-full border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 overflow-x-auto">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </nav>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Tab Content */}
-          <Card className="lg:col-span-full">
-            <CardContent className="p-6">
-              {activeTab === 'registration' && (
-                <div>
-                  <h4 className="font-bold mb-4">ព័ត៌មានចុះឈ្មោះ</h4>
-                  <p>ឈ្មោះសិស្ស: {selectedStudent.lastName} {selectedStudent.firstName}</p>
-                  <p>ថ្នាក់ទី: {selectedStudent.class}</p>
-                  <p>ឆ្នាំសិក្សា: {selectedStudent.academicYear}</p>
-                  <p>ថ្ងៃចុះឈ្មោះ: {selectedStudent.education.registrationDate}</p>
-                </div>
-              )}
+          {/* Main Content Area */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Tabs Navigation */}
+            <div className="bg-white rounded-xl border-none shadow-sm overflow-hidden">
+              <nav className="flex overflow-x-auto">
+                {tabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-4 py-3 text-sm font-medium flex items-center space-x-2 border-b-2 ${activeTab === tab.id ? 'border-[#0082c8] text-[#0082c8]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
 
-              {activeTab === 'scholarship' && (
-                <div>
-                  <h4 className="font-bold mb-4">ព័ត៌មានអាហារូបករណ៍</h4>
-                  {selectedStudent.scholarship.type ? (
-                    <>
-                      <p>ប្រភេទ: {selectedStudent.scholarship.type}</p>
-                      <p>ចំនួនទឹកប្រាក់: {selectedStudent.scholarship.amount}៛</p>
-                      <p>អង្គការឧបត្ថម្ភ: {selectedStudent.scholarship.sponsor}</p>
-                    </>
-                  ) : (
-                    <p>សិស្សនេះមិនមានអាហារូបករណ៍ទេ</p>
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'family' && (
-                <div>
-                  <h4 className="font-bold mb-4">ព័ត៌មានគ្រួសារ</h4>
-                  <p>ឪពុក: {selectedStudent.family.father}</p>
-                  <p>ម្តាយ: {selectedStudent.family.mother}</p>
-                  <p>បងប្អូន: {selectedStudent.family.siblings} នាក់</p>
-                </div>
-              )}
-
-              {activeTab === 'attendance' && (
-                <div>
-                  <h4 className="font-bold mb-4">ក្រាហ្វិចអវត្តមាន</h4>
-                  <div className="space-y-2">
-                    {selectedStudent.attendance.map(record => (
-                      <div key={record.month} className="flex justify-between">
-                        <span>{record.month}:</span>
-                        <span>
-                          មានវត្តមាន {record.present} ថ្ងៃ, អវត្តមាន {record.absent} ថ្ងៃ
-                        </span>
+            {/* Tab Content */}
+            <Card className="border-none shadow-sm bg-white rounded-xl">
+              <CardContent className="p-6">
+                {activeTab === 'registration' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានចុះឈ្មោះ</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">ឈ្មោះសិស្ស</p>
+                        <p className="font-medium">{selectedStudent.lastName} {selectedStudent.firstName}</p>
                       </div>
-                    ))}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">ថ្ងៃខែឆ្នាំកំណើត</p>
+                        <p className="font-medium">{selectedStudent.dob}</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">ថ្នាក់ទី</p>
+                        <p className="font-medium">{selectedStudent.class}</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">ថ្ងៃចុះឈ្មោះ</p>
+                        <p className="font-medium">{selectedStudent.education.registrationDate}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {activeTab === 'grades' && (
-                <div>
-                  <h4 className="font-bold mb-4">ក្រាហ្វិចពិន្ទុ</h4>
-                  <div className="space-y-2">
-                    <p>ភាសាខ្មែរ: {selectedStudent.grades.khmer}/100</p>
-                    <p>គណិតវិទ្យា: {selectedStudent.grades.math}/100</p>
-                    <p>វិទ្យាសាស្ត្រ: {selectedStudent.grades.science}/100</p>
+                {activeTab === 'scholarship' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានអាហារូបករណ៍</h4>
+                    {selectedStudent.scholarship.type ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-indigo-50 p-4 rounded-lg">
+                          <p className="text-sm text-gray-500">ប្រភេទ</p>
+                          <p className="font-medium">{selectedStudent.scholarship.type}</p>
+                        </div>
+                        <div className="bg-indigo-50 p-4 rounded-lg">
+                          <p className="text-sm text-gray-500">ចំនួនទឹកប្រាក់</p>
+                          <p className="font-medium">{selectedStudent.scholarship.amount}៛</p>
+                        </div>
+                        <div className="bg-indigo-50 p-4 rounded-lg">
+                          <p className="text-sm text-gray-500">អង្គការឧបត្ថម្ភ</p>
+                          <p className="font-medium">{selectedStudent.scholarship.sponsor}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-50 p-4 rounded-lg text-center text-gray-500">
+                        សិស្សនេះមិនមានអាហារូបករណ៍ទេ
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                )}
 
-              {activeTab === 'religion' && (
-                <div>
-                  <h4 className="font-bold mb-4">ព័ត៌មានសាសនា</h4>
-                  <p>សាសនា: {selectedStudent.religion}</p>
-                </div>
-              )}
+                {activeTab === 'family' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានគ្រួសារ</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-indigo-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">ឪពុក</p>
+                        <p className="font-medium">{selectedStudent.family.father}</p>
+                      </div>
+                      <div className="bg-indigo-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">ម្តាយ</p>
+                        <p className="font-medium">{selectedStudent.family.mother}</p>
+                      </div>
+                      <div className="bg-indigo-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">បងប្អូន</p>
+                        <p className="font-medium">{selectedStudent.family.siblings} នាក់</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-              {activeTab === 'health' && (
-                <div>
-                  <h4 className="font-bold mb-4">ព័ត៌មានសុខភាព</h4>
-                  <p>ស្ថានភាពសុខភាព: {selectedStudent.health}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                {activeTab === 'attendance' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold text-gray-800">ក្រាហ្វិចអវត្តមាន</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {selectedStudent.attendance.map(record => (
+                        <div key={record.month} className="bg-indigo-50 p-4 rounded-lg">
+                          <p className="text-sm text-gray-500">{record.month}</p>
+                          <div className="mt-2 space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-sm">វត្តមាន:</span>
+                              <span className="font-medium text-green-600">{record.present} ថ្ងៃ</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">អវត្តមាន:</span>
+                              <span className="font-medium text-red-600">{record.absent} ថ្ងៃ</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
+                {activeTab === 'grades' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold text-gray-800">ក្រាហ្វិចពិន្ទុ</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-indigo-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">ភាសាខ្មែរ</p>
+                        <div className="mt-2 flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="bg-[#0082c8] h-2.5 rounded-full" 
+                              style={{ width: `${selectedStudent.grades.khmer}%` }}
+                            ></div>
+                          </div>
+                          <span className="ml-2 font-medium">{selectedStudent.grades.khmer}/100</span>
+                        </div>
+                      </div>
+                      <div className="bg-indigo-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">គណិតវិទ្យា</p>
+                        <div className="mt-2 flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="bg-[#0082c8] h-2.5 rounded-full" 
+                              style={{ width: `${selectedStudent.grades.math}%` }}
+                            ></div>
+                          </div>
+                          <span className="ml-2 font-medium">{selectedStudent.grades.math}/100</span>
+                        </div>
+                      </div>
+                      <div className="bg-indigo-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500">វិទ្យាសាស្ត្រ</p>
+                        <div className="mt-2 flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="bg-[#0082c8] h-2.5 rounded-full" 
+                              style={{ width: `${selectedStudent.grades.science}%` }}
+                            ></div>
+                          </div>
+                          <span className="ml-2 font-medium">{selectedStudent.grades.science}/100</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'religion' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានសាសនា</h4>
+                    <div className="bg-indigo-50 p-4 rounded-lg">
+                      <p className="font-medium">{selectedStudent.religion}</p>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'health' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានសុខភាព</h4>
+                    <div className="bg-indigo-50 p-4 rounded-lg">
+                      <p className="font-medium">{selectedStudent.health}</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       ) : (
-        <Card>
-          <CardContent className="p-6 text-center text-gray-500">
-            សូមជ្រើសរើសសិស្សដើម្បីមើលព័ត៌មាន
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 gap-6 mb-8">
+          <Card className="shadow-sm bg-white rounded-xl">
+            <CardContent className="p-8 text-center">
+              <div className="mx-auto max-w-md">
+                <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="h-10 w-10 text-[#0082c8]" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-800 mb-2">រកមិនឃើញព័ត៌មានសិស្ស</h3>
+                <p className="text-gray-600">សូមជ្រើសរើសសិស្សដើម្បីមើលព័ត៌មានលម្អិត</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
-     </div>
-  </>
+    </>
   );
 }
