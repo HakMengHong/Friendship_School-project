@@ -15,6 +15,7 @@ import {
   ChevronRight,
   UserCheck,
   ClipboardList,
+  GraduationCap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -144,44 +145,40 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
   return (
     <div
       className={cn(
-        "bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out rounded-[20px] m-[10px]",
-        isCollapsed ? "w-[92px]" : "w-[240px]",
+        "bg-card border-r border-border flex flex-col transition-all duration-300 ease-in-out rounded-r-2xl m-2 shadow-soft",
+        isCollapsed ? "w-[80px]" : "w-[280px]",
         className,
       )}
     >
       {/* Header with logo and school name */}
-      <div className="flex items-center p-5 relative border-b border-gray-200">
+      <div className="flex items-center p-6 relative border-b border-border">
         <div className="flex items-center">
-          <Image
-            src="/logo.png"
-            alt="Friendship School Logo"
-            width={45}
-            height={45}
-            className="rounded-full border-2 border-[#0082c8]"
-          />
-          <div className={cn("ml-3 transition-opacity duration-300", isCollapsed ? "opacity-0 w-0" : "opacity-100")}>
-            <h1 className="text-[#0082c8] text-xl font-bold whitespace-nowrap">សាលាមិត្តភាព</h1>
-            <p className="text-sm text-gray-600 whitespace-nowrap">Friendship School</p>
+          <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-sm">
+            <GraduationCap className="w-7 h-7 text-white" />
+          </div>
+          <div className={cn("ml-4 transition-opacity duration-300", isCollapsed ? "opacity-0 w-0" : "opacity-100")}>
+            <h1 className="text-primary text-xl font-bold whitespace-nowrap">សាលាមិត្តភាព</h1>
+            <p className="text-sm text-muted-foreground whitespace-nowrap">Friendship School</p>
           </div>
         </div>
 
         {/* Collapse button */}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-3 top-7 bg-white rounded-full p-2 border border-gray-200 shadow-md hover:bg-gray-50 transition-all duration-300 z-10"
+          className="absolute -right-3 top-8 bg-card rounded-full p-2 border border-border shadow-sm hover:bg-muted transition-all duration-300 z-10"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <Menu size={18} strokeWidth={2} className="text-[#0082c8]" />
+            <Menu size={18} strokeWidth={2} className="text-primary" />
           ) : (
-            <ChevronLeft size={18} strokeWidth={2} className="text-[#0082c8]" />
+            <ChevronLeft size={18} strokeWidth={2} className="text-primary" />
           )}
         </button>
       </div>
 
       {/* Menu items */}
-      <nav className="flex-1 overflow-y-auto py-4">
-        <div className="space-y-1 px-4">
+      <nav className="flex-1 overflow-y-auto py-6">
+        <div className="space-y-2 px-4">
           {menuItems.map((item) => {
             const active = isActive(item.href) || hasActiveSubItem(item.subItems)
             const hasSubItems = item.subItems && !isCollapsed
@@ -193,12 +190,14 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                   <button
                     onClick={(e) => handleParentItemClick(item, e)}
                     className={cn(
-                      "flex items-center flex-1 rounded-lg py-3 px-4 text-base transition-colors duration-200 group",
-                      active ? "bg-[#0082c8] text-white font-medium" : "text-gray-700 hover:bg-gray-100 font-normal",
+                      "flex items-center flex-1 rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200 group",
+                      active 
+                        ? "bg-primary text-primary-foreground shadow-sm" 
+                        : "text-foreground hover:bg-muted hover:text-foreground",
                       isCollapsed && "justify-center px-3",
                     )}
                   >
-                    <item.icon className={`w-6 h-6 ${active ? "text-white" : "text-[#0082c8]"}`} />
+                    <item.icon className={`w-5 h-5 ${active ? "text-primary-foreground" : "text-primary"}`} />
                     {!isCollapsed && (
                       <div className="flex items-center justify-between w-full">
                         <span className="ml-3">{item.label}</span>
@@ -207,7 +206,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                             className={cn(
                               "w-4 h-4 transition-transform duration-200 chevron-icon",
                               isDropdownOpen(item.id) ? "rotate-180" : "",
-                              active ? "text-white" : "text-gray-500 group-hover:text-gray-700"
+                              active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
                             )}
                           />
                         )}
@@ -218,16 +217,16 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
 
                 {/* Dropdown submenu */}
                 {hasSubItems && isDropdownOpen(item.id) && (
-                  <div className="ml-6 mt-1 space-y-1 border-l-2 border-gray-200 pl-4">
+                  <div className="ml-8 mt-2 space-y-1 border-l-2 border-border pl-4">
                     {item.subItems.map((subItem) => (
                       <button
                         key={subItem.id}
                         onClick={() => handleNavigation(subItem.href)}
                         className={cn(
-                          "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-colors duration-200",
+                          "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-all duration-200",
                           isActive(subItem.href)
-                            ? "bg-[#0082c8] text-white font-medium"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                            ? "bg-primary text-primary-foreground font-medium shadow-sm"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
                       >
                         <span>{subItem.label}</span>
@@ -242,16 +241,16 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       </nav>
 
       {/* Bottom menu items */}
-      <div className="border-t border-gray-200 px-4 py-5">
+      <div className="border-t border-border px-4 py-6">
         <button
           onClick={handleLogout}
           className={cn(
-            "flex items-center w-full rounded-lg py-3 px-4 text-base transition-colors duration-200",
-            "text-gray-700 hover:bg-gray-100 font-normal",
+            "flex items-center w-full rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200",
+            "text-foreground hover:bg-muted hover:text-foreground",
             isCollapsed && "justify-center px-3",
           )}
         >
-          <LogOut className="w-6 h-6 text-[#0082c8]" />
+          <LogOut className="w-5 h-5 text-primary" />
           {!isCollapsed && <span className="ml-3">ចាកចេញ</span>}
         </button>
       </div>

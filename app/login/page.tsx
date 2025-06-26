@@ -2,13 +2,12 @@
 
 import type React from "react"
 
-import { Lock, User, Eye, EyeOff, ChevronDown, ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Lock, User, Eye, EyeOff, ChevronDown, ArrowLeft, GraduationCap } from "lucide-react"
+import { ModernButton } from "@/components/ui/modern-button"
+import { ModernInput } from "@/components/ui/modern-input"
+import { ModernCard } from "@/components/ui/modern-card"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -48,137 +47,127 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0082c8] from-purple-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4 font-khmer">
       {/* Back button */}
-      <button
+      <ModernButton
+        variant="ghost"
+        size="icon"
         onClick={handleBackToSplash}
-        className="absolute top-4 left-4 p-2 text-gray-100 hover:text-[#0082c8] transition-colors"
+        className="absolute top-4 left-4"
       >
         <ArrowLeft className="h-5 w-5" />
-      </button>
+      </ModernButton>
 
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in">
-        <div className="p-8 space-y-6">
-          {/* Logo */}
-          <div className="flex justify-center">
-            <div className="h-24 w-24 rounded-full bg-white flex items-center justify-center shadow-lg p-2">
-              <Image
-                src="/logo.png"
-                alt="School Management System Logo"
-                width={88}
-                height={88}
-                className="rounded-full"
-              />
-            </div>
+      <ModernCard className="w-full max-w-md animate-fade-in" variant="elevated" padding="lg">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg">
+            <GraduationCap className="w-10 h-10 text-white" />
           </div>
-
-          {/* Heading */}
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0082c8]">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
-            <p className="text-gray-600 text-sm">សូមបញ្ចូលឈ្មេាះនិងលេខកូដសម្ងាត់</p>
-          </div>
-
-          {/* Login Form */}
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Username Input with Dropdown */}
-            <div className="space-y-2">
-              <Label htmlFor="username">ឈ្មេាះគ្រូ</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-[#0082c8] z-10" />
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="ជ្រើសរើស ឬ សរសេរឈ្មេាះ"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  onFocus={() => setOpen(true)}
-                  onBlur={() => setTimeout(() => setOpen(false), 200)}
-                  className="pl-10 pr-10"
-                  required
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setOpen(!open)}
-                  className="absolute right-3 top-3 h-4 w-4 text-[#0082c8] hover:text-foreground"
-                  disabled={isLoading}
-                >
-                  <ChevronDown className="h-4 w-4 text-[#0082c8]" />
-                </button>
-
-                {open && (
-                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg animate-fade-in">
-                    <div className="max-h-60 overflow-auto">
-                      {userOptions
-                        .filter((user) => user.toLowerCase().includes(username.toLowerCase()))
-                        .map((user) => (
-                          <div
-                            key={user}
-                            className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
-                            onClick={() => {
-                              setUsername(user)
-                              setOpen(false)
-                            }}
-                          >
-                            <User className="mr-2 h-4 w-4 text-[#0082c8]" />
-                            {user}
-                          </div>
-                        ))}
-                      {userOptions.filter((user) => user.toLowerCase().includes(username.toLowerCase())).length ===
-                        0 && <div className="px-3 py-2 text-muted-foreground">រកមិនឃើញឈ្មេាះ</div>}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Password */}
-            <div className="space-y-2">
-              <Label htmlFor="password">លេខកូដសម្ងាត់</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-[#0082c8]" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="លេខកូដសម្ងាត់"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
-                  required
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
-                  disabled={isLoading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-[#0082c8]" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-[#0082c8]" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-[#0082c8] hover:bg-[#0069a4] transition-colors"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>កំពុងចូល...</span>
-                </div>
-              ) : (
-                "ចូលកម្មវិធី"
-              )}
-            </Button>
-          </form>
         </div>
-      </div>
+
+        {/* Heading */}
+        <div className="text-center space-y-3 mb-8">
+          <h1 className="text-3xl font-bold text-foreground">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
+          <p className="text-muted-foreground">សូមបញ្ចូលឈ្មេាះនិងលេខកូដសម្ងាត់</p>
+        </div>
+
+        {/* Login Form */}
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Username Input with Dropdown */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">ឈ្មេាះគ្រូ</label>
+            <div className="relative">
+              <ModernInput
+                type="text"
+                placeholder="ជ្រើសរើស ឬ សរសេរឈ្មេាះ"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                onFocus={() => setOpen(true)}
+                onBlur={() => setTimeout(() => setOpen(false), 200)}
+                icon={<User className="h-4 w-4" />}
+                required
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                disabled={isLoading}
+              >
+                <ChevronDown className="h-4 w-4" />
+              </button>
+
+              {open && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-card border border-border rounded-lg shadow-lg animate-fade-in">
+                  <div className="max-h-60 overflow-auto">
+                    {userOptions
+                      .filter((user) => user.toLowerCase().includes(username.toLowerCase()))
+                      .map((user) => (
+                        <div
+                          key={user}
+                          className="flex items-center px-4 py-3 hover:bg-muted cursor-pointer transition-colors"
+                          onClick={() => {
+                            setUsername(user)
+                            setOpen(false)
+                          }}
+                        >
+                          <User className="mr-3 h-4 w-4 text-primary" />
+                          {user}
+                        </div>
+                      ))}
+                    {userOptions.filter((user) => user.toLowerCase().includes(username.toLowerCase())).length ===
+                      0 && <div className="px-4 py-3 text-muted-foreground">រកមិនឃើញឈ្មេាះ</div>}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">លេខកូដសម្ងាត់</label>
+            <div className="relative">
+              <ModernInput
+                type={showPassword ? "text" : "password"}
+                placeholder="លេខកូដសម្ងាត់"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                icon={<Lock className="h-4 w-4" />}
+                required
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                disabled={isLoading}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <ModernButton
+            type="submit"
+            className="w-full"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>កំពុងចូល...</span>
+              </div>
+            ) : (
+              "ចូលកម្មវិធី"
+            )}
+          </ModernButton>
+        </form>
+      </ModernCard>
     </div>
   )
 }

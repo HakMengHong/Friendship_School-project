@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
+import { GraduationCap } from "lucide-react"
 
 export default function SplashScreen() {
   const [progress, setProgress] = useState(0)
@@ -32,37 +32,34 @@ export default function SplashScreen() {
   }, [router])
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0082c8] from-blue-500 to-blue-700 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden font-khmer">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-secondary/90"></div>
+      <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+      <div className="absolute bottom-20 right-20 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
 
       {/* Main content container */}
       <div className="flex flex-col items-center justify-center space-y-8 z-10">
         {/* Logo container with animation */}
         <div className="relative">
-          <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl animate-pulse p-2">
-            <Image
-              src="/logo.png"
-              alt="School Management System Logo"
-              width={112}
-              height={112}
-              className="rounded-full"
-              priority
-            />
+          <div className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center shadow-2xl animate-pulse">
+            <GraduationCap className="w-16 h-16 text-primary" />
           </div>
           {/* Ripple effect */}
-          <div className="absolute inset-0 w-32 h-32 bg-white rounded-full animate-ping opacity-20"></div>
+          <div className="absolute inset-0 w-32 h-32 bg-white rounded-2xl animate-ping opacity-20"></div>
         </div>
 
         {/* Text content */}
         <div className="text-center space-y-4">
           <h1 className="text-white text-4xl font-bold animate-fade-in">សួស្តី!</h1>
           <p className="text-white/90 text-xl">សូមស្វាគមន៍មកកាន់</p>
-          <p className="text-white/70 text-sm">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</p>
+          <p className="text-white/70 text-lg">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</p>
         </div>
 
         {/* Progress bar */}
-        <div className="w-64 bg-white/20 rounded-full h-2 overflow-hidden">
+        <div className="w-64 bg-white/20 rounded-full h-3 overflow-hidden backdrop-blur-sm">
           <div
-            className="h-full bg-white rounded-full transition-all duration-100 ease-out"
+            className="h-full bg-white rounded-full transition-all duration-100 ease-out shadow-sm"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -74,7 +71,7 @@ export default function SplashScreen() {
       {/* Skip button */}
       <button
         onClick={() => router.push("/login")}
-        className="absolute bottom-8 right-8 text-white/70 hover:text-white text-sm underline transition-colors"
+        className="absolute bottom-8 right-8 text-white/70 hover:text-white text-sm underline transition-colors hover:scale-105 transform"
       >
         រំលង
       </button>
