@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Khmer+Brasar:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/khmer-busra');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 249 250 251;
-    --foreground: 31 41 55;
+    --background: 0 130 200;
+    --foreground: 255 255 255;
     --card: 255 255 255;
     --card-foreground: 31 41 55;
     --popover: 255 255 255;
@@ -116,7 +116,7 @@
 
 /* Khmer font optimization */
 .font-khmer {
-  font-family: 'Khmer Brasar', system-ui, sans-serif;
+  font-family: 'Khmer Busra', system-ui, sans-serif;
   font-display: swap;
 }
 

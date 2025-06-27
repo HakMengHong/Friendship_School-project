@@ -18,6 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="km">
+      <head>
+        <link href="https://fonts.cdnfonts.com/css/khmer-busra" rel="stylesheet" />
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   )

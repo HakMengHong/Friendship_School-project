@@ -47,13 +47,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary to-secondary p-4 font-khmer">
+    <div className="min-h-screen flex items-center justify-center bg-primary p-4 font-khmer">
       {/* Back button */}
       <ModernButton
         variant="ghost"
         size="icon"
         onClick={handleBackToSplash}
-        className="absolute top-4 left-4"
+        className="absolute top-4 left-4 text-white hover:bg-white/10"
       >
         <ArrowLeft className="h-5 w-5" />
       </ModernButton>
