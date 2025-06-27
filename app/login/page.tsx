@@ -48,7 +48,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden p-4 font-khmer">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-secondary/90"></div>
       {/* Back button */}
       <ModernButton
         variant="ghost"
