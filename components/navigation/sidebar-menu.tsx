@@ -157,7 +157,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
             <GraduationCap className="w-7 h-7 text-white" />
           </div>
           <div className={cn("ml-4 transition-opacity duration-300", isCollapsed ? "opacity-0 w-0" : "opacity-100")}>
-            <h1 className="text-primary text-xl font-bold whitespace-nowrap">សាលាមិត្តភាព</h1>
+            <h1 className="text-[#0082c8] text-xl font-bold whitespace-nowrap">សាលាមិត្តភាព</h1>
             <p className="text-sm text-muted-foreground whitespace-nowrap">Friendship School</p>
           </div>
         </div>
@@ -169,9 +169,9 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <Menu size={18} strokeWidth={2} className="text-primary" />
+            <Menu size={18} strokeWidth={2} className="text-[#0082c8]" />
           ) : (
-            <ChevronLeft size={18} strokeWidth={2} className="text-primary" />
+            <ChevronLeft size={18} strokeWidth={2} className="text-[#0082c8]" />
           )}
         </button>
       </div>
@@ -197,7 +197,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                       isCollapsed && "justify-center px-3",
                     )}
                   >
-                    <item.icon className={`w-5 h-5 ${active ? "text-primary-foreground" : "text-primary"}`} />
+                    <item.icon className={`w-5 h-5 ${active ? "text-primary-foreground" : "text-[#0082c8]"}`} />
                     {!isCollapsed && (
                       <div className="flex items-center justify-between w-full">
                         <span className="ml-3">{item.label}</span>
@@ -225,7 +225,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                         className={cn(
                           "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-all duration-200",
                           isActive(subItem.href)
-                            ? "bg-primary text-primary font-medium shadow-sm"
+                            ? "bg-primary text-[#0082c8] font-medium shadow-sm"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
                       >
@@ -250,7 +250,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
             isCollapsed && "justify-center px-3",
           )}
         >
-          <LogOut className="w-5 h-5 text-primary" />
+          <LogOut className="w-5 h-5 text-[#0082c8]" />
           {!isCollapsed && <span className="ml-3">ចាកចេញ</span>}
         </button>
       </div>
