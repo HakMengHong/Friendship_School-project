@@ -21,7 +21,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   }, [])
 
   return (
-    <div className="flex h-screen bg-[#0082c8] font-khmer">
+    <div className="flex h-screen bg-gradient-to-br from-primary via-primary to-secondary font-khmer">
       {/* Sidebar */}
       <SidebarMenu />
 
@@ -31,7 +31,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         <TopBar username={username} />
 
         {/* Main content */}
-        <div className="flex-1 overflow-y-auto bg-[#0082c8]">
+        <div className="flex-1 overflow-y-auto bg-gradient-to-br from-primary via-primary to-secondary">
           <div className="container mx-auto p-6 max-w-7xl">
             <div className="animate-fade-in">
               {children}
