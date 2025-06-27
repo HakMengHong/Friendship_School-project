@@ -126,7 +126,7 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">លេខកូដសម្ងាត់</label>
+            <label className="text-sm font-medium text-[#0082c8]">លេខកូដសម្ងាត់</label>
             <div className="relative">
               <ModernInput
                 type={showPassword ? "text" : "password"}
@@ -140,7 +140,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#0082c8] transition-colors"
                 disabled={isLoading}
               >
                 {showPassword ? (
