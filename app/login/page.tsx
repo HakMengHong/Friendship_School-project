@@ -53,7 +53,7 @@ export default function LoginPage() {
         variant="ghost"
         size="icon"
         onClick={handleBackToSplash}
-        className="absolute top-4 left-4 text-white hover:bg-white/10"
+        className="absolute top-4 left-4"
       >
         <ArrowLeft className="h-5 w-5" />
       </ModernButton>
@@ -68,7 +68,7 @@ export default function LoginPage() {
 
         {/* Heading */}
         <div className="text-center space-y-3 mb-8">
-          <h1 className="text-3xl font-bold text-[#0082c8]">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
+          <h1 className="text-3xl font-bold text-foreground">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
           <p className="text-muted-foreground">សូមបញ្ចូលឈ្មេាះនិងលេខកូដសម្ងាត់</p>
         </div>
 
@@ -76,7 +76,7 @@ export default function LoginPage() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Username Input with Dropdown */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[#0082c8]">ឈ្មេាះគ្រូ</label>
+            <label className="text-sm font-medium text-foreground">ឈ្មេាះគ្រូ</label>
             <div className="relative">
               <ModernInput
                 type="text"
@@ -126,7 +126,7 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[#0082c8]">លេខកូដសម្ងាត់</label>
+            <label className="text-sm font-medium text-foreground">លេខកូដសម្ងាត់</label>
             <div className="relative">
               <ModernInput
                 type={showPassword ? "text" : "password"}
@@ -140,7 +140,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#0082c8] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 disabled={isLoading}
               >
                 {showPassword ? (

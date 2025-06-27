@@ -225,7 +225,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                         className={cn(
                           "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-all duration-200",
                           isActive(subItem.href)
-                            ? "bg-primary text-primary font-medium shadow-sm"
+                            ? "bg-primary text-primary-foreground font-medium shadow-sm"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
                       >
@@ -250,7 +250,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
             isCollapsed && "justify-center px-3",
           )}
         >
-          <LogOut className="w-5 h-5 text-foreground" />
+          <LogOut className="w-5 h-5 text-primary" />
           {!isCollapsed && <span className="ml-3">ចាកចេញ</span>}
         </button>
       </div>

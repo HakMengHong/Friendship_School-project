@@ -26,7 +26,7 @@ const config = {
     },
     extend: {
       fontFamily: {
-        khmer: ["Khmer Busra", "system-ui", "sans-serif"],
+        khmer: ["Khmer Brasar", "system-ui", "sans-serif"],
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["Fira Code", "monospace"],
       },
