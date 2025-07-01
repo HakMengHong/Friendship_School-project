@@ -181,7 +181,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                       "flex items-center flex-1 rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-primary/20",
                       active 
                         ? "bg-primary text-primary-foreground shadow-sm" 
-                        : "text-primary hover:bg-muted hover:text-primary",
+                        : "text-muted-foreground hover:bg-muted hover:text-muted-foreground",
                       isCollapsed && "justify-center px-3",
                     )}
                   >
@@ -194,7 +194,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                             className={cn(
                               "w-4 h-4 transition-transform duration-200 chevron-icon",
                               isDropdownOpen(item.id) ? "rotate-180" : "",
-                              active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary"
+                              active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-muted-foreground"
                             )}
                           />
                         )}
@@ -214,7 +214,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                           "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
                           isActive(subItem.href)
                             ? "bg-primary text-primary-foreground font-medium shadow-sm"
-                            : "text-muted-foreground hover:bg-muted hover:text-primary",
+                            : "text-muted-foreground hover:bg-muted hover:text-muted-foreground",
                         )}
                       >
                         <span>{subItem.label}</span>
@@ -234,7 +234,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
           onClick={handleLogout}
           className={cn(
             "flex items-center w-full rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
-            "text-primary hover:bg-muted hover:text-primary",
+            "text-muted-foreground hover:bg-muted hover:text-muted-foreground",
             isCollapsed && "justify-center px-3",
           )}
         >
