@@ -9,7 +9,6 @@ const config = {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
     "./layouts/**/*.{ts,tsx}",
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
   prefix: "",
@@ -27,7 +26,7 @@ const config = {
     },
     extend: {
       fontFamily: {
-        khmer: ["Khmer Brasar", "system-ui", "sans-serif"],
+        khmer: ["Khmer Busra", "Khmer OS", "Khmer OS System", "system-ui", "sans-serif"],
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["Fira Code", "monospace"],
       },
@@ -45,12 +44,13 @@ const config = {
           300: "#93d1fd",
           400: "#60b7fa",
           500: "#3b9df6",
-          600: "#2583eb",
-          700: "#1d6dd8",
+          600: "#0082c8",
+          700: "#0069a0",
           800: "#1e58af",
           900: "#1e4d8a",
-          950: "#0082c8",
+          950: "#164e63",
           foreground: "#ffffff",
+          hover: "#0069a0",
         },
         secondary: {
           DEFAULT: "#00c2cb",
@@ -81,7 +81,7 @@ const config = {
         },
         muted: {
           DEFAULT: "#f9fafb",
-          foreground: "#1f2937",
+          foreground: "#6b7280",
         },
         destructive: {
           DEFAULT: "#ef4444",
@@ -136,7 +136,7 @@ const config = {
         "pulse-slow": "pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       boxShadow: {
-        soft: "0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)",
+        soft: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
         card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
         glow: "0 0 10px 2px rgba(0, 194, 203, 0.3)",
         "glow-primary": "0 0 15px 3px rgba(0, 130, 200, 0.3)",

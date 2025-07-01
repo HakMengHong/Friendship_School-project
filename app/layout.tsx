@@ -1,14 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស",
   description: "School Program Management System",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -18,7 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="km">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <link href="https://fonts.cdnfonts.com/css/khmer-busra" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-khmer antialiased">{children}</body>
     </html>
   )
 }

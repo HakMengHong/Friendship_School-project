@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Khmer+Brasar:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/khmer-busra');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +17,7 @@
     --secondary: 0 194 203;
     --secondary-foreground: 255 255 255;
     --muted: 249 250 251;
-    --muted-foreground: 31 41 55;
+    --muted-foreground: 107 114 128;
     --accent: 0 194 203;
     --accent-foreground: 255 255 255;
     --destructive: 239 68 68;
@@ -25,6 +26,8 @@
     --input: 229 231 235;
     --ring: 0 130 200;
     --radius: 8px;
+    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
   .dark {
@@ -57,20 +60,21 @@
   body {
     @apply bg-background text-foreground font-khmer;
     font-feature-settings: "rlig" 1, "calt" 1;
+    line-height: 1.6;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+    @apply bg-primary hover:bg-primary-hover text-primary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/20;
   }
   
   .btn-secondary {
-    @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+    @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-secondary/20;
   }
   
   .btn-outline {
-    @apply border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+    @apply border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/20;
   }
   
   .card-modern {
@@ -78,7 +82,7 @@
   }
   
   .input-modern {
-    @apply border border-border rounded-lg px-4 py-3 bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200;
+    @apply border border-border rounded-lg px-4 py-3 bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none;
   }
   
   .table-modern {
@@ -110,13 +114,28 @@
   }
 }
 
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.5s ease-out;
 }
 
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
 /* Khmer font optimization */
 .font-khmer {
-  font-family: 'Khmer Brasar', system-ui, sans-serif;
+  font-family: 'Khmer Busra', 'Khmer OS', 'Khmer OS System', system-ui, sans-serif;
   font-display: swap;
 }
 
@@ -127,15 +146,42 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: rgb(var(--muted));
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgb(var(--muted-foreground) / 0.3);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgb(var(--muted-foreground) / 0.5);
+}
+
+/* Focus styles for accessibility */
+.focus-visible {
+  @apply outline-none ring-2 ring-primary/20 ring-offset-2;
+}
+
+/* Loading states */
+.loading {
+  @apply animate-pulse;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  .card-modern {
+    @apply rounded-lg;
+  }
+  
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    @apply px-4 py-2 text-sm;
+  }
 }

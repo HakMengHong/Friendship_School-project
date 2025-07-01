@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { Bell, Search, Settings } from "lucide-react"
 import { ModernButton } from "@/components/ui/modern-button"
 import { ModernInput } from "@/components/ui/modern-input"
+import { useMemo } from "react"
 
 interface TopBarProps {
   className?: string
@@ -13,43 +14,27 @@ interface TopBarProps {
 export function TopBar({ className, username }: TopBarProps) {
   const pathname = usePathname()
 
-  const getPageTitle = () => {
-    switch (pathname) {
-      case "/dashboard":
-        return "ផ្ទាំងគ្រប់គ្រង"
-      case "/absence":
-        return "អវត្តមានសិស្ស"
-      case "/absence/daily":
-        return "អវត្តមានសិស្សប្រចាំថ្ងៃ"
-      case "/absence/report":
-        return "របាយការណ៍អវត្តមានសិស្ស"
-
-      case "/scores":
-        return "ពិន្ទុសិស្ស"
-      case "/scores/addscore":
-        return "បញ្ចូលពិន្ទុសិស្ស"
-      case "/scores/report":
-        return "របាយការណ៍ពិន្ទុ"
-      case "/scores/gradebook":
-        return "សៀវភៅតាមដាន"
-
-      case "/student-info":
-        return "ព័ត៌មានសិស្ស"
-      case "/student-info/list":
-        return "បញ្ជីឈ្មោះសិស្ស"
-
-      case "/registration":
-        return "ចុះឈ្មេាះសិស្ស"
-        
-      default:
-        return "ផ្ទាំងគ្រប់គ្រង"
+  const pageTitle = useMemo(() => {
+    const routes: Record<string, string> = {
+      "/dashboard": "ផ្ទាំងគ្រប់គ្រង",
+      "/absence": "អវត្តមានសិស្ស",
+      "/absence/daily": "អវត្តមានសិស្សប្រចាំថ្ងៃ",
+      "/absence/report": "របាយការណ៍អវត្តមានសិស្ស",
+      "/scores": "ពិន្ទុសិស្ស",
+      "/scores/addscore": "បញ្ចូលពិន្ទុសិស្ស",
+      "/scores/report": "របាយការណ៍ពិន្ទុ",
+      "/scores/gradebook": "សៀវភៅតាមដាន",
+      "/student-info": "ព័ត៌មានសិស្ស",
+      "/student-info/list": "បញ្ជីឈ្មោះសិស្ស",
+      "/registration": "ចុះឈ្មេាះសិស្ស",
     }
-  }
+    return routes[pathname] || "ផ្ទាំងគ្រប់គ្រង"
+  }, [pathname])
 
   return (
     <div className={`bg-card border-b border-border p-6 flex justify-between items-center shadow-sm ${className}`}>
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{getPageTitle()}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
         <p className="text-sm text-muted-foreground mt-1">
           សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងសាលា
         </p>

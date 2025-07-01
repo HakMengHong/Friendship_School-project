@@ -1,10 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import {
-  Printer,
   ChevronLeft,
   LayoutDashboard,
   BarChart2,
@@ -12,7 +10,6 @@ import {
   LogOut,
   Menu,
   ChevronDown,
-  ChevronRight,
   UserCheck,
   ClipboardList,
   GraduationCap,
@@ -29,7 +26,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  const menuItems = [
+  const menuItems = useMemo(() => [
     {
       id: "dashboard",
       icon: LayoutDashboard,
@@ -43,8 +40,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       href: "/absence",
       subItems: [
         { id: "daily-absence", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/absence/daily" },
-        { 
-        id: "absence-report", label: "របាយការណ៍អវត្តមាន", href: "/absence/report" },
+        { id: "absence-report", label: "របាយការណ៍អវត្តមាន", href: "/absence/report" },
       ],
     },
     {
@@ -73,10 +69,10 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       label: "ចុះឈ្មេាះសិស្ស",
       href: "/registration",
     },
-  ]
+  ], [])
 
+  // Auto-open dropdown for active menu items
   useEffect(() => {
-    // Auto-open dropdown for active menu items on mount
     menuItems.forEach((item) => {
       if (item.subItems && (isActive(item.href) || hasActiveSubItem(item.subItems))) {
         if (!openDropdowns.includes(item.id)) {
@@ -84,63 +80,55 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         }
       }
     })
-  }, [pathname])
+  }, [pathname, menuItems, openDropdowns])
 
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     setIsCollapsed(!isCollapsed)
-    // Close all dropdowns when collapsing
     if (!isCollapsed) {
       setOpenDropdowns([])
     }
-  }
+  }, [isCollapsed])
 
-  const toggleDropdown = (itemId: string) => {
-    if (isCollapsed) return // Don't allow dropdown in collapsed mode
+  const toggleDropdown = useCallback((itemId: string) => {
+    if (isCollapsed) return
+    setOpenDropdowns((prev) => 
+      prev.includes(itemId) 
+        ? prev.filter((id) => id !== itemId) 
+        : [...prev, itemId]
+    )
+  }, [isCollapsed])
 
-    setOpenDropdowns((prev) => (prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]))
-  }
-
-  const handleParentItemClick = (item: typeof menuItems[0], e: React.MouseEvent) => {
-    // Check if the click was on the chevron icon
+  const handleParentItemClick = useCallback((item: typeof menuItems[0], e: React.MouseEvent) => {
     const isChevronClick = (e.target as HTMLElement).closest('.chevron-icon') !== null
     
     if (item.subItems && !isCollapsed && isChevronClick) {
-      // Only toggle dropdown if clicking on the chevron icon
       toggleDropdown(item.id)
     } else if (!item.subItems || isCollapsed) {
-      // Navigate to the parent href if:
-      // 1. It's a simple item without sub-items
-      // 2. The sidebar is collapsed
+      handleNavigation(item.href)
+    } else {
       handleNavigation(item.href)
     }
-    // If it's a parent item with sub-items and sidebar is expanded, but not clicking on chevron,
-    // just navigate without toggling dropdown
-    else {
-      handleNavigation(item.href)
-    }
-  }
+  }, [isCollapsed, toggleDropdown])
 
-  const handleNavigation = (href: string) => {
+  const handleNavigation = useCallback((href: string) => {
     router.push(href)
-  }
+  }, [router])
 
-  const handleLogout = () => {
-    // Clear stored username
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("username")
     router.push("/login")
-  }
+  }, [router])
 
-  // Check if a menu item is active (including its sub-items)
-  const isActive = (href: string) => {
+  const isActive = useCallback((href: string) => {
     return pathname === href || pathname.startsWith(`${href}/`)
-  }
+  }, [pathname])
 
-  // Check if any sub-item is active to highlight the parent
-  const hasActiveSubItem = (subItems?: { href: string }[]) => {
+  const hasActiveSubItem = useCallback((subItems?: { href: string }[]) => {
     return subItems?.some((subItem) => isActive(subItem.href)) ?? false
-  }
+  }, [isActive])
 
-  const isDropdownOpen = (itemId: string) => openDropdowns.includes(itemId)
+  const isDropdownOpen = useCallback((itemId: string) => 
+    openDropdowns.includes(itemId), [openDropdowns])
 
   return (
     <div
@@ -165,7 +153,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         {/* Collapse button */}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-3 top-8 bg-card rounded-full p-2 border border-border shadow-sm hover:bg-muted transition-all duration-300 z-10"
+          className="absolute -right-3 top-8 bg-card rounded-full p-2 border border-border shadow-sm hover:bg-muted transition-all duration-300 z-10 focus:outline-none focus:ring-2 focus:ring-primary/20"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -190,7 +178,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                   <button
                     onClick={(e) => handleParentItemClick(item, e)}
                     className={cn(
-                      "flex items-center flex-1 rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200 group",
+                      "flex items-center flex-1 rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-primary/20",
                       active 
                         ? "bg-primary text-primary-foreground shadow-sm" 
                         : "text-foreground hover:bg-muted hover:text-foreground",
@@ -217,13 +205,13 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
 
                 {/* Dropdown submenu */}
                 {hasSubItems && isDropdownOpen(item.id) && (
-                  <div className="ml-8 mt-2 space-y-1 border-l-2 border-border pl-4">
+                  <div className="ml-8 mt-2 space-y-1 border-l-2 border-border pl-4 animate-fade-in">
                     {item.subItems.map((subItem) => (
                       <button
                         key={subItem.id}
                         onClick={() => handleNavigation(subItem.href)}
                         className={cn(
-                          "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-all duration-200",
+                          "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
                           isActive(subItem.href)
                             ? "bg-primary text-primary-foreground font-medium shadow-sm"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -245,7 +233,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         <button
           onClick={handleLogout}
           className={cn(
-            "flex items-center w-full rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200",
+            "flex items-center w-full rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
             "text-foreground hover:bg-muted hover:text-foreground",
             isCollapsed && "justify-center px-3",
           )}
