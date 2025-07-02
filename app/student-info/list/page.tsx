@@ -40,7 +40,7 @@ export default function StudentListReportPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <Card className="w-full max-w-md animate-in fade-in zoom-in-95">
             <CardHeader>
-              <CardTitle className="text-center">របាយការណ៍បញ្ជីឈ្មោះសិស្សតាមថ្នាក់</CardTitle>
+              <CardTitle className="text-primary">របាយការណ៍បញ្ជីឈ្មោះសិស្សតាមថ្នាក់</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleGenerateReport} className="space-y-4">
