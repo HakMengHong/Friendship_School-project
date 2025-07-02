@@ -68,7 +68,7 @@ export default function LoginPage() {
 
         {/* Heading */}
         <div className="text-center space-y-3 mb-8">
-          <h1 className="text-3xl font-bold text-pramary">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
+          <h1 className="text-3xl font-bold text-primary">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
           <p className="text-muted-foreground">សូមបញ្ចូលឈ្មេាះនិងលេខកូដសម្ងាត់</p>
         </div>
 
