@@ -23,7 +23,7 @@ export default function StudentListReportPage() {
     <>
       {/* Main Card */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h1 className="text-2xl font-bold mb-4">របាយការណ៍បញ្ជីឈ្មោះសិស្សតាមថ្នាក់</h1>
+        <h1 className="text-primary text-2xl font-bold mb-4">របាយការណ៍បញ្ជីឈ្មោះសិស្សតាមថ្នាក់</h1>
         <p className="text-gray-600 mb-4">ចុចប៊ូតុងខាងក្រោមដើម្បីបង្កើតរបាយការណ៍</p>
         
         <button
@@ -40,7 +40,7 @@ export default function StudentListReportPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <Card className="w-full max-w-md animate-in fade-in zoom-in-95">
             <CardHeader>
-              <CardTitle className="text-primary">របាយការណ៍បញ្ជីឈ្មោះសិស្សតាមថ្នាក់</CardTitle>
+              <CardTitle className="text-center">របាយការណ៍បញ្ជីឈ្មោះសិស្សតាមថ្នាក់</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleGenerateReport} className="space-y-4">
