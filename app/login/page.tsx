@@ -76,7 +76,7 @@ export default function LoginPage() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Username Input with Dropdown */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">ឈ្មេាះគ្រូ</label>
+            <label className="text-sm font-medium text-primary">ឈ្មេាះគ្រូ</label>
             <div className="relative">
               <ModernInput
                 type="text"
