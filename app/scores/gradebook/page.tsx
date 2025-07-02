@@ -48,7 +48,7 @@ export default function GradebookReportPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle>បង្កើតរបាយការណ៍សៀវភៅតាមដាន</CardTitle>
+              <CardTitle className="text-primary">បង្កើតរបាយការណ៍សៀវភៅតាមដាន</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={generateReport}>
