@@ -36,7 +36,7 @@ export default function GradebookReportPage() {
         
         <button
           onClick={() => setShowReportModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-primary flex items-center"
+          className="px-4 py-2 bg-priamry-600 text-white rounded-md hover:bg-blue-700 flex items-center"
         >
           <Printer className="mr-2 h-4 w-4" />
           បង្កើតរបាយការណ៍
