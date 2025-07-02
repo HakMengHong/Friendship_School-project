@@ -156,31 +156,30 @@
 }
 
 /* Scrollbar styling */
-::-webkit-scrollbar {
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--muted));
+}
+.scrollbar::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
-::-webkit-scrollbar-track {
-  @apply bg-muted; /* Uses your muted color variable */
+.scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
   border-radius: 4px;
 }
-
-::-webkit-scrollbar-thumb {
-  @apply bg-primary/30; /* Uses primary color with 30% opacity */
+.scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.3);
   border-radius: 4px;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary/50; /* Uses primary color with 50% opacity on hover */
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
 }
-
-.dark ::-webkit-scrollbar-thumb {
-  @apply bg-primary/40; /* Dark mode variant */
+.dark .scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.4);
 }
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary/60; /* Dark mode hover */
+.dark .scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.6);
 }
 
 /* Focus styles for accessibility */
