@@ -47,7 +47,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-backgrond p-4 font-khmer">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 font-khmer">
       {/* Back button */}
       <ModernButton
         variant="ghost"
