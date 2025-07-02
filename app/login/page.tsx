@@ -133,7 +133,7 @@ export default function LoginPage() {
                 placeholder="លេខកូដសម្ងាត់"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                icon={<Lock className="h-4 w-4 test-primary" />}
+                icon={<Lock className="h-4 w-4 text-primary" />}
                 required
                 disabled={isLoading}
               />
