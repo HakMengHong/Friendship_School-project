@@ -31,7 +31,7 @@ export default function AbsenceReportPage() {
     <>
       {/* Main content can show report history or instructions */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h1 className="text-2xl font-bold mb-4">របាយការណ៍អវត្តមាន</h1>
+        <h1 className="text-primary text-2xl font-bold mb-4">របាយការណ៍អវត្តមាន</h1>
         <p className="text-gray-600 mb-4">ជ្រើសរើសជម្រើសរបាយការណ៍ខាងក្រោម</p>
         
         <button
