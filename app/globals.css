@@ -5,7 +5,6 @@
 @tailwind utilities;
 
 @layer base {
-@layer base {
   :root {
     /* Changed to HSL format */
     --background: 0 0% 100%; /* white */
