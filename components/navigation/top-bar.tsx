@@ -64,7 +64,7 @@ export function TopBar({ className, username }: TopBarProps) {
         {/* User profile */}
         <div className="flex items-center space-x-3 pl-4 border-l border-border">
           <div className="text-right">
-            <p className="text-sm font-medium text-foreground">{username}</p>
+            <p className="text-primary text-sm font-medium text-foreground">{username}</p>
             <p className="text-xs text-muted-foreground">គ្រូបង្រៀន</p>
           </div>
           <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white font-semibold shadow-sm">
