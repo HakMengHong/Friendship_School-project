@@ -139,7 +139,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2">
           <ModernCard variant="elevated">
             <ModernCardHeader className="flex flex-row items-center justify-between">
-              <ModernCardTitle>ដំណឹងសំខាន់ៗ</ModernCardTitle>
+              <ModernCardTitle className="text-primary">ដំណឹងសំខាន់ៗ</ModernCardTitle>
               <ModernButton size="sm" onClick={addAnnouncement}>
                 បន្ថែមដំណឹង
               </ModernButton>
