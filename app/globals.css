@@ -155,40 +155,33 @@
   font-display: swap;
 }
 
-/* Scrollbar styling that matches your blue theme */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(var(--muted)); /* Light gray in light mode */
+  @apply bg-muted; /* Uses your muted color variable */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--primary)/0.3); /* Light blue with transparency */
+  @apply bg-primary/30; /* Uses primary color with 30% opacity */
   border-radius: 4px;
-  border: 2px solid transparent;
-  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--primary)/0.5); /* More opaque on hover */
-}
-
-.dark ::-webkit-scrollbar-track {
-  background: rgb(var(--muted)); /* Dark gray in dark mode */
+  @apply bg-primary/50; /* Uses primary color with 50% opacity on hover */
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: rgb(var(--primary)/0.4); /* Slightly more visible in dark */
+  @apply bg-primary/40; /* Dark mode variant */
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--primary)/0.6);
+  @apply bg-primary/60; /* Dark mode hover */
 }
-
 /* Focus styles for accessibility */
 .focus-visible {
   @apply outline-none ring-2 ring-primary/20 ring-offset-2;
