@@ -126,7 +126,7 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">លេខកូដសម្ងាត់</label>
+            <label className="text-sm font-medium text-primary">លេខកូដសម្ងាត់</label>
             <div className="relative">
               <ModernInput
                 type={showPassword ? "text" : "password"}
