@@ -88,7 +88,7 @@ export default function DashboardPage() {
         <ModernCardHeader>
           <ModernCardTitle className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-primary" />
-            <span class="text-primary">គុណភាពការសិក្សាតាមខែ</span>
+            <span className="text-primary">គុណភាពការសិក្សាតាមខែ</span>
           </ModernCardTitle>
         </ModernCardHeader>
         <ModernCardContent>
