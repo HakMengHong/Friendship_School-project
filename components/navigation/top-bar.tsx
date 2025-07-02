@@ -32,7 +32,7 @@ export function TopBar({ className, username }: TopBarProps) {
   }, [pathname])
 
   return (
-    <div className={`bg-card border-b border-border p-6 flex justify-between items-center shadow-sm ${className}`}>
+    <div className={`text-primary bg-card border-b border-border p-6 flex justify-between items-center shadow-sm ${className}`}>
       <div>
         <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
         <p className="text-sm text-muted-foreground mt-1">
