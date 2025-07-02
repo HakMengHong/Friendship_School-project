@@ -31,12 +31,12 @@ export default function GradebookReportPage() {
     <>
       {/* Main content */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h1 className="text-2xl font-bold mb-4">របាយការណ៍សៀវភៅតាមដាន</h1>
+        <h1 className="text-primary text-2xl font-bold mb-4">របាយការណ៍សៀវភៅតាមដាន</h1>
         <p className="text-gray-600 mb-4">ជ្រើសរើសជម្រើសរបាយការណ៍ខាងក្រោម</p>
         
         <button
           onClick={() => setShowReportModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-primary flex items-center"
         >
           <Printer className="mr-2 h-4 w-4" />
           បង្កើតរបាយការណ៍
