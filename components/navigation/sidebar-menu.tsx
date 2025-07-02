@@ -134,7 +134,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
     <div
       className={cn(
         "bg-card border-r border-border flex flex-col transition-all duration-300 ease-in-out rounded-r-2xl m-2 shadow-soft",
-        isCollapsed ? "w-[80px]" : "w-[280px]",
+        isCollapsed ? "w-[95px]" : "w-[240px]",
         className,
       )}
     >
