@@ -165,7 +165,7 @@ export default function StudentInfoPage() {
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-medium text-gray-800">
               <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-[#0082c8]" />
+                <Users className="h-5 w-5 text-primary" />
                 <span>ស្វែងរកសិស្ស</span>
               </div>
             </CardTitle>
@@ -175,17 +175,17 @@ export default function StudentInfoPage() {
               <div className="flex-1 min-w-[300px]">
                 <Label className="text-gray-600 mb-1">សូមបញ្ចូលឈ្មោះសិស្ស</Label>
                 <div className="relative mt-1">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0082c8]" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                   <Input
                     placeholder="សរសេរឈ្មោះសិស្ស"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => setShowDropdown(true)}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                    className="pl-10 pr-10 rounded-lg border-gray-300 focus:border-[#0082c8] focus:ring-[#0082c8]"
+                    className="pl-10 pr-10 rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
                   />
                   <ChevronDown 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0082c8] cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary cursor-pointer"
                     onClick={() => setShowDropdown(!showDropdown)}
                   />
                   {showDropdown && (
@@ -203,7 +203,7 @@ export default function StudentInfoPage() {
                               }}
                             >
                               <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                                <User className="h-4 w-4 text-[#0082c8]" />
+                                <User className="h-4 w-4 text-primary" />
                               </div>
                               <div>
                                 <p className="font-medium text-gray-800">{student.lastName} {student.firstName}</p>
@@ -232,7 +232,7 @@ export default function StudentInfoPage() {
                         setSelectedClass("");
                       }
                     }}
-                    className="h-5 w-5 rounded border-gray-300 text-[#0082c8] focus:ring-[#0082c8]"
+                    className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
                   />
                   <Label htmlFor="filter-toggle" className="text-gray-600 cursor-pointer">
                     រកតាមឆ្នាំសិក្សា និងថ្នាក់
@@ -243,8 +243,8 @@ export default function StudentInfoPage() {
                   <div className="flex space-x-3">
                     <div className="w-[180px]">
                       <Select value={selectedYear} onValueChange={setSelectedYear}>
-                        <SelectTrigger className="rounded-lg border-gray-300 focus:border-[#0082c8] focus:ring-[#0082c8]">
-                          <Calendar className="mr-2 h-4 w-4 text-[#0082c8]" />
+                        <SelectTrigger className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                          <Calendar className="mr-2 h-4 w-4 text-primary" />
                           <SelectValue placeholder="ឆ្នាំសិក្សា" />
                         </SelectTrigger>
                         <SelectContent className="rounded-lg border-gray-300 shadow-lg">
@@ -259,8 +259,8 @@ export default function StudentInfoPage() {
                     
                     <div className="w-[180px]">
                       <Select value={selectedClass} onValueChange={setSelectedClass}>
-                        <SelectTrigger className="rounded-lg border-gray-300 focus:border-[#0082c8] focus:ring-[#0082c8]">
-                          <BookOpen className="mr-2 h-4 w-4 text-[#0082c8]" />
+                        <SelectTrigger className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                          <BookOpen className="mr-2 h-4 w-4 text-primary" />
                           <SelectValue placeholder="ថ្នាក់" />
                         </SelectTrigger>
                         <SelectContent className="rounded-lg border-gray-300 shadow-lg">
@@ -303,7 +303,7 @@ export default function StudentInfoPage() {
                   <div className="mt-6 w-full space-y-4">
                     <div className="bg-indigo-50 rounded-lg p-4">
                       <h4 className="font-medium text-gray-800 flex items-center">
-                        <BookOpen className="h-4 w-4 text-[#0082c8] mr-2" />
+                        <BookOpen className="h-4 w-4 text-primary mr-2" />
                         ព័ត៌មានសិក្សា
                       </h4>
                       <div className="mt-2 space-y-1 text-sm text-gray-600">
@@ -317,7 +317,7 @@ export default function StudentInfoPage() {
 
                     <div className="bg-indigo-50 rounded-lg p-4">
                       <h4 className="font-medium text-gray-800 flex items-center">
-                        <Home className="h-4 w-4 text-[#0082c8] mr-2" />
+                        <Home className="h-4 w-4 text-primary mr-2" />
                         អាសយដ្ឋាន
                       </h4>
                       <div className="mt-2 space-y-1 text-sm text-gray-600">
@@ -341,7 +341,7 @@ export default function StudentInfoPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-3 text-sm font-medium flex items-center space-x-2 border-b-2 ${activeTab === tab.id ? 'border-[#0082c8] text-[#0082c8]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`px-4 py-3 text-sm font-medium flex items-center space-x-2 border-b-2 ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                   >
                     {tab.icon}
                     <span>{tab.label}</span>
@@ -455,7 +455,7 @@ export default function StudentInfoPage() {
                         <div className="mt-2 flex items-center">
                           <div className="w-full bg-gray-200 rounded-full h-2.5">
                             <div 
-                              className="bg-[#0082c8] h-2.5 rounded-full" 
+                              className="bg-primary h-2.5 rounded-full" 
                               style={{ width: `${selectedStudent.grades.khmer}%` }}
                             ></div>
                           </div>
@@ -467,7 +467,7 @@ export default function StudentInfoPage() {
                         <div className="mt-2 flex items-center">
                           <div className="w-full bg-gray-200 rounded-full h-2.5">
                             <div 
-                              className="bg-[#0082c8] h-2.5 rounded-full" 
+                              className="bg-primary h-2.5 rounded-full" 
                               style={{ width: `${selectedStudent.grades.math}%` }}
                             ></div>
                           </div>
@@ -479,7 +479,7 @@ export default function StudentInfoPage() {
                         <div className="mt-2 flex items-center">
                           <div className="w-full bg-gray-200 rounded-full h-2.5">
                             <div 
-                              className="bg-[#0082c8] h-2.5 rounded-full" 
+                              className="bg-primary h-2.5 rounded-full" 
                               style={{ width: `${selectedStudent.grades.science}%` }}
                             ></div>
                           </div>
@@ -517,7 +517,7 @@ export default function StudentInfoPage() {
             <CardContent className="p-8 text-center">
               <div className="mx-auto max-w-md">
                 <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <User className="h-10 w-10 text-[#0082c8]" />
+                  <User className="h-10 w-10 text-primary" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-800 mb-2">រកមិនឃើញព័ត៌មានសិស្ស</h3>
                 <p className="text-gray-600">សូមជ្រើសរើសសិស្សដើម្បីមើលព័ត៌មានលម្អិត</p>
