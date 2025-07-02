@@ -162,7 +162,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             compact ? "p-1 text-xs" : "p-2 text-sm"
           } ${
             isCurrentDay
-              ? "bg-[#0082c8] text-white font-bold shadow-md"
+              ? "bg-primary text-white font-bold shadow-md"
               : isSelectedDay
               ? "bg-blue-100 text-blue-700 font-semibold"
               : "text-gray-700 hover:bg-blue-50"
@@ -212,7 +212,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
     <Card className="bg-white rounded-2xl">
       <CardHeader className={compact ? "pb-2" : "pb-3"}>
         <div className="flex items-center justify-between">
-          <CardTitle className={`text-[#0082c8] font-medium ${compact ? "text-lg" : "text-x1"}`}>
+          <CardTitle className={`text-primary font-medium ${compact ? "text-lg" : "text-x1"}`}>
             ប្រតិទិនខ្មែរ
           </CardTitle>
         </div>
@@ -221,7 +221,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             `${getKhmerDayName(today)} ទី${toKhmerNumber(today.getDate())} ខែ${KHMER_MONTHS[today.getMonth()]} ឆ្នាំ${toKhmerNumber(today.getFullYear())}`}
         </div>
         <div className="flex items-center justify-between mt-2">
-          <div className={`text-[#0082c8] font-medium ${compact ? "text-sm" : "text-base"}`}>
+          <div className={`text-primary font-medium ${compact ? "text-sm" : "text-base"}`}>
             {KHMER_MONTHS[currentMonth]} {toKhmerNumber(currentYear)}
           </div>
           <div className="flex gap-1">
@@ -231,7 +231,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
               className={`p-0 hover:bg-blue-50 ${compact ? "h-6 w-6" : "h-8 w-8"}`}
               onClick={() => navigateMonth("prev")}
             >
-              <ChevronLeft className={`text-[#0082c8] ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
+              <ChevronLeft className={`text-primary ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
             </Button>
             <Button
               variant="ghost"
@@ -239,7 +239,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
               className={`p-0 hover:bg-blue-50 ${compact ? "h-6 w-6" : "h-8 w-8"}`}
               onClick={() => navigateMonth("next")}
             >
-              <ChevronRight className={`text-[#0082c8] ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
+              <ChevronRight className={`text-primary ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
             </Button>
           </div>
         </div>
@@ -252,7 +252,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             {KHMER_DAYS_SHORT.map((day) => (
               <div
                 key={day}
-                className={`text-center text-[#0082c8] font-medium ${compact ? "p-1 text-xs" : "p-2 text-xs"}`}
+                className={`text-center text-primary font-medium ${compact ? "p-1 text-xs" : "p-2 text-xs"}`}
               >
                 {day}
               </div>
@@ -268,19 +268,19 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
           <div className="flex flex-col gap-1 text-xs">
             <div className="flex justify-between">
               <span className="text-gray-500">ថ្ងៃនេះ</span>
-              <span className="text-[#0082c8] font-medium">
+              <span className="text-primary font-medium">
                 ថ្ងៃ{getKhmerDayName(today)} ទី{toKhmerNumber(today.getDate())} ខែ{KHMER_MONTHS[today.getMonth()]} ឆ្នាំ{toKhmerNumber(today.getFullYear())}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">ត្រូវនឹង</span>
-              <span className="text-[#0082c8] font-medium">
+              <span className="text-primary font-medium">
                 {getLunarDateInfo(today)}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">ម៉ោង</span>
-              <span className="text-[#0082c8] font-medium">
+              <span className="text-primary font-medium">
                 {currentTime}
               </span>
             </div>
