@@ -85,7 +85,7 @@ export default function LoginPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 onFocus={() => setOpen(true)}
                 onBlur={() => setTimeout(() => setOpen(false), 200)}
-                icon={<User className="h-4 w-4" />}
+                icon={<User className="h-4 w-4 text-primary" />}
                 required
                 disabled={isLoading}
               />
