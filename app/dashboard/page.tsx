@@ -175,7 +175,7 @@ export default function DashboardPage() {
             <ModernCardHeader>
               <ModernCardTitle className="flex items-center space-x-2">
                 <Star className="h-5 w-5 text-yellow-500" />
-                <span>សិស្សពូកែ</span>
+                <span className="text-primary">សិស្សពូកែ</span>
               </ModernCardTitle>
             </ModernCardHeader>
             <ModernCardContent>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
             <ModernCardHeader>
               <ModernCardTitle className="flex items-center space-x-2">
                 <Activity className="h-5 w-5 text-primary" />
-                <span>សកម្មភាពថ្មីៗ</span>
+                <span className="text-primary">សកម្មភាពថ្មីៗ</span>
               </ModernCardTitle>
             </ModernCardHeader>
             <ModernCardContent>
