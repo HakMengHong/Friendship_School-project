@@ -6,51 +6,68 @@
 
 @layer base {
   :root {
-    /* Changed to HSL format */
-    --background: 0 0% 100%; /* white */
-    --foreground: 221 39% 11%; /* gray-900 */
+    --background: 0 0% 100%;              /* White */
+    --foreground: 222 47% 11%;            /* Slate-900 */
+    
     --card: 0 0% 100%;
-    --card-foreground: 221 39% 11%;
+    --card-foreground: 222 47% 11%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 221 39% 11%;
-    --primary: 221 83% 53%; /* blue-600 */
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 204 100% 44%;              /* Custom Blue #0082c8 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 198 93% 60%; /* sky-400 */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 20% 98%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 198 93% 60%; /* sky-400 */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+
+    --secondary: 200 94% 61%;             /* Sky-400 */
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;                 /* slate-100 */
+    --muted-foreground: 215 20% 50%;      /* slate-500 */
+
+    --accent: 200 94% 61%;                /* same as secondary */
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 85% 60%;             /* red-500 */
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
+
+    --border: 214 32% 91%;                /* gray-200 */
     --input: 214 32% 91%;
-    --ring: 221 83% 53%; /* blue-600 */
+    --ring: 204 100% 44%;
+    
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222 47% 11%; /* gray-900 */
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
+    --background: 222 47% 7%;             /* slate-950 */
+    --foreground: 210 40% 98%;            /* slate-50 */
+
+    --card: 222 47% 9%;                   /* slate-900 */
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
+
+    --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%; /* blue-400 */
-    --primary-foreground: 222 47% 11%;
-    --secondary: 198 93% 60%; /* sky-400 */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 198 93% 60%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
+
+    --primary: 204 100% 66%;              /* lighter blue for dark bg */
+    --primary-foreground: 222 47% 9%;
+
+    --secondary: 198 94% 70%;             /* lighter sky for dark */
+    --secondary-foreground: 222 47% 9%;
+
+    --muted: 215 25% 20%;                 /* slate-800 */
+    --muted-foreground: 215 20% 70%;
+
+    --accent: 198 94% 70%;
+    --accent-foreground: 222 47% 9%;
+
+    --destructive: 0 63% 41%;             /* red-600 */
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 204 100% 66%;
   }
 }
+
 
 @layer base {
   * {
