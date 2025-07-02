@@ -34,7 +34,7 @@ export function TopBar({ className, username }: TopBarProps) {
   return (
     <div className={`bg-card border-b border-border p-6 flex justify-between items-center shadow-sm ${className}`}>
       <div>
-        <h1 className="text- primary text-2xl font-bold text-foreground">{pageTitle}</h1>
+        <h1 className="text-primary text-2xl font-bold text-foreground">{pageTitle}</h1>
         <p className="text-sm text-muted-foreground mt-1">
           សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងសាលា
         </p>
