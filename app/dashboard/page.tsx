@@ -55,7 +55,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="សិស្សទាំងអស់"
-          value={<span style={{ color: 'hsl(214, 32%, 91%)' }}>1,234</span>}
+          value={<span className="text-primary">1,234</span>}
           description="សិស្សកំពុងសិក្សា"
           icon={<Users className="h-6 w-6" />}
           trend={{ value: "20.1%", isPositive: true }}
@@ -63,21 +63,21 @@ export default function DashboardPage() {
         
         <StatCard
           title="គ្រូទាំងអស់"
-          value={<span style={{ color: 'hsl(214, 32%, 91%)' }}>24</span>}
+          value={<span className="text-primary">24</span>}
           description="គ្រូបង្រៀនសកម្ម"
           icon={<BookOpen className="h-6 w-6" />}
         />
         
         <StatCard
           title="សិស្សពូកែ"
-          value={<span style={{ color: 'hsl(214, 32%, 91%)' }}>15</span>}
+          value={<span className="text-primary">15</span>}
           description="សិស្សពូកែក្នុងខែនេះ"
           icon={<Award className="h-6 w-6" />}
         />
         
         <StatCard
           title="ដំណឹង"
-          value={<span style={{ color: 'hsl(214, 32%, 91%)' }}>{announcements.length}</span>}
+          value={<span className="text-primary">{announcements.length}</span>}
           description="ដំណឹងសកម្ម"
           icon={<MessageSquare className="h-6 w-6" />}
         />
