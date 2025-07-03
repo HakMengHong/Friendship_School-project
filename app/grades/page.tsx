@@ -22,7 +22,7 @@ export default function GradesPage() {
   ]
 
   return (
-    <>
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">ពិន្ទុសិស្ស</h2>
         <div className="flex space-x-2">
@@ -159,6 +159,6 @@ export default function GradesPage() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   )
 }
