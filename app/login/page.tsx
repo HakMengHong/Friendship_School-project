@@ -3,9 +3,9 @@
 import type React from "react"
 
 import { Lock, User, Eye, EyeOff, ChevronDown, ArrowLeft, GraduationCap } from "lucide-react"
-import { Button } from "@/components/ui/-button"
-import { Input } from "@/components/ui/-input"
-import { Card } from "@/components/ui/-card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
