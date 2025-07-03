@@ -48,7 +48,7 @@ export default function RegistrationPage() {
   ];
 
   return (
-    <>
+    <div>
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Student List Sidebar */}
         <div className="w-full lg:w-80 flex-shrink-0">
@@ -609,6 +609,6 @@ export default function RegistrationPage() {
           )}
         </div>
       </div>
-    </>
+    </div>
   )
 }
