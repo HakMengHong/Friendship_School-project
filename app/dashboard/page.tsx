@@ -67,6 +67,7 @@ export default function DashboardPage() {
   };
 
   return (
+    <>
     <div className="space-y-8">
       <div>
         <h2 className="text-3xl font-bold text-primary mb-2">សូមស្វាគមន៍មកកាន់ផ្ទាំងគ្រប់គ្រង</h2>
@@ -347,5 +348,6 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+      </>
   )
 }
