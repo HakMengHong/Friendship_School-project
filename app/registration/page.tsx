@@ -229,7 +229,12 @@ export default function RegistrationPage() {
                       </SelectContent>
                     </Select>
                   </div>
-
+                  
+                  <div className="flex-1 min-w-[100px] flex flex-col items-center justify-center space-y-2">
+                      <Checkbox id={`register-to-study-${formIndex}`} />
+                      <Label htmlFor={`register-to-study-${formIndex}`}>ចុះឈ្មេាះចូលរៀន?</Label>
+                  </div>
+                  
                   {/* Student ID */}
                   <div className="flex-1 min-w-[150px] space-y-2">
                     <Label>លេខសំគាល់សិស្ស (ID)</Label>
