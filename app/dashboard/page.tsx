@@ -2,7 +2,7 @@
 
 import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card"
 import { StatCard } from "@/components/ui/stat-card"
-import { Users, BookOpen, Award, MessageSquare, Star, TrendingUp, Calendar, Activity } from "lucide-react"
+import { Users, BookOpen, Award, MessageSquare, Star, TrendingUp, Calendar, Activity, Trash2 as TrashIcon } from "lucide-react"
 import { KhmerCalendar } from "@/components/calendar/khmer_calendar"
 import { ModernButton } from "@/components/ui/modern-button"
 import { useState } from "react"
@@ -10,7 +10,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 export default function DashboardPage() {
   // State for announcements
-
+  const [announcements, setAnnouncements] = useState([
+    { id: "1", title: "ការប្រជុំគ្រូ", content: "មានការប្រជុំគ្រូនៅថ្ងៃសៅរ៍នេះ", date: "2023-05-15", author: "អ្នកគ្រប់គ្រង" },
+    { id: "2", title: "ការប្រឡងឆមាស", content: "ការប្រឡងឆមាសនឹងចាប់ផ្តើមនៅខែក្រោយ", date: "2023-05-10", author: "អ្នកគ្រប់គ្រង" },
+  ])
 
   // State for outstanding students
   const [outstandingStudents, setOutstandingStudents] = useState([
@@ -29,41 +32,28 @@ export default function DashboardPage() {
     { month: 'មិថុនា', quality: 88, averageScore: 78 },
   ]
 
-  // Add new announcement
-
-
+  // Announcement form state
   const [showAddForm, setShowAddForm] = useState(false);
   const [newAnnouncement, setNewAnnouncement] = useState({
-    id: '',
     title: '',
     content: '',
     author: '',
     date: ''
   });
   
-  const addAnnouncement = () => {
-    setShowAddForm(true);
-    setNewAnnouncement({
-      id: '',
-      title: '',
-      content: '',
-      author: '',
-      date: new Date().toLocaleDateString()
-    });
-  };
-  
   const handleAddAnnouncement = () => {
+    if (!newAnnouncement.title || !newAnnouncement.content) return;
+    
     const announcementToAdd = {
       ...newAnnouncement,
-      id: Date.now().toString() // Generate unique ID
+      id: Date.now().toString(),
+      date: new Date().toISOString().split('T')[0]
     };
     
-    // Update your announcements state (assuming it's managed with useState)
-    setAnnouncements([...announcements, announcementToAdd]);
+    setAnnouncements([announcementToAdd, ...announcements]);
     
-    // Reset form and hide it
+    // Reset form
     setNewAnnouncement({
-      id: '',
       title: '',
       content: '',
       author: '',
@@ -76,7 +66,6 @@ export default function DashboardPage() {
     setAnnouncements(announcements.filter(announcement => announcement.id !== id));
   };
 
-  
   return (
     <div className="space-y-8">
       <div>
@@ -183,21 +172,23 @@ export default function DashboardPage() {
                 <div className="mb-6 border border-border rounded-lg p-4">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">ចំណងជើង</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">ចំណងជើង*</label>
                       <input
                         type="text"
                         className="w-full p-2 border border-border rounded-md"
                         value={newAnnouncement.title}
                         onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
+                        placeholder="បញ្ចូលចំណងជើងដំណឹង"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">ខ្លឹមសារ</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">ខ្លឹមសារ*</label>
                       <textarea
                         className="w-full p-2 border border-border rounded-md"
                         rows={3}
                         value={newAnnouncement.content}
                         onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
+                        placeholder="បញ្ចូលខ្លឹមសារដំណឹង"
                       />
                     </div>
                     <div>
@@ -207,13 +198,28 @@ export default function DashboardPage() {
                         className="w-full p-2 border border-border rounded-md"
                         value={newAnnouncement.author}
                         onChange={(e) => setNewAnnouncement({...newAnnouncement, author: e.target.value})}
+                        placeholder="អ្នកផ្សព្វផ្សាយ"
                       />
                     </div>
                     <div className="flex justify-end space-x-2">
-                      <ModernButton variant="outline" onClick={() => setShowAddForm(false)}>
+                      <ModernButton 
+                        variant="outline" 
+                        onClick={() => {
+                          setShowAddForm(false);
+                          setNewAnnouncement({
+                            title: '',
+                            content: '',
+                            author: '',
+                            date: ''
+                          });
+                        }}
+                      >
                         បោះបង់
                       </ModernButton>
-                      <ModernButton onClick={handleAddAnnouncement}>
+                      <ModernButton 
+                        onClick={handleAddAnnouncement}
+                        disabled={!newAnnouncement.title || !newAnnouncement.content}
+                      >
                         រក្សាទុក
                       </ModernButton>
                     </div>
@@ -223,22 +229,29 @@ export default function DashboardPage() {
         
               {/* Announcements List */}
               <div className="space-y-4">
-                {announcements.map((announcement) => (
-                  <div key={announcement.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors relative">
-                    <button 
-                      onClick={() => handleDeleteAnnouncement(announcement.id)}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-foreground">{announcement.title}</h3>
-                      <span className="text-xs text-muted-foreground">{announcement.date}</span>
+                {announcements.length > 0 ? (
+                  announcements.map((announcement) => (
+                    <div key={announcement.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors relative">
+                      <button 
+                        onClick={() => handleDeleteAnnouncement(announcement.id)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                        aria-label="លុបដំណឹង"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-semibold text-foreground">{announcement.title}</h3>
+                        <span className="text-xs text-muted-foreground">{announcement.date}</span>
+                      </div>
+                      <p className="text-sm mt-2 text-muted-foreground">{announcement.content}</p>
+                      {announcement.author && (
+                        <p className="text-xs text-muted-foreground mt-2">- {announcement.author}</p>
+                      )}
                     </div>
-                    <p className="text-sm mt-2 text-muted-foreground">{announcement.content}</p>
-                    <p className="text-xs text-muted-foreground mt-2">- {announcement.author}</p>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-4">មិនមានដំណឹងសំខាន់ៗ</p>
+                )}
               </div>
             </ModernCardContent>
           </ModernCard>
