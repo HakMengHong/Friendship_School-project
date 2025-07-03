@@ -252,7 +252,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             {KHMER_DAYS_SHORT.map((day) => (
               <div
                 key={day}
-                className={`text-center text-primary font-medium ${compact ? "p-1 text-xs" : "p-2 text-xs"}`}
+                className={`text-center text-primary font-medium ${compact ? "p-1 text-sm" : "p-2 text-sm"}`}
               >
                 {day}
               </div>
