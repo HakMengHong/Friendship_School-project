@@ -14,7 +14,7 @@ export default function SubjectsPage() {
   ]
 
   return (
-    <>
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">មុខវិជ្ជាទាំងអស់</h2>
         <div className="flex space-x-2">
@@ -104,6 +104,6 @@ export default function SubjectsPage() {
           </Card>
         ))}
       </div>
-    </>
+    </div>
   )
 }
