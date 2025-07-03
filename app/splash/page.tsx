@@ -1,7 +1,4 @@
 'use client'
-export const dynamic = 'force-dynamic'
-import { SomeProvider } from '@/components/Provider' // check this
-import { ThemeSwitcher } from '@/components/ThemeSwitcher' // check this too
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
