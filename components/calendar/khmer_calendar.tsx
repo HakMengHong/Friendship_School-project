@@ -164,8 +164,8 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             isCurrentDay
               ? "bg-primary text-white font-bold shadow-md"
               : isSelectedDay
-              ? "bg-blue-100 text-blue-700 font-semibold"
-              : "text-gray-700 hover:bg-blue-50"
+              ? "bg-primary-100 text-primary-700 font-semibold"
+              : "text-gray-700 hover:bg-primary-50"
           }`}
         >
           {toKhmerNumber(day)}
@@ -228,7 +228,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             <Button
               variant="ghost"
               size="sm"
-              className={`p-0 hover:bg-blue-50 ${compact ? "h-6 w-6" : "h-8 w-8"}`}
+              className={`p-0 hover:bg-primary-50 ${compact ? "h-6 w-6" : "h-8 w-8"}`}
               onClick={() => navigateMonth("prev")}
             >
               <ChevronLeft className={`text-primary ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
@@ -236,7 +236,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             <Button
               variant="ghost"
               size="sm"
-              className={`p-0 hover:bg-blue-50 ${compact ? "h-6 w-6" : "h-8 w-8"}`}
+              className={`p-0 hover:bg-primary-50 ${compact ? "h-6 w-6" : "h-8 w-8"}`}
               onClick={() => navigateMonth("next")}
             >
               <ChevronRight className={`text-primary ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
