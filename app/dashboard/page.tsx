@@ -239,7 +239,7 @@ export default function DashboardPage() {
                       >
                         <TrashIcon className="h-4 w-4" />
                       </button>
-                      <div className="flex justify-between items-start">
+                      <div className="flex justify items-start">
                         <h3 className="font-semibold text-foreground">{announcement.title}</h3>
                         <span className="text-xs text-muted-foreground">{announcement.date}</span>
                       </div>
