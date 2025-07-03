@@ -221,7 +221,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             `${getKhmerDayName(today)} ទី${toKhmerNumber(today.getDate())} ខែ${KHMER_MONTHS[today.getMonth()]} ឆ្នាំ${toKhmerNumber(today.getFullYear())}`}
         </div>
         <div className="flex items-center justify-between mt-2">
-          <div className={`text-primary font-medium ${compact ? "text-sm" : "text-base"}`}>
+          <div className={`text-primary font-medium ${compact ? "text-base" : "text-base"}`}>
             {KHMER_MONTHS[currentMonth]} {toKhmerNumber(currentYear)}
           </div>
           <div className="flex gap-1">
