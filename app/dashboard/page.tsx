@@ -163,10 +163,8 @@ export default function DashboardPage() {
         </div>
       </div>
         
-      {/* Announcements and Calendar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
         {/* Announcements */}
-        <div className="lg:col-span-2">
           <Card variant="elevated">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-primary">ដំណឹងសំខាន់ៗ</CardTitle>
@@ -273,13 +271,6 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Khmer Calendar */}
-        <div className="lg:col-span-1">
-          <KhmerCalendar compact={true} />
-        </div>
-      </div>
 
       {/* Outstanding Students and Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
