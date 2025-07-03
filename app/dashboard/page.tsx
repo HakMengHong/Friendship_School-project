@@ -10,10 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 export default function DashboardPage() {
   // State for announcements
-  const [announcements, setAnnouncements] = useState([
-    { id: 1, title: "ការប្រជុំគ្រូ", content: "មានការប្រជុំគ្រូនៅថ្ងៃសៅរ៍នេះ", date: "2023-05-15", author: "អ្នកគ្រប់គ្រង" },
-    { id: 2, title: "ការប្រឡងឆមាស", content: "ការប្រឡងឆមាសនឹងចាប់ផ្តើមនៅខែក្រោយ", date: "2023-05-10", author: "អ្នកគ្រប់គ្រង" },
-  ])
+
 
   // State for outstanding students
   const [outstandingStudents, setOutstandingStudents] = useState([
