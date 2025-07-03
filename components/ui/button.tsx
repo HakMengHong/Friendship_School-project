@@ -37,7 +37,7 @@ export interface ButtonProps
   loading?: boolean
 }
 
-const ModernButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, children, disabled, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
@@ -55,6 +55,6 @@ const ModernButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     )
   }
 )
-ModernButton.displayName = "ModernButton"
+Button.displayName = "Button"
 
-export { ModernButton, buttonVariants }
+export { Button, buttonVariants }
