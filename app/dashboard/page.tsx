@@ -232,20 +232,30 @@ export default function DashboardPage() {
                 {announcements.length > 0 ? (
                   announcements.map((announcement) => (
                     <div key={announcement.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors relative">
-                      <button 
-                        onClick={() => handleDeleteAnnouncement(announcement.id)}
-                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                        aria-label="លុបដំណឹង"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
-                      <div className="flex justify items-start">
-                        <h3 className="font-semibold text-foreground">{announcement.title}</h3>
-                        <span className="text-xs text-muted-foreground">{announcement.date}</span>
+                      <div className="flex justify-between items-start gap-4">
+                        <h3 className="font-semibold text-foreground flex-1 min-w-0 break-words">
+                          {announcement.title}
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {announcement.date}
+                          </span>
+                          <button 
+                            onClick={() => handleDeleteAnnouncement(announcement.id)}
+                            className="text-red-500 hover:text-red-700"
+                            aria-label="លុបដំណឹង"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-sm mt-2 text-muted-foreground">{announcement.content}</p>
+                      <p className="text-sm mt-2 text-muted-foreground break-words">
+                        {announcement.content}
+                      </p>
                       {announcement.author && (
-                        <p className="text-xs text-muted-foreground mt-2">- {announcement.author}</p>
+                        <p className="text-xs text-muted-foreground mt-2 break-words">
+                          - {announcement.author}
+                        </p>
                       )}
                     </div>
                   ))
