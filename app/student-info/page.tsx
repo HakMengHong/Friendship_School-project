@@ -158,7 +158,7 @@ export default function StudentInfoPage() {
   };
 
   return (
-    <>
+    <div>
       {/* Search Section */}
       <div className="grid grid-cols-1 gap-6 mb-8">
         <Card className="shadow-sm bg-white rounded-xl">
@@ -526,6 +526,6 @@ export default function StudentInfoPage() {
           </Card>
         </div>
       )}
-    </>
+    </div>
   );
 }
