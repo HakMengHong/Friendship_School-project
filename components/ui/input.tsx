@@ -9,7 +9,7 @@ export interface InputProps
   loading?: boolean
 }
 
-const ModernInput = React.forwardRef<HTMLInputElement, InputProps>(
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, label, error, icon, loading = false, ...props }, ref) => {
     return (
       <div className="space-y-2">
@@ -50,6 +50,6 @@ const ModernInput = React.forwardRef<HTMLInputElement, InputProps>(
     )
   }
 )
-ModernInput.displayName = "ModernInput"
+Input.displayName = "Input"
 
-export { ModernInput }
+export { Input }
