@@ -265,7 +265,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
 
         {/* Today's Info */}
         <div className={`border-t border-gray-100 ${compact ? "mt-2 pt-2" : "mt-4 pt-3"}`}>
-          <div className="flex flex-col gap-1 text-xs">
+          <div className="flex flex-col gap-1 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">ថ្ងៃនេះ</span>
               <span className="text-primary font-medium">
