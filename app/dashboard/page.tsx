@@ -68,6 +68,7 @@ export default function DashboardPage() {
 
   return (
     <>
+    <div>
         <h2 className="text-3xl font-bold text-primary mb-2">សូមស្វាគមន៍មកកាន់ផ្ទាំងគ្រប់គ្រង</h2>
         <p className="text-muted-foreground">ទិន្នន័យសង្ខេបនិងសកម្មភាពសំខាន់ៗ</p>
       </div>
@@ -344,6 +345,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
     </>
   )
 }
