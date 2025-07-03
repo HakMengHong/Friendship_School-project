@@ -3,9 +3,9 @@
 import type React from "react"
 
 import { Lock, User, Eye, EyeOff, ChevronDown, ArrowLeft, GraduationCap } from "lucide-react"
-import { ModernButton } from "@/components/ui/modern-button"
-import { ModernInput } from "@/components/ui/modern-input"
-import { ModernCard } from "@/components/ui/modern-card"
+import { Button } from "@/components/ui/-button"
+import { Input } from "@/components/ui/-input"
+import { Card } from "@/components/ui/-card"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -49,16 +49,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 font-khmer">
       {/* Back button */}
-      <ModernButton
+      <Button
         variant="ghost"
         size="icon"
         onClick={handleBackToSplash}
         className="absolute top-4 left-4"
       >
         <ArrowLeft className="h-5 w-5" />
-      </ModernButton>
+      </Button>
 
-      <ModernCard className="w-full max-w-md animate-fade-in" variant="elevated" padding="lg">
+      <Card className="w-full max-w-md animate-fade-in" variant="elevated" padding="lg">
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg">
@@ -78,7 +78,7 @@ export default function LoginPage() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-primary">ឈ្មេាះគ្រូ</label>
             <div className="relative">
-              <ModernInput
+              <Input
                 type="text"
                 placeholder="ជ្រើសរើស ឬ សរសេរឈ្មេាះ"
                 value={username}
@@ -128,7 +128,7 @@ export default function LoginPage() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-primary">លេខកូដសម្ងាត់</label>
             <div className="relative">
-              <ModernInput
+              <Input
                 type={showPassword ? "text" : "password"}
                 placeholder="លេខកូដសម្ងាត់"
                 value={password}
@@ -152,7 +152,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <ModernButton
+          <Button
             type="submit"
             className="w-full"
             disabled={isLoading}
@@ -165,9 +165,9 @@ export default function LoginPage() {
             ) : (
               "ចូលកម្មវិធី"
             )}
-          </ModernButton>
+          </Button>
         </form>
-      </ModernCard>
+      </Card>
     </div>
   )
 }
