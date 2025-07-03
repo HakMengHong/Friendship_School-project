@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { SidebarMenu } from "@/components/navigation/sidebar-menu"
 import { TopBar } from "@/components/navigation/top-bar"
 
@@ -10,13 +9,14 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const [username, setUsername] = useState<string>("")
+  const [username, setUsername] = useState("")
 
   useEffect(() => {
-    // Get username from localStorage when component mounts
-    const storedUsername = localStorage.getItem("username")
-    if (storedUsername) {
-      setUsername(storedUsername)
+    if (typeof window !== "undefined") {
+      const storedUsername = localStorage.getItem("username")
+      if (storedUsername) {
+        setUsername(storedUsername)
+      }
     }
   }, [])
 
@@ -26,13 +26,13 @@ export function MainLayout({ children }: MainLayoutProps) {
       <SidebarMenu />
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top navigation bar */}
         <TopBar username={username} />
 
-        {/* Main content */}
+        {/* Page content */}
         <div className="flex-1 overflow-y-auto bg-background">
-          <div className="container mx-auto p-6 max-w-7xl">
+          <div className="container mx-auto max-w-7xl p-6">
             <div className="animate-fade-in">
               {children}
             </div>
