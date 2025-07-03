@@ -1,10 +1,10 @@
 "use client"
 
-import { ModernCard, ModernCardContent, ModernCardHeader, ModernCardTitle } from "@/components/ui/modern-card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatCard } from "@/components/ui/stat-card"
 import { Users, BookOpen, Award, MessageSquare, Star, TrendingUp, Calendar, Activity, Trash2 as TrashIcon } from "lucide-react"
 import { KhmerCalendar } from "@/components/calendar/khmer_calendar"
-import { ModernButton } from "@/components/ui/modern-button"
+import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
@@ -106,14 +106,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Learning Quality Chart */}
-      <ModernCard variant="elevated">
-        <ModernCardHeader>
-          <ModernCardTitle className="flex items-center space-x-2">
+      <Card variant="elevated">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-primary" />
             <span className="text-primary">គុណភាពការសិក្សាតាមខែ</span>
-          </ModernCardTitle>
-        </ModernCardHeader>
-        <ModernCardContent>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -152,21 +152,21 @@ export default function DashboardPage() {
           <div className="text-sm text-muted-foreground mt-4">
             ក្រាហ្វបង្ហាញពីគុណភាពការសិក្សានិងពិន្ទុមធ្យមរបស់សិស្សតាមខែ
           </div>
-        </ModernCardContent>
-      </ModernCard>
+        </CardContent>
+      </Card>
 
       {/* Announcements and Calendar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Announcements */}
         <div className="lg:col-span-2">
-          <ModernCard variant="elevated">
-            <ModernCardHeader className="flex flex-row items-center justify-between">
-              <ModernCardTitle className="text-primary">ដំណឹងសំខាន់ៗ</ModernCardTitle>
-              <ModernButton size="sm" onClick={() => setShowAddForm(!showAddForm)}>
+          <Card variant="elevated">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-primary">ដំណឹងសំខាន់ៗ</CardTitle>
+              <Button size="sm" onClick={() => setShowAddForm(!showAddForm)}>
                 {showAddForm ? 'បោះបង់' : 'បន្ថែមដំណឹង'}
-              </ModernButton>
-            </ModernCardHeader>
-            <ModernCardContent>
+              </Button>
+            </CardHeader>
+            <CardContent>
               {/* Add Announcement Form */}
               {showAddForm && (
                 <div className="mb-6 border border-border rounded-lg p-4">
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                       />
                     </div>
                     <div className="flex justify-end space-x-2">
-                      <ModernButton 
+                      <Button 
                         variant="outline" 
                         onClick={() => {
                           setShowAddForm(false);
@@ -215,13 +215,13 @@ export default function DashboardPage() {
                         }}
                       >
                         បោះបង់
-                      </ModernButton>
-                      <ModernButton 
+                      </Button>
+                      <Button 
                         onClick={handleAddAnnouncement}
                         disabled={!newAnnouncement.title || !newAnnouncement.content}
                       >
                         រក្សាទុក
-                      </ModernButton>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -263,8 +263,8 @@ export default function DashboardPage() {
                   <p className="text-center text-muted-foreground py-4">មិនមានដំណឹងសំខាន់ៗ</p>
                 )}
               </div>
-            </ModernCardContent>
-          </ModernCard>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Khmer Calendar */}
@@ -277,14 +277,14 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Outstanding Students */}
         <div className="lg:col-span-2">
-          <ModernCard variant="elevated">
-            <ModernCardHeader>
-              <ModernCardTitle className="flex items-center space-x-2">
+          <Card variant="elevated">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
                 <Star className="h-5 w-5 text-yellow-500" />
                 <span className="text-primary">សិស្សពូកែ</span>
-              </ModernCardTitle>
-            </ModernCardHeader>
-            <ModernCardContent>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
                 {outstandingStudents.map((student) => (
                   <div key={student.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
@@ -306,20 +306,20 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-            </ModernCardContent>
-          </ModernCard>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Activity */}
         <div className="lg:col-span-1">
-          <ModernCard variant="elevated">
-            <ModernCardHeader>
-              <ModernCardTitle className="flex items-center space-x-2">
+          <Card variant="elevated">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
                 <Activity className="h-5 w-5 text-primary" />
                 <span className="text-primary">សកម្មភាពថ្មីៗ</span>
-              </ModernCardTitle>
-            </ModernCardHeader>
-            <ModernCardContent>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -343,8 +343,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-            </ModernCardContent>
-          </ModernCard>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
