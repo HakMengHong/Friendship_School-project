@@ -105,6 +105,8 @@ export default function DashboardPage() {
         />
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2">
       {/* Learning Quality Chart */}
       <Card variant="elevated">
         <CardHeader>
@@ -154,7 +156,11 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
-
+        {/* Khmer Calendar */}
+        <div className="lg:col-span-1">
+          <KhmerCalendar compact={true} />
+        </div>
+      </div>
       {/* Announcements and Calendar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Announcements */}
