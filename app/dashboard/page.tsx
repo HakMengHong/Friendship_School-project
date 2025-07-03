@@ -151,9 +151,7 @@ export default function DashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="text-sm text-muted-foreground mt-4">
-              ក្រាហ្វបង្ហាញពីគុណភាពការសិក្សានិងពិន្ទុមធ្យមរបស់សិស្សតាមខែ
-            </div>
+            
           </CardContent>
         </Card>
         </div>
