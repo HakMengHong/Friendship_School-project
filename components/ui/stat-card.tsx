@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { ModernCard } from "./modern-card"
+import { Card } from "./card"
 
 interface StatCardProps {
   title: string
@@ -17,7 +17,7 @@ interface StatCardProps {
 const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
   ({ title, value, description, icon, trend, className }, ref) => {
     return (
-      <ModernCard
+      <Card
         ref={ref}
         variant="elevated"
         className={cn("hover:scale-105 transition-transform duration-200", className)}
@@ -49,7 +49,7 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
             </div>
           )}
         </div>
-      </ModernCard>
+      </Card>
     )
   }
 )
