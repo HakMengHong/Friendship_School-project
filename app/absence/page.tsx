@@ -1,5 +1,4 @@
 'use client'
-export const dynamic = "force-dynamic"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { UserX, Clock, AlertCircle, ListChecks, CalendarDays, ScrollText } from "lucide-react"
