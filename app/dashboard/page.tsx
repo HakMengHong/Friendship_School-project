@@ -106,61 +106,63 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
-      {/* Learning Quality Chart */}
-      <Card variant="elevated">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            <span className="text-primary">គុណភាពការសិក្សាតាមខែ</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={learningQualityData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="month" stroke="#6b7280" />
-                <YAxis stroke="#6b7280" />
-                <Tooltip 
-                  formatter={(value, name) => {
-                    if (name === 'quality') return [`${value}%`, 'គុណភាព']
-                    if (name === 'averageScore') return [value, 'ពិន្ទុមធ្យម']
-                    return [value, name]
-                  }}
-                  labelFormatter={(label) => `ខែ${label}`}
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Legend 
-                  formatter={(value) => {
-                    if (value === 'quality') return 'គុណភាព (%)'
-                    if (value === 'averageScore') return 'ពិន្ទុមធ្យម'
-                    return value
-                  }}
-                />
-                <Bar dataKey="quality" fill="#0082c8" name="គុណភាព" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="averageScore" fill="#00c2cb" name="ពិន្ទុមធ្យម" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="text-sm text-muted-foreground mt-4">
-            ក្រាហ្វបង្ហាញពីគុណភាពការសិក្សានិងពិន្ទុមធ្យមរបស់សិស្សតាមខែ
-          </div>
-        </CardContent>
-      </Card>
+        <div className="lg:col-span-2">
+        {/* Learning Quality Chart */}
+        <Card variant="elevated">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              <span className="text-primary">គុណភាពការសិក្សាតាមខែ</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={learningQualityData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
+                  <Tooltip 
+                    formatter={(value, name) => {
+                      if (name === 'quality') return [`${value}%`, 'គុណភាព']
+                      if (name === 'averageScore') return [value, 'ពិន្ទុមធ្យម']
+                      return [value, name]
+                    }}
+                    labelFormatter={(label) => `ខែ${label}`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Legend 
+                    formatter={(value) => {
+                      if (value === 'quality') return 'គុណភាព (%)'
+                      if (value === 'averageScore') return 'ពិន្ទុមធ្យម'
+                      return value
+                    }}
+                  />
+                  <Bar dataKey="quality" fill="#0082c8" name="គុណភាព" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="averageScore" fill="#00c2cb" name="ពិន្ទុមធ្យម" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="text-sm text-muted-foreground mt-4">
+              ក្រាហ្វបង្ហាញពីគុណភាពការសិក្សានិងពិន្ទុមធ្យមរបស់សិស្សតាមខែ
+            </div>
+          </CardContent>
+        </Card>
+        </div>
         {/* Khmer Calendar */}
         <div className="lg:col-span-1">
           <KhmerCalendar compact={true} />
         </div>
       </div>
+        
       {/* Announcements and Calendar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Announcements */}
