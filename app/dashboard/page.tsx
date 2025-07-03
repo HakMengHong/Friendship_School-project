@@ -33,16 +33,7 @@ export default function DashboardPage() {
   ]
 
   // Add new announcement
-  const addAnnouncement = () => {
-    const newAnnouncement = {
-      id: announcements.length + 1,
-      title: "ដំណឹងថ្មី",
-      content: "ខ្លឹមសារដំណឹងថ្មី",
-      date: new Date().toISOString().split('T')[0],
-      author: "អ្នកគ្រប់គ្រង"
-    }
-    setAnnouncements([...announcements, newAnnouncement])
-  }
+
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [newAnnouncement, setNewAnnouncement] = useState({
