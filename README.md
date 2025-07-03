@@ -12,7 +12,7 @@ Any changes you make to your deployed app will be automatically pushed to this r
 
 ## Deployment
 
-Your project is live at:1
+Your project is live at:
 
 **[https://vercel.com/hakmenghong9669-6828s-projects/v0-friendship-school-project](https://vercel.com/hakmenghong9669-6828s-projects/v0-friendship-school-project)**
 
