@@ -1,57 +1,56 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
-const Table = React.forwardRef<
+const ModernTable = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
   <div className="relative w-full overflow-auto">
     <table
       ref={ref}
-      className={cn("w-full caption-bottom text-sm", className)}
+      className={cn("w-full caption-bottom text-sm table-modern", className)}
       {...props}
     />
   </div>
 ))
-Table.displayName = "Table"
+ModernTable.displayName = "ModernTable"
 
-const TableHeader = React.forwardRef<
+const ModernTableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead ref={ref} className={cn("", className)} {...props} />
 ))
-TableHeader.displayName = "TableHeader"
+ModernTableHeader.displayName = "ModernTableHeader"
 
-const TableBody = React.forwardRef<
+const ModernTableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("[&_tr:last-child]:border-0", className)}
+    className={cn("", className)}
     {...props}
   />
 ))
-TableBody.displayName = "TableBody"
+ModernTableBody.displayName = "ModernTableBody"
 
-const TableFooter = React.forwardRef<
+const ModernTableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+      "border-t bg-muted/50 font-medium",
       className
     )}
     {...props}
   />
 ))
-TableFooter.displayName = "TableFooter"
+ModernTableFooter.displayName = "ModernTableFooter"
 
-const TableRow = React.forwardRef<
+const ModernTableRow = React.forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement>
 >(({ className, ...props }, ref) => (
@@ -64,36 +63,36 @@ const TableRow = React.forwardRef<
     {...props}
   />
 ))
-TableRow.displayName = "TableRow"
+ModernTableRow.displayName = "ModernTableRow"
 
-const TableHead = React.forwardRef<
+const ModernTableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+      "h-12 px-6 text-left align-middle font-semibold text-foreground bg-muted border-b border-border",
       className
     )}
     {...props}
   />
 ))
-TableHead.displayName = "TableHead"
+ModernTableHead.displayName = "ModernTableHead"
 
-const TableCell = React.forwardRef<
+const ModernTableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
+    className={cn("p-6 align-middle text-foreground border-b border-border last:border-b-0", className)}
     {...props}
   />
 ))
-TableCell.displayName = "TableCell"
+ModernTableCell.displayName = "ModernTableCell"
 
-const TableCaption = React.forwardRef<
+const ModernTableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
@@ -103,15 +102,15 @@ const TableCaption = React.forwardRef<
     {...props}
   />
 ))
-TableCaption.displayName = "TableCaption"
+ModernTableCaption.displayName = "ModernTableCaption"
 
 export {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableCaption,
+  ModernTable,
+  ModernTableHeader,
+  ModernTableBody,
+  ModernTableFooter,
+  ModernTableHead,
+  ModernTableRow,
+  ModernTableCell,
+  ModernTableCaption,
 }
