@@ -104,8 +104,6 @@ export default function AbsencePage() {
   }
 
   return (
-  <>
-
       {/* Today's Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="hover:shadow-lg transition-shadow">
@@ -230,6 +228,5 @@ export default function AbsencePage() {
           </div>
         </CardContent>
       </Card>
-    </>
   )
 }
