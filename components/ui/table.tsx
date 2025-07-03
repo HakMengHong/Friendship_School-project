@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-const ModernTable = React.forwardRef<
+const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
@@ -13,17 +13,17 @@ const ModernTable = React.forwardRef<
     />
   </div>
 ))
-ModernTable.displayName = "ModernTable"
+Table.displayName = "Table"
 
-const ModernTableHeader = React.forwardRef<
+const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
   <thead ref={ref} className={cn("", className)} {...props} />
 ))
-ModernTableHeader.displayName = "ModernTableHeader"
+TableHeader.displayName = "TableHeader"
 
-const ModernTableBody = React.forwardRef<
+const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
@@ -33,9 +33,9 @@ const ModernTableBody = React.forwardRef<
     {...props}
   />
 ))
-ModernTableBody.displayName = "ModernTableBody"
+TableBody.displayName = "TableBody"
 
-const ModernTableFooter = React.forwardRef<
+const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
@@ -48,9 +48,9 @@ const ModernTableFooter = React.forwardRef<
     {...props}
   />
 ))
-ModernTableFooter.displayName = "ModernTableFooter"
+TableFooter.displayName = "TableFooter"
 
-const ModernTableRow = React.forwardRef<
+const TableRow = React.forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement>
 >(({ className, ...props }, ref) => (
@@ -63,9 +63,9 @@ const ModernTableRow = React.forwardRef<
     {...props}
   />
 ))
-ModernTableRow.displayName = "ModernTableRow"
+TableRow.displayName = "TableRow"
 
-const ModernTableHead = React.forwardRef<
+const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
@@ -78,9 +78,9 @@ const ModernTableHead = React.forwardRef<
     {...props}
   />
 ))
-ModernTableHead.displayName = "ModernTableHead"
+TableHead.displayName = "TableHead"
 
-const ModernTableCell = React.forwardRef<
+const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
@@ -90,9 +90,9 @@ const ModernTableCell = React.forwardRef<
     {...props}
   />
 ))
-ModernTableCell.displayName = "ModernTableCell"
+TableCell.displayName = "TableCell"
 
-const ModernTableCaption = React.forwardRef<
+const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
@@ -102,15 +102,15 @@ const ModernTableCaption = React.forwardRef<
     {...props}
   />
 ))
-ModernTableCaption.displayName = "ModernTableCaption"
+TableCaption.displayName = "TableCaption"
 
 export {
-  ModernTable,
-  ModernTableHeader,
-  ModernTableBody,
-  ModernTableFooter,
-  ModernTableHead,
-  ModernTableRow,
-  ModernTableCell,
-  ModernTableCaption,
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
 }
