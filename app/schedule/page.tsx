@@ -5,7 +5,7 @@ import { Calendar, Clock } from "lucide-react"
 
 export default function SchedulePage() {
   return (
-    <>
+    <div>
       <h2 className="text-2xl font-semibold text-gray-800 mb-6">កាលវិភាគសិស្ស</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -54,6 +54,6 @@ export default function SchedulePage() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   )
 }
