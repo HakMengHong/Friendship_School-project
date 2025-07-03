@@ -44,6 +44,51 @@ export default function DashboardPage() {
     setAnnouncements([...announcements, newAnnouncement])
   }
 
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    id: '',
+    title: '',
+    content: '',
+    author: '',
+    date: ''
+  });
+  
+  const addAnnouncement = () => {
+    setShowAddForm(true);
+    setNewAnnouncement({
+      id: '',
+      title: '',
+      content: '',
+      author: '',
+      date: new Date().toLocaleDateString()
+    });
+  };
+  
+  const handleAddAnnouncement = () => {
+    const announcementToAdd = {
+      ...newAnnouncement,
+      id: Date.now().toString() // Generate unique ID
+    };
+    
+    // Update your announcements state (assuming it's managed with useState)
+    setAnnouncements([...announcements, announcementToAdd]);
+    
+    // Reset form and hide it
+    setNewAnnouncement({
+      id: '',
+      title: '',
+      content: '',
+      author: '',
+      date: ''
+    });
+    setShowAddForm(false);
+  };
+  
+  const handleDeleteAnnouncement = (id) => {
+    setAnnouncements(announcements.filter(announcement => announcement.id !== id));
+  };
+
+  
   return (
     <div className="space-y-8">
       <div>
@@ -140,14 +185,64 @@ export default function DashboardPage() {
           <ModernCard variant="elevated">
             <ModernCardHeader className="flex flex-row items-center justify-between">
               <ModernCardTitle className="text-primary">ដំណឹងសំខាន់ៗ</ModernCardTitle>
-              <ModernButton size="sm" onClick={addAnnouncement}>
-                បន្ថែមដំណឹង
+              <ModernButton size="sm" onClick={() => setShowAddForm(!showAddForm)}>
+                {showAddForm ? 'បោះបង់' : 'បន្ថែមដំណឹង'}
               </ModernButton>
             </ModernCardHeader>
             <ModernCardContent>
+              {/* Add Announcement Form */}
+              {showAddForm && (
+                <div className="mb-6 border border-border rounded-lg p-4">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">ចំណងជើង</label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border border-border rounded-md"
+                        value={newAnnouncement.title}
+                        onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">ខ្លឹមសារ</label>
+                      <textarea
+                        className="w-full p-2 border border-border rounded-md"
+                        rows={3}
+                        value={newAnnouncement.content}
+                        onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">អ្នកនិពន្ធ</label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border border-border rounded-md"
+                        value={newAnnouncement.author}
+                        onChange={(e) => setNewAnnouncement({...newAnnouncement, author: e.target.value})}
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <ModernButton variant="outline" onClick={() => setShowAddForm(false)}>
+                        បោះបង់
+                      </ModernButton>
+                      <ModernButton onClick={handleAddAnnouncement}>
+                        រក្សាទុក
+                      </ModernButton>
+                    </div>
+                  </div>
+                </div>
+              )}
+        
+              {/* Announcements List */}
               <div className="space-y-4">
                 {announcements.map((announcement) => (
-                  <div key={announcement.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                  <div key={announcement.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors relative">
+                    <button 
+                      onClick={() => handleDeleteAnnouncement(announcement.id)}
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
                     <div className="flex justify-between items-start">
                       <h3 className="font-semibold text-foreground">{announcement.title}</h3>
                       <span className="text-xs text-muted-foreground">{announcement.date}</span>
