@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { GraduationCap } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default function SplashScreen() {
   const [progress, setProgress] = useState(0)
   const router = useRouter()
