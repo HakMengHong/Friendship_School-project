@@ -32,11 +32,11 @@ export default function SplashScreen() {
   }, [router])
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden font-khmer">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden font-khmer transition-colors duration-300">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-secondary/90"></div>
-      <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-      <div className="absolute bottom-20 right-20 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
+      <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl dark:bg-white/5"></div>
+      <div className="absolute bottom-20 right-20 w-48 h-48 bg-white/5 rounded-full blur-2xl dark:bg-white/3"></div>
 
       {/* Main content container */}
       <div className="flex flex-col items-center justify-center space-y-8 z-10">

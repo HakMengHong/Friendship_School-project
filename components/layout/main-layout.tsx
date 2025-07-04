@@ -21,7 +21,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   }, [])
 
   return (
-    <div className="flex h-screen bg-background font-khmer">
+    <div className="flex h-screen bg-background font-khmer transition-colors duration-300">
       {/* Sidebar */}
       <SidebarMenu />
 
@@ -31,7 +31,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         <TopBar username={username} />
 
         {/* Page content */}
-        <div className="flex-1 overflow-y-auto bg-background">
+        <div className="flex-1 overflow-y-auto bg-background scrollbar">
           <div className="container mx-auto max-w-7xl p-6">
             <div className="animate-fade-in">
               {children}

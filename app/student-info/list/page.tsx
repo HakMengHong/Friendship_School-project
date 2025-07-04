@@ -22,9 +22,9 @@ export default function StudentListReportPage() {
   return (
     <>
       {/* Main Card */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-card dark:bg-slate-800 p-6 rounded-lg shadow">
         <h1 className="text-primary text-2xl font-bold mb-4">របាយការណ៍បញ្ជីឈ្មោះសិស្សតាមថ្នាក់</h1>
-        <p className="text-gray-600 mb-4">ចុចប៊ូតុងខាងក្រោមដើម្បីបង្កើតរបាយការណ៍</p>
+        <p className="text-muted-foreground dark:text-slate-300 mb-4">ចុចប៊ូតុងខាងក្រោមដើម្បីបង្កើតរបាយការណ៍</p>
         
         <button
           onClick={() => setShowReportModal(true)}
@@ -45,35 +45,35 @@ export default function StudentListReportPage() {
             <CardContent>
               <form onSubmit={handleGenerateReport} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium">ឆ្នាំសិក្សា</label>
+                  <label className="block text-sm font-medium text-foreground dark:text-slate-200">ឆ្នាំសិក្សា</label>
                   <input
                     type="text"
                     value={reportData.academicYear}
                     onChange={(e) => setReportData({...reportData, academicYear: e.target.value})}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-100"
                     placeholder="ឧ. 2023-2024"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium">ថ្នាក់</label>
+                  <label className="block text-sm font-medium text-foreground dark:text-slate-200">ថ្នាក់</label>
                   <input
                     type="text"
                     value={reportData.class}
                     onChange={(e) => setReportData({...reportData, class: e.target.value})}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-100"
                     placeholder="ឧ. ថ្នាក់ទី១ក"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium">ទម្រង់ឯកសារ</label>
+                  <label className="block text-sm font-medium text-foreground dark:text-slate-200">ទម្រង់ឯកសារ</label>
                   <select
                     value={reportData.format}
                     onChange={(e) => setReportData({...reportData, format: e.target.value})}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-2 border rounded-md bg-background text-foreground border-border focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-100"
                     required
                   >
                     <option value="pdf">PDF</option>
@@ -86,7 +86,7 @@ export default function StudentListReportPage() {
                   <button
                     type="button"
                     onClick={() => setShowReportModal(false)}
-                    className="px-4 py-2 border rounded-md hover:bg-gray-100 transition-colors"
+                    className="px-4 py-2 border rounded-md hover:bg-muted dark:hover:bg-slate-700 transition-colors"
                   >
                     បោះបង់
                   </button>

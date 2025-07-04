@@ -5,11 +5,11 @@ import { Calendar, Clock } from "lucide-react"
 
 export default function SchedulePage() {
   return (
-    <div>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">កាលវិភាគសិស្ស</h2>
+    <div className="transition-colors duration-300">
+      <h2 className="text-2xl font-semibold text-foreground dark:text-slate-100 mb-6">កាលវិភាគសិស្ស</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Calendar className="h-5 w-5 text-[#0082c8]" />
@@ -21,28 +21,28 @@ export default function SchedulePage() {
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div>
                   <p className="font-medium">គណិតវិទ្យា</p>
-                  <p className="text-sm text-gray-600">ថ្នាក់ទី ៧</p>
+                  <p className="text-sm text-muted-foreground dark:text-slate-400">ថ្នាក់ទី ៧</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium">៨:០០ - ៩:០០</p>
-                  <p className="text-xs text-gray-500">បន្ទប់ A101</p>
+                  <p className="text-xs text-muted-foreground dark:text-slate-500">បន្ទប់ A101</p>
                 </div>
               </div>
               <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                 <div>
                   <p className="font-medium">រូបវិទ្យា</p>
-                  <p className="text-sm text-gray-600">ថ្នាក់ទី ៨</p>
+                  <p className="text-sm text-muted-foreground dark:text-slate-400">ថ្នាក់ទី ៨</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium">៩:១៥ - ១០:១៥</p>
-                  <p className="text-xs text-gray-500">បន្ទប់ B202</p>
+                  <p className="text-xs text-muted-foreground dark:text-slate-500">បន្ទប់ B202</p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Clock className="h-5 w-5 text-[#0082c8]" />
@@ -50,7 +50,7 @@ export default function SchedulePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">កាលវិភាគសប្តាហ៍នឹងត្រូវបានបង្ហាញនៅទីនេះ</p>
+            <p className="text-muted-foreground">កាលវិភាគសប្តាហ៍នឹងត្រូវបានបង្ហាញនៅទីនេះ</p>
           </CardContent>
         </Card>
       </div>

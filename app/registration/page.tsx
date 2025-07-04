@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 
 export default function RegistrationPage() {
   const [studentName, setStudentName] = useState("")
-  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [selectedStudent, setSelectedStudent] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("basic")
   const [guardianForms, setGuardianForms] = useState([0]); // Start with one form
 
@@ -36,7 +36,7 @@ export default function RegistrationPage() {
     setGuardianForms([...guardianForms, guardianForms.length]);
   };
 
-  const removeGuardianForm = (indexToRemove) => {
+  const removeGuardianForm = (indexToRemove: number) => {
     setGuardianForms(guardianForms.filter(index => index !== indexToRemove));
   };
 
@@ -48,15 +48,15 @@ export default function RegistrationPage() {
   ];
 
   return (
-    <div>
+    <div className="transition-colors duration-300">
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Student List Sidebar */}
         <div className="w-full lg:w-80 flex-shrink-0">
           <Card className="h-full">
             <CardHeader>
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-blue-50">
-                  <UserPlus className="h-5 w-5 text-blue-600" />
+                <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">បញ្ជីឈ្មោះសិស្ស</CardTitle>
@@ -73,7 +73,7 @@ export default function RegistrationPage() {
                     onChange={(e) => setStudentName(e.target.value)}
                     className="pl-10"
                   />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground dark:text-slate-400">
                     <Search className="w-4 h-4" />
                   </span>
                 </div>
@@ -92,8 +92,8 @@ export default function RegistrationPage() {
                         onClick={() => setSelectedStudent(student)}
                         className={`p-3 rounded-lg cursor-pointer transition-colors ${
                           selectedStudent?.id === student.id 
-                            ? 'bg-blue-50 border border-blue-100' 
-                            : 'hover:bg-gray-50 border border-transparent'
+                            ? 'bg-blue-50 border border-blue-100 dark:bg-blue-900/20 dark:border-blue-800' 
+                            : 'hover:bg-muted dark:hover:bg-slate-700 border border-transparent'
                         }`}
                       >
                         <div className="flex justify-between items-center">
@@ -101,12 +101,12 @@ export default function RegistrationPage() {
                             <p className="font-medium">
                               {student.lastName} {student.firstName}
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground dark:text-slate-500">
                               ថ្នាក់ {student.class} • ID: {student.id}
                             </p>
                           </div>
                           {selectedStudent?.id === student.id && (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                               បានជ្រើសរើស
                             </Badge>
                           )}
@@ -123,15 +123,14 @@ export default function RegistrationPage() {
         {/* Main Form Content */}
         <div className="flex-1 space-y-6">
           {/* Form Navigation Tabs */}
-            <div className="bg-white rounded-xl border-none shadow-sm overflow-hidden">
+            <div className="bg-card dark:bg-slate-800 rounded-xl border border-border shadow-sm overflow-hidden">
               <nav className="flex overflow-x-auto">
                 {tabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-3 text-sm font-medium flex items-center space-x-2 border-b-2 ${activeTab === tab.id ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`px-4 py-3 text-sm font-medium flex items-center space-x-2 border-b-2 ${activeTab === tab.id ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-muted-foreground dark:text-slate-400 hover:text-foreground dark:hover:text-slate-200 hover:border-border'}`}
                   >
-                    {tab.icon}
                     <span>{tab.label}</span>
                   </button>
                 ))}
@@ -144,7 +143,7 @@ export default function RegistrationPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <User className="h-5 w-5 text-blue-600" />
+                  <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <span>ព័ត៌មានមូលដ្ឋាន</span>
                 </CardTitle>
               </CardHeader>
@@ -238,7 +237,7 @@ export default function RegistrationPage() {
                   {/* Student ID */}
                   <div className="flex-1 min-w-[150px] space-y-2">
                     <Label>លេខសំគាល់សិស្ស (ID)</Label>
-                    <div className="text-4xl h-10 flex items-center justify-center font-bold bg-gray-100 rounded-md p-4">
+                    <div className="text-4xl h-10 flex items-center justify-center font-bold bg-muted dark:bg-slate-700 rounded-md p-4">
                       {selectedStudent?.studentId || "N/A"}
                     </div>
                   </div>
@@ -248,7 +247,7 @@ export default function RegistrationPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <MapPin className="h-5 w-5 text-blue-600" />
+                  <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <span>អាសយដ្ឋានសិស្ស</span>
                 </CardTitle>
               </CardHeader>
@@ -297,7 +296,7 @@ export default function RegistrationPage() {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle className="flex items-center space-x-2">
-                        <Home className="h-5 w-5 text-blue-600" />
+                        <Home className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <span>
                           ព័ត៌មានអាណាព្យាបាល {guardianForms.length > 1 ? formIndex + 1 : ''}
                         </span>
@@ -307,7 +306,7 @@ export default function RegistrationPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeGuardianForm(formIndex)}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                         >
                           លុប
                         </Button>
@@ -415,7 +414,7 @@ export default function RegistrationPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <User className="h-5 w-5 text-blue-600" />
+                    <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <span>ព័ត៌មានពីស្ថានភាពគ្រួសារសិស្ស</span>
                   </CardTitle>
                 </CardHeader>
@@ -512,7 +511,7 @@ export default function RegistrationPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <BookOpen className="h-5 w-5 text-blue-600" />
+                    <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <span>ព័ត៌មានសិក្សាសម្រាប់សិស្សថ្មី</span>
                   </CardTitle>
                 </CardHeader>
@@ -546,7 +545,7 @@ export default function RegistrationPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <FileText className="h-5 w-5 text-blue-600" />
+                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <span>តម្រូវការពីសាលា</span>
                   </CardTitle>
                 </CardHeader>
@@ -577,7 +576,7 @@ export default function RegistrationPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <span>កាលបរិច្ឆេទចុះឈ្មោះ</span>
                   </CardTitle>
                 </CardHeader>
@@ -594,7 +593,7 @@ export default function RegistrationPage() {
                   </div>
                     <div className="flex-1 min-w-[150px] space-y-2">
                       <div className="flex gap-4 pt-6">
-                        <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
                           បញ្ចប់ការចុះឈ្មោះសិស្ស
                         </Button>
                         <Button variant="outline">

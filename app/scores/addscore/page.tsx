@@ -20,6 +20,22 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+interface Student {
+  id: number
+  name: string
+  photo: string
+  grade: string
+}
+
+interface Score {
+  id: number
+  studentId: number
+  subject: string
+  score: number
+  date: string
+  comment: string
+}
+
 export default function AddScorePage() {
   // Filter states
   const [academicYear, setAcademicYear] = useState("")
@@ -32,25 +48,25 @@ export default function AddScorePage() {
   const [subject, setSubject] = useState("")
   const [score, setScore] = useState("")
   const [comment, setComment] = useState("")
-  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
 
   // Sample data
-  const students = [
+  const students: Student[] = [
     { id: 1, name: "សុខ ចន្ទា", photo: "", grade: "10A" },
     { id: 2, name: "ម៉ៅ សុធារ៉ា", photo: "", grade: "10A" },
     { id: 3, name: "វង្ស សុផល", photo: "", grade: "10A" },
   ]
 
-  const [scores, setScores] = useState([
+  const [scores, setScores] = useState<Score[]>([
     { id: 1, studentId: 1, subject: "គណិតវិទ្យា", score: 92, date: "2023-11-15", comment: "ល្អណាស់" },
     { id: 2, studentId: 2, subject: "ភាសាអង់គ្លេស", score: 88, date: "2023-11-10", comment: "ល្អ" },
   ])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedStudent || !subject || !score) return
     
-    const newScore = {
+    const newScore: Score = {
       id: scores.length + 1,
       studentId: selectedStudent.id,
       subject,
@@ -66,7 +82,7 @@ export default function AddScorePage() {
     setComment("")
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number) => {
     setScores(scores.filter(score => score.id !== id))
   }
 
@@ -160,20 +176,24 @@ export default function AddScorePage() {
               {students.map(student => (
                 <div 
                   key={student.id}
-                  className={`p-3 border rounded-lg cursor-pointer ${selectedStudent?.id === student.id ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'}`}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    selectedStudent?.id === student.id 
+                      ? 'bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-600' 
+                      : 'hover:bg-muted dark:hover:bg-slate-700'
+                  }`}
                   onClick={() => setSelectedStudent(student)}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-muted dark:bg-slate-600 rounded-full flex items-center justify-center">
                       {student.photo ? (
                         <img src={student.photo} alt={student.name} className="w-full h-full rounded-full" />
                       ) : (
-                        <span className="text-gray-500">{student.name.charAt(0)}</span>
+                        <span className="text-muted-foreground dark:text-slate-400">{student.name.charAt(0)}</span>
                       )}
                     </div>
                     <div>
                       <p className="font-medium">{student.name}</p>
-                      <p className="text-sm text-gray-600">ថ្នាក់ {student.grade}</p>
+                      <p className="text-sm text-muted-foreground dark:text-slate-400">ថ្នាក់ {student.grade}</p>
                     </div>
                   </div>
                 </div>
@@ -202,7 +222,7 @@ export default function AddScorePage() {
                   <div>
                     <label className="block text-sm font-medium mb-1">រូបថត</label>
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                      <div className="w-10 h-10 bg-muted dark:bg-slate-600 rounded-full flex items-center justify-center overflow-hidden">
                         {selectedStudent.photo ? (
                           <img
                             src={selectedStudent.photo}
@@ -210,7 +230,7 @@ export default function AddScorePage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-gray-500 text-lg font-semibold">
+                          <span className="text-muted-foreground dark:text-slate-400 text-lg font-semibold">
                             {selectedStudent.name.charAt(0)}
                           </span>
                         )}
@@ -265,7 +285,7 @@ export default function AddScorePage() {
                 </div>
               </form>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-muted-foreground dark:text-slate-400">
                 សូមជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ
               </div>
             )}
@@ -316,19 +336,19 @@ export default function AddScorePage() {
             {/* Stats Summary */}
             <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
               <div className="text-center">
-                <p className="text-sm text-gray-600">ចំនួនពិន្ទុ</p>
+                <p className="text-sm text-muted-foreground dark:text-slate-400">ចំនួនពិន្ទុ</p>
                 <p className="text-xl font-bold">{totalScores}</p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-600">សរុបពិន្ទុ</p>
+                <p className="text-sm text-muted-foreground dark:text-slate-400">សរុបពិន្ទុ</p>
                 <p className="text-xl font-bold">{totalPoints}</p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-600">មធ្យមភាគ</p>
+                <p className="text-sm text-muted-foreground dark:text-slate-400">មធ្យមភាគ</p>
                 <p className="text-xl font-bold">{averageScore}</p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-600">និន្នាការ</p>
+                <p className="text-sm text-muted-foreground dark:text-slate-400">និន្នាការ</p>
                 <p className="text-xl font-bold text-green-600">+5.3%</p>
               </div>
             </div>

@@ -4,15 +4,53 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { User, UserCheck, UserX, Clock, Edit, Trash2 } from "lucide-react"
 import { useState } from "react"
 
+interface TimeSlot {
+  status: string
+  time: string
+  absenceType: string
+  reason: string
+}
+
+interface Student {
+  id: number
+  name: string
+  morning: TimeSlot
+  afternoon: TimeSlot
+  [key: string]: any // Add index signature for dynamic property access
+}
+
+interface FormData {
+  schoolYear: string
+  grade: string
+  teacherName: string
+  date: string
+}
+
+interface EditingAbsence {
+  time: string
+  absenceType: string
+  reason: string
+}
+
+interface AbsenceRecord {
+  id: number
+  name: string
+  timePeriod: string
+  status: string
+  time: string
+  absenceType: string
+  reason: string
+}
+
 export default function DailyAbsencePage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     schoolYear: "",
     grade: "",
     teacherName: "",
     date: new Date().toISOString().split('T')[0],
   })
 
-  const [students, setStudents] = useState([
+  const [students, setStudents] = useState<Student[]>([
     { 
       id: 1, 
       name: "សុខ ចន្ទា", 
@@ -47,7 +85,7 @@ export default function DailyAbsencePage() {
   
 
 
-  const handleTimeInput = (e) => {
+  const handleTimeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value.replace(/\D/g, ''); // Remove non-digits
       let formattedValue = '';
       
@@ -61,9 +99,9 @@ export default function DailyAbsencePage() {
       e.target.value = formattedValue;
     };
 
-  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [showAbsenceForm, setShowAbsenceForm] = useState(false)
-  const [editingAbsence, setEditingAbsence] = useState(null)
+  const [editingAbsence, setEditingAbsence] = useState<EditingAbsence | null>(null)
   const [currentTimePeriod, setCurrentTimePeriod] = useState("morning")
 
   const absenceTypes = ["អវត្តមានច្បាប់", "អវត្តមានឥតច្បាប់", "យឺត"]
@@ -81,7 +119,7 @@ export default function DailyAbsencePage() {
   const totalAbsent = morningAbsent + afternoonAbsent
   const totalLate = morningLate + afternoonLate
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -89,20 +127,22 @@ export default function DailyAbsencePage() {
     }))
   }
 
-  const handleStudentClick = (student, timePeriod) => {
+  const handleStudentClick = (student: Student, timePeriod: string) => {
     setSelectedStudent(student)
     setCurrentTimePeriod(timePeriod)
     setShowAbsenceForm(true)
     setEditingAbsence(null)
   }
 
-  const handleAbsenceSubmit = (e) => {
+  const handleAbsenceSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const form = e.target
-    const absenceType = form.absenceType.value
-    const reason = form.reason.value
-    const time = form.time.value
-    const timePeriod = form.timePeriod.value
+    const form = e.target as HTMLFormElement
+    const absenceType = (form.elements.namedItem('absenceType') as HTMLSelectElement).value
+    const reason = (form.elements.namedItem('reason') as HTMLTextAreaElement).value
+    const time = (form.elements.namedItem('time') as HTMLInputElement).value
+    const timePeriod = (form.elements.namedItem('timePeriod') as HTMLSelectElement).value
+
+    if (!selectedStudent) return
 
     const updatedStudents = students.map(student => {
       if (student.id === selectedStudent.id) {
@@ -125,7 +165,7 @@ export default function DailyAbsencePage() {
     setEditingAbsence(null)
   }
 
-  const handleEditAbsence = (absence) => {
+  const handleEditAbsence = (absence: any) => {
     const student = students.find(s => s.id === absence.id)
     if (!student) return
     
@@ -139,7 +179,7 @@ export default function DailyAbsencePage() {
     setShowAbsenceForm(true)
   }
 
-  const handleDeleteAbsence = (studentId, timePeriod) => {
+  const handleDeleteAbsence = (studentId: number, timePeriod: string) => {
     const updatedStudents = students.map(student => {
       if (student.id === studentId) {
         return {
@@ -158,8 +198,8 @@ export default function DailyAbsencePage() {
     setStudents(updatedStudents)
   }
 
-  const getDailyAbsences = () => {
-    const absences = []
+  const getDailyAbsences = (): AbsenceRecord[] => {
+    const absences: AbsenceRecord[] = []
     students.forEach(student => {
       if (student.morning.status !== "present") {
         absences.push({
@@ -187,7 +227,7 @@ export default function DailyAbsencePage() {
     return absences
   }
 
-  const dailyAbsencesData = getDailyAbsences()
+  const dailyAbsencesData: AbsenceRecord[] = getDailyAbsences()
 
   return (
     <>
@@ -199,46 +239,46 @@ export default function DailyAbsencePage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ឆ្នាំសិក្សា</label>
+              <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឆ្នាំសិក្សា</label>
               <input
                 type="text"
                 name="schoolYear"
                 value={formData.schoolYear}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded-md bg-muted dark:bg-slate-700"
                 placeholder="ឆ្នាំសិក្សា"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ថ្នាក់</label>
+              <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្នាក់</label>
               <input
                 type="text"
                 name="grade"
                 value={formData.grade}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded-md bg-muted dark:bg-slate-700"
                 placeholder="ថ្នាក់"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះគ្រូ</label>
+              <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឈ្មោះគ្រូ</label>
               <input
                 type="text"
                 name="teacherName"
                 value={formData.teacherName}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded-md bg-muted dark:bg-slate-700"
                 placeholder="ឈ្មោះគ្រូ"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">កាលបរិច្ឆេទ</label>
+              <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">កាលបរិច្ឆេទ</label>
               <input
                 type="date"
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded-md bg-muted dark:bg-slate-700"
               />
             </div>
           </div>
@@ -259,15 +299,15 @@ export default function DailyAbsencePage() {
             <div className="grid grid-cols-3 gap-2">
               <div className="text-center">
                 <div className="text-xl font-bold text-green-600">{morningPresent}</div>
-                <p className="text-xs text-gray-600">វត្តមាន</p>
+                <p className="text-xs text-muted-foreground dark:text-slate-400">វត្តមាន</p>
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-red-600">{morningAbsent}</div>
-                <p className="text-xs text-gray-600">អវត្តមាន</p>
+                <p className="text-xs text-muted-foreground dark:text-slate-400">អវត្តមាន</p>
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-yellow-600">{morningLate}</div>
-                <p className="text-xs text-gray-600">យឺត</p>
+                <p className="text-xs text-muted-foreground dark:text-slate-400">យឺត</p>
               </div>
             </div>
           </CardContent>
@@ -285,15 +325,15 @@ export default function DailyAbsencePage() {
             <div className="grid grid-cols-3 gap-2">
               <div className="text-center">
                 <div className="text-xl font-bold text-green-600">{afternoonPresent}</div>
-                <p className="text-xs text-gray-600">វត្តមាន</p>
+                <p className="text-xs text-muted-foreground dark:text-slate-400">វត្តមាន</p>
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-red-600">{afternoonAbsent}</div>
-                <p className="text-xs text-gray-600">អវត្តមាន</p>
+                <p className="text-xs text-muted-foreground dark:text-slate-400">អវត្តមាន</p>
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-yellow-600">{afternoonLate}</div>
-                <p className="text-xs text-gray-600">យឺត</p>
+                <p className="text-xs text-muted-foreground dark:text-slate-400">យឺត</p>
               </div>
             </div>
           </CardContent>
@@ -311,7 +351,7 @@ export default function DailyAbsencePage() {
             <div className="text-3xl font-bold text-green-600">
               {totalPresent}
             </div>
-            <p className="text-sm text-gray-600">សិស្ស</p>
+            <p className="text-sm text-muted-foreground dark:text-slate-400">សិស្ស</p>
           </CardContent>
         </Card>
 
@@ -327,7 +367,7 @@ export default function DailyAbsencePage() {
             <div className="text-3xl font-bold text-red-600">
               {totalAbsent}
             </div>
-            <p className="text-sm text-gray-600">សិស្ស</p>
+            <p className="text-sm text-muted-foreground dark:text-slate-400">សិស្ស</p>
           </CardContent>
         </Card>
 
@@ -343,7 +383,7 @@ export default function DailyAbsencePage() {
             <div className="text-3xl font-bold text-yellow-600">
               {totalLate}
             </div>
-            <p className="text-sm text-gray-600">សិស្ស</p>
+            <p className="text-sm text-muted-foreground dark:text-slate-400">សិស្ស</p>
           </CardContent>
         </Card>
 
@@ -356,10 +396,10 @@ export default function DailyAbsencePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-gray-600">
+            <div className="text-3xl font-bold text-muted-foreground dark:text-slate-400">
               {students.length}
             </div>
-            <p className="text-sm text-gray-600">សិស្ស</p>
+            <p className="text-sm text-muted-foreground dark:text-slate-400">សិស្ស</p>
           </CardContent>
         </Card>
       </div>
@@ -372,18 +412,18 @@ export default function DailyAbsencePage() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted dark:bg-slate-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ឈ្មោះ</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ពេលព្រឹក</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ពេលរសៀល</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">ឈ្មោះ</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">ពេលព្រឹក</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">ពេលរសៀល</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-card divide-y divide-border">
                   {students.map((student) => (
                     <tr key={student.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground dark:text-slate-100">
                         {student.name}
                       </td>
                       <td 
@@ -424,33 +464,33 @@ export default function DailyAbsencePage() {
           <CardContent>
             {dailyAbsencesData.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-border">
+                  <thead className="bg-muted dark:bg-slate-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ឈ្មោះសិស្ស</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ពេលវេលា</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ប្រភេទ</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ម៉ោង</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">មូលហេតុ</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">សកម្មភាព</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">ឈ្មោះសិស្ស</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">ពេលវេលា</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">ប្រភេទ</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">ម៉ោង</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">មូលហេតុ</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-slate-400 uppercase">សកម្មភាព</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-card divide-y divide-border">
                     {dailyAbsencesData.map((absence, index) => (
                       <tr key={`${absence.id}-${absence.timePeriod}`}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground dark:text-slate-100">
                           {absence.name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground dark:text-slate-400">
                           {absence.timePeriod}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground dark:text-slate-400">
                           {absence.absenceType}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground dark:text-slate-400">
                           {absence.time}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
+                        <td className="px-6 py-4 text-sm text-muted-foreground dark:text-slate-400">
                           {absence.reason}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -480,7 +520,7 @@ export default function DailyAbsencePage() {
                 </table>
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-4">មិនមានសិស្សអវត្តមាននៅថ្ងៃនេះទេ</p>
+              <p className="text-muted-foreground dark:text-slate-400 text-center py-4">មិនមានសិស្សអវត្តមាននៅថ្ងៃនេះទេ</p>
             )}
           </CardContent>
         </Card>
@@ -495,27 +535,27 @@ export default function DailyAbsencePage() {
                 <form onSubmit={handleAbsenceSubmit}>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះសិស្ស</label>
+                      <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឈ្មោះសិស្ស</label>
                       <input
                         type="text"
                         value={selectedStudent.name}
                         readOnly
-                        className="w-full p-2 border rounded-md bg-gray-100"
+                        className="w-full p-2 border rounded-md bg-muted dark:bg-slate-700"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">កាលបរិច្ឆេទ</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">កាលបរិច្ឆេទ</label>
                         <input
                           type="date"
                           value={formData.date}
                           readOnly
-                          className="w-full p-2 border rounded-md bg-gray-100"
+                          className="w-full p-2 border rounded-md bg-muted dark:bg-slate-700"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ពេលវេលា</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ពេលវេលា</label>
                         <select
                           name="timePeriod"
                           defaultValue={currentTimePeriod}
@@ -529,7 +569,7 @@ export default function DailyAbsencePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">ស្ថានភាព</label>
+                      <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-2">ស្ថានភាព</label>
                       <div className="space-y-2">
                         {absenceTypes.map(type => (
                           <label key={type} className="flex items-center space-x-2">
@@ -547,7 +587,7 @@ export default function DailyAbsencePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ម៉ោង (សម្រាប់មកយឺត)</label>
+                      <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ម៉ោង (សម្រាប់មកយឺត)</label>
                       <input
                         type="text"
                         name="time"
@@ -566,7 +606,7 @@ export default function DailyAbsencePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">មូលហេតុ (បើមាន)</label>
+                      <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">មូលហេតុ (បើមាន)</label>
                       <textarea
                         name="reason"
                         defaultValue={editingAbsence?.reason || selectedStudent[currentTimePeriod].reason}
@@ -580,7 +620,7 @@ export default function DailyAbsencePage() {
                       <button
                         type="button"
                         onClick={() => setShowAbsenceForm(false)}
-                        className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+                        className="px-4 py-2 border rounded-md text-foreground dark:text-slate-200 hover:bg-muted dark:hover:bg-slate-700"
                       >
                         បោះបង់
                       </button>

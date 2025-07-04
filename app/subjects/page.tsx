@@ -14,11 +14,11 @@ export default function SubjectsPage() {
   ]
 
   return (
-    <div>
+    <div className="transition-colors duration-300">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">មុខវិជ្ជាទាំងអស់</h2>
+        <h2 className="text-2xl font-semibold text-foreground dark:text-slate-100">មុខវិជ្ជាទាំងអស់</h2>
         <div className="flex space-x-2">
-          <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+          <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium dark:bg-blue-900 dark:text-blue-200">
             {subjects.length} មុខវិជ្ជា
           </div>
         </div>
@@ -26,7 +26,7 @@ export default function SubjectsPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">មុខវិជ្ជាទាំងអស់</CardTitle>
             <BookOpen className="h-4 w-4 text-[#0082c8]" />
@@ -37,7 +37,7 @@ export default function SubjectsPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">សិស្សសរុប</CardTitle>
             <Users className="h-4 w-4 text-[#0082c8]" />
@@ -48,7 +48,7 @@ export default function SubjectsPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">មធ្យមភាគ</CardTitle>
             <Clock className="h-4 w-4 text-[#0082c8]" />
@@ -59,7 +59,7 @@ export default function SubjectsPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">គ្រូបង្រៀន</CardTitle>
             <Award className="h-4 w-4 text-[#0082c8]" />
@@ -83,20 +83,20 @@ export default function SubjectsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">គ្រូបង្រៀន:</span>
+                <span className="text-sm text-muted-foreground dark:text-slate-400">គ្រូបង្រៀន:</span>
                 <span className="text-sm font-medium">{subject.teacher}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">សិស្ស:</span>
+                <span className="text-sm text-muted-foreground dark:text-slate-400">សិស្ស:</span>
                 <span className="text-sm font-medium">{subject.students} នាក់</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">រយៈពេល:</span>
+                <span className="text-sm text-muted-foreground dark:text-slate-400">រយៈពេល:</span>
                 <span className="text-sm font-medium">{subject.duration}</span>
               </div>
               <div className="pt-2 border-t">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">ស្ថានភាព</span>
+                  <span className="text-xs text-muted-foreground dark:text-slate-500">ស្ថានភាព</span>
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">សកម្ម</span>
                 </div>
               </div>

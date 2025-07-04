@@ -62,22 +62,22 @@ export default function DashboardPage() {
     setShowAddForm(false);
   };
   
-  const handleDeleteAnnouncement = (id) => {
+  const handleDeleteAnnouncement = (id: string) => {
     setAnnouncements(announcements.filter(announcement => announcement.id !== id));
   };
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-primary mb-2">សូមស្វាគមន៍មកកាន់ផ្ទាំងគ្រប់គ្រង</h2>
-        <p className="text-muted-foreground">ទិន្នន័យសង្ខេបនិងសកម្មភាពសំខាន់ៗ</p>
+        <h2 className="text-3xl font-bold text-primary mb-2 dark:text-blue-400">សូមស្វាគមន៍មកកាន់ផ្ទាំងគ្រប់គ្រង</h2>
+        <p className="text-muted-foreground dark:text-slate-300">ទិន្នន័យសង្ខេបនិងសកម្មភាពសំខាន់ៗ</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="សិស្សទាំងអស់"
-          value={<span className="text-primary">1,234</span>}
+          value="1,234"
           description="សិស្សកំពុងសិក្សា"
           icon={<Users className="h-6 w-6" />}
           trend={{ value: "20.1%", isPositive: true }}
@@ -85,21 +85,21 @@ export default function DashboardPage() {
         
         <StatCard
           title="គ្រូទាំងអស់"
-          value={<span className="text-primary">24</span>}
+          value="24"
           description="គ្រូបង្រៀនសកម្ម"
           icon={<BookOpen className="h-6 w-6" />}
         />
         
         <StatCard
           title="សិស្សពូកែ"
-          value={<span className="text-primary">15</span>}
+          value="15"
           description="សិស្សពូកែក្នុងខែនេះ"
           icon={<Award className="h-6 w-6" />}
         />
         
         <StatCard
           title="ដំណឹង"
-          value={<span className="text-primary">{announcements.length}</span>}
+          value={announcements.length.toString()}
           description="ដំណឹងសកម្ម"
           icon={<MessageSquare className="h-6 w-6" />}
         />
@@ -121,9 +121,9 @@ export default function DashboardPage() {
                     data={learningQualityData}
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="month" stroke="#6b7280" />
-                    <YAxis stroke="#6b7280" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
                     <Tooltip 
                       formatter={(value, name) => {
                         if (name === 'quality') return [`${value}%`, 'គុណភាព']
@@ -132,10 +132,11 @@ export default function DashboardPage() {
                       }}
                       labelFormatter={(label) => `ខែ${label}`}
                       contentStyle={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e5e7eb',
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        color: 'hsl(var(--foreground))'
                       }}
                     />
                     <Legend 
@@ -180,7 +181,7 @@ export default function DashboardPage() {
                       <label className="block text-sm font-medium text-foreground mb-1">ចំណងជើង*</label>
                       <input
                         type="text"
-                        className="w-full p-2 border border-border rounded-md"
+                        className="w-full p-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
                         value={newAnnouncement.title}
                         onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
                         placeholder="បញ្ចូលចំណងជើងដំណឹង"
@@ -189,7 +190,7 @@ export default function DashboardPage() {
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">ខ្លឹមសារ*</label>
                       <textarea
-                        className="w-full p-2 border border-border rounded-md"
+                        className="w-full p-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
                         rows={3}
                         value={newAnnouncement.content}
                         onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
@@ -200,7 +201,7 @@ export default function DashboardPage() {
                       <label className="block text-sm font-medium text-foreground mb-1">អ្នកនិពន្ធ</label>
                       <input
                         type="text"
-                        className="w-full p-2 border border-border rounded-md"
+                        className="w-full p-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
                         value={newAnnouncement.author}
                         onChange={(e) => setNewAnnouncement({...newAnnouncement, author: e.target.value})}
                         placeholder="អ្នកផ្សព្វផ្សាយ"

@@ -133,7 +133,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
   return (
     <div
       className={cn(
-        "bg-card border-r border-border flex flex-col transition-all duration-300 ease-in-out rounded-r-2xl m-2 shadow-soft",
+        "bg-card border-r border-border flex flex-col transition-all duration-300 ease-in-out rounded-r-2xl m-2 shadow-soft sidebar",
         isCollapsed ? "w-[95px]" : "w-[240px]",
         className,
       )}

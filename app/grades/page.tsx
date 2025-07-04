@@ -22,15 +22,15 @@ export default function GradesPage() {
   ]
 
   return (
-    <div>
+    <div className="transition-colors duration-300">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">ពិន្ទុសិស្ស</h2>
+        <h2 className="text-2xl font-semibold text-foreground dark:text-slate-100">ពិន្ទុសិស្ស</h2>
         <div className="flex space-x-2">
-          <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
+          <select className="border border-border rounded-md px-3 py-1 text-sm bg-background text-foreground">
             <option>ឆមាសទី ១</option>
             <option>ឆមាសទី ២</option>
           </select>
-          <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
+          <select className="border border-border rounded-md px-3 py-1 text-sm bg-background text-foreground">
             <option>ឆ្នាំសិក្សា ២០២៤</option>
             <option>ឆ្នាំសិក្សា ២០២៣</option>
           </select>
@@ -39,7 +39,7 @@ export default function GradesPage() {
 
       {/* Overall Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">ពិន្ទុមធ្យមទូទៅ</CardTitle>
             <Award className="h-4 w-4 text-[#0082c8]" />
@@ -50,7 +50,7 @@ export default function GradesPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">ពិន្ទុខ្ពស់បំផុត</CardTitle>
             <TrendingUp className="h-4 w-4 text-[#0082c8]" />
@@ -61,7 +61,7 @@ export default function GradesPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">សិស្សប្រលង</CardTitle>
             <Users className="h-4 w-4 text-[#0082c8]" />
@@ -72,7 +72,7 @@ export default function GradesPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">អត្រាជាប់</CardTitle>
             <BookOpen className="h-4 w-4 text-[#0082c8]" />
@@ -93,12 +93,12 @@ export default function GradesPage() {
           <CardContent>
             <div className="space-y-4">
               {gradeData.map((subject, index) => (
-                <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <div key={index} className="p-4 border rounded-lg hover:bg-muted dark:hover:bg-slate-700 transition-colors">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-medium">{subject.subject}</h3>
                     <span className="text-lg font-bold text-blue-600">{subject.average}</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground dark:text-slate-400">
                     <div>
                       <span className="block text-xs">ខ្ពស់បំផុត</span>
                       <span className="font-medium text-green-600">{subject.highest}</span>
@@ -128,15 +128,15 @@ export default function GradesPage() {
               {topStudents.map((student, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted dark:hover:bg-slate-700 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
                         index === 0
                           ? "bg-yellow-500"
-                          : index === 1
-                            ? "bg-gray-400"
+                          :                         index === 1
+                          ? "bg-muted dark:bg-slate-600"
                             : index === 2
                               ? "bg-orange-500"
                               : "bg-blue-500"
@@ -146,12 +146,12 @@ export default function GradesPage() {
                     </div>
                     <div>
                       <p className="font-medium">{student.name}</p>
-                      <p className="text-sm text-gray-600">{student.class}</p>
+                      <p className="text-sm text-muted-foreground dark:text-slate-400">{student.class}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-blue-600">{student.grade}</p>
-                    <p className="text-xs text-gray-500">ពិន្ទុ</p>
+                    <p className="text-xs text-muted-foreground dark:text-slate-500">ពិន្ទុ</p>
                   </div>
                 </div>
               ))}

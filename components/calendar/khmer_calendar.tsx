@@ -136,7 +136,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
       days.push(
         <button
           key={`prev-${day}`}
-          className={`text-gray-400 hover:bg-gray-100 rounded-lg transition-colors ${
+          className={`text-muted-foreground hover:bg-muted rounded-lg transition-colors ${
             compact ? "p-1 text-xs" : "p-2 text-sm"
           }`}
           onClick={() => {
@@ -162,10 +162,10 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             compact ? "p-1 text-xs" : "p-2 text-sm"
           } ${
             isCurrentDay
-              ? "bg-primary text-white font-bold shadow-md"
+              ? "bg-primary text-primary-foreground font-bold shadow-md"
               : isSelectedDay
-              ? "bg-primary-100 text-primary-700 font-semibold"
-              : "text-gray-700 hover:bg-primary-50"
+              ? "bg-primary/10 text-primary font-semibold"
+              : "text-foreground hover:bg-muted"
           }`}
         >
           {toKhmerNumber(day)}
@@ -178,7 +178,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
       days.push(
         <button
           key={`next-${day}`}
-          className={`text-gray-400 hover:bg-gray-100 rounded-lg transition-colors ${
+          className={`text-muted-foreground hover:bg-muted rounded-lg transition-colors ${
             compact ? "p-1 text-xs" : "p-2 text-sm"
           }`}
           onClick={() => {
@@ -209,14 +209,14 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
   }
 
   return (
-    <Card className="bg-white rounded-2xl">
+    <Card className="bg-card rounded-2xl border-border">
       <CardHeader className={compact ? "pb-2" : "pb-3"}>
         <div className="flex items-center justify-between">
           <CardTitle className={`text-primary font-medium ${compact ? "text-lg" : "text-x1"}`}>
             ប្រតិទិនខ្មែរ
           </CardTitle>
         </div>
-        <div className={`font-bold text-gray-900 ${compact ? "text-base" : "text-lg"}`}>
+        <div className={`font-bold text-foreground ${compact ? "text-base" : "text-lg"}`}>
           {formatSelectedDate() ||
             `${getKhmerDayName(today)} ទី${toKhmerNumber(today.getDate())} ខែ${KHMER_MONTHS[today.getMonth()]} ឆ្នាំ${toKhmerNumber(today.getFullYear())}`}
         </div>
@@ -228,7 +228,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             <Button
               variant="ghost"
               size="sm"
-              className={`p-0 hover:bg-primary-50 ${compact ? "h-6 w-6" : "h-8 w-8"}`}
+              className={`p-0 hover:bg-muted ${compact ? "h-6 w-6" : "h-8 w-8"}`}
               onClick={() => navigateMonth("prev")}
             >
               <ChevronLeft className={`text-primary ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
@@ -236,7 +236,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             <Button
               variant="ghost"
               size="sm"
-              className={`p-0 hover:bg-primary-50 ${compact ? "h-6 w-6" : "h-8 w-8"}`}
+              className={`p-0 hover:bg-muted ${compact ? "h-6 w-6" : "h-8 w-8"}`}
               onClick={() => navigateMonth("next")}
             >
               <ChevronRight className={`text-primary ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
@@ -264,22 +264,22 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
         </div>
 
         {/* Today's Info */}
-        <div className={`border-t border-gray-100 ${compact ? "mt-2 pt-2" : "mt-4 pt-3"}`}>
+        <div className={`border-t border-border ${compact ? "mt-2 pt-2" : "mt-4 pt-3"}`}>
           <div className="flex flex-col gap-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">ថ្ងៃនេះ</span>
+              <span className="text-muted-foreground">ថ្ងៃនេះ</span>
               <span className="text-primary font-medium">
                 ថ្ងៃ{getKhmerDayName(today)} ទី{toKhmerNumber(today.getDate())} ខែ{KHMER_MONTHS[today.getMonth()]} ឆ្នាំ{toKhmerNumber(today.getFullYear())}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">ត្រូវនឹង</span>
+              <span className="text-muted-foreground">ត្រូវនឹង</span>
               <span className="text-primary font-medium">
                 {getLunarDateInfo(today)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">ម៉ោង</span>
+              <span className="text-muted-foreground">ម៉ោង</span>
               <span className="text-primary font-medium">
                 {currentTime}
               </span>

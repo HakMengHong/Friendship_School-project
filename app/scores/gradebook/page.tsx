@@ -30,9 +30,9 @@ export default function GradebookReportPage() {
   return (
     <>
       {/* Main content */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-card dark:bg-slate-800 p-6 rounded-lg shadow">
         <h1 className="text-primary text-2xl font-bold mb-4">របាយការណ៍សៀវភៅតាមដាន</h1>
-        <p className="text-gray-600 mb-4">ជ្រើសរើសជម្រើសរបាយការណ៍ខាងក្រោម</p>
+        <p className="text-muted-foreground dark:text-slate-400 mb-4">ជ្រើសរើសជម្រើសរបាយការណ៍ខាងក្រោម</p>
         
         <button
           onClick={() => setShowReportModal(true)}
@@ -54,11 +54,11 @@ export default function GradebookReportPage() {
               <form onSubmit={generateReport}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ជ្រើសរើសរបាយការណ៍</label>
+                    <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ជ្រើសរើសរបាយការណ៍</label>
                     <select
                       value={reportType}
                       onChange={(e) => setReportType(e.target.value)}
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                       required
                     >
                       <option value="monthly">របាយការណ៍សៀវភៅតាមដានប្រចាំខែ</option>
@@ -69,12 +69,12 @@ export default function GradebookReportPage() {
 
                   {/* Common field for all report types */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ឆ្នាំសិក្សា</label>
+                    <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឆ្នាំសិក្សា</label>
                     <input
                       type="text"
                       value={reportData.academicYear}
                       onChange={(e) => setReportData({...reportData, academicYear: e.target.value})}
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                       placeholder="ឧ. 2023-2024"
                       required
                     />
@@ -84,11 +84,11 @@ export default function GradebookReportPage() {
                   {reportType === "monthly" && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ខែ</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ខែ</label>
                         <select
                           value={reportData.month}
                           onChange={(e) => setReportData({...reportData, month: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           required
                         >
                           <option value="">ជ្រើសរើសខែ</option>
@@ -107,12 +107,12 @@ export default function GradebookReportPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ឆ្នាំ</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឆ្នាំ</label>
                         <input
                           type="number"
                           value={reportData.year}
                           onChange={(e) => setReportData({...reportData, year: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           placeholder="ឧ. 2024"
                           required
                         />
@@ -124,11 +124,11 @@ export default function GradebookReportPage() {
                   {reportType === "semester" && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ឆមាស</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឆមាស</label>
                         <select
                           value={reportData.semester}
                           onChange={(e) => setReportData({...reportData, semester: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           required
                         >
                           <option value="">ជ្រើសរើសឆមាស</option>
@@ -138,22 +138,22 @@ export default function GradebookReportPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">ថ្ងៃចូលរៀនដំបូង</label>
+                          <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្ងៃចូលរៀនដំបូង</label>
                           <input
                             type="date"
                             value={reportData.startDate}
                             onChange={(e) => setReportData({...reportData, startDate: e.target.value})}
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                             required
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">ថ្ងៃចូលរៀនចុងក្រោយ</label>
+                          <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្ងៃចូលរៀនចុងក្រោយ</label>
                           <input
                             type="date"
                             value={reportData.endDate}
                             onChange={(e) => setReportData({...reportData, endDate: e.target.value})}
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                             required
                           />
                         </div>
@@ -165,22 +165,22 @@ export default function GradebookReportPage() {
                   {reportType === "yearly" && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ថ្ងៃចូលរៀនដំបូង</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្ងៃចូលរៀនដំបូង</label>
                         <input
                           type="date"
                           value={reportData.startDate}
                           onChange={(e) => setReportData({...reportData, startDate: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ថ្ងៃចូលរៀនចុងក្រោយ</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្ងៃចូលរៀនចុងក្រោយ</label>
                         <input
                           type="date"
                           value={reportData.endDate}
                           onChange={(e) => setReportData({...reportData, endDate: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           required
                         />
                       </div>
@@ -190,12 +190,12 @@ export default function GradebookReportPage() {
                   {/* Class field (common for all except when includeAllClasses is checked) */}
                   {!reportData.includeAllClasses && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ថ្នាក់</label>
+                      <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្នាក់</label>
                       <input
                         type="text"
                         value={reportData.class}
                         onChange={(e) => setReportData({...reportData, class: e.target.value})}
-                        className="w-full p-2 border rounded-md"
+                        className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                         placeholder="ឧ. ថ្នាក់ទី១ក"
                         required={!reportData.includeAllClasses}
                       />
@@ -204,11 +204,11 @@ export default function GradebookReportPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ទម្រង់ឯកសារ</label>
+                      <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ទម្រង់ឯកសារ</label>
                       <select
                         value={reportData.format}
                         onChange={(e) => setReportData({...reportData, format: e.target.value})}
-                        className="w-full p-2 border rounded-md"
+                        className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                         required
                       >
                         <option value="pdf">PDF</option>
@@ -219,7 +219,7 @@ export default function GradebookReportPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">ជម្រើស</label>
+                    <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-2">ជម្រើស</label>
                     <div className="space-y-2">
                       <label className="flex items-center space-x-2">
                         <input
@@ -255,7 +255,7 @@ export default function GradebookReportPage() {
                     <button
                       type="button"
                       onClick={() => setShowReportModal(false)}
-                      className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+                      className="px-4 py-2 border rounded-md text-foreground dark:text-slate-200 hover:bg-muted dark:hover:bg-slate-700"
                     >
                       បោះបង់
                     </button>

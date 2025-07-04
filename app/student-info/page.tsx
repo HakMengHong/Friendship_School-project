@@ -120,7 +120,7 @@ const tabs = [
 ];
 
 export default function StudentInfoPage() {
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('registration');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByYearClass, setFilterByYearClass] = useState(false);
@@ -152,18 +152,18 @@ export default function StudentInfoPage() {
     setFilteredStudents(result);
   }, [searchTerm, filterByYearClass, selectedYear, selectedClass]);
 
-  const handleStudentSelect = (student) => {
+  const handleStudentSelect = (student: any) => {
     setSelectedStudent(student);
     setActiveTab('registration');
   };
 
   return (
-    <div>
+    <div className="transition-colors duration-300">
       {/* Search Section */}
       <div className="grid grid-cols-1 gap-6 mb-8">
-        <Card className="shadow-sm bg-white rounded-xl">
+        <Card className="card-modern">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-medium text-gray-800">
+            <CardTitle className="text-lg font-medium text-foreground">
               <div className="flex items-center space-x-2">
                 <Users className="h-5 w-5 text-primary" />
                 <span>ស្វែងរកសិស្ស</span>
@@ -173,29 +173,29 @@ export default function StudentInfoPage() {
           <CardContent>
             <div className="flex flex-col md:flex-row md:items-end gap-4">
               <div className="flex-1 min-w-[300px]">
-                <Label className="text-gray-600 mb-1">សូមបញ្ចូលឈ្មោះសិស្ស</Label>
+                <Label className="text-muted-foreground mb-1">សូមបញ្ចូលឈ្មោះសិស្ស</Label>
                 <div className="relative mt-1">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-500 z-10 pointer-events-none" />
                   <Input
                     placeholder="សរសេរឈ្មោះសិស្ស"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => setShowDropdown(true)}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                    className="pl-10 pr-10 rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                    className="pl-10 pr-10 rounded-lg border-border focus:border-primary focus:ring-primary"
                   />
                   <ChevronDown 
                     className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary cursor-pointer"
                     onClick={() => setShowDropdown(!showDropdown)}
                   />
                   {showDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                    <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
                       <div className="max-h-60 overflow-auto">
                         {filteredStudents.length > 0 ? (
                           filteredStudents.map(student => (
                             <div
                               key={student.id}
-                              className="flex items-center p-3 hover:bg-indigo-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                              className="flex items-center p-3 hover:bg-muted cursor-pointer transition-colors border-b border-border last:border-b-0"
                               onClick={() => {
                                 setSearchTerm(`${student.lastName} ${student.firstName}`);
                                 handleStudentSelect(student);
@@ -206,13 +206,13 @@ export default function StudentInfoPage() {
                                 <User className="h-4 w-4 text-primary" />
                               </div>
                               <div>
-                                <p className="font-medium text-gray-800">{student.lastName} {student.firstName}</p>
-                                <p className="text-xs text-gray-500">{student.class} • {student.academicYear}</p>
+                                <p className="font-medium text-foreground">{student.lastName} {student.firstName}</p>
+                                <p className="text-xs text-muted-foreground">{student.class} • {student.academicYear}</p>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div className="p-3 text-gray-500 text-center">រកមិនឃើញឈ្មោះសិស្ស</div>
+                          <div className="p-3 text-muted-foreground text-center">រកមិនឃើញឈ្មោះសិស្ស</div>
                         )}
                       </div>
                     </div>
@@ -226,15 +226,15 @@ export default function StudentInfoPage() {
                     id="filter-toggle"
                     checked={filterByYearClass}
                     onCheckedChange={(checked) => {
-                      setFilterByYearClass(checked);
-                      if (!checked) {
+                      setFilterByYearClass(checked === true);
+                      if (checked !== true) {
                         setSelectedYear("");
                         setSelectedClass("");
                       }
                     }}
-                    className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                    className="h-5 w-5 rounded border-border text-primary focus:ring-primary"
                   />
-                  <Label htmlFor="filter-toggle" className="text-gray-600 cursor-pointer">
+                  <Label htmlFor="filter-toggle" className="text-muted-foreground cursor-pointer">
                     រកតាមឆ្នាំសិក្សា និងថ្នាក់
                   </Label>
                 </div>
@@ -243,13 +243,13 @@ export default function StudentInfoPage() {
                   <div className="flex space-x-3">
                     <div className="w-[180px]">
                       <Select value={selectedYear} onValueChange={setSelectedYear}>
-                        <SelectTrigger className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <SelectTrigger className="rounded-lg border-border focus:border-primary focus:ring-primary">
                           <Calendar className="mr-2 h-4 w-4 text-primary" />
                           <SelectValue placeholder="ឆ្នាំសិក្សា" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-lg border-gray-300 shadow-lg">
+                        <SelectContent className="rounded-lg border-border shadow-lg">
                           {academicYears.map(year => (
-                            <SelectItem key={year} value={year} className="hover:bg-indigo-50">
+                            <SelectItem key={year} value={year} className="hover:bg-muted">
                               {year}
                             </SelectItem>
                           ))}
@@ -259,13 +259,13 @@ export default function StudentInfoPage() {
                     
                     <div className="w-[180px]">
                       <Select value={selectedClass} onValueChange={setSelectedClass}>
-                        <SelectTrigger className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <SelectTrigger className="rounded-lg border-border focus:border-primary focus:ring-primary">
                           <BookOpen className="mr-2 h-4 w-4 text-primary" />
                           <SelectValue placeholder="ថ្នាក់" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-lg border-gray-300 shadow-lg">
+                        <SelectContent className="rounded-lg border-border shadow-lg">
                           {classes.map(cls => (
-                            <SelectItem key={cls} value={cls} className="hover:bg-indigo-50">
+                            <SelectItem key={cls} value={cls} className="hover:bg-muted">
                               {cls}
                             </SelectItem>
                           ))}
@@ -285,28 +285,28 @@ export default function StudentInfoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Student Profile Card */}
           <div className="lg:col-span-1">
-            <Card className="shadow-sm bg-white rounded-xl h-full">
+            <Card className="shadow-sm bg-card rounded-xl h-full">
               <CardContent className="p-6">
                 <div className="flex flex-col items-center">
-                  <div className="w-32 h-32 bg-gray-100 rounded-full overflow-hidden mb-4 border-4 border-indigo-50">
+                  <div className="w-32 h-32 bg-muted rounded-full overflow-hidden mb-4 border-4 border-primary/10">
                     <img 
                       src={selectedStudent.photo} 
                       alt={`${selectedStudent.lastName} ${selectedStudent.firstName}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 text-center">
+                  <h3 className="text-xl font-bold text-foreground text-center">
                     {selectedStudent.lastName} {selectedStudent.firstName}
                   </h3>
-                  <p className="text-gray-600 text-center">{selectedStudent.age} ឆ្នាំ • {selectedStudent.gender}</p>
+                  <p className="text-muted-foreground text-center">{selectedStudent.age} ឆ្នាំ • {selectedStudent.gender}</p>
                   
                   <div className="mt-6 w-full space-y-4">
-                    <div className="bg-indigo-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-800 flex items-center">
+                    <div className="bg-primary/5 rounded-lg p-4">
+                      <h4 className="font-medium text-foreground flex items-center">
                         <BookOpen className="h-4 w-4 text-primary mr-2" />
                         ព័ត៌មានសិក្សា
                       </h4>
-                      <div className="mt-2 space-y-1 text-sm text-gray-600">
+                      <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                         <p>ថ្នាក់: {selectedStudent.class}</p>
                         <p>ឆ្នាំសិក្សា: {selectedStudent.academicYear}</p>
                         <p className={selectedStudent.education.registered ? "text-green-600" : "text-red-600"}>
@@ -315,12 +315,12 @@ export default function StudentInfoPage() {
                       </div>
                     </div>
 
-                    <div className="bg-indigo-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-800 flex items-center">
+                    <div className="bg-primary/5 rounded-lg p-4">
+                      <h4 className="font-medium text-foreground flex items-center">
                         <Home className="h-4 w-4 text-primary mr-2" />
                         អាសយដ្ឋាន
                       </h4>
-                      <div className="mt-2 space-y-1 text-sm text-gray-600">
+                      <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                         <p>{selectedStudent.address.houseNo}, {selectedStudent.address.village}</p>
                         <p>{selectedStudent.address.commune}, {selectedStudent.address.district}</p>
                         <p>{selectedStudent.address.province}</p>
@@ -335,13 +335,13 @@ export default function StudentInfoPage() {
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
             {/* Tabs Navigation */}
-            <div className="bg-white rounded-xl border-none shadow-sm overflow-hidden">
+            <div className="bg-card rounded-xl border-none shadow-sm overflow-hidden">
               <nav className="flex overflow-x-auto">
                 {tabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-3 text-sm font-medium flex items-center space-x-2 border-b-2 ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                    className={`px-4 py-3 text-sm font-medium flex items-center space-x-2 border-b-2 ${activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'}`}
                   >
                     {tab.icon}
                     <span>{tab.label}</span>
@@ -351,26 +351,26 @@ export default function StudentInfoPage() {
             </div>
 
             {/* Tab Content */}
-            <Card className="border-none shadow-sm bg-white rounded-xl">
+            <Card className="border-none shadow-sm bg-card rounded-xl">
               <CardContent className="p-6">
                 {activeTab === 'registration' && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានចុះឈ្មោះ</h4>
+                    <h4 className="text-lg font-bold text-foreground">ព័ត៌មានចុះឈ្មោះ</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">ឈ្មោះសិស្ស</p>
+                      <div className="bg-muted p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">ឈ្មោះសិស្ស</p>
                         <p className="font-medium">{selectedStudent.lastName} {selectedStudent.firstName}</p>
                       </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">ថ្ងៃខែឆ្នាំកំណើត</p>
+                      <div className="bg-muted p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">ថ្ងៃខែឆ្នាំកំណើត</p>
                         <p className="font-medium">{selectedStudent.dob}</p>
                       </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">ថ្នាក់ទី</p>
+                      <div className="bg-muted p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">ថ្នាក់ទី</p>
                         <p className="font-medium">{selectedStudent.class}</p>
                       </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">ថ្ងៃចុះឈ្មោះ</p>
+                      <div className="bg-muted p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">ថ្ងៃចុះឈ្មោះ</p>
                         <p className="font-medium">{selectedStudent.education.registrationDate}</p>
                       </div>
                     </div>
@@ -379,24 +379,24 @@ export default function StudentInfoPage() {
 
                 {activeTab === 'scholarship' && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានអាហារូបករណ៍</h4>
+                    <h4 className="text-lg font-bold text-foreground">ព័ត៌មានអាហារូបករណ៍</h4>
                     {selectedStudent.scholarship.type ? (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-indigo-50 p-4 rounded-lg">
-                          <p className="text-sm text-gray-500">ប្រភេទ</p>
+                        <div className="bg-primary/5 p-4 rounded-lg">
+                          <p className="text-sm text-muted-foreground">ប្រភេទ</p>
                           <p className="font-medium">{selectedStudent.scholarship.type}</p>
                         </div>
-                        <div className="bg-indigo-50 p-4 rounded-lg">
-                          <p className="text-sm text-gray-500">ចំនួនទឹកប្រាក់</p>
+                        <div className="bg-primary/5 p-4 rounded-lg">
+                          <p className="text-sm text-muted-foreground">ចំនួនទឹកប្រាក់</p>
                           <p className="font-medium">{selectedStudent.scholarship.amount}៛</p>
                         </div>
-                        <div className="bg-indigo-50 p-4 rounded-lg">
-                          <p className="text-sm text-gray-500">អង្គការឧបត្ថម្ភ</p>
+                        <div className="bg-primary/5 p-4 rounded-lg">
+                          <p className="text-sm text-muted-foreground">អង្គការឧបត្ថម្ភ</p>
                           <p className="font-medium">{selectedStudent.scholarship.sponsor}</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-gray-50 p-4 rounded-lg text-center text-gray-500">
+                      <div className="bg-muted p-4 rounded-lg text-center text-muted-foreground">
                         សិស្សនេះមិនមានអាហារូបករណ៍ទេ
                       </div>
                     )}
@@ -405,18 +405,18 @@ export default function StudentInfoPage() {
 
                 {activeTab === 'family' && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានគ្រួសារ</h4>
+                    <h4 className="text-lg font-bold text-foreground">ព័ត៌មានគ្រួសារ</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">ឪពុក</p>
+                      <div className="bg-primary/5 p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">ឪពុក</p>
                         <p className="font-medium">{selectedStudent.family.father}</p>
                       </div>
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">ម្តាយ</p>
+                      <div className="bg-primary/5 p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">ម្តាយ</p>
                         <p className="font-medium">{selectedStudent.family.mother}</p>
                       </div>
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">បងប្អូន</p>
+                      <div className="bg-primary/5 p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">បងប្អូន</p>
                         <p className="font-medium">{selectedStudent.family.siblings} នាក់</p>
                       </div>
                     </div>
@@ -425,11 +425,11 @@ export default function StudentInfoPage() {
 
                 {activeTab === 'attendance' && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-800">ក្រាហ្វិចអវត្តមាន</h4>
+                    <h4 className="text-lg font-bold text-foreground">ក្រាហ្វិចអវត្តមាន</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {selectedStudent.attendance.map(record => (
-                        <div key={record.month} className="bg-indigo-50 p-4 rounded-lg">
-                          <p className="text-sm text-gray-500">{record.month}</p>
+                      {selectedStudent.attendance.map((record: any) => (
+                        <div key={record.month} className="bg-primary/5 p-4 rounded-lg">
+                          <p className="text-sm text-muted-foreground">{record.month}</p>
                           <div className="mt-2 space-y-1">
                             <div className="flex justify-between">
                               <span className="text-sm">វត្តមាន:</span>
@@ -448,12 +448,12 @@ export default function StudentInfoPage() {
 
                 {activeTab === 'grades' && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-800">ក្រាហ្វិចពិន្ទុ</h4>
+                    <h4 className="text-lg font-bold text-foreground">ក្រាហ្វិចពិន្ទុ</h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">ភាសាខ្មែរ</p>
+                      <div className="bg-primary/5 p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">ភាសាខ្មែរ</p>
                         <div className="mt-2 flex items-center">
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div className="w-full bg-muted rounded-full h-2.5">
                             <div 
                               className="bg-primary h-2.5 rounded-full" 
                               style={{ width: `${selectedStudent.grades.khmer}%` }}
@@ -462,10 +462,10 @@ export default function StudentInfoPage() {
                           <span className="ml-2 font-medium">{selectedStudent.grades.khmer}/100</span>
                         </div>
                       </div>
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">គណិតវិទ្យា</p>
+                      <div className="bg-primary/5 p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">គណិតវិទ្យា</p>
                         <div className="mt-2 flex items-center">
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div className="w-full bg-muted rounded-full h-2.5">
                             <div 
                               className="bg-primary h-2.5 rounded-full" 
                               style={{ width: `${selectedStudent.grades.math}%` }}
@@ -474,10 +474,10 @@ export default function StudentInfoPage() {
                           <span className="ml-2 font-medium">{selectedStudent.grades.math}/100</span>
                         </div>
                       </div>
-                      <div className="bg-indigo-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-500">វិទ្យាសាស្ត្រ</p>
+                      <div className="bg-primary/5 p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">វិទ្យាសាស្ត្រ</p>
                         <div className="mt-2 flex items-center">
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div className="w-full bg-muted rounded-full h-2.5">
                             <div 
                               className="bg-primary h-2.5 rounded-full" 
                               style={{ width: `${selectedStudent.grades.science}%` }}
@@ -492,8 +492,8 @@ export default function StudentInfoPage() {
 
                 {activeTab === 'religion' && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានសាសនា</h4>
-                    <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="text-lg font-bold text-foreground">ព័ត៌មានសាសនា</h4>
+                    <div className="bg-primary/5 p-4 rounded-lg">
                       <p className="font-medium">{selectedStudent.religion}</p>
                     </div>
                   </div>
@@ -501,8 +501,8 @@ export default function StudentInfoPage() {
 
                 {activeTab === 'health' && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-800">ព័ត៌មានសុខភាព</h4>
-                    <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="text-lg font-bold text-foreground">ព័ត៌មានសុខភាព</h4>
+                    <div className="bg-primary/5 p-4 rounded-lg">
                       <p className="font-medium">{selectedStudent.health}</p>
                     </div>
                   </div>
@@ -513,14 +513,14 @@ export default function StudentInfoPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 mb-8">
-          <Card className="shadow-sm bg-white rounded-xl">
+          <Card className="shadow-sm bg-card rounded-xl">
             <CardContent className="p-8 text-center">
               <div className="mx-auto max-w-md">
-                <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <User className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-800 mb-2">រកមិនឃើញព័ត៌មានសិស្ស</h3>
-                <p className="text-gray-600">សូមជ្រើសរើសសិស្សដើម្បីមើលព័ត៌មានលម្អិត</p>
+                <h3 className="text-lg font-medium text-foreground mb-2">រកមិនឃើញព័ត៌មានសិស្ស</h3>
+                <p className="text-muted-foreground">សូមជ្រើសរើសសិស្សដើម្បីមើលព័ត៌មានលម្អិត</p>
               </div>
             </CardContent>
           </Card>

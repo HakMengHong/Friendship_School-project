@@ -1,11 +1,11 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { Bell, Search, Settings, Sun, Moon } from "lucide-react"
+import { Bell, Search, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useMemo } from "react"
-import { useTheme } from "next-themes"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 interface TopBarProps {
   className?: string
@@ -14,7 +14,6 @@ interface TopBarProps {
 
 export function TopBar({ className, username }: TopBarProps) {
   const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
 
   const pageTitle = useMemo(() => {
     const routes: Record<string, string> = {
@@ -64,14 +63,7 @@ export function TopBar({ className, username }: TopBarProps) {
         </Button>
 
         {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          aria-label="Toggle theme"
-        >
-          {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </Button>
+        <ThemeToggle />
 
         {/* User profile */}
         <div className="flex items-center space-x-3 pl-4 border-l border-border">

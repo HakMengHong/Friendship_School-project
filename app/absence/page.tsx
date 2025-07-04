@@ -104,10 +104,10 @@ export default function AbsencePage() {
   }
 
   return (
-  <div>
+  <div className="transition-colors duration-300">
       {/* Today's Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">អវត្តមានថ្ងៃនេះ</CardTitle>
             <UserX className="h-4 w-4 text-rose-500" />
@@ -118,7 +118,7 @@ export default function AbsencePage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">យឺតយ៉ាវ</CardTitle>
             <Clock className="h-4 w-4 text-amber-500" />
@@ -129,7 +129,7 @@ export default function AbsencePage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">អវត្តមានច្បាប់</CardTitle>
             <ListChecks className="h-4 w-4 text-emerald-500" />
@@ -140,7 +140,7 @@ export default function AbsencePage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="card-modern hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">អវត្តមានឥតច្បាប់</CardTitle>
             <AlertCircle className="h-4 w-4 text-red-500" />
@@ -212,13 +212,13 @@ export default function AbsencePage() {
               >
                 <div>
                   <p className="font-medium">{classInfo.name}</p>
-                  <p className="text-sm text-gray-600">{classInfo.totalStudents} សិស្ស</p>
+                  <p className="text-sm text-muted-foreground dark:text-slate-400">{classInfo.totalStudents} សិស្ស</p>
                 </div>
                 <div className="text-right space-y-1">
                   <p className="text-lg font-bold">
                     {calculatePercentage(classInfo.present, classInfo.totalStudents)}%
                   </p>
-                  <div className="flex gap-2 text-xs text-gray-500">
+                  <div className="flex gap-2 text-xs text-muted-foreground dark:text-slate-500">
                     <span>យឺត: {classInfo.late}ដង</span>
                     <span>ច្បាប់: {classInfo.excused}ដង</span>
                     <span>ឥត: {classInfo.unexcused}ដង</span>

@@ -30,9 +30,9 @@ export default function AbsenceReportPage() {
   return (
     <>
       {/* Main content can show report history or instructions */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-card dark:bg-slate-800 p-6 rounded-lg shadow">
         <h1 className="text-primary text-2xl font-bold mb-4">របាយការណ៍អវត្តមាន</h1>
-        <p className="text-gray-600 mb-4">ជ្រើសរើសជម្រើសរបាយការណ៍ខាងក្រោម</p>
+        <p className="text-muted-foreground dark:text-slate-400 mb-4">ជ្រើសរើសជម្រើសរបាយការណ៍ខាងក្រោម</p>
         
         <button
           onClick={() => setShowReportModal(true)}
@@ -54,11 +54,11 @@ export default function AbsenceReportPage() {
               <form onSubmit={generateReport}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ជ្រើសរើសរបាយការណ៍</label>
+                    <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ជ្រើសរើសរបាយការណ៍</label>
                     <select
                       value={reportType}
                       onChange={(e) => setReportType(e.target.value)}
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                       required
                     >
                       <option value="daily">របាយការណ៍អវត្តមានសិស្សប្រចាំថ្ងៃ</option>
@@ -71,22 +71,22 @@ export default function AbsenceReportPage() {
                   {reportType === "daily" && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ថ្ងៃចាប់ផ្តើម</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្ងៃចាប់ផ្តើម</label>
                         <input
                           type="date"
                           value={reportData.startDate}
                           onChange={(e) => setReportData({...reportData, startDate: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ថ្ងៃបញ្ចប់</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្ងៃបញ្ចប់</label>
                         <input
                           type="date"
                           value={reportData.endDate}
                           onChange={(e) => setReportData({...reportData, endDate: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           required
                         />
                       </div>
@@ -97,22 +97,22 @@ export default function AbsenceReportPage() {
                   {reportType === "monthly" && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ឆ្នាំសិក្សា</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឆ្នាំសិក្សា</label>
                         <input
                           type="text"
                           value={reportData.academicYear}
                           onChange={(e) => setReportData({...reportData, academicYear: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           placeholder="ឧ. 2023-2024"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ខែ</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ខែ</label>
                         <select
                           value={reportData.month}
                           onChange={(e) => setReportData({...reportData, month: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           required
                         >
                           <option value="">ជ្រើសរើសខែ</option>
@@ -131,23 +131,23 @@ export default function AbsenceReportPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ឆ្នាំ</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឆ្នាំ</label>
                         <input
                           type="number"
                           value={reportData.year}
                           onChange={(e) => setReportData({...reportData, year: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           placeholder="ឧ. 2024"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ថ្នាក់</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្នាក់</label>
                         <input
                           type="text"
                           value={reportData.class}
                           onChange={(e) => setReportData({...reportData, class: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           placeholder="ឧ. ថ្នាក់ទី១ក"
                         />
                       </div>
@@ -158,23 +158,23 @@ export default function AbsenceReportPage() {
                   {reportType === "yearly" && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ឆ្នាំសិក្សា</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ឆ្នាំសិក្សា</label>
                         <input
                           type="text"
                           value={reportData.academicYear}
                           onChange={(e) => setReportData({...reportData, academicYear: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           placeholder="ឧ. 2023-2024"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ថ្នាក់</label>
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ថ្នាក់</label>
                         <input
                           type="text"
                           value={reportData.class}
                           onChange={(e) => setReportData({...reportData, class: e.target.value})}
-                          className="w-full p-2 border rounded-md"
+                          className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                           placeholder="ឧ. ថ្នាក់ទី១ក"
                         />
                       </div>
@@ -183,11 +183,11 @@ export default function AbsenceReportPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ទម្រង់ឯកសារ</label>
+                      <label className="block text-sm font-medium text-foreground dark:text-slate-200 mb-1">ទម្រង់ឯកសារ</label>
                       <select
                         value={reportData.format}
                         onChange={(e) => setReportData({...reportData, format: e.target.value})}
-                        className="w-full p-2 border rounded-md"
+                        className="w-full p-2 border rounded-md bg-background text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary dark:bg-slate-800 dark:text-slate-10"
                         required
                       >
                         <option value="pdf">PDF</option>
@@ -200,7 +200,7 @@ export default function AbsenceReportPage() {
                     <button
                       type="button"
                       onClick={() => setShowReportModal(false)}
-                      className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+                      className="px-4 py-2 border rounded-md text-foreground dark:text-slate-200 hover:bg-muted dark:hover:bg-slate-700"
                     >
                       បោះបង់
                     </button>

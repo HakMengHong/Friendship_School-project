@@ -13,10 +13,10 @@ import {
 
 export default function ScoresPage() {
   return (
-    <div>
+    <div className="transition-colors duration-300">
       {/* Top Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <BarChart2 className="h-5 w-5 text-[#0082c8]" />
@@ -25,11 +25,11 @@ export default function ScoresPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-600">85.2</div>
-            <p className="text-sm text-gray-600">ពិន្ទុមធ្យមទូទៅ</p>
+            <p className="text-sm text-muted-foreground">ពិន្ទុមធ្យមទូទៅ</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <TrendingUp className="h-5 w-5 text-[#0082c8]" />
@@ -38,11 +38,11 @@ export default function ScoresPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">+5.3%</div>
-            <p className="text-sm text-gray-600">ពីខែមុន</p>
+            <p className="text-sm text-muted-foreground">ពីខែមុន</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Award className="h-5 w-5 text-[#0082c8]" />
@@ -51,11 +51,11 @@ export default function ScoresPage() {
           </CardHeader>
           <CardContent>
             <div className="text-lg font-bold">សុខ ចន្ទា</div>
-            <p className="text-sm text-gray-600">ពិន្ទុ: 98.5</p>
+            <p className="text-sm text-muted-foreground">ពិន្ទុ: 98.5</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Medal className="h-5 w-5 text-[#0082c8]" />
@@ -64,7 +64,7 @@ export default function ScoresPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">#3</div>
-            <p className="text-sm text-gray-600">ក្នុងចំណោមសិស្ស 45 នាក់</p>
+            <p className="text-sm text-muted-foreground">ក្នុងចំណោមសិស្ស 45 នាក់</p>
             <div className="mt-2 text-sm">
               <span className="font-medium">ការវាយតម្លៃ:</span> ល្អណាស់
             </div>
@@ -79,8 +79,8 @@ export default function ScoresPage() {
             <CardTitle>ពិន្ទុតាមមុខវិជ្ជា</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">Bar Chart Placeholder</p>
+            <div className="h-64 flex items-center justify-center bg-muted rounded-lg">
+              <p className="text-muted-foreground">Bar Chart Placeholder</p>
             </div>
           </CardContent>
         </Card>
@@ -90,8 +90,8 @@ export default function ScoresPage() {
             <CardTitle>ការបែងចែកពិន្ទុ</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">Pie Chart Placeholder</p>
+            <div className="h-64 flex items-center justify-center bg-muted rounded-lg">
+              <p className="text-muted-foreground">Pie Chart Placeholder</p>
             </div>
           </CardContent>
         </Card>
@@ -112,7 +112,7 @@ export default function ScoresPage() {
                 <span>គោលដៅពិន្ទុមធ្យម</span>
                 <span>85.2/90</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-muted dark:bg-slate-700 rounded-full h-2.5">
                 <div 
                   className="bg-blue-600 h-2.5 rounded-full" 
                   style={{ width: `${(85.2/90)*100}%` }}
@@ -124,7 +124,7 @@ export default function ScoresPage() {
                 <span>គោលដៅភាសាអង់គ្លេស</span>
                 <span>88/95</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-muted dark:bg-slate-700 rounded-full h-2.5">
                 <div 
                   className="bg-green-600 h-2.5 rounded-full" 
                   style={{ width: `${(88/95)*100}%` }}
@@ -136,7 +136,7 @@ export default function ScoresPage() {
                 <span>គោលដៅគណិតវិទ្យា</span>
                 <span>92/95</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-muted dark:bg-slate-700 rounded-full h-2.5">
                 <div 
                   className="bg-purple-600 h-2.5 rounded-full" 
                   style={{ width: `${(92/95)*100}%` }}
@@ -201,16 +201,16 @@ export default function ScoresPage() {
             <div className="h-full flex flex-col justify-center">
               <div className="flex justify-around text-center mb-6">
                 <div>
-                  <div className="text-sm text-gray-500">ពាក់កណ្តាលឆ្នាំទី១</div>
+                  <div className="text-sm text-muted-foreground dark:text-slate-500">ពាក់កណ្តាលឆ្នាំទី១</div>
                   <div className="text-2xl font-bold">82.4</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">ពាក់កណ្តាលឆ្នាំទី២</div>
+                  <div className="text-sm text-muted-foreground dark:text-slate-500">ពាក់កណ្តាលឆ្នាំទី២</div>
                   <div className="text-2xl font-bold text-blue-600">85.2</div>
                 </div>
               </div>
-              <div className="h-48 flex items-center justify-center bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Comparison Chart Placeholder</p>
+              <div className="h-48 flex items-center justify-center bg-muted dark:bg-slate-800 rounded-lg">
+                <p className="text-muted-foreground dark:text-slate-400">Comparison Chart Placeholder</p>
               </div>
             </div>
           </CardContent>

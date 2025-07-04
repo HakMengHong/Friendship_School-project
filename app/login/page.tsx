@@ -47,7 +47,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 font-khmer">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 font-khmer transition-colors duration-300">
       {/* Back button */}
       <Button
         variant="ghost"
@@ -68,8 +68,8 @@ export default function LoginPage() {
 
         {/* Heading */}
         <div className="text-center space-y-3 mb-8">
-          <h1 className="text-3xl font-bold text-primary">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
-          <p className="text-muted-foreground">សូមបញ្ចូលឈ្មេាះនិងលេខកូដសម្ងាត់</p>
+          <h1 className="text-3xl font-bold text-primary dark:text-blue-400">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</h1>
+          <p className="text-muted-foreground dark:text-slate-300">សូមបញ្ចូលឈ្មេាះនិងលេខកូដសម្ងាត់</p>
         </div>
 
         {/* Login Form */}
@@ -99,14 +99,14 @@ export default function LoginPage() {
               </button>
 
               {open && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-card border border-border rounded-lg shadow-lg animate-fade-in">
+                <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-card border border-border rounded-lg shadow-lg animate-fade-in dropdown-menu">
                   <div className="max-h-60 overflow-auto">
                     {userOptions
                       .filter((user) => user.toLowerCase().includes(username.toLowerCase()))
                       .map((user) => (
                         <div
                           key={user}
-                          className="flex items-center px-4 py-3 hover:bg-muted cursor-pointer transition-colors"
+                          className="flex items-center px-4 py-3 hover:bg-muted cursor-pointer transition-colors dropdown-item"
                           onClick={() => {
                             setUsername(user)
                             setOpen(false)
