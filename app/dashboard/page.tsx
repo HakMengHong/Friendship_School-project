@@ -2,34 +2,73 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatCard } from "@/components/ui/stat-card"
-import { Users, BookOpen, Award, MessageSquare, Star, TrendingUp, Calendar, Activity, Trash2 as TrashIcon } from "lucide-react"
+import { 
+  Users, 
+  BookOpen, 
+  Award, 
+  MessageSquare, 
+  Star, 
+  TrendingUp, 
+  Calendar, 
+  Activity, 
+  Trash2 as TrashIcon,
+  Plus,
+  Download,
+  BarChart3,
+  UserCheck,
+  Clock,
+  CheckCircle,
+  XCircle
+} from "lucide-react"
 import { KhmerCalendar } from "@/components/calendar/khmer_calendar"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts'
 
 export default function DashboardPage() {
   // State for announcements
   const [announcements, setAnnouncements] = useState([
-    { id: "1", title: "ការប្រជុំគ្រូ", content: "មានការប្រជុំគ្រូនៅថ្ងៃសៅរ៍នេះ", date: "2023-05-15", author: "អ្នកគ្រប់គ្រង" },
-    { id: "2", title: "ការប្រឡងឆមាស", content: "ការប្រឡងឆមាសនឹងចាប់ផ្តើមនៅខែក្រោយ", date: "2023-05-10", author: "អ្នកគ្រប់គ្រង" },
+    { id: "1", title: "ការប្រជុំគ្រូ", content: "មានការប្រជុំគ្រូនៅថ្ងៃសៅរ៍នេះ នៅម៉ោង ៨:០០ ព្រឹក", date: "2024-01-15", author: "អ្នកគ្រប់គ្រង", priority: "high" },
+    { id: "2", title: "ការប្រឡងឆមាស", content: "ការប្រឡងឆមាសនឹងចាប់ផ្តើមនៅខែក្រោយ សូមគ្រូរៀបចំសិស្ស", date: "2024-01-10", author: "អ្នកគ្រប់គ្រង", priority: "medium" },
+    { id: "3", title: "ការប្រកួតអក្សរសាស្ត្រ", content: "នឹងមានការប្រកួតអក្សរសាស្ត្រនៅថ្ងៃពុធ សូមគ្រូជ្រើសរើសសិស្ស", date: "2024-01-08", author: "អ្នកគ្រប់គ្រង", priority: "low" },
   ])
 
   // State for outstanding students
   const [outstandingStudents, setOutstandingStudents] = useState([
-    { id: 1, name: "សុខ សំអាង", grade: "ថ្នាក់ទី១២ក", achievement: "ពិន្ទុខ្ពស់បំផុតក្នុងថ្នាក់", score: "A" },
-    { id: 2, name: "ម៉ៅ សុធារី", grade: "ថ្នាក់ទី១១ខ", achievement: "ឈ្នះការប្រកួតអក្សរសាស្ត្រ", score: "A+" },
-    { id: 3, name: "វ៉ាន់ សុផល", grade: "ថ្នាក់ទី១០គ", achievement: "សកម្មភាពស្ម័គ្រចិត្តល្អ", score: "A" },
+    { id: 1, name: "សុខ សំអាង", grade: "ថ្នាក់ទី១២ក", achievement: "ពិន្ទុខ្ពស់បំផុតក្នុងថ្នាក់", score: "A+", subject: "គណិតវិទ្យា" },
+    { id: 2, name: "ម៉ៅ សុធារី", grade: "ថ្នាក់ទី១១ខ", achievement: "ឈ្នះការប្រកួតអក្សរសាស្ត្រ", score: "A+", subject: "ភាសាខ្មែរ" },
+    { id: 3, name: "វ៉ាន់ សុផល", grade: "ថ្នាក់ទី១០គ", achievement: "សកម្មភាពស្ម័គ្រចិត្តល្អ", score: "A", subject: "វិទ្យាសាស្ត្រ" },
+    { id: 4, name: "គឹម សុខា", grade: "ថ្នាក់ទី១២ខ", achievement: "ពិន្ទុល្អក្នុងគ្រប់មុខវិជ្ជា", score: "A", subject: "គ្រប់មុខវិជ្ជា" },
   ])
 
   // Learning quality data by month
   const learningQualityData = [
-    { month: 'មករា', quality: 75, averageScore: 68 },
-    { month: 'កុម្ភៈ', quality: 82, averageScore: 72 },
-    { month: 'មីនា', quality: 78, averageScore: 70 },
-    { month: 'មេសា', quality: 85, averageScore: 75 },
-    { month: 'ឧសភា', quality: 90, averageScore: 80 },
-    { month: 'មិថុនា', quality: 88, averageScore: 78 },
+    { month: 'មករា', quality: 75, averageScore: 68, attendance: 92 },
+    { month: 'កុម្ភៈ', quality: 82, averageScore: 72, attendance: 89 },
+    { month: 'មីនា', quality: 78, averageScore: 70, attendance: 91 },
+    { month: 'មេសា', quality: 85, averageScore: 75, attendance: 94 },
+    { month: 'ឧសភា', quality: 90, averageScore: 80, attendance: 96 },
+    { month: 'មិថុនា', quality: 88, averageScore: 78, attendance: 93 },
+  ]
+
+  // Attendance data for pie chart
+  const attendanceData = [
+    { name: 'មាន', value: 1150, color: '#10b981' },
+    { name: 'អវត្តមាន', value: 45, color: '#ef4444' },
+    { name: 'យឺតយ៉ាវ', value: 23, color: '#f59e0b' },
+    { name: 'ច្បាប់', value: 12, color: '#3b82f6' },
+  ]
+
+  // Recent activities
+  const recentActivities = [
+    { id: 1, action: "បានបន្ថែមសិស្សថ្មី", time: "២ នាទីមុន", type: "add", user: "គ្រូ សុខា" },
+    { id: 2, action: "បានកែប្រែពិន្ទុ", time: "៥ នាទីមុន", type: "edit", user: "គ្រូ ម៉ៅ" },
+    { id: 3, action: "បានបង្កើតថ្នាក់ថ្មី", time: "១០ នាទីមុន", type: "create", user: "អ្នកគ្រប់គ្រង" },
+    { id: 4, action: "បានបញ្ចូលអវត្តមាន", time: "១៥ នាទីមុន", type: "attendance", user: "គ្រូ វង្ស" },
+    { id: 5, action: "បានបង្កើតដំណឹង", time: "២០ នាទីមុន", type: "announcement", user: "អ្នកគ្រប់គ្រង" },
   ]
 
   // Announcement form state
@@ -38,7 +77,8 @@ export default function DashboardPage() {
     title: '',
     content: '',
     author: '',
-    date: ''
+    date: '',
+    priority: 'medium'
   });
   
   const handleAddAnnouncement = () => {
@@ -57,7 +97,8 @@ export default function DashboardPage() {
       title: '',
       content: '',
       author: '',
-      date: ''
+      date: '',
+      priority: 'medium'
     });
     setShowAddForm(false);
   };
@@ -66,52 +107,111 @@ export default function DashboardPage() {
     setAnnouncements(announcements.filter(announcement => announcement.id !== id));
   };
 
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">សំខាន់</Badge>
+      case 'medium':
+        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">ធម្មតា</Badge>
+      case 'low':
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">តិច</Badge>
+      default:
+        return <Badge>ធម្មតា</Badge>
+    }
+  }
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'add':
+        return <Plus className="h-4 w-4 text-green-600" />
+      case 'edit':
+        return <CheckCircle className="h-4 w-4 text-blue-600" />
+      case 'create':
+        return <Star className="h-4 w-4 text-purple-600" />
+      case 'attendance':
+        return <UserCheck className="h-4 w-4 text-orange-600" />
+      case 'announcement':
+        return <MessageSquare className="h-4 w-4 text-indigo-600" />
+      default:
+        return <Activity className="h-4 w-4 text-gray-600" />
+    }
+  }
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-primary mb-2 dark:text-blue-400">សូមស្វាគមន៍មកកាន់ផ្ទាំងគ្រប់គ្រង</h2>
-        <p className="text-muted-foreground dark:text-slate-300">ទិន្នន័យសង្ខេបនិងសកម្មភាពសំខាន់ៗ</p>
-      </div>
+    <div className="space-y-4 p-0">
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="សិស្សទាំងអស់"
-          value="1,234"
-          description="សិស្សកំពុងសិក្សា"
-          icon={<Users className="h-6 w-6" />}
-          trend={{ value: "20.1%", isPositive: true }}
-        />
-        
-        <StatCard
-          title="គ្រូទាំងអស់"
-          value="24"
-          description="គ្រូបង្រៀនសកម្ម"
-          icon={<BookOpen className="h-6 w-6" />}
-        />
-        
-        <StatCard
-          title="សិស្សពូកែ"
-          value="15"
-          description="សិស្សពូកែក្នុងខែនេះ"
-          icon={<Award className="h-6 w-6" />}
-        />
-        
-        <StatCard
-          title="ដំណឹង"
-          value={announcements.length.toString()}
-          description="ដំណឹងសកម្ម"
-          icon={<MessageSquare className="h-6 w-6" />}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">សិស្សទាំងអស់</CardTitle>
+            <Users className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">1,234</div>
+            <p className="text-xs text-muted-foreground">សិស្សកំពុងសិក្សា</p>
+            <div className="flex items-center mt-2">
+              <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+              <span className="text-xs text-green-500">+20.1% ពីខែមុន</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">គ្រូទាំងអស់</CardTitle>
+            <BookOpen className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">24</div>
+            <p className="text-xs text-muted-foreground">គ្រូបង្រៀនសកម្ម</p>
+            <div className="flex items-center mt-2">
+              <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+              <span className="text-xs text-green-500">+2 នាក់ថ្មី</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">សិស្សពូកែ</CardTitle>
+            <Award className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-600">15</div>
+            <p className="text-xs text-muted-foreground">សិស្សពូកែក្នុងខែនេះ</p>
+            <div className="flex items-center mt-2">
+              <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+              <span className="text-xs text-green-500">+3 នាក់ថ្មី</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ដំណឹង</CardTitle>
+            <MessageSquare className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{announcements.length}</div>
+            <p className="text-xs text-muted-foreground">ដំណឹងសកម្ម</p>
+            <div className="flex items-center mt-2">
+              <Clock className="h-3 w-3 text-blue-500 mr-1" />
+              <span className="text-xs text-blue-500">ថ្មីៗ</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Learning Quality Chart */}
         <div className="lg:col-span-2">
-          {/* Learning Quality Chart */}
-          <Card variant="elevated">
+          <Card className="hover:shadow-lg transition-all duration-200">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <span className="text-primary">គុណភាពការសិក្សាតាមខែ</span>
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                <span className="text-lg">គុណភាពការសិក្សាតាមខែ</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -128,6 +228,7 @@ export default function DashboardPage() {
                       formatter={(value, name) => {
                         if (name === 'quality') return [`${value}%`, 'គុណភាព']
                         if (name === 'averageScore') return [value, 'ពិន្ទុមធ្យម']
+                        if (name === 'attendance') return [`${value}%`, 'វត្តមាន']
                         return [value, name]
                       }}
                       labelFormatter={(label) => `ខែ${label}`}
@@ -143,165 +244,86 @@ export default function DashboardPage() {
                       formatter={(value) => {
                         if (value === 'quality') return 'គុណភាព (%)'
                         if (value === 'averageScore') return 'ពិន្ទុមធ្យម'
+                        if (value === 'attendance') return 'វត្តមាន (%)'
                         return value
                       }}
                     />
-                    <Bar dataKey="quality" fill="#0082c8" name="គុណភាព" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="averageScore" fill="#00c2cb" name="ពិន្ទុមធ្យម" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="quality" fill="#3b82f6" name="គុណភាព" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="averageScore" fill="#10b981" name="ពិន្ទុមធ្យម" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="attendance" fill="#f59e0b" name="វត្តមាន" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
-              <div className="text-xs text-muted-foreground mt-4">
-                ក្រាហ្វបង្ហាញពីគុណភាពការសិក្សានិងពិន្ទុមធ្យមរបស់សិស្សតាមខែ
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Attendance Pie Chart */}
+        <div className="lg:col-span-1">
+          <Card className="hover:shadow-lg transition-all duration-200">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <UserCheck className="h-5 w-5 text-green-600" />
+                <span className="text-lg">វត្តមានថ្ងៃនេះ</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={attendanceData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                                             label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {attendanceData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Khmer Calendar and Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Khmer Calendar */}
         <div className="lg:col-span-1">
           <KhmerCalendar compact={true} />
         </div>
-      </div>
-      
-      {/* Announcements */}
-          <Card variant="elevated">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-primary">ដំណឹងសំខាន់ៗ</CardTitle>
-              <Button size="sm" onClick={() => setShowAddForm(!showAddForm)}>
-                {showAddForm ? 'បោះបង់' : 'បន្ថែមដំណឹង'}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {/* Add Announcement Form */}
-              {showAddForm && (
-                <div className="mb-6 border border-border rounded-lg p-4">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">ចំណងជើង*</label>
-                      <input
-                        type="text"
-                        className="w-full p-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
-                        value={newAnnouncement.title}
-                        onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
-                        placeholder="បញ្ចូលចំណងជើងដំណឹង"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">ខ្លឹមសារ*</label>
-                      <textarea
-                        className="w-full p-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
-                        rows={3}
-                        value={newAnnouncement.content}
-                        onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
-                        placeholder="បញ្ចូលខ្លឹមសារដំណឹង"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">អ្នកនិពន្ធ</label>
-                      <input
-                        type="text"
-                        className="w-full p-2 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
-                        value={newAnnouncement.author}
-                        onChange={(e) => setNewAnnouncement({...newAnnouncement, author: e.target.value})}
-                        placeholder="អ្នកផ្សព្វផ្សាយ"
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          setShowAddForm(false);
-                          setNewAnnouncement({
-                            title: '',
-                            content: '',
-                            author: '',
-                            date: ''
-                          });
-                        }}
-                      >
-                        បោះបង់
-                      </Button>
-                      <Button 
-                        onClick={handleAddAnnouncement}
-                        disabled={!newAnnouncement.title || !newAnnouncement.content}
-                      >
-                        រក្សាទុក
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-        
-              {/* Announcements List */}
-              <div className="space-y-4">
-                {announcements.length > 0 ? (
-                  announcements.map((announcement) => (
-                    <div key={announcement.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors relative">
-                      <div className="flex justify-between items-start gap-4">
-                        <h3 className="font-semibold text-foreground flex-1 min-w-0 break-words">
-                          {announcement.title}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {announcement.date}
-                          </span>
-                          <button 
-                            onClick={() => handleDeleteAnnouncement(announcement.id)}
-                            className="text-red-500 hover:text-red-700"
-                            aria-label="លុបដំណឹង"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <p className="text-sm mt-2 text-muted-foreground break-words">
-                        {announcement.content}
-                      </p>
-                      {announcement.author && (
-                        <p className="text-xs text-muted-foreground mt-2 break-words">
-                          - {announcement.author}
-                        </p>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-muted-foreground py-4">មិនមានដំណឹងសំខាន់ៗ</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
 
-
-      {/* Outstanding Students and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Outstanding Students */}
+        {/* Recent Activity */}
         <div className="lg:col-span-2">
-          <Card variant="elevated">
+          <Card className="hover:shadow-lg transition-all duration-200">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Star className="h-5 w-5 text-yellow-500" />
-                <span className="text-primary">សិស្សពូកែ</span>
+                <Activity className="h-5 w-5 text-orange-600" />
+                <span className="text-lg">សកម្មភាពថ្មីៗ</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {outstandingStudents.map((student) => (
-                  <div key={student.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white font-bold">
-                        {student.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{student.name}</p>
-                        <p className="text-sm text-muted-foreground">{student.grade}</p>
-                        <p className="text-xs text-muted-foreground">{student.achievement}</p>
-                      </div>
+                {recentActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div className="flex-shrink-0">
+                      {getActivityIcon(activity.type)}
                     </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
-                        {student.score}
-                      </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {activity.action}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {activity.user} • {activity.time}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -309,44 +331,168 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Recent Activity */}
-        <div className="lg:col-span-1">
-          <Card variant="elevated">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="h-5 w-5 text-primary" />
-                <span className="text-primary">សកម្មភាពថ្មីៗ</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+      </div>
+      
+      {/* Announcements */}
+      <Card className="hover:shadow-lg transition-all duration-200">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center space-x-2">
+            <MessageSquare className="h-5 w-5 text-blue-600" />
+            <span className="text-lg">ដំណឹងសំខាន់ៗ</span>
+          </CardTitle>
+          <Button size="sm" onClick={() => setShowAddForm(!showAddForm)} className="flex items-center gap-2">
+            {showAddForm ? (
+              <>
+                <XCircle className="h-4 w-4" />
+                បោះបង់
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4" />
+                បន្ថែមដំណឹង
+              </>
+            )}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {/* Add Announcement Form */}
+          {showAddForm && (
+            <div className="mb-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">បានបន្ថែមសិស្សថ្មី</p>
-                    <p className="text-xs text-muted-foreground">២ នាទីមុន</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ចំណងជើង*</label>
+                    <Input
+                      value={newAnnouncement.title}
+                      onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
+                      placeholder="បញ្ចូលចំណងជើងដំណឹង"
+                      className="h-12"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">អ្នកនិពន្ធ</label>
+                    <Input
+                      value={newAnnouncement.author}
+                      onChange={(e) => setNewAnnouncement({...newAnnouncement, author: e.target.value})}
+                      placeholder="អ្នកផ្សព្វផ្សាយ"
+                      className="h-12"
+                    />
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">បានកែប្រែពិន្ទុ</p>
-                    <p className="text-xs text-muted-foreground">៥ នាទីមុន</p>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ខ្លឹមសារ*</label>
+                  <Textarea
+                    value={newAnnouncement.content}
+                    onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
+                    placeholder="បញ្ចូលខ្លឹមសារដំណឹង"
+                    rows={3}
+                    className="resize-none"
+                  />
+                </div>
+                <div className="flex justify-end space-x-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setNewAnnouncement({
+                        title: '',
+                        content: '',
+                        author: '',
+                        date: '',
+                        priority: 'medium'
+                      });
+                    }}
+                  >
+                    បោះបង់
+                  </Button>
+                  <Button 
+                    onClick={handleAddAnnouncement}
+                    disabled={!newAnnouncement.title || !newAnnouncement.content}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    រក្សាទុក
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+    
+          {/* Announcements List */}
+          <div className="space-y-4">
+            {announcements.length > 0 ? (
+              announcements.map((announcement) => (
+                <div key={announcement.id} className="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {announcement.title}
+                        </h3>
+                        {getPriorityBadge(announcement.priority)}
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        {announcement.content}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <span>📅 {announcement.date}</span>
+                        {announcement.author && <span>👤 {announcement.author}</span>}
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => handleDeleteAnnouncement(announcement.id)}
+                      className="text-red-500 hover:text-red-700 transition-colors"
+                      aria-label="លុបដំណឹង"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <p>មិនមានដំណឹងសំខាន់ៗ</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Outstanding Students */}
+      <Card className="hover:shadow-lg transition-all duration-200">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Star className="h-5 w-5 text-yellow-500" />
+            <span className="text-lg">សិស្សពូកែ</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {outstandingStudents.map((student) => (
+              <div key={student.id} className="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    {student.name.charAt(0)}
+                  </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">បានបង្កើតថ្នាក់ថ្មី</p>
-                    <p className="text-xs text-muted-foreground">១០ នាទីមុន</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{student.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{student.grade}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{student.achievement}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{student.subject}</span>
+                    <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+                      {student.score}
+                    </Badge>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

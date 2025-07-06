@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider" // update path as ne
 export const metadata: Metadata = {
   title: "កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស",
   description: "School Program Management System",
-  generator: 'v0.dev'
+  generator: 'menghong'
 }
 
 export default function RootLayout({
