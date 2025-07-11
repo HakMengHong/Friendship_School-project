@@ -10,60 +10,43 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
-
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-
     --primary: 204 100% 44%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 200 94% 61%;
     --secondary-foreground: 222 47% 11%;
-
     --muted: 210 40% 96%;
     --muted-foreground: 215 20% 50%;
-
     --accent: 200 94% 61%;
     --accent-foreground: 222 47% 11%;
-
     --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 204 100% 44%;
-
     --radius: 0.5rem;
   }
 
   .dark {
     --background: 222 47% 4%;
     --foreground: 210 40% 98%;
-
     --card: 222 47% 6%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222 47% 6%;
     --popover-foreground: 210 40% 98%;
-
     --primary: 204 100% 66%;
     --primary-foreground: 222 47% 6%;
-
     --secondary: 198 94% 70%;
     --secondary-foreground: 222 47% 6%;
-
     --muted: 215 25% 15%;
     --muted-foreground: 215 20% 75%;
-
     --accent: 198 94% 70%;
     --accent-foreground: 222 47% 6%;
-
     --destructive: 0 63% 41%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 215 25% 15%;
     --input: 215 25% 15%;
     --ring: 204 100% 66%;
@@ -83,12 +66,7 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Dark mode specific body styles */
-  .dark body {
-    @apply bg-slate-900 text-slate-100;
-  }
-
-  /* Enhanced typography for dark mode */
+  /* Dark mode typography */
   .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
     @apply text-slate-100;
   }
@@ -97,7 +75,6 @@
     @apply text-slate-200;
   }
 
-  /* Improved link styling for dark mode */
   .dark a {
     @apply text-blue-400 hover:text-blue-300 transition-colors duration-200;
   }
@@ -105,214 +82,66 @@
 
 /* === COMPONENTS === */
 @layer components {
-  /* Enhanced button styles with dark mode support */
+  /* Custom button styles - only keeping what's actually used */
   .btn-primary {
     @apply bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/20;
-  }
-
-  .dark .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl;
   }
 
   .btn-secondary {
     @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-secondary/20;
   }
 
-  .dark .btn-secondary {
-    @apply bg-slate-700 hover:bg-slate-600 text-slate-100 shadow-lg hover:shadow-xl;
-  }
-
   .btn-outline {
     @apply border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/20;
+  }
+
+  /* Card styles - only keeping what's used */
+  .card-modern {
+    @apply bg-card border border-border rounded-xl shadow-card hover:shadow-soft transition-all duration-200;
+  }
+
+  /* Input styles - only keeping what's used */
+  .input-modern {
+    @apply border border-border rounded-lg px-4 py-3 bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none;
+  }
+
+  /* Table styles - only keeping what's used */
+  .table-modern {
+    @apply w-full border-collapse bg-card rounded-lg overflow-hidden shadow-card;
+  }
+
+  /* Dark mode overrides for used components */
+  .dark .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl;
+  }
+
+  .dark .btn-secondary {
+    @apply bg-slate-700 hover:bg-slate-600 text-slate-100 shadow-lg hover:shadow-xl;
   }
 
   .dark .btn-outline {
     @apply border-blue-500 text-blue-400 hover:bg-blue-600 hover:text-white shadow-lg hover:shadow-xl;
   }
 
-  /* Enhanced card styles for dark mode */
-  .card-modern {
-    @apply bg-card border border-border rounded-xl shadow-card hover:shadow-soft transition-all duration-200;
-  }
-
   .dark .card-modern {
     @apply bg-slate-800 border-slate-700 shadow-xl hover:shadow-2xl;
-  }
-
-  /* Enhanced input styles for dark mode */
-  .input-modern {
-    @apply border border-border rounded-lg px-4 py-3 bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none;
   }
 
   .dark .input-modern {
     @apply bg-slate-800 border-slate-600 text-slate-100 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20;
   }
 
-  /* Enhanced table styles for dark mode */
-  .table-modern {
-    @apply w-full border-collapse bg-card rounded-lg overflow-hidden shadow-card;
-  }
-
   .dark .table-modern {
     @apply bg-slate-800 shadow-xl;
   }
 
-  .table-modern th {
-    @apply bg-muted px-6 py-4 text-left text-sm font-semibold text-foreground border-b border-border;
-  }
-
-  .dark .table-modern th {
-    @apply bg-slate-700 text-slate-100 border-slate-600;
-  }
-
-  .table-modern td {
-    @apply px-6 py-4 text-sm text-foreground border-b border-border last:border-b-0;
-  }
-
-  .dark .table-modern td {
-    @apply text-slate-200 border-slate-700;
-  }
-
-  .table-modern tr:hover {
-    @apply bg-muted/50;
-  }
-
-  .dark .table-modern tr:hover {
-    @apply bg-slate-700/50;
-  }
-
-  /* Enhanced form elements for dark mode */
+  /* Form elements dark mode */
   .dark select {
     @apply bg-slate-800 border-slate-600 text-slate-100;
   }
 
   .dark textarea {
     @apply bg-slate-800 border-slate-600 text-slate-100 placeholder:text-slate-400;
-  }
-
-  /* Enhanced navigation and sidebar for dark mode */
-  .dark .sidebar {
-    @apply bg-slate-900 border-r border-slate-700;
-  }
-
-  .dark .nav-item {
-    @apply text-slate-300 hover:text-slate-100 hover:bg-slate-800;
-  }
-
-  .dark .nav-item.active {
-    @apply bg-blue-600 text-white;
-  }
-
-  /* Enhanced modal and dialog styles for dark mode */
-  .dark .modal-overlay {
-    @apply bg-black/50;
-  }
-
-  .dark .modal-content {
-    @apply bg-slate-800 border border-slate-700 shadow-2xl;
-  }
-
-  /* Enhanced badge and chip styles for dark mode */
-  .dark .badge {
-    @apply bg-slate-700 text-slate-200 border-slate-600;
-  }
-
-  .dark .badge-primary {
-    @apply bg-blue-600 text-white;
-  }
-
-  .dark .badge-secondary {
-    @apply bg-slate-600 text-slate-100;
-  }
-
-  /* Enhanced progress and loading indicators for dark mode */
-  .dark .progress-bar {
-    @apply bg-slate-700;
-  }
-
-  .dark .progress-fill {
-    @apply bg-blue-600;
-  }
-
-  /* Enhanced tooltip styles for dark mode */
-  .dark .tooltip {
-    @apply bg-slate-800 border border-slate-700 text-slate-100 shadow-xl;
-  }
-
-  /* Enhanced dropdown and menu styles for dark mode */
-  .dark .dropdown-menu {
-    @apply bg-slate-800 border border-slate-700 shadow-xl;
-  }
-
-  .dark .dropdown-item {
-    @apply text-slate-200 hover:bg-slate-700 hover:text-slate-100;
-  }
-
-  /* Enhanced calendar and date picker for dark mode */
-  .dark .calendar {
-    @apply bg-slate-800 border border-slate-700;
-  }
-
-  .dark .calendar-day {
-    @apply text-slate-200 hover:bg-slate-700;
-  }
-
-  .dark .calendar-day.selected {
-    @apply bg-blue-600 text-white;
-  }
-
-  /* Enhanced chart and graph styles for dark mode */
-  .dark .chart-container {
-    @apply bg-slate-800 border border-slate-700;
-  }
-
-  /* Enhanced notification and toast styles for dark mode */
-  .dark .toast {
-    @apply bg-slate-800 border border-slate-700 text-slate-100 shadow-xl;
-  }
-
-  .dark .toast-success {
-    @apply bg-green-800 border-green-700 text-green-100;
-  }
-
-  .dark .toast-error {
-    @apply bg-red-800 border-red-700 text-red-100;
-  }
-
-  .dark .toast-warning {
-    @apply bg-yellow-800 border-yellow-700 text-yellow-100;
-  }
-
-  /* Enhanced icon styles for dark mode */
-  .dark .icon {
-    @apply text-slate-300;
-  }
-
-  .dark .icon-primary {
-    @apply text-blue-400;
-  }
-
-  .dark .icon-secondary {
-    @apply text-slate-400;
-  }
-
-  /* Enhanced divider and separator styles for dark mode */
-  .dark .divider {
-    @apply border-slate-700;
-  }
-
-  /* Enhanced skeleton loading for dark mode */
-  .dark .skeleton {
-    @apply bg-slate-700 animate-pulse;
-  }
-
-  /* Enhanced code and pre blocks for dark mode */
-  .dark pre {
-    @apply bg-slate-900 border border-slate-700 text-slate-100;
-  }
-
-  .dark code {
-    @apply bg-slate-800 text-slate-100 border border-slate-700;
   }
 }
 
@@ -440,18 +269,6 @@
 
 .dark .shadow-soft {
   box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-/* === UTILITY CLASSES === */
-.dark .bg-gradient {
-  background: linear-gradient(135deg, hsl(222 47% 4%) 0%, hsl(222 47% 6%) 100%);
-}
-
-.dark .text-gradient {
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* === PRINT STYLES === */

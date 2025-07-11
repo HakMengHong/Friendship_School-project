@@ -25,7 +25,7 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold text-foreground">{value}</p>
+            <p className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">{value}</p>
             {description && (
               <p className="text-xs text-muted-foreground">{description}</p>
             )}
@@ -44,7 +44,7 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
             )}
           </div>
           {icon && (
-            <div className="p-3 bg-primary/10 rounded-lg text-primary">
+            <div className="p-3 bg-gradient-to-br from-primary to-primary/80 rounded-lg text-white shadow-lg">
               {icon}
             </div>
           )}

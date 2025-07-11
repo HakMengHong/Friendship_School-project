@@ -146,7 +146,17 @@ export default function AddScorePage() {
   const averageScore = totalScores > 0 ? (totalPoints / totalScores).toFixed(2) : 0
 
   return (
-    <div className="space-y-4 p-0">
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
+          បន្ថែមពិន្ទុ
+        </h1>
+        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
+          បញ្ចូលពិន្ទុសិស្សតាមមុខវិជ្ជា
+        </p>
+      </div>
+
       {/* Enhanced Filter Bar */}
       <Card className="shadow-lg">
         <CardHeader className="pb-4">
@@ -372,7 +382,7 @@ export default function AddScorePage() {
                       >
                         បោះបង់
                       </Button>
-                      <Button type="submit" className="px-5 py-3 text-base bg-blue-600 hover:bg-blue-700">
+                      <Button type="submit" className="px-5 py-3 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
                         ធ្វើបច្ចុប្បន្នភាព
                       </Button>
                     </>
@@ -391,8 +401,12 @@ export default function AddScorePage() {
                       >
                         សម្អាត
                       </Button>
-                      <Button type="submit" className="px-8 py-3 text-base bg-blue-600 hover:bg-blue-700">
-                        បញ្ជូលពិន្ទុ
+                      <Button 
+                        type="submit" 
+                        className="px-5 py-3 text-base"
+                        variant="gradient"
+                      >
+                        បន្ថែមពិន្ទុ
                       </Button>
                     </>
                   )}

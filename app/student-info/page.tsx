@@ -160,7 +160,7 @@ const academicYears = ["2023-2024", "2022-2023", "2021-2022"];
 const classes = ["៧ក", "៧ខ", "៦ក", "៦ខ", "៥ក", "៥ខ"];
 
 const tabs = [
-  { id: 'registration', label: 'ចុះឈ្មោះ', icon: <ScrollText className="h-4 w-4" /> },
+  { id: 'register-student', label: 'ចុះឈ្មោះ', icon: <ScrollText className="h-4 w-4" /> },
   { id: 'scholarship', label: 'អាហារូបករណ៍', icon: <Utensils className="h-4 w-4" /> },
   { id: 'family', label: 'គ្រួសារ', icon: <Home className="h-4 w-4" /> },
   { id: 'attendance', label: 'អវត្តមាន', icon: <CalendarCheck className="h-4 w-4" /> },
@@ -171,7 +171,7 @@ const tabs = [
 
 export default function StudentInfoPage() {
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('registration');
+  const [activeTab, setActiveTab] = useState('register-student');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByYearClass, setFilterByYearClass] = useState(false);
   const [selectedYear, setSelectedYear] = useState('');
@@ -222,7 +222,7 @@ export default function StudentInfoPage() {
 
   const handleStudentSelect = (student: any) => {
     setSelectedStudent(student);
-    setActiveTab('registration');
+    setActiveTab('register-student');
   };
 
   const getAttendanceStatus = (percentage: number) => {
@@ -239,8 +239,18 @@ export default function StudentInfoPage() {
   };
 
   return (
-    <div className="space-y-2 p-0">
-      {/* Search Section */}
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
+          ព័ត៌មានសិស្ស
+        </h1>
+        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
+          គ្រប់គ្រងព័ត៌មានលម្អិតរបស់សិស្ស
+        </p>
+      </div>
+
+      {/* Search and Filter Section */}
       <Card className="hover:shadow-lg transition-all duration-200">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -484,11 +494,11 @@ export default function StudentInfoPage() {
             {/* Tab Content */}
             <Card className="hover:shadow-lg transition-all duration-200">
               <CardContent className="p-6">
-                {activeTab === 'registration' && (
+                {activeTab === 'register-student' && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xl font-bold text-gray-900 dark:text-white">ព័ត៌មានចុះឈ្មោះ</h4>
-                      <Button size="sm" className="flex items-center gap-2">
+                      <Button size="sm" className="flex items-center gap-2" variant="gradient">
                         <Edit className="h-4 w-4" />
                         កែប្រែ
                       </Button>
@@ -671,7 +681,7 @@ export default function StudentInfoPage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">រកមិនឃើញព័ត៌មានសិស្ស</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">សូមជ្រើសរើសសិស្សដើម្បីមើលព័ត៌មានលម្អិត</p>
-              <Button className="flex items-center gap-2 mx-auto">
+              <Button className="flex items-center gap-2 mx-auto" variant="gradient">
                 <Search className="h-4 w-4" />
                 ស្វែងរកសិស្ស
               </Button>

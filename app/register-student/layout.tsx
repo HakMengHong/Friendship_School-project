@@ -1,7 +1,7 @@
 import type React from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 
-export default function RegistrationLayout({
+export default function RegisterStudentLayout({
   children,
 }: {
   children: React.ReactNode

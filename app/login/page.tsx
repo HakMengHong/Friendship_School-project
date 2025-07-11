@@ -120,8 +120,20 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center shadow-2xl">
-                <GraduationCap className="w-12 h-12 text-white" />
+              <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden">
+                <img 
+                  src="/logo.png" 
+                  alt="សាលាមិត្តភាព" 
+                  className="w-16 h-16 object-contain"
+                  onError={(e) => {
+                    // Fallback to icon if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const fallback = target.parentElement?.querySelector('.fallback-icon');
+                    if (fallback) fallback.classList.remove('hidden');
+                  }}
+                />
+                <GraduationCap className="w-12 h-12 text-primary fallback-icon hidden" />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                 <CheckCircle className="w-5 h-5 text-white" />
@@ -132,7 +144,7 @@ export default function LoginPage() {
           {/* Heading */}
           <div className="text-center space-y-4 mb-8">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
                 កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស
               </h1>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -145,8 +157,8 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Username Input with Dropdown */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-                <User className="w-4 h-4" />
+              <label className="text-sm font-semibold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent dark:text-gray-200 flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
                 ឈ្មោះគ្រូ
               </label>
               <div className="relative" ref={dropdownRef}>
@@ -183,7 +195,7 @@ export default function LoginPage() {
                             setOpen(false)
                           }}
                         >
-                          <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3">
                             {user.avatar}
                           </div>
                           <div className="flex-1">
@@ -204,8 +216,8 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-                <Lock className="w-4 h-4" />
+              <label className="text-sm font-semibold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent dark:text-gray-200 flex items-center gap-2">
+                <Lock className="w-4 h-4 text-primary" />
                 លេខកូដសម្ងាត់
               </label>
               <div className="relative">
@@ -243,7 +255,8 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              className="w-full h-12 text-base font-semibold"
+              variant="gradient"
               disabled={isLoading}
             >
               {isLoading ? (

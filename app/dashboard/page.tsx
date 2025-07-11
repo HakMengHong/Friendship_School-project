@@ -1,7 +1,6 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { StatCard } from "@/components/ui/stat-card"
 import { 
   Users, 
   BookOpen, 
@@ -9,11 +8,9 @@ import {
   MessageSquare, 
   Star, 
   TrendingUp, 
-  Calendar, 
   Activity, 
   Trash2 as TrashIcon,
   Plus,
-  Download,
   BarChart3,
   UserCheck,
   Clock,
@@ -26,7 +23,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
 export default function DashboardPage() {
   // State for announcements
@@ -138,7 +135,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-4 p-0">
+    <div className="space-y-4">
+      {/* Dashboard Header */}
+      <div className="mb-6">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
+          ផ្ទាំងគ្រប់គ្រង
+        </h1>
+        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
+          ការតាមដានសកម្មភាពសិស្ស និងគ្រូបង្រៀន
+        </p>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -276,7 +282,7 @@ export default function DashboardPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                                             label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -340,7 +346,12 @@ export default function DashboardPage() {
             <MessageSquare className="h-5 w-5 text-blue-600" />
             <span className="text-lg">ដំណឹងសំខាន់ៗ</span>
           </CardTitle>
-          <Button size="sm" onClick={() => setShowAddForm(!showAddForm)} className="flex items-center gap-2">
+          <Button 
+            size="sm" 
+            onClick={() => setShowAddForm(!showAddForm)} 
+            className="flex items-center gap-2"
+            variant="gradient"
+          >
             {showAddForm ? (
               <>
                 <XCircle className="h-4 w-4" />
@@ -402,15 +413,15 @@ export default function DashboardPage() {
                         priority: 'medium'
                       });
                     }}
+                    className="border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
                   >
                     បោះបង់
                   </Button>
                   <Button 
                     onClick={handleAddAnnouncement}
-                    disabled={!newAnnouncement.title || !newAnnouncement.content}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    variant="gradientGreen"
                   >
-                    រក្សាទុក
+                    បន្ថែមដំណឹង
                   </Button>
                 </div>
               </div>

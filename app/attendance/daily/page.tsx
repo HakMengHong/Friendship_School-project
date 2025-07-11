@@ -10,29 +10,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { 
-  User, 
-  UserCheck, 
-  UserX, 
-  Clock, 
-  Edit, 
-  Trash2, 
-  Calendar,
-  BookOpen,
   GraduationCap,
+  Plus,
+  Download,
+  User,
+  UserCheck,
+  UserX,
+  Clock,
   TrendingUp,
   TrendingDown,
   AlertCircle,
   CheckCircle,
-  XCircle,
-  Plus,
   Search,
-  Filter,
-  Download,
-  BarChart3,
   Users,
-  Activity
+  Edit,
+  Trash2
 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 
 interface TimeSlot {
   status: string
@@ -46,7 +40,6 @@ interface Student {
   name: string
   morning: TimeSlot
   afternoon: TimeSlot
-  [key: string]: any
 }
 
 interface FormData {
@@ -149,21 +142,33 @@ export default function DailyAbsencePage() {
 
   const absenceTypes = ["អវត្តមានច្បាប់", "អវត្តមានឥតច្បាប់", "យឺត"]
 
-  // Calculate statistics
-  const morningPresent = students.filter(s => s.morning.status === "present").length
-  const morningAbsent = students.filter(s => s.morning.status === "absent").length
-  const morningLate = students.filter(s => s.morning.status === "late").length
-  
-  const afternoonPresent = students.filter(s => s.afternoon.status === "present").length
-  const afternoonAbsent = students.filter(s => s.afternoon.status === "absent").length
-  const afternoonLate = students.filter(s => s.afternoon.status === "late").length
+  // Calculate statistics with useMemo for performance
+  const statistics = useMemo(() => {
+    const morningPresent = students.filter(s => s.morning.status === "present").length
+    const morningAbsent = students.filter(s => s.morning.status === "absent").length
+    const morningLate = students.filter(s => s.morning.status === "late").length
+    
+    const afternoonPresent = students.filter(s => s.afternoon.status === "present").length
+    const afternoonAbsent = students.filter(s => s.afternoon.status === "absent").length
+    const afternoonLate = students.filter(s => s.afternoon.status === "late").length
 
-  const totalPresent = morningPresent + afternoonPresent
-  const totalAbsent = morningAbsent + afternoonAbsent
-  const totalLate = morningLate + afternoonLate
+    return {
+      morningPresent,
+      morningAbsent,
+      morningLate,
+      afternoonPresent,
+      afternoonAbsent,
+      afternoonLate,
+      totalPresent: morningPresent + afternoonPresent,
+      totalAbsent: morningAbsent + afternoonAbsent,
+      totalLate: morningLate + afternoonLate
+    }
+  }, [students])
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredStudents = useMemo(() => 
+    students.filter(student =>
+      student.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [students, searchTerm]
   )
 
   // Check if form is valid and load students for selected class
@@ -179,22 +184,22 @@ export default function DailyAbsencePage() {
     }
   }, [formData.schoolYear, formData.grade, formData.teacherName])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
       [name]: value
     }))
-  }
+  }, [])
 
-  const handleStudentClick = (student: Student, timePeriod: string) => {
+  const handleStudentClick = useCallback((student: Student, timePeriod: string) => {
     setSelectedStudent(student)
     setCurrentTimePeriod(timePeriod)
     setShowAbsenceForm(true)
     setEditingAbsence(null)
-  }
+  }, [])
 
-  const handleAbsenceSubmit = (e: React.FormEvent) => {
+  const handleAbsenceSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     const form = e.target as HTMLFormElement
     const absenceType = (form.elements.namedItem('absenceType') as HTMLSelectElement).value
@@ -231,9 +236,9 @@ export default function DailyAbsencePage() {
     setShowAbsenceForm(false)
     setSelectedStudent(null)
     setEditingAbsence(null)
-  }
+  }, [selectedStudent, students])
 
-  const handleEditAbsence = (absence: any) => {
+  const handleEditAbsence = useCallback((absence: AbsenceRecord) => {
     const student = students.find(s => s.id === absence.id)
     if (!student) return
     
@@ -245,9 +250,9 @@ export default function DailyAbsencePage() {
       reason: absence.reason
     })
     setShowAbsenceForm(true)
-  }
+  }, [students])
 
-  const handleDeleteAbsence = (studentId: number, timePeriod: string) => {
+  const handleDeleteAbsence = useCallback((studentId: number, timePeriod: string) => {
     const updatedStudents = students.map(student => {
       if (student.id === studentId) {
         const updatedStudent = { ...student }
@@ -272,9 +277,9 @@ export default function DailyAbsencePage() {
     })
 
     setStudents(updatedStudents)
-  }
+  }, [students])
 
-  const getDailyAbsences = (): AbsenceRecord[] => {
+  const getDailyAbsences = useMemo((): AbsenceRecord[] => {
     const absences: AbsenceRecord[] = []
     students.forEach(student => {
       if (student.morning.status !== "present") {
@@ -301,11 +306,11 @@ export default function DailyAbsencePage() {
       }
     })
     return absences
-  }
+  }, [students])
 
-  const dailyAbsencesData: AbsenceRecord[] = getDailyAbsences()
+  const dailyAbsencesData: AbsenceRecord[] = getDailyAbsences
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case "present":
         return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">វត្តមាន</Badge>
@@ -316,33 +321,21 @@ export default function DailyAbsencePage() {
       default:
         return <Badge variant="secondary">មិនច្បាស់</Badge>
     }
-  }
+  }, [])
 
   return (
-    <div className="space-y-6 p-6 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen">
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            ការកត់ត្រាអវត្តមានប្រចាំថ្ងៃ
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
-            ការកត់ត្រានិងគ្រប់គ្រងអវត្តមានសិស្ស
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            ទាញយករបាយការណ៍
-          </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            បន្ថែមសិស្ស
-          </Button>
-        </div>
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
+          ការគ្រប់គ្រងវត្តមានប្រចាំងថ្ងៃ
+        </h1>
+        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
+          កត់ត្រាវត្តមានសិស្សប្រចាំងថ្ងៃ
+        </p>
       </div>
 
-      {/* School Information Card */}
+      {/* Form Section */}
       <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -425,11 +418,11 @@ export default function DailyAbsencePage() {
                 <Clock className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{morningPresent + morningAbsent + morningLate} នាក់</div>
-                <p className="text-xs text-muted-foreground">វត្តមាន: {morningPresent} • អវត្តមាន: {morningAbsent} • យឺត: {morningLate}</p>
+                <div className="text-2xl font-bold text-blue-600">{statistics.morningPresent + statistics.morningAbsent + statistics.morningLate} នាក់</div>
+                <p className="text-xs text-muted-foreground">វត្តមាន: {statistics.morningPresent} • អវត្តមាន: {statistics.morningAbsent} • យឺត: {statistics.morningLate}</p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="h-3 w-3 text-blue-500 mr-1" />
-                  <span className="text-xs text-blue-500">វត្តមាន {morningPresent} នាក់</span>
+                  <span className="text-xs text-blue-500">វត្តមាន {statistics.morningPresent} នាក់</span>
                 </div>
               </CardContent>
             </Card>
@@ -441,11 +434,11 @@ export default function DailyAbsencePage() {
                 <Clock className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-600">{afternoonPresent + afternoonAbsent + afternoonLate} នាក់</div>
-                <p className="text-xs text-muted-foreground">វត្តមាន: {afternoonPresent} • អវត្តមាន: {afternoonAbsent} • យឺត: {afternoonLate}</p>
+                <div className="text-2xl font-bold text-orange-600">{statistics.afternoonPresent + statistics.afternoonAbsent + statistics.afternoonLate} នាក់</div>
+                <p className="text-xs text-muted-foreground">វត្តមាន: {statistics.afternoonPresent} • អវត្តមាន: {statistics.afternoonAbsent} • យឺត: {statistics.afternoonLate}</p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="h-3 w-3 text-orange-500 mr-1" />
-                  <span className="text-xs text-orange-500">វត្តមាន {afternoonPresent} នាក់</span>
+                  <span className="text-xs text-orange-500">វត្តមាន {statistics.afternoonPresent} នាក់</span>
                 </div>
               </CardContent>
             </Card>
@@ -457,11 +450,11 @@ export default function DailyAbsencePage() {
                 <UserCheck className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{totalPresent} នាក់</div>
-                <p className="text-xs text-muted-foreground">{students.length > 0 ? ((totalPresent / students.length) * 100).toFixed(1) : 0}% នៃសិស្សទាំងអស់</p>
+                <div className="text-2xl font-bold text-green-600">{statistics.totalPresent} នាក់</div>
+                <p className="text-xs text-muted-foreground">{students.length > 0 ? ((statistics.totalPresent / students.length) * 100).toFixed(1) : 0}% នៃសិស្សទាំងអស់</p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                  <span className="text-xs text-green-500">+{morningPresent + afternoonPresent} ពីពេលព្រឹក</span>
+                  <span className="text-xs text-green-500">+{statistics.morningPresent + statistics.afternoonPresent} ពីពេលព្រឹក</span>
                 </div>
               </CardContent>
             </Card>
@@ -473,11 +466,11 @@ export default function DailyAbsencePage() {
                 <UserX className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">{totalAbsent} នាក់</div>
-                <p className="text-xs text-muted-foreground">{students.length > 0 ? ((totalAbsent / students.length) * 100).toFixed(1) : 0}% នៃសិស្សទាំងអស់</p>
+                <div className="text-2xl font-bold text-red-600">{statistics.totalAbsent} នាក់</div>
+                <p className="text-xs text-muted-foreground">{students.length > 0 ? ((statistics.totalAbsent / students.length) * 100).toFixed(1) : 0}% នៃសិស្សទាំងអស់</p>
                 <div className="flex items-center mt-2">
                   <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
-                  <span className="text-xs text-red-500">+{morningAbsent + afternoonAbsent} ពីពេលព្រឹក</span>
+                  <span className="text-xs text-red-500">+{statistics.morningAbsent + statistics.afternoonAbsent} ពីពេលព្រឹក</span>
                 </div>
               </CardContent>
             </Card>
@@ -708,7 +701,7 @@ export default function DailyAbsencePage() {
                 <Label>ម៉ោង (សម្រាប់មកយឺត)</Label>
                 <Input
                   name="time"
-                  defaultValue={editingAbsence?.time || selectedStudent[currentTimePeriod].time}
+                  defaultValue={editingAbsence?.time || (currentTimePeriod === 'morning' ? selectedStudent.morning.time : selectedStudent.afternoon.time)}
                   placeholder="ម៉ោង:នាទី"
                   maxLength={5}
                 />
@@ -718,7 +711,7 @@ export default function DailyAbsencePage() {
                 <Label>មូលហេតុ (បើមាន)</Label>
                 <Textarea
                   name="reason"
-                  defaultValue={editingAbsence?.reason || selectedStudent[currentTimePeriod].reason}
+                  defaultValue={editingAbsence?.reason || (currentTimePeriod === 'morning' ? selectedStudent.morning.reason : selectedStudent.afternoon.reason)}
                   placeholder="បញ្ចូលមូលហេតុ..."
                   rows={3}
                 />
@@ -732,7 +725,7 @@ export default function DailyAbsencePage() {
                 >
                   បោះបង់
                 </Button>
-                <Button type="submit">
+                <Button type="submit" variant="gradient">
                   រក្សាទុក
                 </Button>
               </div>

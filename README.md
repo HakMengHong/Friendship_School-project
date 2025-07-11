@@ -33,6 +33,60 @@ Friendship School Project is a modern, responsive school management dashboard bu
 - 🌏 **Khmer language support**
 - 🔒 **Accessible, keyboard-friendly UI**
 
+---
+
+## Current State
+
+- **All data is currently mock/hardcoded in the frontend.**
+- **Authentication uses localStorage and is not secure.**
+- **No real database or backend API is connected yet.**
+- **UI and UX are production-ready and easy to extend.**
+
+---
+
+## Database Schema & Models (Latest)
+
+- **Schema is now fully documented with comments for every model, enum, and important field.**
+- **New models added:**
+  - `Announcement` (school news/events)
+  - `ActivityLog` (audit/history of user actions)
+  - `File` (uploads, e.g., student photos, documents)
+  - `Class` (school classes/groups)
+  - `Scholarship`, `Guardian`, `FamilyInfo` (student support)
+- **Enums for type safety:**
+  - `GradeType` (exam, quiz, assignment, etc.)
+  - `AttendanceSession` (AM, PM, FULL)
+- **Existing models improved:**
+  - All models now have clear field explanations and relations
+  - `Grade` and `Attendance` use enums for type safety
+- **Schema is ready for collaborative development and future migrations.**
+
+---
+
+## Roadmap: Next Steps
+
+1. **Backend Integration**
+   - Set up a database (PostgreSQL recommended)
+   - Use Prisma ORM for schema and migrations
+   - Create API routes in `/app/api/` for students, grades, attendance, and authentication
+
+2. **Authentication**
+   - Replace localStorage with JWT-based authentication
+   - Add secure login/logout endpoints
+
+3. **Data Fetching**
+   - Replace all hardcoded/mock data with API calls
+   - Use React hooks for data fetching and state management
+
+4. **Validation & Error Handling**
+   - Add Zod schemas for input validation
+   - Improve error and loading state handling in the UI
+
+5. **Testing**
+   - Add unit and integration tests for critical components and API routes
+
+---
+
 ## Getting Started
 
 1. **Install dependencies:**
@@ -49,36 +103,26 @@ Friendship School Project is a modern, responsive school management dashboard bu
    ```
 3. **Open [http://localhost:3000](http://localhost:3000) in your browser.**
 
+---
+
 ## Usage Notes
 
-- **Theme Toggle:**
-  - Use the sun/moon button in the top bar to switch between light and dark mode instantly.
-- **Modern Forms:**
-  - All forms and modals are styled for both light and dark mode.
-- **No hardcoded colors:**
-  - All UI elements use theme-aware Tailwind classes and CSS variables.
-- **Language:**
-  - The UI and labels are in Khmer for local usability.
-
-## Deployment
-
-Your project is live at:
-
-
+- **Theme Toggle:**  
+  Use the sun/moon button in the top bar to switch between light and dark mode instantly.
+- **Modern Forms:**  
+  All forms and modals are styled for both light and dark mode.
+- **No hardcoded colors:**  
+  All UI elements use theme-aware Tailwind classes and CSS variables.
 
 ---
 
-## What We Have
+## Contributing
 
-- Student info, registration, and list pages
-- Gradebook, add score, and score report pages
-- Absence daily, report, and summary pages
-- Schedule, subjects, and dashboard
-- Modern sidebar and top bar navigation
-- Theme toggle (light/dark)
-- All forms, tables, and modals are dark mode compatible
-- Khmer font and language support
+- Please open issues or pull requests for bugs, improvements, or new features.
+- When backend/API is added, see the `/prisma` and `/app/api/` folders for schema and endpoint documentation.
 
 ---
 
-**Made with ❤️ by hakmenghong**
+## License
+
+MIT

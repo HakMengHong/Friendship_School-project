@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { ModernCard } from "./modern-card"
+import { Card, CardContent } from "./card"
 import { Badge } from "./badge"
 import { User, Calendar, MapPin } from "lucide-react"
 
@@ -38,7 +38,7 @@ const StudentCard = React.forwardRef<HTMLDivElement, StudentCardProps>(
     }
 
     return (
-      <ModernCard
+      <Card
         ref={ref}
         variant="elevated"
         className={cn(
@@ -47,62 +47,64 @@ const StudentCard = React.forwardRef<HTMLDivElement, StudentCardProps>(
         )}
         onClick={onClick}
       >
-        <div className="flex items-start space-x-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl flex items-center justify-center overflow-hidden">
-            {student.photo ? (
-              <img
-                src={student.photo}
-                alt={`${student.lastName} ${student.firstName}`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User className="w-8 h-8 text-primary" />
-            )}
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-foreground truncate">
-                  {student.lastName} {student.firstName}
-                </h3>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-sm text-muted-foreground">ថ្នាក់ {student.class}</span>
-                  {student.age && (
-                    <>
-                      <span className="text-muted-foreground">•</span>
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{student.age} ឆ្នាំ</span>
-                      </div>
-                    </>
+        <CardContent>
+          <div className="flex items-start space-x-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center overflow-hidden shadow-lg">
+              {student.photo ? (
+                <img
+                  src={student.photo}
+                  alt={`${student.lastName} ${student.firstName}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="w-8 h-8 text-white" />
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent truncate">
+                    {student.lastName} {student.firstName}
+                  </h3>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-sm text-muted-foreground">ថ្នាក់ {student.class}</span>
+                    {student.age && (
+                      <>
+                        <span className="text-muted-foreground">•</span>
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">{student.age} ឆ្នាំ</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  
+                  {student.address && (
+                    <div className="flex items-center space-x-1 mt-2">
+                      <MapPin className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground truncate">
+                        {student.address.village}, {student.address.district}
+                      </span>
+                    </div>
                   )}
                 </div>
                 
-                {student.address && (
-                  <div className="flex items-center space-x-1 mt-2">
-                    <MapPin className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground truncate">
-                      {student.address.village}, {student.address.district}
-                    </span>
-                  </div>
+                {student.status && (
+                  <Badge
+                    className={cn(
+                      "text-xs",
+                      statusColors[student.status]
+                    )}
+                  >
+                    {statusLabels[student.status]}
+                  </Badge>
                 )}
               </div>
-              
-              {student.status && (
-                <Badge
-                  className={cn(
-                    "text-xs",
-                    statusColors[student.status]
-                  )}
-                >
-                  {statusLabels[student.status]}
-                </Badge>
-              )}
             </div>
           </div>
-        </div>
-      </ModernCard>
+        </CardContent>
+      </Card>
     )
   }
 )

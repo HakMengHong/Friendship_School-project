@@ -212,7 +212,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
     <Card className="bg-card rounded-2xl border-border">
       <CardHeader className={compact ? "pb-2" : "pb-3"}>
         <div className="flex items-center justify-between">
-          <CardTitle className={`text-primary font-medium ${compact ? "text-lg" : "text-x1"}`}>
+          <CardTitle className={`font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent ${compact ? "text-lg" : "text-xl"}`}>
             ប្រតិទិនខ្មែរ
           </CardTitle>
         </div>

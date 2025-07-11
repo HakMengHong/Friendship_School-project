@@ -34,24 +34,24 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       href: "/dashboard",
     },
     {
-      id: "absence",
+      id: "attendance",
       icon: UserCheck,
       label: "អវត្តមានសិស្ស",
-      href: "/absence",
+      href: "/attendance",
       subItems: [
-        { id: "daily-absence", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/absence/daily" },
-        { id: "absence-report", label: "របាយការណ៍អវត្តមាន", href: "/absence/report" },
+        { id: "daily-attendance", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/attendance/daily" },
+        { id: "attendance-report", label: "របាយការណ៍អវត្តមាន", href: "/attendance/report" },
       ],
     },
     {
-      id: "scores",
+      id: "grade",
       icon: BarChart2,
       label: "ពិន្ទុសិស្ស",
-      href: "/scores",
+      href: "/grade",
       subItems: [
-        { id: "add-scores", label: "បញ្ចូលពិន្ទុ", href: "/scores/addscore" },
-        { id: "scores-report", label: "របាយការណ៍ពិន្ទុ", href: "/scores/report" },
-        { id: "record-book-report", label: "សៀវភៅតាមដាន", href: "/scores/gradebook" },
+        { id: "add-grade", label: "បញ្ចូលពិន្ទុ", href: "/grade/addgrade" },
+        { id: "grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/grade/report" },
+        { id: "record-book-report", label: "សៀវភៅតាមដាន", href: "/grade/gradebook" },
       ],
     },
     {
@@ -64,10 +64,10 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       ],
     },
     {
-      id: "registration",
+      id: "register-student",
       icon: ClipboardList,
       label: "ចុះឈ្មេាះសិស្ស",
-      href: "/registration",
+      href: "/register-student",
     },
   ], [])
 
@@ -141,11 +141,25 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       {/* Header with logo and school name */}
       <div className="flex items-center p-6 relative border-b border-border">
         <div className="flex items-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-sm">
-            <GraduationCap className="w-7 h-7 text-white" />
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
+            <img 
+              src="/logo.png" 
+              alt="សាលាមិត្តភាព" 
+              className="w-8 h-8 object-contain"
+              onError={(e) => {
+                // Fallback to icon if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.parentElement?.querySelector('.fallback-icon');
+                if (fallback) fallback.classList.remove('hidden');
+              }}
+            />
+            <GraduationCap className="w-7 h-7 text-primary fallback-icon hidden" />
           </div>
           <div className={cn("ml-4 transition-opacity duration-300", isCollapsed ? "opacity-0 w-0" : "opacity-100")}>
-            <h1 className="text-primary text-xl font-bold whitespace-nowrap">សាលាមិត្តភាព</h1>
+            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent whitespace-nowrap">
+              សាលាមិត្តភាព
+            </h1>
             <p className="text-sm text-muted-foreground whitespace-nowrap">Friendship School</p>
           </div>
         </div>

@@ -41,7 +41,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export default function RegistrationPage() {
+export default function RegisterStudentPage() {
   const [studentName, setStudentName] = useState("")
   const [selectedStudent, setSelectedStudent] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("basic")
@@ -106,9 +106,18 @@ export default function RegistrationPage() {
   })
 
   return (
-    <div className="space-y-1 p-0">
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
+          ចុះឈ្មោះសិស្ស
+        </h1>
+        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
+          បញ្ចូលព័ត៌មានសិស្សថ្មី និងគ្រប់គ្រងព័ត៌មាន
+        </p>
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-2">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Student List Sidebar */}
         <div className="w-full lg:w-80 flex-shrink-0">
           <Card className="h-full border-0 shadow-lg">
@@ -126,7 +135,7 @@ export default function RegistrationPage() {
                 <Button 
                   onClick={handleNewStudent}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  variant="gradient"
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   ថ្មី

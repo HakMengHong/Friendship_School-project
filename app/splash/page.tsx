@@ -42,8 +42,20 @@ export default function SplashScreen() {
       <div className="flex flex-col items-center justify-center space-y-8 z-10">
         {/* Logo container with animation */}
         <div className="relative">
-          <div className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center shadow-2xl animate-pulse">
-            <GraduationCap className="w-16 h-16 text-primary" />
+          <div className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center shadow-2xl animate-pulse overflow-hidden">
+            <img 
+              src="/logo.png" 
+              alt="សាលាមិត្តភាព" 
+              className="w-20 h-20 object-contain"
+              onError={(e) => {
+                // Fallback to icon if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.parentElement?.querySelector('.fallback-icon');
+                if (fallback) fallback.classList.remove('hidden');
+              }}
+            />
+            <GraduationCap className="w-16 h-16 text-primary fallback-icon hidden" />
           </div>
           {/* Ripple effect */}
           <div className="absolute inset-0 w-32 h-32 bg-white rounded-2xl animate-ping opacity-20"></div>
@@ -51,8 +63,10 @@ export default function SplashScreen() {
 
         {/* Text content */}
         <div className="text-center space-y-4">
-          <h1 className="text-white text-4xl font-bold animate-fade-in">សួស្តី!</h1>
-          <p className="text-white/90 text-xl">សូមស្វាគមន៍មកកាន់</p>
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-primary/20 to-primary/40 bg-clip-text text-transparent animate-fade-in">
+            សួស្តី!
+          </h1>
+          <p className="text-white/90 text-xl font-medium">សូមស្វាគមន៍មកកាន់</p>
           <p className="text-white/70 text-lg">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</p>
         </div>
 

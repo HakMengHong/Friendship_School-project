@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =========================
+// ENUMS
+// =========================
+
+// GradeType: Type of grade (exam, quiz, assignment, etc.)
+enum GradeType {
+  exam
+  quiz
+  assignment
+  participation
+  other
+}
+
+// AttendanceSession: Which session the attendance is for (AM, PM, FULL)
+enum AttendanceSession {
+  AM
+  PM
+  FULL
+}
+
+// =========================
+// MODELS
+// =========================
+
+// User: Teachers and Admins only
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique // Login username
+  password     String   // Hashed password
+  lastname     String
+  firstname    String
+  phonenumber1 String?
+  phonenumber2 String?
+  role         String   @default("teacher") // "teacher" or "admin"
+  avatar       String?
+  position     String?  // e.g., "គ្រូបន្ទុកថ្នាក់ទី ១", "នាយក"
+  lastLogin    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  // Relations
+  announcements Announcement[] @relation("AnnouncementAuthor")
+  activityLogs  ActivityLog[]   @relation("ActivityLogUser")
+  files         File[]          @relation("FileUploader")
+}
+
+// Student: Registered students
+model Student {
+  id               Int      @id @default(autoincrement())
+  studentId        String   @unique // School-issued student code
+  lastName         String
+  firstName        String
+  gender           String
+  dob              DateTime
+  birthPlace       String?
+  class            String
+  academicYear     String
+  photo            String?
+  phone            String?
+  email            String?
+  address          String?   // Can be JSON for structured address
+  registrationDate DateTime
+  status           String?   // e.g., "active", "dropped", "graduated"
+  religion         String?
+  health           String?
+  emergencyContact String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  // Relations
+  guardians        Guardian[]
+  scholarships     Scholarship[]
+  family           FamilyInfo?
+  classObj         Class?    @relation(fields: [classId], references: [id])
+  classId          Int?
+}
+
+// Guardian: Parent/guardian info for students
+model Guardian {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  name       String
+  relation   String   // e.g., "father", "mother"
+  phone      String?
+  email      String?
+  address    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  student    Student  @relation(fields: [studentId], references: [id])
+}
+
+// FamilyInfo: Detailed family data for students (optional)
+model FamilyInfo {
+  id           Int      @id @default(autoincrement())
+  studentId    Int      @unique
+  fatherName   String?
+  motherName   String?
+  siblings     Int?
+  fatherPhone  String?
+  motherPhone  String?
+  address      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  student      Student  @relation(fields: [studentId], references: [id])
+}
+
+// Scholarship: Scholarships awarded to students (optional)
+model Scholarship {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  type       String?
+  amount     Float?
+  sponsor    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  student    Student  @relation(fields: [studentId], references: [id])
+}
+
+// Course: School courses/classes
+model Course {
+  id            Int      @id @default(autoincrement())
+  courseId      String   @unique // School-issued course code
+  schoolYearId  Int
+  teacherId1    Int?
+  teacherId2    Int?
+  teacherId3    Int?
+  grade         String
+  section       String
+  courseName    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Subject: Subjects taught in school
+model Subject {
+  id          Int      @id @default(autoincrement())
+  subjectId   String   @unique // School-issued subject code
+  subjectName String
+  credits     Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Grade: Student grades per subject/course/semester
+model Grade {
+  id           Int        @id @default(autoincrement())
+  gradeId      String     @unique // School-issued grade record code
+  courseId     Int
+  studentId    Int
+  subjectId    Int
+  semesterId   Int
+  gradeDate    DateTime
+  grade        Float
+  gradeComment String?
+  user         String?    // Username or user ID who recorded/edited
+  lastEdit     DateTime?
+  gradeType    GradeType? // Type of grade (exam, quiz, etc.)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+// Attendance: Student attendance tracking
+model Attendance {
+  id             Int                @id @default(autoincrement())
+  attendanceId   String             @unique // School-issued attendance record code
+  courseId       Int
+  studentId      Int
+  attendanceDate DateTime
+  status         String             // e.g., "present", "absent", "late"
+  session        AttendanceSession? // AM/PM/FULL
+  comment        String?
+  user           String?            // Username or user ID who recorded/edited
+  lastEdit       DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+// Enrollment: Student enrollment in courses
+model Enrollment {
+  id             Int      @id @default(autoincrement())
+  enrollmentId   String   @unique // School-issued enrollment code
+  courseId       Int
+  studentId      Int
+  droup          Boolean  // true if dropped, false if still enrolled
+  droupSemester  String?  // Semester in which the student dropped
+  droupDate      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// Semester: Academic semesters
+model Semester {
+  id         Int      @id @default(autoincrement())
+  semesterId String   @unique // School-issued semester code
+  semester   String   // e.g., "Semester 1", "Semester 2"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// SchoolYear: Academic years
+model SchoolYear {
+  id          Int      @id @default(autoincrement())
+  schoolYearId String   @unique // School-issued school year code
+  yearLabel   String   // e.g., "2023-2024"
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Announcement: School news/events
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  date      DateTime
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ActivityLog: Audit/history of user actions
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  action     String   // e.g., "create", "update", "delete", "login"
+  targetType String   // e.g., "Student", "Grade", "Attendance"
+  targetId   Int?     // ID of the affected record
+  details    String?  // Optional: JSON or text for more info
+  timestamp  DateTime @default(now())
+}
+
+// File: Uploaded files (e.g., student photos, documents)
+model File {
+  id         Int      @id @default(autoincrement())
+  url        String
+  fileName   String
+  fileType   String
+  uploadedBy Int
+  user       User     @relation(fields: [uploadedBy], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+// Class: School classes/groups
+model Class {
+  id        Int      @id @default(autoincrement())
+  className String   @unique // e.g., "7A", "8B"
+  grade     String
+  section   String?
+  students  Student[]
+} 

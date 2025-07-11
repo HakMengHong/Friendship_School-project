@@ -35,15 +35,15 @@ import {
 } from "@/components/ui/table"
 import { useState } from "react"
 
-export default function ScoresPage() {
+export default function GradePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('all')
 
-  const recentScores = [
+  const recentGrades = [
     { 
       id: 1,
       subject: "គណិតវិទ្យា", 
-      score: 92, 
+      grade: 92, 
       date: "2023-11-15", 
       status: "ល្អណាស់",
       teacher: "លោកគ្រូ ស៊ុន សុខា",
@@ -52,7 +52,7 @@ export default function ScoresPage() {
     { 
       id: 2,
       subject: "ភាសាអង់គ្លេស", 
-      score: 88, 
+      grade: 88, 
       date: "2023-11-10", 
       status: "ល្អ",
       teacher: "លោកគ្រូ ជន ម៉ានី",
@@ -61,7 +61,7 @@ export default function ScoresPage() {
     { 
       id: 3,
       subject: "រូបវិទ្យា", 
-      score: 85, 
+      grade: 85, 
       date: "2023-11-08", 
       status: "មធ្យម",
       teacher: "លោកគ្រូ ចាន់ ដារា",
@@ -70,7 +70,7 @@ export default function ScoresPage() {
     { 
       id: 4,
       subject: "ភាសាខ្មែរ", 
-      score: 90, 
+      grade: 90, 
       date: "2023-11-05", 
       status: "ល្អណាស់",
       teacher: "លោកស្រី ពេជ្រ ចន្ទា",
@@ -79,7 +79,7 @@ export default function ScoresPage() {
     { 
       id: 5,
       subject: "គីមីវិទ្យា", 
-      score: 87, 
+      grade: 87, 
       date: "2023-11-03", 
       status: "ល្អ",
       teacher: "លោកស្រី ម៉ម សុភា",
@@ -100,22 +100,31 @@ export default function ScoresPage() {
     }
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-green-600"
-    if (score >= 80) return "text-blue-600"
-    if (score >= 70) return "text-yellow-600"
+  const getGradeColor = (grade: number) => {
+    if (grade >= 90) return "text-green-600"
+    if (grade >= 80) return "text-blue-600"
+    if (grade >= 70) return "text-yellow-600"
     return "text-red-600"
   }
 
-  const filteredScores = recentScores.filter(score => {
-    const matchesSearch = score.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         score.teacher.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = selectedFilter === 'all' || score.status === selectedFilter
+  const filteredGrades = recentGrades.filter(grade => {
+    const matchesSearch = grade.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      grade.teacher.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesFilter = selectedFilter === 'all' || grade.status === selectedFilter
     return matchesSearch && matchesFilter
   })
 
   return (
-    <div className="space-y-4 p-0">
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
+          ការគ្រប់គ្រងពិន្ទុ
+        </h1>
+        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
+          តាមដានពិន្ទុសិស្ស និងវឌ្ឍនភាពការសិក្សា
+        </p>
+      </div>
 
       {/* Top Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -279,7 +288,7 @@ export default function ScoresPage() {
         </CardContent>
       </Card>
 
-      {/* Recent Scores and Semester Comparison */}
+      {/* Recent Grades and Semester Comparison */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 hover:shadow-lg transition-all duration-200">
           <CardHeader>
@@ -313,12 +322,12 @@ export default function ScoresPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredScores.map((item) => (
+                {filteredGrades.map((item) => (
                   <TableRow key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <TableCell className="font-medium">{item.subject}</TableCell>
                     <TableCell>
-                      <span className={`font-bold ${getScoreColor(item.score)}`}>
-                        {item.score}
+                      <span className={`font-bold ${getGradeColor(item.grade)}`}>
+                        {item.grade}
                       </span>
                     </TableCell>
                     <TableCell className="text-sm text-gray-600 dark:text-gray-400">
@@ -388,7 +397,7 @@ export default function ScoresPage() {
         </Card>
       </div>
 
-      {filteredScores.length === 0 && (
+      {filteredGrades.length === 0 && (
         <Card className="hover:shadow-lg transition-all duration-200">
           <CardContent className="p-12 text-center">
             <div className="mx-auto max-w-md">
