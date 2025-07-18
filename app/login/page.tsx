@@ -14,7 +14,10 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  Sparkles
+  Sparkles,
+  Crown,
+  BookOpen,
+  ClipboardList
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,6 +26,8 @@ import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { setCurrentUser } from "@/lib/auth-service"
+import { resetSplashPreferences } from "@/lib/splash-preferences"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -31,23 +36,43 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [loginError, setLoginError] = useState("")
+  const [userOptions, setUserOptions] = useState<Array<{
+    name: string
+    role: string
+    avatar: string
+    username: string
+    userRole: 'admin' | 'teacher'
+  }>>([])
   const router = useRouter()
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const userOptions = [
-    { name: "ហាក់​ ម៉េងហុង", role: "គ្រូបង្រៀន", avatar: "HM" },
-    { name: "ហេង​ សុនី", role: "គ្រូបង្រៀន", avatar: "HS" },
-    { name: "ស្រួយ​ ស៊ីណាត", role: "គ្រូបង្រៀន", avatar: "SS" },
-    { name: "ស្រួយ ចាន់នាត", role: "គ្រូបង្រៀន", avatar: "SC" },
-  ]
+  // Load users from API on component mount
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await fetch('/api/auth/users')
+        if (response.ok) {
+          const data = await response.json()
+          const options = data.users.map((user: any) => ({
+            name: user.username, // Show username instead of full name
+            role: user.role === 'admin' ? 'នាយក' : 'គ្រូបង្រៀន',
+    avatar: user.avatar || user.firstname.charAt(0) + user.lastname.charAt(0),
+    username: user.username,
+    userRole: user.role
+  }))
+          setUserOptions(options)
+        }
+      } catch (error) {
+        console.error('Error loading users:', error)
+      }
+    }
+    loadUsers()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setLoginError("")
-
-    // Simulate authentication
-    await new Promise((resolve) => setTimeout(resolve, 1500))
 
     // Simple validation
     if (!username || !password) {
@@ -56,18 +81,52 @@ export default function LoginPage() {
       return
     }
 
-    // Store username in localStorage
-    localStorage.setItem("username", username)
+    try {
+      // Authenticate user via API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password })
+      })
+    
+      if (!response.ok) {
+        const errorData = await response.json()
+        setLoginError(errorData.error || "ឈ្មោះឬលេខកូដសម្ងាត់មិនត្រឹមត្រូវ")
+      return
+    }
 
-    // Add authentication logic here
-    console.log("Login attempt:", { username, password })
+      const data = await response.json()
+      const user = data.user
 
-    // Redirect to dashboard after successful login
-    router.push("/dashboard")
+    // Store user data
+    setCurrentUser(user)
+
+    // Redirect to appropriate dashboard based on role
+    if (user.role === 'admin') {
+      router.push("/admin/dashboard")
+    } else if (user.role === 'teacher') {
+      router.push("/teacher/dashboard")
+    } else {
+      // Default fallback
+      router.push("/admin/dashboard")
+    }
+    } catch (error) {
+      console.error('Login error:', error)
+      setLoginError("មានបញ្ហាក្នុងការចូល សូមព្យាយាមម្តងទៀត")
+    } finally {
     setIsLoading(false)
+    }
   }
 
   const handleBackToSplash = () => {
+    router.push("/splash")
+  }
+
+  const handleResetSplashPreferences = () => {
+    // Clear splash preferences to show splash screen again
+    resetSplashPreferences()
     router.push("/splash")
   }
 
@@ -110,8 +169,17 @@ export default function LoginPage() {
         <ArrowLeft className="h-5 w-5" />
       </Button>
 
-      {/* Theme Toggle */}
-      <div className="absolute top-6 right-6">
+      {/* Theme Toggle and Settings */}
+      <div className="absolute top-6 right-6 flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleResetSplashPreferences}
+          className="relative bg-gradient-to-br from-primary/10 to-primary/5 hover:from-primary hover:to-primary/80 active:from-primary/90 active:to-primary/70 text-primary hover:text-white active:text-white shadow-sm hover:shadow-lg active:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 group flex-shrink-0"
+          title="ផ្លាស់ប្តូរការកំណត់ Splash Screen"
+        >
+          <Sparkles className="h-5 w-5" />
+        </Button>
         <ThemeToggle />
       </div>
 
@@ -166,7 +234,11 @@ export default function LoginPage() {
                   type="text"
                   placeholder="ជ្រើសរើស ឬ សរសេរឈ្មោះ"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    // Remove spaces from manually typed username
+                    const cleanValue = e.target.value.replace(/\s+/g, '')
+                    setUsername(cleanValue)
+                  }}
                   onFocus={() => setOpen(true)}
                   className="h-12 text-base border-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
                   required
@@ -191,7 +263,10 @@ export default function LoginPage() {
                           onClick={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
-                            setUsername(user.name)
+                            // Ensure username has no spaces and is properly trimmed
+                            const cleanUsername = user.username.trim().replace(/\s+/g, '')
+                            console.log('Selected username:', user.username, 'Clean username:', cleanUsername)
+                            setUsername(cleanUsername)
                             setOpen(false)
                           }}
                         >
@@ -200,7 +275,15 @@ export default function LoginPage() {
                           </div>
                           <div className="flex-1">
                             <div className="font-medium text-gray-900 dark:text-white">{user.name}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">{user.role}</div>
+                            <div className="flex items-center gap-2">
+                            <div className="text-xs text-gray-500 dark:text-gray-400 hidden">{user.role}</div>
+                              {user.userRole === 'admin' && (
+                                <Crown className="w-3 h-3 text-yellow-500 hidden" />
+                              )}
+                              {user.userRole === 'teacher' && (
+                                <BookOpen className="w-3 h-3 text-blue-500 hidden" />
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))

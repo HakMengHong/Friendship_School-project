@@ -10,21 +10,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { 
-  GraduationCap,
-  Plus,
-  Download,
-  User,
   UserCheck,
-  UserX,
+  XCircle, 
   Clock,
-  TrendingUp,
-  TrendingDown,
-  AlertCircle,
   CheckCircle,
-  Search,
-  Users,
+  XCircle as XCircleIcon,
+  Trash2 as TrashIcon,
   Edit,
-  Trash2
+  Eye,
+  Search,
+  Filter,
+  Download as DownloadIcon,
+  Plus as PlusIcon,
+  Download as DownloadIcon2
 } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback } from "react"
 
@@ -339,7 +337,7 @@ export default function DailyAbsencePage() {
       <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <GraduationCap className="h-5 w-5 text-blue-600" />
+            <UserCheck className="h-5 w-5 text-blue-600" />
             ព័ត៌មានមុខងារ
           </CardTitle>
         </CardHeader>
@@ -397,7 +395,7 @@ export default function DailyAbsencePage() {
           {!isFormValid && (
             <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <div className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-yellow-600" />
+                <XCircle className="h-5 w-5 text-yellow-600" />
                 <span className="text-sm text-yellow-800 dark:text-yellow-200">
                   សូមបំពេញព័ត៌មានមុខងារទាំងអស់ដើម្បីមើលបញ្ជីសិស្ស
                 </span>
@@ -421,7 +419,7 @@ export default function DailyAbsencePage() {
                 <div className="text-2xl font-bold text-blue-600">{statistics.morningPresent + statistics.morningAbsent + statistics.morningLate} នាក់</div>
                 <p className="text-xs text-muted-foreground">វត្តមាន: {statistics.morningPresent} • អវត្តមាន: {statistics.morningAbsent} • យឺត: {statistics.morningLate}</p>
                 <div className="flex items-center mt-2">
-                  <TrendingUp className="h-3 w-3 text-blue-500 mr-1" />
+                  <UserCheck className="h-3 w-3 text-blue-500 mr-1" />
                   <span className="text-xs text-blue-500">វត្តមាន {statistics.morningPresent} នាក់</span>
                 </div>
               </CardContent>
@@ -437,7 +435,7 @@ export default function DailyAbsencePage() {
                 <div className="text-2xl font-bold text-orange-600">{statistics.afternoonPresent + statistics.afternoonAbsent + statistics.afternoonLate} នាក់</div>
                 <p className="text-xs text-muted-foreground">វត្តមាន: {statistics.afternoonPresent} • អវត្តមាន: {statistics.afternoonAbsent} • យឺត: {statistics.afternoonLate}</p>
                 <div className="flex items-center mt-2">
-                  <TrendingUp className="h-3 w-3 text-orange-500 mr-1" />
+                  <UserCheck className="h-3 w-3 text-orange-500 mr-1" />
                   <span className="text-xs text-orange-500">វត្តមាន {statistics.afternoonPresent} នាក់</span>
                 </div>
               </CardContent>
@@ -453,7 +451,7 @@ export default function DailyAbsencePage() {
                 <div className="text-2xl font-bold text-green-600">{statistics.totalPresent} នាក់</div>
                 <p className="text-xs text-muted-foreground">{students.length > 0 ? ((statistics.totalPresent / students.length) * 100).toFixed(1) : 0}% នៃសិស្សទាំងអស់</p>
                 <div className="flex items-center mt-2">
-                  <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+                  <UserCheck className="h-3 w-3 text-green-500 mr-1" />
                   <span className="text-xs text-green-500">+{statistics.morningPresent + statistics.afternoonPresent} ពីពេលព្រឹក</span>
                 </div>
               </CardContent>
@@ -463,13 +461,13 @@ export default function DailyAbsencePage() {
             <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">សរុបអវត្តមាន</CardTitle>
-                <UserX className="h-4 w-4 text-red-500" />
+                <XCircleIcon className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">{statistics.totalAbsent} នាក់</div>
                 <p className="text-xs text-muted-foreground">{students.length > 0 ? ((statistics.totalAbsent / students.length) * 100).toFixed(1) : 0}% នៃសិស្សទាំងអស់</p>
                 <div className="flex items-center mt-2">
-                  <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
+                  <XCircle className="h-3 w-3 text-red-500 mr-1" />
                   <span className="text-xs text-red-500">+{statistics.morningAbsent + statistics.afternoonAbsent} ពីពេលព្រឹក</span>
                 </div>
               </CardContent>
@@ -482,7 +480,7 @@ export default function DailyAbsencePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5 text-blue-600" />
+                    <UserCheck className="h-5 w-5 text-blue-600" />
                     បញ្ជីឈ្មោះសិស្ស - {formData.grade} ({filteredStudents.length} នាក់)
                   </CardTitle>
                   <div className="relative">
@@ -553,7 +551,7 @@ export default function DailyAbsencePage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">
                       {searchTerm ? "រកមិនឃើញសិស្ស" : "មិនមានសិស្សនៅក្នុងថ្នាក់នេះទេ"}
                     </p>
@@ -566,7 +564,7 @@ export default function DailyAbsencePage() {
             <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
+                  <XCircle className="h-5 w-5 text-red-600" />
                   ឈ្មោះសិស្សអវត្តមានប្រចាំថ្ងៃ
                 </CardTitle>
               </CardHeader>
@@ -578,7 +576,7 @@ export default function DailyAbsencePage() {
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-                              <UserX className="h-4 w-4 text-red-600" />
+                              <XCircleIcon className="h-4 w-4 text-red-600" />
                             </div>
                             <div>
                               <h4 className="font-semibold text-gray-900 dark:text-white">{absence.name}</h4>
@@ -605,7 +603,7 @@ export default function DailyAbsencePage() {
                                 )}
                                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <TrashIcon className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>

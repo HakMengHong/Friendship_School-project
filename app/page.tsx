@@ -2,13 +2,18 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { shouldShowSplash } from "@/lib/splash-preferences"
 
 export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to splash screen on first load
+    // Check if user should show splash screen
+    if (shouldShowSplash()) {
     router.push("/splash")
+    } else {
+      router.push("/login")
+    }
   }, [router])
 
   return (

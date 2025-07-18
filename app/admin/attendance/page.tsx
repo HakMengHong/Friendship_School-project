@@ -21,21 +21,19 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { 
-  UserX, 
-  Clock, 
-  AlertCircle, 
-  ListChecks, 
-  CalendarDays, 
-  ScrollText, 
-  Search,
-  Filter,
-  Download,
-  Plus,
-  Users,
+  Calendar,
+  BarChart3,
   TrendingUp,
   TrendingDown,
+  AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Clock,
+  UserCheck,
+  Users,
+  FileText,
+  Download as DownloadIcon,
+  Plus as PlusIcon
 } from "lucide-react"
 import { Bar } from 'react-chartjs-2'
 import {
@@ -197,9 +195,9 @@ export default function AbsencePage() {
       case 'late':
         return <Clock className="h-4 w-4 text-yellow-600" />
       case 'excused':
-        return <ListChecks className="h-4 w-4 text-blue-600" />
+        return <UserCheck className="h-4 w-4 text-blue-600" />
       default:
-        return <UserX className="h-4 w-4 text-gray-600" />
+        return <UserCheck className="h-4 w-4 text-gray-600" />
     }
   }
 
@@ -220,7 +218,7 @@ export default function AbsencePage() {
         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">អវត្តមានថ្ងៃនេះ</CardTitle>
-            <UserX className="h-4 w-4 text-red-500" />
+            <UserCheck className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">២៨ នាក់</div>
@@ -250,7 +248,7 @@ export default function AbsencePage() {
         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">អវត្តមានច្បាប់</CardTitle>
-            <ListChecks className="h-4 w-4 text-green-500" />
+            <UserCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">៦ នាក់</div>
@@ -284,7 +282,7 @@ export default function AbsencePage() {
         <Card className="hover:shadow-lg transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">អវត្តមានប្រចាំសប្តាហ៍</CardTitle>
-            <ScrollText className="h-4 w-4 text-purple-500" />
+            <BarChart3 className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <Bar data={weeklyAbsenceData} options={chartOptions} />
@@ -295,7 +293,7 @@ export default function AbsencePage() {
         <Card className="hover:shadow-lg transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">អវត្តមានប្រចាំខែ</CardTitle>
-            <CalendarDays className="h-4 w-4 text-blue-500" />
+            <Calendar className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <Bar 
@@ -419,7 +417,7 @@ export default function AbsencePage() {
                       យឺត: {classInfo.late}
                     </span>
                     <span className="flex items-center gap-1">
-                      <ListChecks className="h-3 w-3 text-blue-500" />
+                      <UserCheck className="h-3 w-3 text-blue-500" />
                       ច្បាប់: {classInfo.excused}
                     </span>
                     <span className="flex items-center gap-1">

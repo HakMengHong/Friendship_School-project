@@ -3,32 +3,33 @@
 import React, { useEffect, useState } from "react"
 import { SidebarMenu } from "@/components/navigation/sidebar-menu"
 import { TopBar } from "@/components/navigation/top-bar"
+import { getCurrentUser, User } from "@/lib/auth-service"
 
 interface MainLayoutProps {
   children: React.ReactNode
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const [username, setUsername] = useState("")
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedUsername = localStorage.getItem("username")
-      if (storedUsername) {
-        setUsername(storedUsername)
+      const currentUser = getCurrentUser()
+      if (currentUser) {
+        setUser(currentUser)
       }
     }
   }, [])
 
   return (
     <div className="flex h-screen bg-background font-khmer transition-colors duration-300">
-      {/* Sidebar */}
+      {/* Sidebar - width and height unchanged */}
       <SidebarMenu />
 
-      {/* Main content area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Main content area - flat and clean */}
+      <div className="flex flex-1 flex-col overflow-hidden min-h-screen bg-gradient-to-br from-muted/40 via-background to-muted/10">
         {/* Top navigation bar */}
-        <TopBar username={username} />
+        <TopBar user={user} />
 
         {/* Page content */}
         <div className="flex-1 overflow-y-auto bg-background scrollbar">

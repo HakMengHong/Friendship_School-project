@@ -3,33 +3,51 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { GraduationCap } from "lucide-react"
+import { getSplashPreferences, setSplashSeen, setSkipSplash, shouldShowSplash } from "@/lib/splash-preferences"
 
 export default function SplashScreen() {
   const [progress, setProgress] = useState(0)
+  const [skipSplash, setSkipSplash] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    // Progress animation - faster to reach 100% in 1 second
+    // Check if user should skip splash based on preferences
+    const preferences = getSplashPreferences()
+    
+    if (preferences.hasSeenSplash && preferences.skipSplash) {
+      router.push("/login")
+      return
+    }
+
+    // Progress animation - faster to reach 100% in 800ms
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(progressInterval)
           return 100
         }
-        return prev + 10 // Increased from +2 to +10 for faster progress
+        return prev + 12.5 // Increased from +10 to +12.5 for faster progress (100% in 800ms)
       })
-    }, 60)
+    }, 50) // Reduced from 60ms to 50ms for faster animation
 
-    // Auto-redirect to login after 1 second
+    // Auto-redirect to login after 800ms (reduced from 1000ms)
     const timer = setTimeout(() => {
+      // Mark that user has seen splash
+      setSplashSeen()
       router.push("/login")
-    }, 1000)
+    }, 800)
 
     return () => {
       clearInterval(progressInterval)
       clearTimeout(timer)
     }
   }, [router])
+
+  const handleSkipSplash = () => {
+    // Save user preference to skip splash in future
+    setSkipSplash(true)
+    router.push("/login")
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden font-khmer transition-colors duration-300">
@@ -63,7 +81,7 @@ export default function SplashScreen() {
 
         {/* Text content */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-primary/20 to-primary/40 bg-clip-text text-transparent animate-fade-in">
+          <h1 className="text-4xl font-extrabold tracking-tight text-white/90 animate-fade-in">
             សួស្តី!
           </h1>
           <p className="text-white/90 text-xl font-medium">សូមស្វាគមន៍មកកាន់</p>
@@ -82,12 +100,13 @@ export default function SplashScreen() {
         <p className="text-white/80 text-sm animate-pulse">កំពុងផ្ទុក... {progress}%</p>
       </div>
 
-      {/* Skip button */}
+      {/* Skip button with improved styling */}
       <button
-        onClick={() => router.push("/login")}
-        className="absolute bottom-8 right-8 text-white/70 hover:text-white text-sm underline transition-colors hover:scale-105 transform"
+        onClick={handleSkipSplash}
+        className="absolute bottom-8 right-8 text-white/70 hover:text-white text-sm underline transition-colors hover:scale-105 transform flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/20"
       >
         រំលង
+        <span className="text-xs opacity-70">(ជ្រើសរើសដើម្បីរំលងក្នុងពេលក្រោយ)</span>
       </button>
     </div>
   )

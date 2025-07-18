@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useClientTime } from "@/hooks/use-client-time"
 
 const KHMER_MONTHS = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"]
 const KHMER_DAYS = ["អាទិត្យ", "ចន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍"]
@@ -26,17 +27,7 @@ function getKhmerDayName(date: Date): string {
   return KHMER_DAYS[date.getDay()]
 }
 
-function getCurrentTime() {
-  const now = new Date()
-  const hours = now.getHours()
-  const minutes = now.getMinutes()
-  const seconds = now.getSeconds()
   
-  const period = hours >= 12 ? "ល្ងាច" : "ព្រឹក"
-  const khmerHours = hours > 12 ? hours - 12 : hours
-  
-  return `${toKhmerNumber(khmerHours)}:${toKhmerNumber(minutes)}:${toKhmerNumber(seconds)} ${period}`
-}
 
 // Simplified lunar date calculation (for demonstration)
 // In a real app, you'd want to use a proper lunar calendar library
@@ -65,14 +56,7 @@ interface KhmerCalendarProps {
 export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
-  const [currentTime, setCurrentTime] = useState(getCurrentTime())
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(getCurrentTime())
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
+  const { time: currentTime, isClient } = useClientTime()
 
   const today = new Date()
   const currentMonth = currentDate.getMonth()
@@ -281,7 +265,7 @@ export function KhmerCalendar({ compact = false }: KhmerCalendarProps) {
             <div className="flex justify-between">
               <span className="text-muted-foreground">ម៉ោង</span>
               <span className="text-primary font-medium">
-                {currentTime}
+                {isClient ? currentTime : "កំពុងផ្ទុក..."}
               </span>
             </div>
           </div>

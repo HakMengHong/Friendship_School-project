@@ -6,7 +6,7 @@ import {
   ChevronLeft,
   LayoutDashboard,
   BarChart2,
-  User,
+  User as UserIcon,
   LogOut,
   Menu,
   ChevronDown,
@@ -15,6 +15,7 @@ import {
   GraduationCap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getCurrentUser, logout, User, isAdmin, isTeacher } from "@/lib/auth-service"
 
 interface SidebarMenuProps {
   className?: string
@@ -23,64 +24,131 @@ interface SidebarMenuProps {
 export function SidebarMenu({ className }: SidebarMenuProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [openDropdowns, setOpenDropdowns] = useState<string[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const router = useRouter()
   const pathname = usePathname()
 
-  const menuItems = useMemo(() => [
-    {
-      id: "dashboard",
-      icon: LayoutDashboard,
-      label: "ផ្ទាំងគ្រប់គ្រង",
-      href: "/dashboard",
-    },
-    {
-      id: "attendance",
-      icon: UserCheck,
-      label: "អវត្តមានសិស្ស",
-      href: "/attendance",
-      subItems: [
-        { id: "daily-attendance", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/attendance/daily" },
-        { id: "attendance-report", label: "របាយការណ៍អវត្តមាន", href: "/attendance/report" },
-      ],
-    },
-    {
-      id: "grade",
-      icon: BarChart2,
-      label: "ពិន្ទុសិស្ស",
-      href: "/grade",
-      subItems: [
-        { id: "add-grade", label: "បញ្ចូលពិន្ទុ", href: "/grade/addgrade" },
-        { id: "grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/grade/report" },
-        { id: "record-book-report", label: "សៀវភៅតាមដាន", href: "/grade/gradebook" },
-      ],
-    },
-    {
-      id: "student-info",
-      icon: User,
-      label: "ព័ត៌មានសិស្ស",
-      href: "/student-info",
-      subItems: [
-        { id: "student-list", label: "បញ្ជីឈ្មោះសិស្ស", href: "/student-info/list" },
-      ],
-    },
-    {
-      id: "register-student",
-      icon: ClipboardList,
-      label: "ចុះឈ្មេាះសិស្ស",
-      href: "/register-student",
-    },
-  ], [])
-
-  // Auto-open dropdown for active menu items
   useEffect(() => {
-    menuItems.forEach((item) => {
-      if (item.subItems && (isActive(item.href) || hasActiveSubItem(item.subItems))) {
-        if (!openDropdowns.includes(item.id)) {
-          setOpenDropdowns((prev) => [...prev, item.id])
-        }
-      }
+    const user = getCurrentUser()
+    setCurrentUser(user)
+  }, [])
+
+  const menuItems = useMemo(() => {
+    const baseItems = [
+      // Admin Dashboard
+      {
+        id: "admin-dashboard",
+        icon: LayoutDashboard,
+        label: "ផ្ទាំងគ្រប់គ្រង",
+        href: "/admin/dashboard",
+        requiredRole: "admin" as const,
+        subItems: [
+          { id: "admin-users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/admin/dashboard/users" },
+        ],
+      },
+      // Admin Attendance
+      {
+        id: "admin-attendance",
+        icon: UserCheck,
+        label: "អវត្តមានសិស្ស",
+        href: "/admin/attendance",
+        requiredRole: "admin" as const,
+        subItems: [
+          { id: "admin-attendance-daily", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/admin/attendance/daily" },
+          { id: "admin-attendance-report", label: "របាយការណ៍អវត្តមាន", href: "/admin/attendance/report" },
+        ],
+      },
+      // Admin Grade
+      {
+        id: "admin-grade",
+        icon: BarChart2,
+        label: "ពិន្ទុសិស្ស",
+        href: "/admin/grade",
+        requiredRole: "admin" as const,
+        subItems: [
+          { id: "admin-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/admin/grade/report" },
+          { id: "admin-grade-gradebook", label: "សៀវភៅតាមដាន", href: "/admin/grade/gradebook" },
+        ],
+      },
+      // Admin Student Info
+      {
+        id: "admin-student-info",
+        icon: UserIcon,
+        label: "ព័ត៌មានសិស្ស",
+        href: "/admin/student-info",
+        requiredRole: "admin" as const,
+        subItems: [
+          { id: "admin-student-info-list", label: "បញ្ជីឈ្មោះសិស្ស", href: "/admin/student-info/list" },
+        ],
+      },
+      // Admin Register Student
+      {
+        id: "admin-register-student",
+        icon: ClipboardList,
+        label: "ចុះឈ្មោះសិស្ស",
+        href: "/admin/register-student",
+        requiredRole: "admin" as const,
+      },
+      // Teacher Dashboard
+      {
+        id: "teacher-dashboard",
+        icon: LayoutDashboard,
+        label: "ផ្ទាំងគ្រប់គ្រង",
+        href: "/teacher/dashboard",
+        requiredRole: "teacher" as const,
+      },
+      // Teacher Attendance
+      {
+        id: "teacher-attendance",
+        icon: UserCheck,
+        label: "អវត្តមានសិស្ស",
+        href: "/teacher/attendance",
+        requiredRole: "teacher" as const,
+        subItems: [
+          { id: "teacher-attendance-daily", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/teacher/attendance/daily" },
+          { id: "teacher-attendance-report", label: "របាយការណ៍អវត្តមាន", href: "/teacher/attendance/report" },
+        ],
+      },
+      // Teacher Grade
+      {
+        id: "teacher-grade",
+        icon: BarChart2,
+        label: "ពិន្ទុសិស្ស",
+        href: "/teacher/grade",
+        requiredRole: "teacher" as const,
+        subItems: [
+          { id: "teacher-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/teacher/grade/report" },
+          { id: "teacher-grade-gradebook", label: "សៀវភៅតាមដាន", href: "/teacher/grade/gradebook" },
+        ],
+      },
+      // Teacher Student Info
+      {
+        id: "teacher-student-info",
+        icon: UserIcon,
+        label: "ព័ត៌មានសិស្ស",
+        href: "/teacher/student-info",
+        requiredRole: "teacher" as const,
+        subItems: [
+          { id: "teacher-student-info-list", label: "បញ្ជីឈ្មោះសិស្ស", href: "/teacher/student-info/list" },
+        ],
+      },
+      // Teacher Register Student
+      {
+        id: "teacher-register-student",
+        icon: ClipboardList,
+        label: "ចុះឈ្មោះសិស្ស",
+        href: "/teacher/register-student",
+        requiredRole: "teacher" as const,
+      },
+    ]
+
+    // Filter menu items based on user role
+    return baseItems.filter(item => {
+      if (item.requiredRole === 'admin') return isAdmin(currentUser)
+      if (item.requiredRole === 'teacher') return isTeacher(currentUser)
+      return false
     })
-  }, [pathname, menuItems, openDropdowns])
+  }, [currentUser])
 
   const toggleSidebar = useCallback(() => {
     setIsCollapsed(!isCollapsed)
@@ -114,11 +182,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
     router.push(href)
   }, [router])
 
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem("username")
-    router.push("/login")
-  }, [router])
-
   const isActive = useCallback((href: string) => {
     return pathname === href || pathname.startsWith(`${href}/`)
   }, [pathname])
@@ -129,6 +192,22 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
 
   const isDropdownOpen = useCallback((itemId: string) => 
     openDropdowns.includes(itemId), [openDropdowns])
+
+  const handleLogout = useCallback(() => {
+    logout()
+    router.push("/login")
+  }, [router])
+
+  // Auto-open dropdown for active menu items
+  useEffect(() => {
+    menuItems.forEach((item) => {
+      if (item.subItems && (isActive(item.href) || hasActiveSubItem(item.subItems))) {
+        if (!openDropdowns.includes(item.id)) {
+          setOpenDropdowns((prev) => [...prev, item.id])
+        }
+      }
+    })
+  }, [pathname, menuItems, openDropdowns, isActive, hasActiveSubItem])
 
   return (
     <div
