@@ -37,7 +37,7 @@ export const authenticateUser = async (username: string, password: string): Prom
     const dbUser = await prisma.user.findUnique({
       where: { username },
       include: {
-        assignedClasses: true
+        classes: true
       }
     })
 
@@ -58,13 +58,13 @@ export const authenticateUser = async (username: string, password: string): Prom
 
     // Update last login
     await prisma.user.update({
-      where: { id: dbUser.id },
+      where: { userId: dbUser.userId },
       data: { lastLogin: new Date() }
     })
 
     // Convert to User interface
     const user: User = {
-      id: dbUser.id,
+      id: dbUser.userId,
       username: dbUser.username,
       firstname: dbUser.firstname,
       lastname: dbUser.lastname,
@@ -76,7 +76,7 @@ export const authenticateUser = async (username: string, password: string): Prom
       lastLogin: dbUser.lastLogin || undefined,
       photo: dbUser.photo || undefined,
       status: dbUser.status,
-      assignedClass: dbUser.assignedClasses[0]?.className || undefined
+      assignedClass: dbUser.classes[0]?.courseId || undefined
     }
 
     return user
@@ -98,7 +98,7 @@ export const getAllUsers = async (): Promise<User[]> => {
         status: 'active'
       },
       include: {
-        assignedClasses: true
+        classes: true
       },
       orderBy: [
         { role: 'asc' },
@@ -107,7 +107,7 @@ export const getAllUsers = async (): Promise<User[]> => {
     })
 
     return dbUsers.map(dbUser => ({
-      id: dbUser.id,
+      id: dbUser.userId,
       username: dbUser.username,
       firstname: dbUser.firstname,
       lastname: dbUser.lastname,
@@ -119,7 +119,7 @@ export const getAllUsers = async (): Promise<User[]> => {
       lastLogin: dbUser.lastLogin || undefined,
       photo: dbUser.photo || undefined,
       status: dbUser.status,
-      assignedClass: dbUser.assignedClasses[0]?.className || undefined
+      assignedClass: dbUser.classes[0]?.courseId || undefined
     }))
   } catch (error) {
     console.error('Error fetching users:', error)

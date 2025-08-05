@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     })
 
     const userData = users.map(user => ({
-      id: user.id,
+      id: user.userId,
       username: user.username,
       firstname: user.firstname,
       lastname: user.lastname,

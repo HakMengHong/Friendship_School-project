@@ -7,11 +7,197 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// =========================
-// ENUMS
-// =========================
+model User {
+  username     String    @unique
+  password     String
+  lastname     String
+  firstname    String
+  phonenumber1 String?
+  phonenumber2 String?
+  role         String    @default("teacher")
+  avatar       String?
+  photo        String?
+  position     String?
+  status       String    @default("active")
+  lastLogin    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  userId       Int       @id @default(autoincrement())
+  courses      Course[]  @relation("ClassTeacher")
+  activityLogs ActivityLog[] @relation("ActivityLogUser")
+}
 
-// GradeType: Type of grade (exam, quiz, assignment, etc.)
+model Student {
+  lastName             String
+  firstName            String
+  gender               String
+  dob                  DateTime
+  class                String
+  photo                String?
+  phone                String?
+  email                String?
+  registrationDate     DateTime?
+  status               String?
+  religion             String?
+  health               String?
+  emergencyContact     String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  classId              Int?
+  needsClothes         Boolean?      @default(false)
+  needsMaterials       Boolean?      @default(false)
+  needsTransport       Boolean?      @default(false)
+  previousSchool       String?
+  registerToStudy      Boolean?      @default(false)
+  studentBirthDistrict String?
+  studentDistrict      String?
+  studentHouseNumber   String?
+  studentProvince      String?
+  studentVillage       String?
+  transferReason       String?
+  vaccinated           Boolean?      @default(false)
+  studentId            Int           @id @default(autoincrement())
+  schoolYear           String?
+  enrollments          Enrollment[]
+  family               FamilyInfo?
+  grades               Grade[]
+  guardians            Guardian[]
+  scholarships         Scholarship[]
+  attendances          Attendance[]
+}
+
+model Guardian {
+  studentId     Int
+  relation      String
+  phone         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  believeJesus  Boolean? @default(false)
+  birthDistrict String?
+  childrenCount Int?
+  church        String?
+  district      String?
+  firstName     String?
+  guardianId    Int      @id @default(autoincrement())
+  houseNumber   String?
+  income        Float?
+  lastName      String?
+  occupation    String?
+  province      String?
+  village       String?
+  student       Student  @relation(fields: [studentId], references: [studentId])
+}
+
+model FamilyInfo {
+  studentId        Int      @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  canHelpSchool    Boolean? @default(false)
+  churchName       String?
+  durationInKPC    String?
+  familyinfoId     Int      @id @default(autoincrement())
+  helpAmount       Float?
+  helpFrequency    String?
+  knowSchool       String?
+  livingCondition  String?
+  livingWith       String?
+  organizationHelp String?
+  ownHouse         Boolean? @default(false)
+  religion         String?
+  student          Student  @relation(fields: [studentId], references: [studentId])
+}
+
+model Scholarship {
+  studentId     Int
+  type          String?
+  amount        Float?
+  sponsor       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  scholarshipId Int      @id @default(autoincrement())
+  student       Student  @relation(fields: [studentId], references: [studentId])
+}
+
+model Course {
+  courseId     String       @id @unique
+  schoolYearId Int
+  teacherId1   Int?
+  teacherId2   Int?
+  teacherId3   Int?
+  grade        String
+  section      String
+  courseName   String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  schoolYear   SchoolYear   @relation(fields: [schoolYearId], references: [schoolYearId])
+  enrollments  Enrollment[]
+  grades       Grade[]
+  teachers     User[]       @relation("ClassTeacher")
+}
+
+model Subject {
+  subjectName String
+  credits     Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subjectCode String   @unique
+  subjectId   Int      @id @default(autoincrement())
+  grades      Grade[]
+}
+
+model Grade {
+  studentId    Int
+  subjectId    Int
+  semesterId   Int
+  gradeDate    DateTime
+  grade        Float
+  gradeComment String?
+  user         String?
+  lastEdit     DateTime?
+  gradeType    GradeType?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  gradeCode    String     @unique
+  gradeId      Int        @id @default(autoincrement())
+  courseId     String
+  course       Course     @relation(fields: [courseId], references: [courseId])
+  semester     Semester   @relation(fields: [semesterId], references: [semesterId])
+  student      Student    @relation(fields: [studentId], references: [studentId])
+  subject      Subject    @relation(fields: [subjectId], references: [subjectId])
+}
+
+model Enrollment {
+  studentId      Int
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  enrollmentCode String    @unique
+  enrollmentId   Int       @id @default(autoincrement())
+  courseId       String
+  drop           Boolean
+  dropDate       DateTime?
+  dropSemester   String?
+  course         Course    @relation(fields: [courseId], references: [courseId])
+  student        Student   @relation(fields: [studentId], references: [studentId])
+}
+
+model SchoolYear {
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  schoolyear     String
+  schoolYearCode String   @unique
+  schoolYearId   Int      @id @default(autoincrement())
+  courses        Course[]
+}
+
+model Semester {
+  semester     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  semesterCode String   @unique
+  semesterId   Int      @id @default(autoincrement())
+  grades       Grade[]
+}
+
 enum GradeType {
   exam
   quiz
@@ -20,214 +206,56 @@ enum GradeType {
   other
 }
 
-// AttendanceSession: Which session the attendance is for (AM, PM, FULL)
-enum AttendanceSession {
-  AM
-  PM
-  FULL
+// Attendance: Student attendance records
+model Attendance {
+  id           Int                @id @default(autoincrement())
+  studentId    Int
+  date         DateTime
+  session      AttendanceSession  // AM, PM, or FULL
+  status       String             // "present", "absent", "late", "excused"
+  reason       String?            // Reason for absence if applicable
+  recordedBy   String?            // Username or user ID who recorded
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  student      Student            @relation(fields: [studentId], references: [studentId])
 }
 
-// =========================
-// MODELS
-// =========================
-
-// User: Teachers and Admins only
-model User {
-  userId          Int            @id @default(autoincrement())
-  username        String         @unique // Login username
-  password        String // Hashed password
-  lastname        String
-  firstname       String
-  phonenumber1    String?
-  phonenumber2    String?
-  role            String         @default("teacher") // "teacher" or "admin"
-  avatar          String?
-  photo           String? // Profile photo URL
-  position        String? // e.g., "គ្រូបន្ទុកថ្នាក់ទី ១", "នាយក"
-  status          String         @default("active") // "active", "inactive", "suspended"
-  lastLogin       DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  // Relations
-  activityLogs    ActivityLog[]  @relation("ActivityLogUser")
-}
-
-// Student: Registered students
-model Student {
-  studentId        Int           @id @default(autoincrement())
-  lastName         String
-  firstName        String
-  gender           String
-  dob              DateTime
-  // Address fields (flat)
-  studentHouseNumber String?
-  studentVillage     String?
-  studentDistrict    String?
-  studentProvince    String?
-  studentBirthDistrict String?
-  // Registration and class
-  class            String
-  academicYear     String
-  registrationDate DateTime
-  registerToStudy  Boolean?      @default(false)
-  // Contact
-  photo            String?
-  phone            String?
-  email            String?
-  // Status and health
-  status           String? // e.g., "active", "dropped", "graduated"
-  religion         String?
-  health           String?
-  emergencyContact String?
-  vaccinated       Boolean?      @default(false)
-  // Study info
-  previousSchool   String?
-  transferReason   String?
-  // Needs (checkboxes)
-  needsClothes     Boolean?      @default(false)
-  needsMaterials   Boolean?      @default(false)
-  needsTransport   Boolean?      @default(false)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  // Relations
-  guardians        Guardian[]
-  scholarships     Scholarship[]
-  family           FamilyInfo?
-  classObj         Class?        @relation(fields: [classId], references: [id])
-  classId          Int?
-}
-
-// Guardian: Parent/guardian info for students
-model Guardian {
-  guardianid       Int      @id @default(autoincrement())
-  studentId        Int
-  // Name fields (flat)
-  lastName         String?
-  firstName        String?
-  // Relation and contact
-  relation         String // e.g., "father", "mother", "guardian"
-  phone            String?
-  email            String?
-  // Address fields (flat)
-  houseNumber      String?
-  village          String?
-  district         String?
-  province         String?
-  birthDistrict    String?
-  // Other info
-  occupation       String?
-  income           Float?
-  childrenCount    Int?
-  believeJesus     Boolean? @default(false)
-  church           String?
-  address          String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  student          Student  @relation(fields: [studentId], references: [studentId])
-}
-
-// FamilyInfo: Detailed family data for students (optional)
-model FamilyInfo {
-  id              Int      @id @default(autoincrement())
-  studentId       Int      @unique
-  // Family situation fields (flat)
-  livingWith      String?
-  ownHouse        Boolean? @default(false)
-  durationInKPC   String?
-  livingCondition String?
-  organizationHelp String?
-  knowSchool      String?
-  religion        String?
-  churchName      String?
-  canHelpSchool   Boolean? @default(false)
-  helpAmount      Float?
-  helpFrequency   String?
-  // Legacy/compatibility fields
-  fatherName      String?
-  motherName      String?
-  siblings        Int?
-  fatherPhone     String?
-  motherPhone     String?
-  address         String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  student         Student  @relation(fields: [studentId], references: [studentId])
-}
-
-// Scholarship: Scholarships awarded to students (optional)
-model Scholarship {
+// ActivityLog: Audit/history of user actions
+model ActivityLog {
   id        Int      @id @default(autoincrement())
-  studentId Int
-  type      String?
-  amount    Float?
-  sponsor   String?
+  userId    Int
+  action    String   // e.g., "login", "create_student", "update_grade"
+  details   String?  // JSON or text details
+  timestamp DateTime @default(now())
+  user      User     @relation("ActivityLogUser", fields: [userId], references: [userId])
+}
+
+// Announcement: School news/events
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  author    String   // Username or user ID
+  published Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  student   Student  @relation(fields: [studentId], references: [id])
 }
 
-// Course: School courses/classes
-model Course {
+// File: Uploads (student photos, documents, etc.)
+model File {
   id           Int      @id @default(autoincrement())
-  courseId     String   @unique // School-issued course code
-  schoolYearId Int
-  teacherId1   Int?
-  teacherId2   Int?
-  teacherId3   Int?
-  grade        String
-  section      String
-  courseName   String
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+  uploadedBy   String?  // Username or user ID
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
-// Subject: Subjects taught in school
-model Subject {
-  id          Int      @id @default(autoincrement())
-  subjectId   String   @unique // School-issued subject code
-  subjectName String
-  credits     Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// Grade: Student grades per subject/course/semester
-model Grade {
-  id           Int        @id @default(autoincrement())
-  gradeId      String     @unique // School-issued grade record code
-  courseId     Int
-  studentId    Int
-  subjectId    Int
-  semesterId   Int
-  gradeDate    DateTime
-  grade        Float
-  gradeComment String?
-  user         String? // Username or user ID who recorded/edited
-  lastEdit     DateTime?
-  gradeType    GradeType? // Type of grade (exam, quiz, etc.)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-}
-
-// Enrollment: Student enrollment in courses
-model Enrollment {
-  id            Int       @id @default(autoincrement())
-  enrollmentId  String    @unique // School-issued enrollment code
-  courseId      Int
-  studentId     Int
-  droup         Boolean // true if dropped, false if still enrolled
-  droupSemester String? // Semester in which the student dropped
-  droupDate     DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-
-// Class: School classes/groups
-model Class {
-  id        Int       @id @default(autoincrement())
-  className String    @unique // e.g., "7A", "8B"
-  grade     String
-  section   String?
-  students  Student[]
-  teachers  User[]    @relation("ClassTeacher")
+enum AttendanceSession {
+  AM
+  PM
+  FULL
 }

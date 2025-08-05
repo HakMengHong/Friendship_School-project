@@ -40,147 +40,587 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from '@/hooks/use-toast';
-
-function getAgeString(dob: string): string {
-  if (!dob) return '';
-  const birth = new Date(dob);
-  const today = new Date();
-  let years = today.getFullYear() - birth.getFullYear();
-  let months = today.getMonth() - birth.getMonth();
-  let days = today.getDate() - birth.getDate();
-  if (days < 0) {
-    months -= 1;
-    const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-    days += prevMonth.getDate();
-  }
-  if (months < 0) {
-    years -= 1;
-    months += 12;
-  }
-  return `${years}ឆ្នាំ ${months}ខែ​ ${days}ថ្ងៃ`;
-}
+import { useToast } from "@/hooks/use-toast"
 
 export default function RegisterStudentPage() {
   const [studentName, setStudentName] = useState("")
-  const [selectedStudent, setSelectedStudent] = useState<any>(null)
+  const [selectedStudent, setSelectedStudent] = useState<any>({
+    id: 'new',
+    lastName: '',
+    firstName: '',
+    class: '',
+    dob: '',
+    gender: '',
+    studentId: ''
+  })
   const [activeTab, setActiveTab] = useState("basic")
   const [guardianForms, setGuardianForms] = useState([0]); // Start with one form
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showForm, setShowForm] = useState(false)
-  const [isNewStudent, setIsNewStudent] = useState(false)
-  const { toast } = useToast();
-  const [students, setStudents] = useState<any[]>([]);
-  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [showForm, setShowForm] = useState(true) // Show form by default
+  const [isNewStudent, setIsNewStudent] = useState(true) // Set to true by default
+  const [students, setStudents] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
 
-  // Fetch students from the database
-  const fetchStudents = async () => {
-    setLoadingStudents(true);
-    const res = await fetch('/api/students');
-    const data = await res.json();
-    setStudents(data.students || []);
-    setLoadingStudents(false);
-  };
+  // Form state for new student
+  const [formData, setFormData] = useState({
+    // ===== BASIC INFORMATION =====
+    // Personal Details
+    lastName: '',
+    firstName: '',
+    gender: '',
+    dob: '',
+    age: '',
+    studentId: '',
+    
+    // Academic Information
+    class: '',
+    registerToStudy: false,
+    previousSchool: '',
+    transferReason: '',
+    
+    // ===== ADDRESS & CONTACT =====
+    // Student Address
+    studentHouseNumber: '',
+    studentVillage: '',
+    studentDistrict: '',
+    studentProvince: '',
+    studentBirthDistrict: '',
+    
+    // Contact Information
+    phone: '',
+    emergencyContact: '',
+    
+    // ===== HEALTH & RELIGION =====
+    // Health Information
+    health: '',
+    vaccinated: false,
+    
+    // Religious Information
+    religion: '',
+    
+    // ===== SCHOOL NEEDS =====
+    // Material Needs
+    needsClothes: false,
+    needsMaterials: false,
+    needsTransport: false,
+    
+    // Guardians
+    guardians: [{
+      firstName: '',
+      lastName: '',
+      relation: '',
+      phone: '',
+      occupation: '',
+      income: '',
+      childrenCount: '',
+      houseNumber: '',
+      village: '',
+      district: '',
+      province: '',
+      birthDistrict: '',
+      believeJesus: false,
+      church: ''
+    }],
+    
+    // Family info
+    familyInfo: {
+      livingWith: '',
+      ownHouse: false,
+      durationInKPC: '',
+      livingCondition: '',
+      organizationHelp: '',
+      knowSchool: '',
+      religion: '',
+      churchName: '',
+      canHelpSchool: false,
+      helpAmount: '',
+      helpFrequency: ''
+    }
+  })
 
+  // Function to generate next student ID
+  const generateNextStudentId = async () => {
+    try {
+      const response = await fetch('/api/students/next-id')
+      const data = await response.json()
+      return data.nextStudentId
+    } catch (error) {
+      console.error('Error generating student ID:', error)
+      // Fallback: generate simple number based on current students count
+      const nextId = students.length + 1
+      return nextId.toString()
+    }
+  }
+
+  // Function to generate simple numeric student ID
+  const generateSimpleStudentId = () => {
+    // Generate simple number based on current students count + 1
+    const nextId = students.length + 1;
+    return nextId.toString();
+  }
+
+  // Fetch students from API
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch('/api/students')
+        const data = await response.json()
+        setStudents(data.students || [])
+      } catch (error) {
+        console.error('Error fetching students:', error)
+        toast({
+          title: "Error",
+          description: "Failed to fetch students",
+          variant: "destructive"
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStudents()
+  }, [toast])
+
+
 
   const addGuardianForm = () => {
     setGuardianForms([...guardianForms, guardianForms.length]);
+    setFormData(prev => ({
+      ...prev,
+      guardians: [...prev.guardians, {
+        firstName: '',
+        lastName: '',
+        relation: '',
+        phone: '',
+        occupation: '',
+        income: '',
+        childrenCount: '',
+        houseNumber: '',
+        village: '',
+        district: '',
+        province: '',
+        birthDistrict: '',
+        believeJesus: false,
+        church: ''
+      }]
+    }));
   };
 
   const removeGuardianForm = (indexToRemove: number) => {
     setGuardianForms(guardianForms.filter(index => index !== indexToRemove));
+    setFormData(prev => ({
+      ...prev,
+      guardians: prev.guardians.filter((_, index) => index !== indexToRemove)
+    }));
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    // Map form state to payload
-    const payload = {
-      student: {
-        lastName: selectedStudent.lastName,
-        firstName: selectedStudent.firstName,
-        dob: selectedStudent.dob,
-        gender: selectedStudent.gender,
-        class: selectedStudent.class,
-        // Add other fields as needed
-      },
-      guardians: selectedStudent.guardians || [], // or guardianForms state if you use it
-      familyInfo: selectedStudent.familyInfo || {},
-      scholarships: selectedStudent.scholarships || [],
+    // Validate required fields
+    const requiredFields = {
+      lastName: formData.lastName,
+      firstName: formData.firstName,
+      gender: formData.gender,
+      dob: formData.dob,
+      class: formData.class
     };
-    try {
-      let res, data;
-      if (isNewStudent) {
-        // Create new student
-        res = await fetch('/api/students', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      } else {
-        // Update existing student
-        res = await fetch(`/api/students/${selectedStudent.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      }
-      data = await res.json();
-      setIsSubmitting(false);
-      if (res.ok) {
-        toast({ title: 'ជោគជ័យ', description: 'សិស្សត្រូវបានរក្សាទុក', variant: 'default' });
-        setShowForm(false);
-        setSelectedStudent(null);
-        setIsNewStudent(false);
-        fetchStudents(); // Refresh the list
-      } else {
-        toast({ title: 'បរាជ័យ', description: data.error || 'មានបញ្ហា', variant: 'destructive' });
-      }
-    } catch (err) {
-      setIsSubmitting(false);
-      toast({ title: 'បរាជ័យ', description: 'មានបញ្ហាក្នុងការផ្ញើទិន្នន័យ', variant: 'destructive' });
-    }
-  };
 
-  // Helper to calculate grade from DOB
-  const calculateGrade = (dob: string) => {
-    if (!dob) return '';
-    const dobYear = new Date(dob).getFullYear();
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - dobYear;
-    if (age < 6) return '';
-    return `${age - 5}`; // Grade 1 for age 6, Grade 2 for age 7, etc.
-  };
+    const missingFields = Object.entries(requiredFields)
+      .filter(([key, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      toast({
+        title: "Validation Error",
+        description: `Please fill in required fields: ${missingFields.join(', ')}`,
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Determine if this is a new student or updating existing
+      const isNewStudent = !selectedStudent?.studentId || selectedStudent?.studentId === 'new';
+      const url = isNewStudent ? '/api/students' : `/api/students/${selectedStudent.studentId}`;
+      const method = isNewStudent ? 'POST' : 'PUT';
+      
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          student: {
+            lastName: formData.lastName,
+            firstName: formData.firstName,
+            gender: formData.gender,
+            dob: formData.dob,
+            class: formData.class,
+            registerToStudy: formData.registerToStudy,
+            studentHouseNumber: formData.studentHouseNumber,
+            studentVillage: formData.studentVillage,
+            studentDistrict: formData.studentDistrict,
+            studentProvince: formData.studentProvince,
+            studentBirthDistrict: formData.studentBirthDistrict,
+            phone: formData.phone,
+
+            religion: formData.religion,
+            health: formData.health,
+            emergencyContact: formData.emergencyContact,
+            vaccinated: formData.vaccinated,
+            previousSchool: formData.previousSchool,
+            transferReason: formData.transferReason,
+            needsClothes: formData.needsClothes,
+            needsMaterials: formData.needsMaterials,
+            needsTransport: formData.needsTransport,
+            registrationDate: new Date().toISOString(),
+            status: 'active'
+          },
+          guardians: formData.guardians.filter(guardian => 
+            guardian.firstName || guardian.lastName || guardian.relation || guardian.phone
+          ),
+          familyInfo: formData.familyInfo
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        const isNewStudent = !selectedStudent?.studentId || selectedStudent?.studentId === 'new';
+        toast({
+          title: "Success",
+          description: isNewStudent ? "Student registered successfully" : "Student updated successfully",
+        })
+        // Reset form
+        setFormData({
+          // ===== BASIC INFORMATION =====
+          // Personal Details
+          lastName: '',
+          firstName: '',
+          gender: '',
+          dob: '',
+          age: '',
+          studentId: '',
+          
+          // Academic Information
+          class: '',
+          registerToStudy: false,
+          previousSchool: '',
+          transferReason: '',
+          
+          // ===== ADDRESS & CONTACT =====
+          // Student Address
+          studentHouseNumber: '',
+          studentVillage: '',
+          studentDistrict: '',
+          studentProvince: '',
+          studentBirthDistrict: '',
+          
+          // Contact Information
+          phone: '',
+          emergencyContact: '',
+          
+          // ===== HEALTH & RELIGION =====
+          // Health Information
+          health: '',
+          vaccinated: false,
+          
+          // Religious Information
+          religion: '',
+          
+          // ===== SCHOOL NEEDS =====
+          // Material Needs
+          needsClothes: false,
+          needsMaterials: false,
+          needsTransport: false,
+          guardians: [{
+            firstName: '',
+            lastName: '',
+            relation: '',
+            phone: '',
+            occupation: '',
+            income: '',
+            childrenCount: '',
+            houseNumber: '',
+            village: '',
+            district: '',
+            province: '',
+            birthDistrict: '',
+            believeJesus: false,
+            church: ''
+          }],
+          familyInfo: {
+            livingWith: '',
+            ownHouse: false,
+            durationInKPC: '',
+            livingCondition: '',
+            organizationHelp: '',
+            knowSchool: '',
+            religion: '',
+            churchName: '',
+            canHelpSchool: false,
+            helpAmount: '',
+            helpFrequency: ''
+          }
+        })
+        setShowForm(false)
+        setSelectedStudent(null)
+        setIsNewStudent(false)
+        // Refresh students list
+        const studentsResponse = await fetch('/api/students')
+        const studentsData = await studentsResponse.json()
+        setStudents(studentsData.students || [])
+      } else {
+        throw new Error('Failed to register student')
+      }
+    } catch (error) {
+      console.error('Error registering student:', error)
+      toast({
+        title: "Error",
+        description: "Failed to register student",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const handleNewStudent = () => {
     setSelectedStudent({
-      id: undefined, // Will be set by DB after creation
+      id: 'new',
       lastName: '',
       firstName: '',
       class: '',
       dob: '',
       gender: '',
+      studentId: ''
+    })
+    
+    // Reset form data for new student
+    setFormData({
+      // ===== BASIC INFORMATION =====
+      // Personal Details
+      lastName: '',
+      firstName: '',
+      gender: '',
+      dob: '',
       age: '',
-      // Add other fields as needed
-    });
-    setIsNewStudent(true);
-    setShowForm(true);
-    setActiveTab('basic');
-  };
+      studentId: '',
+      
+      // Academic Information
+      class: '',
+      registerToStudy: false,
+      previousSchool: '',
+      transferReason: '',
+      
+      // ===== ADDRESS & CONTACT =====
+      // Student Address
+      studentHouseNumber: '',
+      studentVillage: '',
+      studentDistrict: '',
+      studentProvince: '',
+      studentBirthDistrict: '',
+      
+      // Contact Information
+      phone: '',
+      emergencyContact: '',
+      
+      // ===== HEALTH & RELIGION =====
+      // Health Information
+      health: '',
+      vaccinated: false,
+      
+      // Religious Information
+      religion: '',
+      
+      // ===== SCHOOL NEEDS =====
+      // Material Needs
+      needsClothes: false,
+      needsMaterials: false,
+      needsTransport: false,
+      guardians: [{
+        firstName: '',
+        lastName: '',
+        relation: '',
+        phone: '',
+        occupation: '',
+        income: '',
+        childrenCount: '',
+        houseNumber: '',
+        village: '',
+        district: '',
+        province: '',
+        birthDistrict: '',
+        believeJesus: false,
+        church: ''
+      }],
+      familyInfo: {
+        livingWith: '',
+        ownHouse: false,
+        durationInKPC: '',
+        livingCondition: '',
+        organizationHelp: '',
+        knowSchool: '',
+        religion: '',
+        churchName: '',
+        canHelpSchool: false,
+        helpAmount: '',
+        helpFrequency: ''
+      }
+    })
+    
+    setIsNewStudent(true)
+    setShowForm(true)
+    setActiveTab("basic")
+  }
 
   const handleSelectStudent = (student: any) => {
     setSelectedStudent(student)
     setIsNewStudent(false)
     setShowForm(true)
     setActiveTab("basic")
+    
+    // Calculate age from DOB
+    let ageString = '';
+    if (student.dob) {
+      const birthDate = new Date(student.dob);
+      const today = new Date();
+      
+      let years = today.getFullYear() - birthDate.getFullYear();
+      let months = today.getMonth() - birthDate.getMonth();
+      let days = today.getDate() - birthDate.getDate();
+      
+      if (days < 0) {
+        months--;
+        const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, birthDate.getDate());
+        days = Math.floor((today.getTime() - lastMonth.getTime()) / (1000 * 60 * 60 * 24));
+      }
+      
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+      
+      ageString = `${years} ឆ្នាំ ${months} ខែ ${days} ថ្ងៃ`;
+    }
+    
+    // Populate form with student data
+    setFormData({
+      // ===== BASIC INFORMATION =====
+      // Personal Details
+      lastName: student.lastName || '',
+      firstName: student.firstName || '',
+      gender: student.gender || '',
+      dob: student.dob ? new Date(student.dob).toISOString().split('T')[0] : '',
+      age: ageString,
+      studentId: student.studentId?.toString() || '',
+      
+      // Academic Information
+      class: student.class || '',
+      registerToStudy: student.registerToStudy || false,
+      previousSchool: student.previousSchool || '',
+      transferReason: student.transferReason || '',
+      
+      // ===== ADDRESS & CONTACT =====
+      // Student Address
+      studentHouseNumber: student.studentHouseNumber || '',
+      studentVillage: student.studentVillage || '',
+      studentDistrict: student.studentDistrict || '',
+      studentProvince: student.studentProvince || '',
+      studentBirthDistrict: student.studentBirthDistrict || '',
+      
+      // Contact Information
+      phone: student.phone || '',
+      emergencyContact: student.emergencyContact || '',
+      
+      // ===== HEALTH & RELIGION =====
+      // Health Information
+      health: student.health || '',
+      vaccinated: student.vaccinated || false,
+      
+      // Religious Information
+      religion: student.religion || '',
+      
+      // ===== SCHOOL NEEDS =====
+      // Material Needs
+      needsClothes: student.needsClothes || false,
+      needsMaterials: student.needsMaterials || false,
+      needsTransport: student.needsTransport || false,
+      
+      // Guardians (load from student.guardians if available)
+      guardians: student.guardians && student.guardians.length > 0 ? student.guardians.map((guardian: any) => ({
+        firstName: guardian.firstName || '',
+        lastName: guardian.lastName || '',
+        relation: guardian.relation || '',
+        phone: guardian.phone || '',
+        occupation: guardian.occupation || '',
+        income: guardian.income?.toString() || '',
+        childrenCount: guardian.childrenCount?.toString() || '',
+        houseNumber: guardian.houseNumber || '',
+        village: guardian.village || '',
+        district: guardian.district || '',
+        province: guardian.province || '',
+        birthDistrict: guardian.birthDistrict || '',
+        believeJesus: guardian.believeJesus || false,
+        church: guardian.church || ''
+      })) : [{
+        firstName: '',
+        lastName: '',
+        relation: '',
+        phone: '',
+        occupation: '',
+        income: '',
+        childrenCount: '',
+        houseNumber: '',
+        village: '',
+        district: '',
+        province: '',
+        birthDistrict: '',
+        believeJesus: false,
+        church: ''
+      }],
+      
+      // Family info (load from student.family if available)
+      familyInfo: student.family ? {
+        livingWith: student.family.livingWith || '',
+        ownHouse: student.family.ownHouse || false,
+        durationInKPC: student.family.durationInKPC || '',
+        livingCondition: student.family.livingCondition || '',
+        organizationHelp: student.family.organizationHelp || '',
+        knowSchool: student.family.knowSchool || '',
+        religion: student.family.religion || '',
+        churchName: student.family.churchName || '',
+        canHelpSchool: student.family.canHelpSchool || false,
+        helpAmount: student.family.helpAmount?.toString() || '',
+        helpFrequency: student.family.helpFrequency || ''
+      } : {
+        livingWith: '',
+        ownHouse: false,
+        durationInKPC: '',
+        livingCondition: '',
+        organizationHelp: '',
+        knowSchool: '',
+        religion: '',
+        churchName: '',
+        canHelpSchool: false,
+        helpAmount: '',
+        helpFrequency: ''
+      }
+    })
+    
+    // Update guardian forms count based on loaded guardians
+    if (student.guardians && student.guardians.length > 0) {
+      setGuardianForms(Array.from({ length: student.guardians.length }, (_, i) => i));
+    } else {
+      setGuardianForms([0]);
+    }
   }
 
   const filteredStudents = students.filter(student => {
     if (!studentName) return true
     const searchTerm = studentName.toLowerCase()
-    const fullName = `${student.lastName} ${student.firstName}`.toLowerCase()
+    const fullName = `${student.lastName || ''} ${student.firstName || ''}`.toLowerCase()
     return fullName.includes(searchTerm)
   })
 
@@ -235,33 +675,36 @@ export default function RegisterStudentPage() {
               </div>
 
               <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
-                {loadingStudents ? (
-                  <div className="text-center py-12 text-muted-foreground">កំពុងផ្ទុក...</div>
-                ) : students.length > 0 ? (
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">កំពុងផ្ទុក...</p>
+                  </div>
+                ) : filteredStudents.length > 0 ? (
                   <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {students.map(student => (
+                    {filteredStudents.map(student => (
                       <div
-                        key={student.id}
+                        key={student.studentId}
                         onClick={() => handleSelectStudent(student)}
                         className={`p-4 cursor-pointer transition-colors duration-150 ${
-                          selectedStudent?.id === student.id 
+                          selectedStudent?.studentId === student.studentId 
                             ? 'bg-blue-50 dark:bg-blue-900/20 border-r-4 border-r-blue-600' 
                             : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                         }`}
                       >
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                            {student.firstName.charAt(0)}{student.lastName.charAt(0)}
+                            {student.firstName?.charAt(0) || ''}{student.lastName?.charAt(0) || ''}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-900 dark:text-white truncate">
                               {student.lastName} {student.firstName}
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                              ថ្នាក់ {student.class} • ID: {student.id}
+                              ថ្នាក់ {student.class} • ID: {student.studentId}
                             </p>
                           </div>
-                          {selectedStudent?.id === student.id && (
+                          {selectedStudent?.studentId === student.studentId && (
                             <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                           )}
                         </div>
@@ -324,10 +767,13 @@ export default function RegisterStudentPage() {
                               <Label htmlFor="last-name">នាមត្រកូល</Label>
                               <Input 
                                 id="last-name" 
-                                value={selectedStudent?.lastName || ""} 
-                                onChange={(e) => setSelectedStudent({...selectedStudent, lastName: e.target.value})}
+                                value={formData.lastName} 
+                                onChange={(e) => {
+                                  const lastName = e.target.value;
+                                  setFormData({...formData, lastName: lastName});
+                                }}
                                 placeholder="នាមត្រកូល" 
-                                className="h-11"
+                                className="h-11 text-center"
                               />
                             </div>
 
@@ -336,10 +782,13 @@ export default function RegisterStudentPage() {
                               <Label htmlFor="first-name">នាមខ្លួន</Label>
                               <Input 
                                 id="first-name" 
-                                value={selectedStudent?.firstName || ""} 
-                                onChange={(e) => setSelectedStudent({...selectedStudent, firstName: e.target.value})}
+                                value={formData.firstName} 
+                                onChange={(e) => {
+                                  const firstName = e.target.value;
+                                  setFormData({...formData, firstName: firstName});
+                                }}
                                 placeholder="នាមខ្លួន" 
-                                className="h-11"
+                                className="h-11 text-center"
                               />
                             </div>
 
@@ -347,10 +796,10 @@ export default function RegisterStudentPage() {
                             <div className="space-y-1">
                               <Label htmlFor="gender">ភេទ</Label>
                               <Select
-                                value={selectedStudent?.gender || ""}
-                                onValueChange={(value) => setSelectedStudent({...selectedStudent, gender: value})}
+                                value={formData.gender}
+                                onValueChange={(value) => setFormData({...formData, gender: value})}
                               >
-                                <SelectTrigger id="gender" className="h-11">
+                                <SelectTrigger id="gender" className="h-11 text-center">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -366,19 +815,38 @@ export default function RegisterStudentPage() {
                               <Input 
                                 type="date" 
                                 id="dob" 
-                                value={selectedStudent?.dob || ""} 
-                                onChange={e => {
+                                value={formData.dob} 
+                                onChange={(e) => {
                                   const dob = e.target.value;
-                                  const grade = calculateGrade(dob);
-                                  const age = getAgeString(dob);
-                                  setSelectedStudent({
-                                    ...selectedStudent,
-                                    dob,
-                                    class: grade,
-                                    age,
-                                  });
+                                  setFormData({...formData, dob: dob});
+                                  // Auto-calculate detailed age if DOB is provided
+                                  if (dob) {
+                                    const birthDate = new Date(dob);
+                                    const today = new Date();
+                                    
+                                    // Calculate years, months, and days
+                                    let years = today.getFullYear() - birthDate.getFullYear();
+                                    let months = today.getMonth() - birthDate.getMonth();
+                                    let days = today.getDate() - birthDate.getDate();
+                                    
+                                    // Adjust for negative months/days
+                                    if (days < 0) {
+                                      months--;
+                                      const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, birthDate.getDate());
+                                      days = Math.floor((today.getTime() - lastMonth.getTime()) / (1000 * 60 * 60 * 24));
+                                    }
+                                    
+                                    if (months < 0) {
+                                      years--;
+                                      months += 12;
+                                    }
+                                    
+                                    // Format as "Xឆ្នាំ Yខែ Zថ្ងៃ"
+                                    const ageString = `${years} ឆ្នាំ ${months} ខែ ${days} ថ្ងៃ`;
+                                    setFormData(prev => ({...prev, age: ageString}));
+                                  }
                                 }}
-                                className="h-11"
+                                className="h-11 text-center"
                               />
                             </div>
 
@@ -387,9 +855,10 @@ export default function RegisterStudentPage() {
                               <Label htmlFor="age">អាយុ</Label>
                               <Input 
                                 id="age" 
-                                value={selectedStudent?.age || ''}
-                                readOnly
-                                className="h-11 bg-muted/50 cursor-not-allowed"
+                                value={formData.age || ""}
+                                onChange={(e) => setFormData({...formData, age: e.target.value})}
+                                placeholder="អាយុ" 
+                                className="h-11 text-center"
                               />
                             </div>
 
@@ -397,10 +866,12 @@ export default function RegisterStudentPage() {
                             <div className="space-y-1">
                               <Label htmlFor="class">ចូលរៀនថ្នាក់ទី</Label>
                               <Select
-                                value={selectedStudent?.class || ""}
-                                onValueChange={(value) => setSelectedStudent({...selectedStudent, class: value})}
+                                value={formData.class}
+                                onValueChange={(value) => {
+                                  setFormData({...formData, class: value});
+                                }}
                               >
-                                <SelectTrigger id="class" className="h-11">
+                                <SelectTrigger id="class" className="h-11 text-center">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -413,7 +884,11 @@ export default function RegisterStudentPage() {
                             
                             {/* Register to Study Checkbox */}
                             <div className="flex flex-col items-center justify-center space-y-1">
-                              <Checkbox id="register-to-study" />
+                              <Checkbox 
+                                id="register-to-study" 
+                                checked={formData.registerToStudy}
+                                onCheckedChange={(checked) => setFormData({...formData, registerToStudy: checked as boolean})}
+                              />
                               <Label htmlFor="register-to-study">ចុះឈ្មោះចូលរៀន?</Label>
                             </div>
                             
@@ -421,7 +896,7 @@ export default function RegisterStudentPage() {
                             <div className="space-y-1">
                               <Label>លេខសំគាល់សិស្ស (ID)</Label>
                               <div className="text-4xl h-11 flex items-center justify-center font-bold bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
-                                {selectedStudent?.id || "N/A"}
+                              {isNewStudent ? formData.studentId || "NEW" : selectedStudent?.studentId || "N/A"}
                               </div>
                             </div>
                           </div>
@@ -441,32 +916,108 @@ export default function RegisterStudentPage() {
                             {/* House Number */}
                             <div className="space-y-1">
                               <Label htmlFor="student-house-number">ផ្ទះលេខ</Label>
-                              <Input id="student-house-number" placeholder="ផ្ទះលេខ" className="h-11" />
+                              <Input 
+                                id="student-house-number" 
+                                placeholder="ផ្ទះលេខ" 
+                                value={formData.studentHouseNumber}
+                                onChange={(e) => setFormData({...formData, studentHouseNumber: e.target.value})}
+                                className="h-11 text-center" 
+                              />
                             </div>
 
                             {/* Village */}
                             <div className="space-y-1">
                               <Label htmlFor="student-village">ភូមិ/សង្កាត់</Label>
-                              <Input id="student-village" placeholder="ភូមិ/សង្កាត់" className="h-11" />
+                              <Input 
+                                id="student-village" 
+                                placeholder="ភូមិ/សង្កាត់" 
+                                value={formData.studentVillage}
+                                onChange={(e) => setFormData({...formData, studentVillage: e.target.value})}
+                                className="h-11 text-center" 
+                              />
                             </div>
 
                             {/* District */}
                             <div className="space-y-1">
                               <Label htmlFor="student-district">ស្រុក/ខណ្ឌ</Label>
-                              <Input id="student-district" placeholder="ស្រុក/ខណ្ឌ" className="h-11" />
+                              <Input 
+                                id="student-district" 
+                                placeholder="ស្រុក/ខណ្ឌ" 
+                                value={formData.studentDistrict}
+                                onChange={(e) => setFormData({...formData, studentDistrict: e.target.value})}
+                                className="h-11 text-center" 
+                              />
                             </div>
 
                             {/* Province */}
                             <div className="space-y-1">
                               <Label htmlFor="student-province">ខេត្ត/ក្រុង</Label>
-                              <Input id="student-province" placeholder="ខេត្ត/ក្រុង" className="h-11" />
+                              <Input 
+                                id="student-province" 
+                                placeholder="ខេត្ត/ក្រុង" 
+                                value={formData.studentProvince}
+                                onChange={(e) => setFormData({...formData, studentProvince: e.target.value})}
+                                className="h-11 text-center" 
+                              />
                             </div>
 
                             {/* Birth District */}
                             <div className="space-y-1 col-span-4">
                               <Label htmlFor="student-birth-district">ស្រុកកំណើត</Label>
-                              <Input id="student-birth-district" placeholder="ស្រុកកំណើត" className="h-11" />
+                              <Input 
+                                id="student-birth-district" 
+                                placeholder="ស្រុកកំណើត" 
+                                value={formData.studentBirthDistrict}
+                                onChange={(e) => setFormData({...formData, studentBirthDistrict: e.target.value})}
+                                className="h-11 text-center" 
+                              />
                             </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Contact Information Card */}
+                      <Card className="hover:shadow-lg transition-all duration-200">
+                        <CardHeader>
+                          <CardTitle className="flex items-center space-x-2">
+                            <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            <span>ព័ត៌មានបន្ថែម</span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                            {/* Phone */}
+                            <div className="space-y-1">
+                              <Label htmlFor="phone">លេខទូរស័ព្ទទំនាក់ទំនងគោល</Label>
+                              <Input 
+                                id="phone" 
+                                type="tel"
+                                placeholder="012 XXX XXX" 
+                                value={formData.phone}
+                                onChange={(e) => {
+                                  // Only allow numbers and spaces
+                                  const value = e.target.value.replace(/[^0-9\s]/g, '');
+                                  // Limit to 12 characters (including spaces)
+                                  if (value.length <= 12) {
+                                    setFormData({...formData, phone: value});
+                                  }
+                                }}
+                                className="h-11 text-center" 
+                              />
+                            </div>
+
+                            {/* Vaccination Status */}
+                            <div className="flex flex-col items-center justify-center space-y-1 col-span-3">
+                              <Checkbox 
+                                id="vaccinated" 
+                                checked={formData.vaccinated || false}
+                                onCheckedChange={(checked) => setFormData({...formData, vaccinated: checked as boolean})}
+                              />
+                              <Label htmlFor="vaccinated" className="cursor-pointer text-center">
+                                តើសិស្សបានទទួលវ៉ាក់សាំងគ្រប់គ្រាន់ហើយឬនៅ?
+                              </Label>
+                            </div>
+
                           </div>
                         </CardContent>
                       </Card>
@@ -499,21 +1050,48 @@ export default function RegisterStudentPage() {
                           </CardHeader>
                           <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
-                              {/* Guardian's Name */}
+                              {/* Family's Name */}
                               <div className="space-y-1">
-                                <Label htmlFor={`guardian-first-name-${formIndex}`}>នាមត្រកូល</Label>
-                                <Input id={`guardian-first-name-${formIndex}`} placeholder="នាមត្រកូល" className="h-11" />
+                                <Label htmlFor={`family-first-name-${formIndex}`}>នាមត្រកូល</Label>
+                                <Input 
+                                  id={`family-first-name-${formIndex}`} 
+                                  placeholder="នាមត្រកូល" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.firstName || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], firstName: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
                               <div className="space-y-1">
-                                <Label htmlFor={`guardian-last-name-${formIndex}`}>នាមខ្លួន</Label>
-                                <Input id={`guardian-last-name-${formIndex}`} placeholder="នាមខ្លួន" className="h-11" />
+                                <Label htmlFor={`family-last-name-${formIndex}`}>នាមខ្លួន</Label>
+                                <Input 
+                                  id={`family-last-name-${formIndex}`} 
+                                  placeholder="នាមខ្លួន" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.lastName || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], lastName: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
 
                               {/* Guardian Info */}
                               <div className="space-y-1">
                                 <Label htmlFor={`guardian-relation-${formIndex}`}>ត្រូវជា</Label>
-                                <Select>
-                                  <SelectTrigger id={`guardian-relation-${formIndex}`} className="h-11">
+                                <Select
+                                  value={formData.guardians[formIndex]?.relation || ''}
+                                  onValueChange={(value) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], relation: value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                >
+                                  <SelectTrigger id={`guardian-relation-${formIndex}`} className="h-11 text-center">
                                     <SelectValue placeholder="ជ្រើសរើស" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -527,55 +1105,180 @@ export default function RegisterStudentPage() {
                               {/* Contact Info */}
                               <div className="space-y-1">
                                 <Label htmlFor={`phone-${formIndex}`}>លេខទូរស័ព្ទ</Label>
-                                <Input id={`phone-${formIndex}`} placeholder="លេខទូរស័ព្ទ" className="h-11" />
+                                <Input 
+                                  id={`phone-${formIndex}`} 
+                                  type="tel"
+                                  placeholder="012 XXX XXX" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.phone || ''}
+                                  onChange={(e) => {
+                                    // Only allow numbers and spaces
+                                    const value = e.target.value.replace(/[^0-9\s]/g, '');
+                                    // Limit to 12 characters (including spaces)
+                                    if (value.length <= 12) {
+                                      const newGuardians = [...formData.guardians];
+                                      newGuardians[formIndex] = { ...newGuardians[formIndex], phone: value };
+                                      setFormData({ ...formData, guardians: newGuardians });
+                                    }
+                                  }}
+                                />
                               </div>
 
                               {/* Occupation */}
                               <div className="space-y-1">
                                 <Label htmlFor={`occupation-${formIndex}`}>មុខរបរ</Label>
-                                <Input id={`occupation-${formIndex}`} placeholder="មុខរបរ" className="h-11" />
+                                <Input 
+                                  id={`occupation-${formIndex}`} 
+                                  placeholder="មុខរបរ" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.occupation || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], occupation: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
                               <div className="space-y-1">
                                 <Label htmlFor={`income-${formIndex}`}>ប្រាក់ចំណូល</Label>
-                                <Input id={`income-${formIndex}`} placeholder="ប្រាក់ចំណូល" className="h-11" />
+                                <Input 
+                                  id={`income-${formIndex}`} 
+                                  type="number"
+                                  placeholder="0" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.income || ''}
+                                  onChange={(e) => {
+                                    // Only allow numbers
+                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], income: value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
 
                               {/* Children Info */}
                               <div className="space-y-1">
                                 <Label htmlFor={`children-count-${formIndex}`}>ចំនួនកូនក្នុងបន្ទុក</Label>
-                                <Input id={`children-count-${formIndex}`} type="number" placeholder="ចំនួន" className="h-11" />
+                                <Input 
+                                  id={`children-count-${formIndex}`} 
+                                  type="number" 
+                                  placeholder="0" 
+                                  min="0"
+                                  max="20"
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.childrenCount || ''}
+                                  onChange={(e) => {
+                                    // Only allow numbers and limit to reasonable range
+                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                    const numValue = parseInt(value) || 0;
+                                    if (numValue >= 0 && numValue <= 20) {
+                                      const newGuardians = [...formData.guardians];
+                                      newGuardians[formIndex] = { ...newGuardians[formIndex], childrenCount: value };
+                                      setFormData({ ...formData, guardians: newGuardians });
+                                    }
+                                  }}
+                                />
                               </div>
 
                               {/* Address */}
                               <div className="space-y-1">
                                 <Label htmlFor={`house-number-${formIndex}`}>ផ្ទះលេខ</Label>
-                                <Input id={`house-number-${formIndex}`} placeholder="ផ្ទះលេខ" className="h-11" />
+                                <Input 
+                                  id={`house-number-${formIndex}`} 
+                                  placeholder="ផ្ទះលេខ" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.houseNumber || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], houseNumber: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
                               <div className="space-y-1">
                                 <Label htmlFor={`village-${formIndex}`}>ភូមិ/សង្កាត់</Label>
-                                <Input id={`village-${formIndex}`} placeholder="ភូមិ/សង្កាត់" className="h-11" />
+                                <Input 
+                                  id={`village-${formIndex}`} 
+                                  placeholder="ភូមិ/សង្កាត់" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.village || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], village: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
                               <div className="space-y-1">
                                 <Label htmlFor={`district-${formIndex}`}>ស្រុក/ខណ្ឌ</Label>
-                                <Input id={`district-${formIndex}`} placeholder="ស្រុក/ខណ្ឌ" className="h-11" />
+                                <Input 
+                                  id={`district-${formIndex}`} 
+                                  placeholder="ស្រុក/ខណ្ឌ" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.district || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], district: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
                               <div className="space-y-1">
                                 <Label htmlFor={`province-${formIndex}`}>ខេត្ត/ក្រុង</Label>
-                                <Input id={`province-${formIndex}`} placeholder="ខេត្ត/ក្រុង" className="h-11" />
+                                <Input 
+                                  id={`province-${formIndex}`} 
+                                  placeholder="ខេត្ត/ក្រុង" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.province || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], province: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
                               <div className="space-y-1">
                                 <Label htmlFor={`birth-district-${formIndex}`}>ស្រុកកំណើត</Label>
-                                <Input id={`birth-district-${formIndex}`} placeholder="ស្រុកកំណើត" className="h-11" />
+                                <Input 
+                                  id={`birth-district-${formIndex}`} 
+                                  placeholder="ស្រុកកំណើត" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.birthDistrict || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], birthDistrict: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
 
                               {/* Religion */}
                               <div className="flex flex-col items-center justify-center space-y-1">
-                                <Checkbox id={`believe-jesus-${formIndex}`} />
+                                <Checkbox 
+                                  id={`believe-jesus-${formIndex}`}
+                                  checked={formData.guardians[formIndex]?.believeJesus || false}
+                                  onCheckedChange={(checked) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], believeJesus: checked as boolean };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                                 <Label htmlFor={`believe-jesus-${formIndex}`}>ជឿព្រះយ៉េស៊ូ?</Label>
                               </div>
                               <div className="space-y-1 col-span-2">
                                 <Label htmlFor={`church-${formIndex}`}>ព្រះវិហារ</Label>
-                                <Input id={`church-${formIndex}`} placeholder="ព្រះវិហារ" className="h-11" />
+                                <Input 
+                                  id={`church-${formIndex}`} 
+                                  placeholder="ព្រះវិហារ" 
+                                  className="h-11 text-center"
+                                  value={formData.guardians[formIndex]?.church || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], church: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
                               </div>
                             </div>
                           </CardContent>
@@ -607,24 +1310,55 @@ export default function RegisterStudentPage() {
                             {/* Living Situation */}
                             <div className="space-y-1">
                               <Label htmlFor="living-with">នៅជាមួយអ្នកណា</Label>
-                              <Input id="living-with" placeholder="នៅជាមួយអ្នកណា" className="h-11" />
+                              <Input 
+                                id="living-with" 
+                                placeholder="នៅជាមួយអ្នកណា" 
+                                className="h-11 text-center"
+                                value={formData.familyInfo.livingWith || ''}
+                                onChange={(e) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, livingWith: e.target.value }
+                                })}
+                              />
                             </div>
                             
                             <div className="flex flex-col items-center justify-center space-y-1">
-                              <Checkbox id="own-house" />
+                              <Checkbox 
+                                id="own-house"
+                                checked={formData.familyInfo.ownHouse || false}
+                                onCheckedChange={(checked) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, ownHouse: checked as boolean }
+                                })}
+                              />
                               <Label htmlFor="own-house">នៅផ្ទះផ្ទាល់ខ្លួន?</Label>
                             </div>
 
                             <div className="space-y-1">
                               <Label htmlFor="duration-in-kpc">រយៈពេលនៅកំពង់ចាម</Label>
-                              <Input id="duration-in-kpc" placeholder="រយៈពេល" className="h-11" />
+                              <Input 
+                                id="duration-in-kpc" 
+                                placeholder="រយៈពេល" 
+                                className="h-11 text-center"
+                                value={formData.familyInfo.durationInKPC || ''}
+                                onChange={(e) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, durationInKPC: e.target.value }
+                                })}
+                              />
                             </div>
 
                             {/* Living Condition */}
                             <div className="space-y-1">
                               <Label htmlFor="living-condition">ជីវភាព</Label>
-                              <Select>
-                                <SelectTrigger id="living-condition" className="h-11">
+                              <Select
+                                value={formData.familyInfo.livingCondition || ''}
+                                onValueChange={(value) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, livingCondition: value }
+                                })}
+                              >
+                                <SelectTrigger id="living-condition" className="h-11 text-center">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -638,31 +1372,73 @@ export default function RegisterStudentPage() {
                             {/* Organization Help */}
                             <div className="space-y-1">
                               <Label htmlFor="organization-help">ទទួលជំនួយពីអង្គការ</Label>
-                              <Input id="organization-help" placeholder="អង្គការ" className="h-11" />
+                              <Input 
+                                id="organization-help" 
+                                placeholder="អង្គការ" 
+                                className="h-11 text-center"
+                                value={formData.familyInfo.organizationHelp || ''}
+                                onChange={(e) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, organizationHelp: e.target.value }
+                                })}
+                              />
                             </div>
 
                             {/* School Info */}
                             <div className="space-y-1">
                               <Label htmlFor="know-school">ស្គាល់សាលាតាមរយៈ</Label>
-                              <Input id="know-school" placeholder="ស្គាល់សាលាតាម" className="h-11" />
+                              <Input 
+                                id="know-school" 
+                                placeholder="ស្គាល់សាលាតាម" 
+                                className="h-11 text-center"
+                                value={formData.familyInfo.knowSchool || ''}
+                                onChange={(e) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, knowSchool: e.target.value }
+                                })}
+                              />
                             </div>
 
                             {/* Religion */}
                             <div className="space-y-1">
                               <Label htmlFor="religion">សាសនា</Label>
-                              <Input id="religion" placeholder="សាសនា" className="h-11" />
+                              <Input 
+                                id="religion" 
+                                placeholder="សាសនា" 
+                                className="h-11 text-center"
+                                value={formData.familyInfo.religion || ''}
+                                onChange={(e) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, religion: e.target.value }
+                                })}
+                              />
                             </div>
 
                             <div className="space-y-1">
                               <Label htmlFor="church-name">ឈ្មោះព្រះវិហារ</Label>
-                              <Input id="church-name" placeholder="ព្រះវិហារ" className="h-11" />
+                              <Input 
+                                id="church-name" 
+                                placeholder="ព្រះវិហារ" 
+                                className="h-11 text-center"
+                                value={formData.familyInfo.churchName || ''}
+                                onChange={(e) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, churchName: e.target.value }
+                                })}
+                              />
                             </div>
 
                             {/* School Support */}
                             <div className="space-y-1">
                               <Label htmlFor="can-help-school">លទ្ធភាពជួយសាលា</Label>
-                              <Select>
-                                <SelectTrigger id="can-help-school" className="h-11">
+                              <Select
+                                value={formData.familyInfo.canHelpSchool ? 'yes' : 'no'}
+                                onValueChange={(value) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, canHelpSchool: value === 'yes' }
+                                })}
+                              >
+                                <SelectTrigger id="can-help-school" className="h-11 text-center">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -674,13 +1450,33 @@ export default function RegisterStudentPage() {
 
                             <div className="space-y-1">
                               <Label htmlFor="help-amount">ថវិកាជួយសាលា</Label>
-                              <Input id="help-amount" placeholder="ចំនួនទឹកប្រាក់" className="h-11" />
+                              <Input 
+                                id="help-amount" 
+                                type="number"
+                                placeholder="0" 
+                                className="h-11 text-center"
+                                value={formData.familyInfo.helpAmount || ''}
+                                onChange={(e) => {
+                                  // Only allow numbers
+                                  const value = e.target.value.replace(/[^0-9]/g, '');
+                                  setFormData({
+                                    ...formData, 
+                                    familyInfo: { ...formData.familyInfo, helpAmount: value }
+                                  });
+                                }}
+                              />
                             </div>
 
                             <div className="space-y-1">
                               <Label htmlFor="help-frequency">ក្នុងមួយ</Label>
-                              <Select>
-                                <SelectTrigger id="help-frequency" className="h-11">
+                              <Select
+                                value={formData.familyInfo.helpFrequency || ''}
+                                onValueChange={(value) => setFormData({
+                                  ...formData, 
+                                  familyInfo: { ...formData.familyInfo, helpFrequency: value }
+                                })}
+                              >
+                                <SelectTrigger id="help-frequency" className="h-11 text-center">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -705,16 +1501,30 @@ export default function RegisterStudentPage() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-2">
                             <div className="space-y-1 col-span-3">
                               <Label htmlFor="school">សាលារៀនមុន</Label>
-                              <Input id="school" className="h-11" />
+                              <Input 
+                                id="school" 
+                                className="h-11 text-center"
+                                value={formData.previousSchool || ''}
+                                onChange={(e) => setFormData({...formData, previousSchool: e.target.value})}
+                              />
                             </div>
                             
                             <div className="space-y-1 col-span-4">
                               <Label htmlFor="reason">មូលហេតុផ្លាស់ប្តូរ</Label>
-                              <Input id="reason" className="h-11" />
+                              <Input 
+                                id="reason" 
+                                className="h-11 text-center"
+                                value={formData.transferReason || ''}
+                                onChange={(e) => setFormData({...formData, transferReason: e.target.value})}
+                              />
                             </div>
                             
                             <div className="flex flex-col items-center justify-center space-y-1 col-span-5">
-                              <Checkbox id="vaccinated" />
+                              <Checkbox 
+                                id="vaccinated"
+                                checked={formData.vaccinated || false}
+                                onCheckedChange={(checked) => setFormData({...formData, vaccinated: checked as boolean})}
+                              />
                               <Label htmlFor="vaccinated" className="cursor-pointer">
                                 សិស្សទទួលបានវ៉ាក់សាំងគ្រប់គ្រាន់ហើយនៅ?
                               </Label>
@@ -736,15 +1546,27 @@ export default function RegisterStudentPage() {
                         <CardContent>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div className="flex items-center space-x-2">
-                              <Checkbox id="clothes" />
+                              <Checkbox 
+                                id="clothes"
+                                checked={formData.needsClothes || false}
+                                onCheckedChange={(checked) => setFormData({...formData, needsClothes: checked as boolean})}
+                              />
                               <Label htmlFor="clothes">កង្វះខាតសម្លៀកបំពាក់</Label>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Checkbox id="materials" />
+                              <Checkbox 
+                                id="materials"
+                                checked={formData.needsMaterials || false}
+                                onCheckedChange={(checked) => setFormData({...formData, needsMaterials: checked as boolean})}
+                              />
                               <Label htmlFor="materials">កង្វះខាតសម្ភារៈសិក្សា</Label>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Checkbox id="transport" />
+                              <Checkbox 
+                                id="transport"
+                                checked={formData.needsTransport || false}
+                                onCheckedChange={(checked) => setFormData({...formData, needsTransport: checked as boolean})}
+                              />
                               <Label htmlFor="transport">ត្រូវការឡានដើម្បីជូនមកសាលា</Label>
                             </div>
                           </div>
@@ -782,7 +1604,7 @@ export default function RegisterStudentPage() {
                                 ) : (
                                   <>
                                     <Save className="h-4 w-4 mr-2" />
-                                    បញ្ចប់ការចុះឈ្មោះសិស្ស
+                                    {isNewStudent ? 'បញ្ចប់ការចុះឈ្មោះសិស្ស' : 'រក្សាទុកការកែប្រែ'}
                                   </>
                                 )}
                               </Button>
