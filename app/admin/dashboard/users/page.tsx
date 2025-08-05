@@ -160,11 +160,29 @@ export default function AdminUsersPage() {
     }
   };
 
-  // Toggle user status (optimistic for View Details dialog)
+  // Toggle user status (real-time update without refetch)
   const handleToggleStatus = async (user: User) => {
     setStatusLoading(user.userid);
     const isCurrentlyActive = (optimisticStatus && optimisticStatus.userid === user.userid ? optimisticStatus.status : user.status) === "active";
-    setOptimisticStatus({ userid: user.userid, status: isCurrentlyActive ? "inactive" : "active" });
+    const newStatus = isCurrentlyActive ? "inactive" : "active";
+    
+    // Optimistic update - update local state immediately
+    setOptimisticStatus({ userid: user.userid, status: newStatus });
+    
+    // Update users array immediately for real-time UI
+    setUsers(prevUsers => 
+      prevUsers.map(u => 
+        u.userid === user.userid 
+          ? { ...u, status: newStatus }
+          : u
+      )
+    );
+    
+    // Update viewDetailsUser if it's the same user
+    if (viewDetailsUser && viewDetailsUser.userid === user.userid) {
+      setViewDetailsUser({ ...viewDetailsUser, status: newStatus });
+    }
+    
     try {
       const res = await fetch(`/api/admin/users/${user.userid}/status`, {
         method: "PATCH",
@@ -173,22 +191,40 @@ export default function AdminUsersPage() {
       });
       const result = await res.json();
       if (!res.ok) {
+        // Revert optimistic update on error
         setOptimisticStatus(null);
+        setUsers(prevUsers => 
+          prevUsers.map(u => 
+            u.userid === user.userid 
+              ? { ...u, status: user.status } // Revert to original status
+              : u
+          )
+        );
+        if (viewDetailsUser && viewDetailsUser.userid === user.userid) {
+          setViewDetailsUser({ ...viewDetailsUser, status: user.status });
+        }
         toast({ title: "បរាជ័យ", description: result.error || "មិនអាចផ្លាស់ប្តូរស្ថានភាពបានទេ", variant: "destructive" });
         return;
       }
-      fetchUsers();
-      // Update viewDetailsUser with the new status from the API response
-      if (viewDetailsUser && result.user && viewDetailsUser.userid === result.user.userid) {
-        setViewDetailsUser({ ...viewDetailsUser, status: result.user.status });
-      }
+      
       toast({
         title: "ផ្លាស់ប្តូរជោគជ័យ",
         description: `អ្នកប្រើត្រូវបាន${!isCurrentlyActive ? "ដំណើរការ" : "បិទដំណើរការ"}`
       });
       setOptimisticStatus(null);
     } catch (e) {
+      // Revert optimistic update on error
       setOptimisticStatus(null);
+      setUsers(prevUsers => 
+        prevUsers.map(u => 
+          u.userid === user.userid 
+            ? { ...u, status: user.status } // Revert to original status
+            : u
+        )
+      );
+      if (viewDetailsUser && viewDetailsUser.userid === user.userid) {
+        setViewDetailsUser({ ...viewDetailsUser, status: user.status });
+      }
       toast({ title: "បរាជ័យ", description: "មានបញ្ហាក្នុងការផ្លាស់ប្តូរស្ថានភាព", variant: "destructive" });
     } finally {
       setStatusLoading(null);

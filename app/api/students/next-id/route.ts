@@ -2,14 +2,26 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const last = await prisma.student.findFirst({
-    orderBy: { id: 'desc' },
-    select: { studentId: true },
-  });
-  let nextId = 1;
-  if (last && last.studentId) {
-    const num = parseInt(last.studentId.replace(/\D/g, '')) || 0;
-    nextId = num + 1;
+  try {
+    // Get the highest student ID from the database
+    const lastStudent = await prisma.student.findFirst({
+      orderBy: { studentId: 'desc' },
+      select: { studentId: true }
+    });
+
+    let nextId = 1;
+    if (lastStudent && lastStudent.studentId) {
+      // Extract numeric part from student ID (e.g., "S001" -> 1, "123" -> 123)
+      const numericPart = parseInt(lastStudent.studentId.replace(/\D/g, ''));
+      if (!isNaN(numericPart)) {
+        nextId = numericPart + 1;
+      }
+    }
+
+    return NextResponse.json({ nextStudentId: nextId.toString() });
+  } catch (error) {
+    console.error('Error generating next student ID:', error);
+    // Fallback to simple increment
+    return NextResponse.json({ nextStudentId: "1" });
   }
-  return NextResponse.json({ nextStudentId: `S${String(nextId).padStart(3, '0')}` });
 }

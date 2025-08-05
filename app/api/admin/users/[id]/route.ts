@@ -5,8 +5,7 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 // PUT - Update user
-export async function PUT(request: NextRequest, context: any) {
-  const { params } = await context;
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const userId = parseInt(params.id)
     const body = await request.json()
@@ -22,7 +21,7 @@ export async function PUT(request: NextRequest, context: any) {
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { userid: userId }
+      where: { userId }
     })
 
     if (!existingUser) {
@@ -54,11 +53,10 @@ export async function PUT(request: NextRequest, context: any) {
       phonenumber1: phonenumber1 || null,
       phonenumber2: phonenumber2 || null,
       role: role || 'teacher',
+      avatar: `${firstname.charAt(0)}${lastname.charAt(0)}`,
       position: position || null,
       photo: photo || null,
-    };
-    if (typeof status === 'string') {
-      updateData.status = status;
+      status: status || 'active'
     }
 
     // Hash password if provided
@@ -68,28 +66,12 @@ export async function PUT(request: NextRequest, context: any) {
 
     // Update user
     const updatedUser = await prisma.user.update({
-      where: { userid: userId },
-      data: updateData,
-      select: {
-        userid: true,
-        username: true,
-        firstname: true,
-        lastname: true,
-        phonenumber1: true,
-        phonenumber2: true,
-        role: true,
-        avatar: true,
-        position: true,
-        photo: true,
-        status: true,
-        lastLogin: true,
-        createdAt: true,
-        updatedAt: true
-      }
+      where: { userId },
+      data: updateData
     })
 
     const transformedUser = {
-      userid: (updatedUser as any).userid,
+      userid: updatedUser.userId,
       username: updatedUser.username,
       password: '',
       firstname: updatedUser.firstname,
@@ -103,7 +85,7 @@ export async function PUT(request: NextRequest, context: any) {
       lastLogin: updatedUser.lastLogin,
       createdAt: updatedUser.createdAt,
       updatedAt: updatedUser.updatedAt,
-      status: updatedUser.status // Return the actual status string
+      status: updatedUser.status
     }
 
     return NextResponse.json({ user: transformedUser })
@@ -126,7 +108,7 @@ export async function DELETE(
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { userid: userId }
+      where: { userId }
     })
 
     if (!existingUser) {
@@ -138,7 +120,7 @@ export async function DELETE(
 
     // Delete user
     await prisma.user.delete({
-      where: { userid: userId }
+      where: { userId }
     })
 
     return NextResponse.json({ message: 'User deleted successfully' })

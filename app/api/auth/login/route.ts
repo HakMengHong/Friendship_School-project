@@ -47,13 +47,13 @@ export async function POST(request: NextRequest) {
 
     // Update last login
     await prisma.user.update({
-      where: { id: user.id },
+      where: { userId: user.userId },
       data: { lastLogin: new Date() }
     })
 
     // Return user data (without password)
     const userData = {
-      id: user.id,
+      id: user.userId,
       username: user.username,
       firstname: user.firstname,
       lastname: user.lastname,

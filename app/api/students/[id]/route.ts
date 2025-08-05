@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+// import { prisma } from '@/lib/prisma';
 
 export async function PUT(request: NextRequest, context: any) {
   const { params } = await context;
@@ -13,34 +13,15 @@ export async function PUT(request: NextRequest, context: any) {
       scholarships,   // [{ type, amount, ... }]
     } = data;
 
-    // Update student and related records
-    const updated = await prisma.student.update({
-      where: { id },
-      data: {
-        ...student,
-        guardians: {
-          deleteMany: {}, // Remove all old guardians
-          create: guardians || [],
-        },
-        family: familyInfo
-          ? {
-              upsert: {
-                create: familyInfo,
-                update: familyInfo,
-              },
-            }
-          : undefined,
-        scholarships: {
-          deleteMany: {}, // Remove all old scholarships
-          create: scholarships || [],
-        },
-      },
-      include: {
-        guardians: true,
-        family: true,
-        scholarships: true,
-      },
-    });
+    // For mock data, just return the updated data
+    const updated = {
+      studentId: id,
+      ...student,
+      guardians: guardians || [],
+      family: familyInfo || null,
+      scholarships: scholarships || [],
+      updatedAt: new Date()
+    };
 
     return NextResponse.json({ student: updated });
   } catch (error) {

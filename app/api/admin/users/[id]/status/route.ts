@@ -22,7 +22,7 @@ export async function PATCH(
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { userId }
     });
 
     if (!existingUser) {
@@ -34,16 +34,10 @@ export async function PATCH(
 
     // Update user status
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: { status: isActive ? "active" : "inactive" },
-      select: {
-        id: true,
-        username: true,
-        firstname: true,
-        lastname: true,
-        status: true,
-        updatedAt: true,
-      },
+      where: { userId },
+      data: {
+        status: isActive ? "active" : "inactive"
+      }
     });
 
     return NextResponse.json({
@@ -56,7 +50,5 @@ export async function PATCH(
       { error: "មានបញ្ហាក្នុងការផ្លាស់ប្តូរស្ថានភាព" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 } 

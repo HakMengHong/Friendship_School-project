@@ -8,15 +8,12 @@ const prisma = new PrismaClient()
 export async function GET(request: NextRequest) {
   try {
     const users = await prisma.user.findMany({
-      orderBy: [
-        { role: 'asc' },
-        { firstname: 'asc' }
-      ]
+      orderBy: { createdAt: 'desc' }
     })
 
     // Transform the data to match the frontend interface
     const transformedUsers = users.map(user => ({
-      userid: (user as any).userid,
+      userid: user.userId,
       username: user.username,
       password: '', // Don't send password
       firstname: user.firstname,
@@ -30,7 +27,7 @@ export async function GET(request: NextRequest) {
       lastLogin: user.lastLogin,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      status: user.status // Return the actual status string
+      status: user.status
     }))
 
     return NextResponse.json({ users: transformedUsers })
@@ -72,7 +69,7 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user
+    // Create new user
     const newUser = await prisma.user.create({
       data: {
         username,
@@ -82,6 +79,7 @@ export async function POST(request: NextRequest) {
         phonenumber1: phonenumber1 || null,
         phonenumber2: phonenumber2 || null,
         role: role || 'teacher',
+        avatar: `${firstname.charAt(0)}${lastname.charAt(0)}`,
         position: position || null,
         photo: photo || null,
         status: 'active'
@@ -89,7 +87,7 @@ export async function POST(request: NextRequest) {
     })
 
     const transformedUser = {
-      userid: (newUser as any).userid,
+      userid: newUser.userId,
       username: newUser.username,
       password: '',
       firstname: newUser.firstname,
@@ -103,7 +101,7 @@ export async function POST(request: NextRequest) {
       lastLogin: newUser.lastLogin,
       createdAt: newUser.createdAt,
       updatedAt: newUser.updatedAt,
-      status: newUser.status // Return the actual status string
+      status: newUser.status
     }
 
     return NextResponse.json({ user: transformedUser }, { status: 201 })
