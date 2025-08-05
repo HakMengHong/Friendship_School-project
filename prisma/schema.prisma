@@ -7,154 +7,120 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// =========================
-// ENUMS
-// =========================
-
-// GradeType: Type of grade (exam, quiz, assignment, etc.)
-enum GradeType {
-  exam
-  quiz
-  assignment
-  participation
-  other
-}
-
-// AttendanceSession: Which session the attendance is for (AM, PM, FULL)
-enum AttendanceSession {
-  AM
-  PM
-  FULL
-}
-
-// =========================
-// MODELS
-// =========================
-
-// User: Teachers and Admins only
 model User {
-  userId          Int            @id @default(autoincrement())
-  username        String         @unique // Login username
-  password        String // Hashed password
-  lastname        String
-  firstname       String
-  phonenumber1    String?
-  phonenumber2    String?
-  role            String         @default("teacher") // "teacher" or "admin"
-  avatar          String?
-  photo           String? // Profile photo URL
-  position        String? // e.g., "គ្រូបន្ទុកថ្នាក់ទី ១", "នាយក"
-  status          String         @default("active") // "active", "inactive", "suspended"
-  lastLogin       DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  // Relations
-  activityLogs    ActivityLog[]  @relation("ActivityLogUser")
+  username     String        @unique
+  password     String
+  lastname     String
+  firstname    String
+  phonenumber1 String?
+  phonenumber2 String?
+  role         String        @default("teacher")
+  avatar       String?
+  photo        String?
+  position     String?
+  status       String        @default("active")
+  lastLogin    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userId       Int           @id @default(autoincrement())
+  activityLogs ActivityLog[] @relation("ActivityLogUser")
+  classes      Class[]       @relation("ClassTeacher")
 }
 
-// Student: Registered students
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  action    String
+  timestamp DateTime @default(now())
+  user      User     @relation("ActivityLogUser", fields: [userId], references: [userId])
+}
+
 model Student {
-  studentId        Int           @id @default(autoincrement())
-  lastName         String
-  firstName        String
-  gender           String
-  dob              DateTime
-  // Address fields (flat)
-  studentHouseNumber String?
-  studentVillage     String?
-  studentDistrict    String?
-  studentProvince    String?
+  lastName             String
+  firstName            String
+  gender               String
+  dob                  DateTime
+  class                String
+  academicYear         String
+  photo                String?
+  phone                String?
+  email                String?
+  registrationDate     DateTime
+  status               String?
+  religion             String?
+  health               String?
+  emergencyContact     String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  classId              Int?
+  needsClothes         Boolean?      @default(false)
+  needsMaterials       Boolean?      @default(false)
+  needsTransport       Boolean?      @default(false)
+  previousSchool       String?
+  registerToStudy      Boolean?      @default(false)
   studentBirthDistrict String?
-  // Registration and class
-  class            String
-  academicYear     String
-  registrationDate DateTime
-  registerToStudy  Boolean?      @default(false)
-  // Contact
-  photo            String?
-  phone            String?
-  email            String?
-  // Status and health
-  status           String? // e.g., "active", "dropped", "graduated"
-  religion         String?
-  health           String?
-  emergencyContact String?
-  vaccinated       Boolean?      @default(false)
-  // Study info
-  previousSchool   String?
-  transferReason   String?
-  // Needs (checkboxes)
-  needsClothes     Boolean?      @default(false)
-  needsMaterials   Boolean?      @default(false)
-  needsTransport   Boolean?      @default(false)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  // Relations
-  guardians        Guardian[]
-  scholarships     Scholarship[]
-  family           FamilyInfo?
-  classObj         Class?        @relation(fields: [classId], references: [id])
-  classId          Int?
+  studentDistrict      String?
+  studentHouseNumber   String?
+  studentProvince      String?
+  studentVillage       String?
+  transferReason       String?
+  vaccinated           Boolean?      @default(false)
+  studentId            Int           @id @default(autoincrement())
+  family               FamilyInfo?
+  guardians            Guardian[]
+  scholarships         Scholarship[]
+  classObj             Class?        @relation(fields: [classId], references: [id])
 }
 
-// Guardian: Parent/guardian info for students
 model Guardian {
-  guardianid       Int      @id @default(autoincrement())
-  studentId        Int
-  // Name fields (flat)
-  lastName         String?
-  firstName        String?
-  // Relation and contact
-  relation         String // e.g., "father", "mother", "guardian"
-  phone            String?
-  email            String?
-  // Address fields (flat)
-  houseNumber      String?
-  village          String?
-  district         String?
-  province         String?
-  birthDistrict    String?
-  // Other info
-  occupation       String?
-  income           Float?
-  childrenCount    Int?
-  believeJesus     Boolean? @default(false)
-  church           String?
+  studentId     Int
+  relation      String
+  phone         String?
+  email         String?
+  address       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  believeJesus  Boolean? @default(false)
+  birthDistrict String?
+  childrenCount Int?
+  church        String?
+  district      String?
+  firstName     String?
+  guardianid    Int      @id @default(autoincrement())
+  houseNumber   String?
+  income        Float?
+  lastName      String?
+  occupation    String?
+  province      String?
+  village       String?
+  student       Student  @relation(fields: [studentId], references: [studentId])
+}
+
+model FamilyInfo {
+  id               Int      @id @default(autoincrement())
+  studentId        Int      @unique
+  fatherName       String?
+  motherName       String?
+  siblings         Int?
+  fatherPhone      String?
+  motherPhone      String?
   address          String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  canHelpSchool    Boolean? @default(false)
+  churchName       String?
+  durationInKPC    String?
+  helpAmount       Float?
+  helpFrequency    String?
+  knowSchool       String?
+  livingCondition  String?
+  livingWith       String?
+  organizationHelp String?
+  ownHouse         Boolean? @default(false)
+  religion         String?
   student          Student  @relation(fields: [studentId], references: [studentId])
 }
 
-// FamilyInfo: Detailed family data for students (optional)
-model FamilyInfo {
-  id              Int      @id @default(autoincrement())
-  studentId       Int      @unique
-  // Family situation fields (flat)
-  livingWith      String?
-  ownHouse        Boolean? @default(false)
-  durationInKPC   String?
-  livingCondition String?
-  organizationHelp String?
-  knowSchool      String?
-  religion        String?
-  churchName      String?
-  canHelpSchool   Boolean? @default(false)
-  helpAmount      Float?
-  helpFrequency   String?
-  // Legacy/compatibility fields
-  fatherName      String?
-  motherName      String?
-  siblings        Int?
-  fatherPhone     String?
-  motherPhone     String?
-  address         String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  student         Student  @relation(fields: [studentId], references: [studentId])
-}
-
-// Scholarship: Scholarships awarded to students (optional)
 model Scholarship {
   id        Int      @id @default(autoincrement())
   studentId Int
@@ -163,13 +129,12 @@ model Scholarship {
   sponsor   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [studentId])
 }
 
-// Course: School courses/classes
 model Course {
   id           Int      @id @default(autoincrement())
-  courseId     String   @unique // School-issued course code
+  courseId     String   @unique
   schoolYearId Int
   teacherId1   Int?
   teacherId2   Int?
@@ -181,20 +146,18 @@ model Course {
   updatedAt    DateTime @updatedAt
 }
 
-// Subject: Subjects taught in school
 model Subject {
   id          Int      @id @default(autoincrement())
-  subjectId   String   @unique // School-issued subject code
+  subjectId   String   @unique
   subjectName String
   credits     Int?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// Grade: Student grades per subject/course/semester
 model Grade {
   id           Int        @id @default(autoincrement())
-  gradeId      String     @unique // School-issued grade record code
+  gradeId      String     @unique
   courseId     Int
   studentId    Int
   subjectId    Int
@@ -202,32 +165,44 @@ model Grade {
   gradeDate    DateTime
   grade        Float
   gradeComment String?
-  user         String? // Username or user ID who recorded/edited
+  user         String?
   lastEdit     DateTime?
-  gradeType    GradeType? // Type of grade (exam, quiz, etc.)
+  gradeType    GradeType?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
 
-// Enrollment: Student enrollment in courses
 model Enrollment {
   id            Int       @id @default(autoincrement())
-  enrollmentId  String    @unique // School-issued enrollment code
+  enrollmentId  String    @unique
   courseId      Int
   studentId     Int
-  droup         Boolean // true if dropped, false if still enrolled
-  droupSemester String? // Semester in which the student dropped
+  droup         Boolean
+  droupSemester String?
   droupDate     DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
 
-
-// Class: School classes/groups
 model Class {
   id        Int       @id @default(autoincrement())
-  className String    @unique // e.g., "7A", "8B"
+  className String    @unique
   grade     String
   section   String?
   students  Student[]
   teachers  User[]    @relation("ClassTeacher")
+}
+
+enum GradeType {
+  exam
+  quiz
+  assignment
+  participation
+  other
+}
+
+enum AttendanceSession {
+  AM
+  PM
+  FULL
 }
