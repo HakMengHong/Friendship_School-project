@@ -40,6 +40,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 import { useToast } from "@/hooks/use-toast"
 
 export default function RegisterStudentPage() {
@@ -54,10 +55,11 @@ export default function RegisterStudentPage() {
     studentId: ''
   })
   const [activeTab, setActiveTab] = useState("basic")
-  const [guardianForms, setGuardianForms] = useState([0]); // Start with one form
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showForm, setShowForm] = useState(true) // Show form by default
-  const [isNewStudent, setIsNewStudent] = useState(true) // Set to true by default
+      const [guardianForms, setGuardianForms] = useState([0]); // Start with one form
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isCompleted, setIsCompleted] = useState(false)
+    const [showForm, setShowForm] = useState(true) // Show form by default
+    const [isNewStudent, setIsNewStudent] = useState(true) // Set to true by default
   const [students, setStudents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
@@ -216,6 +218,16 @@ export default function RegisterStudentPage() {
   };
 
   const handleSubmit = async () => {
+    console.log('handleSubmit called');
+    console.log('Current formData:', formData);
+    console.log('isSubmitting:', isSubmitting, 'isCompleted:', isCompleted);
+    
+    // Prevent multiple submissions
+    if (isSubmitting || isCompleted) {
+      console.log('Submission blocked - already submitting or completed');
+      return;
+    }
+
     // Validate required fields
     const requiredFields = {
       lastName: formData.lastName,
@@ -225,20 +237,24 @@ export default function RegisterStudentPage() {
       class: formData.class
     };
 
+    console.log('Required fields check:', requiredFields);
+
     const missingFields = Object.entries(requiredFields)
       .filter(([key, value]) => !value)
       .map(([key]) => key);
 
     if (missingFields.length > 0) {
+      console.log('Missing fields:', missingFields);
+      console.log('Current formData:', formData);
       toast({
-        title: "Validation Error",
-        description: `Please fill in required fields: ${missingFields.join(', ')}`,
+        title: "កំហុសក្នុងការបំពេញព័ត៌មាន",
+        description: `សូមបំពេញព័ត៌មានដែលត្រូវការ: ${missingFields.join(', ')}`,
         variant: "destructive"
       });
-      setIsSubmitting(false);
       return;
     }
 
+    console.log('Validation passed, starting submission');
     setIsSubmitting(true)
     try {
       // Determine if this is a new student or updating existing
@@ -246,139 +262,114 @@ export default function RegisterStudentPage() {
       const url = isNewStudent ? '/api/students' : `/api/students/${selectedStudent.studentId}`;
       const method = isNewStudent ? 'POST' : 'PUT';
       
-      const response = await fetch(url, {
+      console.log('Submitting form data:', {
+        student: {
+          lastName: formData.lastName,
+          firstName: formData.firstName,
+          gender: formData.gender,
+          dob: formData.dob,
+          class: formData.class,
+          registerToStudy: formData.registerToStudy,
+          studentHouseNumber: formData.studentHouseNumber,
+          studentVillage: formData.studentVillage,
+          studentDistrict: formData.studentDistrict,
+          studentProvince: formData.studentProvince,
+          studentBirthDistrict: formData.studentBirthDistrict,
+          phone: formData.phone,
+          religion: formData.religion,
+          health: formData.health,
+          emergencyContact: formData.emergencyContact,
+          vaccinated: formData.vaccinated,
+          previousSchool: formData.previousSchool,
+          transferReason: formData.transferReason,
+          needsClothes: formData.needsClothes,
+          needsMaterials: formData.needsMaterials,
+          needsTransport: formData.needsTransport,
+          registrationDate: new Date().toISOString(),
+          status: 'active'
+        },
+        guardians: formData.guardians.filter(guardian => 
+          guardian.firstName || guardian.lastName || guardian.relation || guardian.phone
+        ),
+        familyInfo: formData.familyInfo
+      });
+      
+      console.log('Making API call to:', url, 'with method:', method);
+      const requestBody = {
+        student: {
+          lastName: formData.lastName,
+          firstName: formData.firstName,
+          gender: formData.gender,
+          dob: formData.dob,
+          class: formData.class,
+          registerToStudy: formData.registerToStudy,
+          studentHouseNumber: formData.studentHouseNumber,
+          studentVillage: formData.studentVillage,
+          studentDistrict: formData.studentDistrict,
+          studentProvince: formData.studentProvince,
+          studentBirthDistrict: formData.studentBirthDistrict,
+          phone: formData.phone,
+          religion: formData.religion,
+          health: formData.health,
+          emergencyContact: formData.emergencyContact,
+          vaccinated: formData.vaccinated,
+          previousSchool: formData.previousSchool,
+          transferReason: formData.transferReason,
+          needsClothes: formData.needsClothes,
+          needsMaterials: formData.needsMaterials,
+          needsTransport: formData.needsTransport,
+          registrationDate: new Date().toISOString(),
+          status: 'active'
+        },
+        guardians: formData.guardians.filter(guardian => 
+          guardian.firstName || guardian.lastName || guardian.relation || guardian.phone
+        ),
+        familyInfo: formData.familyInfo
+      };
+      
+      console.log('Request body:', requestBody);
+      
+            const response = await fetch(url, {
         method: method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          student: {
-            lastName: formData.lastName,
-            firstName: formData.firstName,
-            gender: formData.gender,
-            dob: formData.dob,
-            class: formData.class,
-            registerToStudy: formData.registerToStudy,
-            studentHouseNumber: formData.studentHouseNumber,
-            studentVillage: formData.studentVillage,
-            studentDistrict: formData.studentDistrict,
-            studentProvince: formData.studentProvince,
-            studentBirthDistrict: formData.studentBirthDistrict,
-            phone: formData.phone,
-
-            religion: formData.religion,
-            health: formData.health,
-            emergencyContact: formData.emergencyContact,
-            vaccinated: formData.vaccinated,
-            previousSchool: formData.previousSchool,
-            transferReason: formData.transferReason,
-            needsClothes: formData.needsClothes,
-            needsMaterials: formData.needsMaterials,
-            needsTransport: formData.needsTransport,
-            registrationDate: new Date().toISOString(),
-            status: 'active'
-          },
-          guardians: formData.guardians.filter(guardian => 
-            guardian.firstName || guardian.lastName || guardian.relation || guardian.phone
-          ),
-          familyInfo: formData.familyInfo
-        })
+        body: JSON.stringify(requestBody)
       })
 
       if (response.ok) {
         const result = await response.json()
+        console.log('Response received:', result);
         const isNewStudent = !selectedStudent?.studentId || selectedStudent?.studentId === 'new';
         toast({
           title: "Success",
           description: isNewStudent ? "Student registered successfully" : "Student updated successfully",
         })
-        // Reset form
-        setFormData({
-          // ===== BASIC INFORMATION =====
-          // Personal Details
-          lastName: '',
-          firstName: '',
-          gender: '',
-          dob: '',
-          age: '',
-          studentId: '',
-          
-          // Academic Information
-          class: '',
-          registerToStudy: false,
-          previousSchool: '',
-          transferReason: '',
-          
-          // ===== ADDRESS & CONTACT =====
-          // Student Address
-          studentHouseNumber: '',
-          studentVillage: '',
-          studentDistrict: '',
-          studentProvince: '',
-          studentBirthDistrict: '',
-          
-          // Contact Information
-          phone: '',
-          emergencyContact: '',
-          
-          // ===== HEALTH & RELIGION =====
-          // Health Information
-          health: '',
-          vaccinated: false,
-          
-          // Religious Information
-          religion: '',
-          
-          // ===== SCHOOL NEEDS =====
-          // Material Needs
-          needsClothes: false,
-          needsMaterials: false,
-          needsTransport: false,
-          guardians: [{
-            firstName: '',
-            lastName: '',
-            relation: '',
-            phone: '',
-            occupation: '',
-            income: '',
-            childrenCount: '',
-            houseNumber: '',
-            village: '',
-            district: '',
-            province: '',
-            birthDistrict: '',
-            believeJesus: false,
-            church: ''
-          }],
-          familyInfo: {
-            livingWith: '',
-            ownHouse: false,
-            durationInKPC: '',
-            livingCondition: '',
-            organizationHelp: '',
-            knowSchool: '',
-            religion: '',
-            churchName: '',
-            canHelpSchool: false,
-            helpAmount: '',
-            helpFrequency: ''
-          }
-        })
-        setShowForm(false)
-        setSelectedStudent(null)
-        setIsNewStudent(false)
+        setIsCompleted(true)
+        console.log('Success state set to true')
+        
+        // Show completion state for 3 seconds before allowing new submission
+        setTimeout(() => {
+          setIsCompleted(false)
+          console.log('Success state reset to false')
+        }, 3000)
+        
+                // Don't reset form or close it - keep the data visible
         // Refresh students list
         const studentsResponse = await fetch('/api/students')
         const studentsData = await studentsResponse.json()
         setStudents(studentsData.students || [])
       } else {
-        throw new Error('Failed to register student')
+        const errorData = await response.text();
+        console.error('Response not ok:', response.status, errorData);
+        throw new Error(`Failed to register student: ${response.status} ${errorData}`)
       }
     } catch (error) {
       console.error('Error registering student:', error)
+      setIsCompleted(false) // Reset completion state on error
       toast({
         title: "Error",
-        description: "Failed to register student",
+        description: `Failed to register student: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       })
     } finally {
@@ -396,6 +387,10 @@ export default function RegisterStudentPage() {
       gender: '',
       studentId: ''
     })
+    
+    setIsCompleted(false)
+    setShowForm(true)
+    setActiveTab("basic")
     
     // Reset form data for new student
     setFormData({
@@ -480,6 +475,7 @@ export default function RegisterStudentPage() {
     setIsNewStudent(false)
     setShowForm(true)
     setActiveTab("basic")
+    setIsCompleted(false)
     
     // Calculate age from DOB
     let ageString = '';
@@ -761,10 +757,15 @@ export default function RegisterStudentPage() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
+                          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                              <span className="text-red-500">*</span> បង្ហាញព័ត៌មានដែលត្រូវការ (Required fields)
+                            </p>
+                          </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                             {/* Last Name */}
                             <div className="space-y-1">
-                              <Label htmlFor="last-name">នាមត្រកូល</Label>
+                              <Label htmlFor="last-name">នាមត្រកូល <span className="text-red-500">*</span></Label>
                               <Input 
                                 id="last-name" 
                                 value={formData.lastName} 
@@ -779,7 +780,7 @@ export default function RegisterStudentPage() {
 
                             {/* First Name */}
                             <div className="space-y-1">
-                              <Label htmlFor="first-name">នាមខ្លួន</Label>
+                              <Label htmlFor="first-name">នាមខ្លួន <span className="text-red-500">*</span></Label>
                               <Input 
                                 id="first-name" 
                                 value={formData.firstName} 
@@ -794,7 +795,7 @@ export default function RegisterStudentPage() {
 
                             {/* Gender */}
                             <div className="space-y-1">
-                              <Label htmlFor="gender">ភេទ</Label>
+                              <Label htmlFor="gender">ភេទ <span className="text-red-500">*</span></Label>
                               <Select
                                 value={formData.gender}
                                 onValueChange={(value) => setFormData({...formData, gender: value})}
@@ -811,14 +812,16 @@ export default function RegisterStudentPage() {
 
                             {/* Date of Birth */}
                             <div className="space-y-1">
-                              <Label htmlFor="dob">ថ្ងៃខែឆ្នាំកំណើត</Label>
+                              <Label htmlFor="dob">ថ្ងៃខែឆ្នាំកំណើត <span className="text-red-500">*</span></Label>
                               <Input 
                                 type="date" 
                                 id="dob" 
                                 value={formData.dob} 
                                 onChange={(e) => {
                                   const dob = e.target.value;
+                                  console.log('Date input changed:', dob);
                                   setFormData({...formData, dob: dob});
+                                  
                                   // Auto-calculate detailed age if DOB is provided
                                   if (dob) {
                                     const birthDate = new Date(dob);
@@ -843,10 +846,12 @@ export default function RegisterStudentPage() {
                                     
                                     // Format as "Xឆ្នាំ Yខែ Zថ្ងៃ"
                                     const ageString = `${years} ឆ្នាំ ${months} ខែ ${days} ថ្ងៃ`;
+                                    console.log('Age calculated:', ageString);
                                     setFormData(prev => ({...prev, age: ageString}));
                                   }
                                 }}
-                                className="h-11 text-center"
+                                className="h-11 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors bg-background text-foreground border-input [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-2 [&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:transform [&::-webkit-calendar-picker-indicator]:-translate-y-1/2 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                                max={new Date().toISOString().split('T')[0]}
                               />
                             </div>
 
@@ -856,15 +861,15 @@ export default function RegisterStudentPage() {
                               <Input 
                                 id="age" 
                                 value={formData.age || ""}
-                                onChange={(e) => setFormData({...formData, age: e.target.value})}
+                                readOnly
                                 placeholder="អាយុ" 
-                                className="h-11 text-center"
+                                className="h-11 text-center bg-gray-50 dark:bg-gray-800 cursor-not-allowed"
                               />
                             </div>
 
                             {/* Class */}
                             <div className="space-y-1">
-                              <Label htmlFor="class">ចូលរៀនថ្នាក់ទី</Label>
+                              <Label htmlFor="class">ចូលរៀនថ្នាក់ទី <span className="text-red-500">*</span></Label>
                               <Select
                                 value={formData.class}
                                 onValueChange={(value) => {
@@ -962,7 +967,7 @@ export default function RegisterStudentPage() {
                             </div>
 
                             {/* Birth District */}
-                            <div className="space-y-1 col-span-4">
+                            <div className="space-y-1 col-span-3">
                               <Label htmlFor="student-birth-district">ស្រុកកំណើត</Label>
                               <Input 
                                 id="student-birth-district" 
@@ -972,27 +977,13 @@ export default function RegisterStudentPage() {
                                 className="h-11 text-center" 
                               />
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Contact Information Card */}
-                      <Card className="hover:shadow-lg transition-all duration-200">
-                        <CardHeader>
-                          <CardTitle className="flex items-center space-x-2">
-                            <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>ព័ត៌មានបន្ថែម</span>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                             {/* Phone */}
                             <div className="space-y-1">
                               <Label htmlFor="phone">លេខទូរស័ព្ទទំនាក់ទំនងគោល</Label>
                               <Input 
                                 id="phone" 
                                 type="tel"
-                                placeholder="012 XXX XXX" 
+                                placeholder="012 456 789" 
                                 value={formData.phone}
                                 onChange={(e) => {
                                   // Only allow numbers and spaces
@@ -1005,19 +996,6 @@ export default function RegisterStudentPage() {
                                 className="h-11 text-center" 
                               />
                             </div>
-
-                            {/* Vaccination Status */}
-                            <div className="flex flex-col items-center justify-center space-y-1 col-span-3">
-                              <Checkbox 
-                                id="vaccinated" 
-                                checked={formData.vaccinated || false}
-                                onCheckedChange={(checked) => setFormData({...formData, vaccinated: checked as boolean})}
-                              />
-                              <Label htmlFor="vaccinated" className="cursor-pointer text-center">
-                                តើសិស្សបានទទួលវ៉ាក់សាំងគ្រប់គ្រាន់ហើយឬនៅ?
-                              </Label>
-                            </div>
-
                           </div>
                         </CardContent>
                       </Card>
@@ -1108,7 +1086,7 @@ export default function RegisterStudentPage() {
                                 <Input 
                                   id={`phone-${formIndex}`} 
                                   type="tel"
-                                  placeholder="012 XXX XXX" 
+                                  placeholder="012 456 789" 
                                   className="h-11 text-center"
                                   value={formData.guardians[formIndex]?.phone || ''}
                                   onChange={(e) => {
@@ -1141,44 +1119,52 @@ export default function RegisterStudentPage() {
                               </div>
                               <div className="space-y-1">
                                 <Label htmlFor={`income-${formIndex}`}>ប្រាក់ចំណូល</Label>
-                                <Input 
-                                  id={`income-${formIndex}`} 
-                                  type="number"
-                                  placeholder="0" 
-                                  className="h-11 text-center"
-                                  value={formData.guardians[formIndex]?.income || ''}
-                                  onChange={(e) => {
-                                    // Only allow numbers
-                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                    const newGuardians = [...formData.guardians];
-                                    newGuardians[formIndex] = { ...newGuardians[formIndex], income: value };
-                                    setFormData({ ...formData, guardians: newGuardians });
-                                  }}
-                                />
+                                <div className="relative">
+                                  <Input 
+                                    id={`income-${formIndex}`} 
+                                    type="text"
+                                    placeholder="0" 
+                                    className="h-11 text-center pr-16"
+                                    value={formData.guardians[formIndex]?.income ? parseInt(formData.guardians[formIndex]?.income).toLocaleString() : ''}
+                                    onChange={(e) => {
+                                      // Remove all non-numeric characters and commas
+                                      const value = e.target.value.replace(/[^0-9]/g, '');
+                                      const newGuardians = [...formData.guardians];
+                                      newGuardians[formIndex] = { ...newGuardians[formIndex], income: value };
+                                      setFormData({ ...formData, guardians: newGuardians });
+                                    }}
+                                  />
+                                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 text-sm">រៀល</span>
+                                  </div>
+                                </div>
                               </div>
 
                               {/* Children Info */}
                               <div className="space-y-1">
                                 <Label htmlFor={`children-count-${formIndex}`}>ចំនួនកូនក្នុងបន្ទុក</Label>
-                                <Input 
-                                  id={`children-count-${formIndex}`} 
-                                  type="number" 
-                                  placeholder="0" 
-                                  min="0"
-                                  max="20"
-                                  className="h-11 text-center"
-                                  value={formData.guardians[formIndex]?.childrenCount || ''}
-                                  onChange={(e) => {
-                                    // Only allow numbers and limit to reasonable range
-                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                    const numValue = parseInt(value) || 0;
-                                    if (numValue >= 0 && numValue <= 20) {
-                                      const newGuardians = [...formData.guardians];
-                                      newGuardians[formIndex] = { ...newGuardians[formIndex], childrenCount: value };
-                                      setFormData({ ...formData, guardians: newGuardians });
-                                    }
-                                  }}
-                                />
+                                <div className="relative">
+                                  <Input 
+                                    id={`children-count-${formIndex}`} 
+                                    type="text" 
+                                    placeholder="0" 
+                                    className="h-11 text-center pr-16"
+                                    value={formData.guardians[formIndex]?.childrenCount || ''}
+                                    onChange={(e) => {
+                                      // Only allow numbers and limit to reasonable range
+                                      const value = e.target.value.replace(/[^0-9]/g, '');
+                                      const numValue = parseInt(value) || 0;
+                                      if (numValue >= 0 && numValue <= 20) {
+                                        const newGuardians = [...formData.guardians];
+                                        newGuardians[formIndex] = { ...newGuardians[formIndex], childrenCount: value };
+                                        setFormData({ ...formData, guardians: newGuardians });
+                                      }
+                                    }}
+                                  />
+                                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 text-sm">នាក់</span>
+                                  </div>
+                                </div>
                               </div>
 
                               {/* Address */}
@@ -1336,16 +1322,26 @@ export default function RegisterStudentPage() {
 
                             <div className="space-y-1">
                               <Label htmlFor="duration-in-kpc">រយៈពេលនៅកំពង់ចាម</Label>
-                              <Input 
-                                id="duration-in-kpc" 
-                                placeholder="រយៈពេល" 
-                                className="h-11 text-center"
-                                value={formData.familyInfo.durationInKPC || ''}
-                                onChange={(e) => setFormData({
-                                  ...formData, 
-                                  familyInfo: { ...formData.familyInfo, durationInKPC: e.target.value }
-                                })}
-                              />
+                              <div className="relative">
+                                <Input 
+                                  id="duration-in-kpc" 
+                                  type="text"
+                                  placeholder="0" 
+                                  className="h-11 text-center pr-16"
+                                  value={formData.familyInfo.durationInKPC || ''}
+                                  onChange={(e) => {
+                                    // Only allow numbers
+                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                    setFormData({
+                                      ...formData, 
+                                      familyInfo: { ...formData.familyInfo, durationInKPC: value }
+                                    });
+                                  }}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                  <span className="text-gray-500 text-sm">ឆ្នាំ</span>
+                                </div>
+                              </div>
                             </div>
 
                             {/* Living Condition */}
@@ -1450,21 +1446,26 @@ export default function RegisterStudentPage() {
 
                             <div className="space-y-1">
                               <Label htmlFor="help-amount">ថវិកាជួយសាលា</Label>
-                              <Input 
-                                id="help-amount" 
-                                type="number"
-                                placeholder="0" 
-                                className="h-11 text-center"
-                                value={formData.familyInfo.helpAmount || ''}
-                                onChange={(e) => {
-                                  // Only allow numbers
-                                  const value = e.target.value.replace(/[^0-9]/g, '');
-                                  setFormData({
-                                    ...formData, 
-                                    familyInfo: { ...formData.familyInfo, helpAmount: value }
-                                  });
-                                }}
-                              />
+                              <div className="relative">
+                                <Input 
+                                  id="help-amount" 
+                                  type="text"
+                                  placeholder="0" 
+                                  className="h-11 text-center pr-16"
+                                  value={formData.familyInfo.helpAmount ? parseInt(formData.familyInfo.helpAmount).toLocaleString() : ''}
+                                  onChange={(e) => {
+                                    // Remove all non-numeric characters and commas
+                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                    setFormData({
+                                      ...formData, 
+                                      familyInfo: { ...formData.familyInfo, helpAmount: value }
+                                    });
+                                  }}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                  <span className="text-gray-500 text-sm">រៀល</span>
+                                </div>
+                              </div>
                             </div>
 
                             <div className="space-y-1">
@@ -1588,18 +1589,31 @@ export default function RegisterStudentPage() {
                                 id="registration-date"
                                 type="date"
                                 className="h-11 w-full md:w-auto"
+                                disabled
                               />
                             </div>
-                            <div className="flex gap-4">
+                            <div className="flex gap-4 items-center">
                               <Button 
                                 onClick={handleSubmit}
-                                disabled={isSubmitting}
-                                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                                disabled={isSubmitting || isCompleted}
+                                className={`${
+                                  isCompleted 
+                                    ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' 
+                                    : isSubmitting
+                                    ? 'bg-gradient-to-r from-blue-400 to-purple-400 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
+                                } transition-all duration-200`}
+                                title={`isSubmitting: ${isSubmitting}, isCompleted: ${isCompleted}`}
                               >
                                 {isSubmitting ? (
                                   <>
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                                     កំពុងរក្សាទុក...
+                                  </>
+                                ) : isCompleted ? (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-2 animate-pulse" />
+                                    បញ្ចាប់រួចរាល់
                                   </>
                                 ) : (
                                   <>
@@ -1612,6 +1626,14 @@ export default function RegisterStudentPage() {
                                 <Download className="h-4 w-4 mr-2" />
                                 បោះពុម្ព
                               </Button>
+                              {isCompleted && (
+                                <div className="flex items-center space-x-2 text-green-600 dark:text-green-400 animate-pulse bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg border border-green-200 dark:border-green-800 shadow-sm">
+                                  <CheckCircle className="h-4 w-4" />
+                                  <span className="text-sm font-medium">
+                                    {isNewStudent ? 'ការចុះឈ្មោះសិស្សបានជោគជ័យ' : 'ការកែប្រែព័ត៌មានសិស្សបានជោគជ័យ'}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </CardContent>
