@@ -103,41 +103,49 @@ async function main() {
 
   console.log('🎉 Database seeding completed!')
 
-  await prisma.student.createMany({
-    data: [
-      {
-        studentId: 'S001', lastName: 'សុខ', firstName: 'ម៉ាលី', gender: 'female', dob: new Date('2010-05-15'), class: '៧ក', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S002', lastName: 'យន្ត', firstName: 'សុខ', gender: 'male', dob: new Date('2010-06-20'), class: '៧ខ', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S003', lastName: 'វណ្ណា', firstName: 'ស្រី', gender: 'female', dob: new Date('2011-03-22'), class: '៦ខ', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S004', lastName: 'រស់', firstName: 'សំណាង', gender: 'male', dob: new Date('2011-01-05'), class: '៦ក', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S005', lastName: 'វណ្ដណា', firstName: 'ស្រី', gender: 'female', dob: new Date('2011-04-10'), class: '៦ខ', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S006', lastName: 'សុភា', firstName: 'សុវណ្ណ', gender: 'male', dob: new Date('2010-09-12'), class: '៧ក', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S007', lastName: 'ស្រីពៅ', firstName: 'សុផានិត', gender: 'female', dob: new Date('2011-07-18'), class: '៦ក', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S008', lastName: 'សុខ', firstName: 'សុវណ្ណ', gender: 'male', dob: new Date('2010-11-25'), class: '៧ខ', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S009', lastName: 'ស្រី', firstName: 'សុផានិត', gender: 'female', dob: new Date('2011-02-14'), class: '៦ខ', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-      {
-        studentId: 'S010', lastName: 'សុវណ្ណ', firstName: 'សុភា', gender: 'male', dob: new Date('2010-08-30'), class: '៧ក', academicYear: '2023-2024', registrationDate: new Date(), status: 'active',
-      },
-    ],
-    skipDuplicates: true,
-  });
+  console.log('👨‍🎓 Creating students...')
+  
+  const students = [
+    {
+      lastName: 'សុខ', firstName: 'ម៉ាលី', gender: 'female', dob: new Date('2010-05-15'), class: '៧ក', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'យន្ត', firstName: 'សុខ', gender: 'male', dob: new Date('2010-06-20'), class: '៧ខ', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'វណ្ណា', firstName: 'ស្រី', gender: 'female', dob: new Date('2011-03-22'), class: '៦ខ', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'រស់', firstName: 'សំណាង', gender: 'male', dob: new Date('2011-01-05'), class: '៦ក', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'វណ្ដណា', firstName: 'ស្រី', gender: 'female', dob: new Date('2011-04-10'), class: '៦ខ', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'សុភា', firstName: 'សុវណ្ណ', gender: 'male', dob: new Date('2010-09-12'), class: '៧ក', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'ស្រីពៅ', firstName: 'សុផានិត', gender: 'female', dob: new Date('2011-07-18'), class: '៦ក', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'សុខ', firstName: 'សុវណ្ណ', gender: 'male', dob: new Date('2010-11-25'), class: '៧ខ', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'ស្រី', firstName: 'សុផានិត', gender: 'female', dob: new Date('2011-02-14'), class: '៦ខ', registrationDate: new Date(), status: 'active',
+    },
+    {
+      lastName: 'សុវណ្ណ', firstName: 'សុភា', gender: 'male', dob: new Date('2010-08-30'), class: '៧ក', registrationDate: new Date(), status: 'active',
+    },
+  ];
+
+  for (const studentData of students) {
+    const student = await prisma.student.create({
+      data: studentData,
+    });
+    console.log(`✅ Created student: ${student.firstName} ${student.lastName} (${student.class})`);
+  }
+
+  console.log('🎉 Database seeding completed!');
 }
 
 main().catch(e => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect()); 

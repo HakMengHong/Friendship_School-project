@@ -1,5 +1,6 @@
 'use client'
 
+import React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { 
@@ -145,14 +146,16 @@ export default function RegisterStudentPage() {
   const generateNextStudentId = async () => {
     try {
       const response = await fetch('/api/students/next-id')
-      const data = await response.json()
-      return data.nextStudentId
+      if (response.ok) {
+        const data = await response.json()
+        return data.nextStudentId
+      }
     } catch (error) {
       console.error('Error generating student ID:', error)
-      // Fallback: generate simple number based on current students count
-      const nextId = students.length + 1
-      return nextId.toString()
     }
+    // Fallback: generate simple number based on current students count
+    const nextId = students.length + 1
+    return nextId.toString()
   }
 
   // Function to generate simple numeric student ID
@@ -171,11 +174,11 @@ export default function RegisterStudentPage() {
         setStudents(data.students || [])
       } catch (error) {
         console.error('Error fetching students:', error)
-        toast({
-          title: "Error",
-          description: "Failed to fetch students",
-          variant: "destructive"
-        })
+              toast({
+        title: "កំហុស",
+        description: "បរាជ័យក្នុងការទាញយកព័ត៌មានសិស្ស",
+        variant: "destructive"
+      })
       } finally {
         setLoading(false)
       }
@@ -247,8 +250,8 @@ export default function RegisterStudentPage() {
       console.log('Missing fields:', missingFields);
       console.log('Current formData:', formData);
       toast({
-        title: "កំហុសក្នុងការបំពេញព័ត៌មាន",
-        description: `សូមបំពេញព័ត៌មានដែលត្រូវការ: ${missingFields.join(', ')}`,
+        title: "កំហុសការផ្ទៀងផ្ទាត់",
+        description: `សូមបំពេញវាលដែលត្រូវការ: ${missingFields.join(', ')}`,
         variant: "destructive"
       });
       return;
@@ -342,8 +345,8 @@ export default function RegisterStudentPage() {
         console.log('Response received:', result);
         const isNewStudent = !selectedStudent?.studentId || selectedStudent?.studentId === 'new';
         toast({
-          title: "Success",
-          description: isNewStudent ? "Student registered successfully" : "Student updated successfully",
+          title: "ជោគជ័យ",
+          description: isNewStudent ? "ចុះឈ្មោះសិស្សបានជោគជ័យ" : "កែប្រែសិស្សបានជោគជ័យ",
         })
         setIsCompleted(true)
         console.log('Success state set to true')
@@ -368,8 +371,8 @@ export default function RegisterStudentPage() {
       console.error('Error registering student:', error)
       setIsCompleted(false) // Reset completion state on error
       toast({
-        title: "Error",
-        description: `Failed to register student: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        title: "កំហុស",
+        description: "បរាជ័យក្នុងការចុះឈ្មោះសិស្ស",
         variant: "destructive"
       })
     } finally {
