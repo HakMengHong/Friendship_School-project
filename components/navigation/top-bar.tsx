@@ -28,34 +28,109 @@ export function TopBar({ className, user }: TopBarProps) {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
 
-  const pageTitle = useMemo(() => {
-    const routes: Record<string, string> = {
-      "/admin/dashboard": "ផ្ទាំងគ្រប់គ្រង",
-      "/admin/dashboard/users": "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
-      "/admin/users": "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
-      "/admin/attendance": "អវត្តមានសិស្ស",
-      "/admin/attendance/daily": "អវត្តមានសិស្សប្រចាំថ្ងៃ",
-      "/admin/attendance/report": "របាយការណ៍អវត្តមានសិស្ស",
-      "/admin/grade": "ពិន្ទុសិស្ស",
-      "/admin/grade/addgrade": "បញ្ចូលពិន្ទុសិស្ស",
-      "/admin/grade/report": "របាយការណ៍ពិន្ទុ",
-      "/admin/grade/gradebook": "សៀវភៅតាមដាន",
-      "/admin/student-info": "ព័ត៌មានសិស្ស",
-      "/admin/student-info/list": "បញ្ជីឈ្មោះសិស្ស",
-      "/admin/register-student": "ចុះឈ្មោះសិស្ស",
-      "/teacher/dashboard": "ផ្ទាំងគ្រប់គ្រង",
-      "/teacher/attendance": "អវត្តមានសិស្ស",
-      "/teacher/attendance/daily": "អវត្តមានសិស្សប្រចាំថ្ងៃ",
-      "/teacher/attendance/report": "របាយការណ៍អវត្តមានសិស្ស",
-      "/teacher/grade": "ពិន្ទុសិស្ស",
-      "/teacher/grade/addgrade": "បញ្ចូលពិន្ទុសិស្ស",
-      "/teacher/grade/report": "របាយការណ៍ពិន្ទុ",
-      "/teacher/grade/gradebook": "សៀវភៅតាមដាន",
-      "/teacher/student-info": "ព័ត៌មានសិស្ស",
-      "/teacher/student-info/list": "បញ្ជីឈ្មោះសិស្ស",
-      "/teacher/register-student": "ចុះឈ្មោះសិស្ស",
+  const pageInfo = useMemo(() => {
+    const routes: Record<string, { title: string; subtitle: string }> = {
+      "/admin/dashboard": {
+        title: "ផ្ទាំងគ្រប់គ្រង",
+        subtitle: "ការតាមដានសកម្មភាពសិស្ស និងគ្រូបង្រៀន"
+      },
+      "/admin/dashboard/users": {
+        title: "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
+        subtitle: "គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងការអនុញ្ញាត"
+      },
+      "/admin/users": {
+        title: "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
+        subtitle: "គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងការអនុញ្ញាត"
+      },
+      "/admin/attendance": {
+        title: "អវត្តមានសិស្ស",
+        subtitle: "ការតាមដានវត្តមាន និងអវត្តមានសិស្ស"
+      },
+      "/admin/attendance/daily": {
+        title: "អវត្តមានសិស្សប្រចាំថ្ងៃ",
+        subtitle: "ការកត់ត្រាវត្តមានសិស្សប្រចាំថ្ងៃ"
+      },
+      "/admin/attendance/report": {
+        title: "របាយការណ៍អវត្តមានសិស្ស",
+        subtitle: "របាយការណ៍លម្អិតនៃវត្តមានសិស្ស"
+      },
+      "/admin/grade": {
+        title: "ពិន្ទុសិស្ស",
+        subtitle: "ការគ្រប់គ្រងពិន្ទុ និងការវាយតម្លៃសិស្ស"
+      },
+      "/admin/grade/addgrade": {
+        title: "បញ្ចូលពិន្ទុសិស្ស",
+        subtitle: "បញ្ចូលពិន្ទុថ្មីសម្រាប់សិស្ស"
+      },
+      "/admin/grade/report": {
+        title: "របាយការណ៍ពិន្ទុ",
+        subtitle: "របាយការណ៍លម្អិតនៃពិន្ទុសិស្ស"
+      },
+      "/admin/grade/gradebook": {
+        title: "សៀវភៅតាមដាន",
+        subtitle: "ការតាមដានពិន្ទុសិស្សតាមថ្នាក់"
+      },
+      "/admin/student-info": {
+        title: "ព័ត៌មានសិស្ស",
+        subtitle: "ការគ្រប់គ្រងព័ត៌មានលម្អិតសិស្ស"
+      },
+      "/admin/student-info/list": {
+        title: "បញ្ជីឈ្មោះសិស្ស",
+        subtitle: "បញ្ជីសិស្សទាំងអស់ក្នុងប្រព័ន្ធ"
+      },
+      "/admin/register-student": {
+        title: "ចុះឈ្មោះសិស្ស",
+        subtitle: "បញ្ចូលព័ត៌មានសិស្សថ្មី និងគ្រប់គ្រងព័ត៌មាន"
+      },
+      "/teacher/dashboard": {
+        title: "ផ្ទាំងគ្រប់គ្រង",
+        subtitle: "ការតាមដានសកម្មភាពសិស្ស និងថ្នាក់រៀន"
+      },
+      "/teacher/attendance": {
+        title: "អវត្តមានសិស្ស",
+        subtitle: "ការតាមដានវត្តមានសិស្សក្នុងថ្នាក់"
+      },
+      "/teacher/attendance/daily": {
+        title: "អវត្តមានសិស្សប្រចាំថ្ងៃ",
+        subtitle: "ការកត់ត្រាវត្តមានសិស្សប្រចាំថ្ងៃ"
+      },
+      "/teacher/attendance/report": {
+        title: "របាយការណ៍អវត្តមានសិស្ស",
+        subtitle: "របាយការណ៍វត្តមានសិស្សក្នុងថ្នាក់"
+      },
+      "/teacher/grade": {
+        title: "ពិន្ទុសិស្ស",
+        subtitle: "ការគ្រប់គ្រងពិន្ទុសិស្សក្នុងថ្នាក់"
+      },
+      "/teacher/grade/addgrade": {
+        title: "បញ្ចូលពិន្ទុសិស្ស",
+        subtitle: "បញ្ចូលពិន្ទុថ្មីសម្រាប់សិស្ស"
+      },
+      "/teacher/grade/report": {
+        title: "របាយការណ៍ពិន្ទុ",
+        subtitle: "របាយការណ៍ពិន្ទុសិស្សក្នុងថ្នាក់"
+      },
+      "/teacher/grade/gradebook": {
+        title: "សៀវភៅតាមដាន",
+        subtitle: "ការតាមដានពិន្ទុសិស្សក្នុងថ្នាក់"
+      },
+      "/teacher/student-info": {
+        title: "ព័ត៌មានសិស្ស",
+        subtitle: "ការគ្រប់គ្រងព័ត៌មានសិស្សក្នុងថ្នាក់"
+      },
+      "/teacher/student-info/list": {
+        title: "បញ្ជីឈ្មោះសិស្ស",
+        subtitle: "បញ្ជីសិស្សក្នុងថ្នាក់រៀន"
+      },
+      "/teacher/register-student": {
+        title: "ចុះឈ្មោះសិស្ស",
+        subtitle: "បញ្ចូលព័ត៌មានសិស្សថ្មី និងគ្រប់គ្រងព័ត៌មាន"
+      },
     }
-    return routes[pathname] || "ផ្ទាំងគ្រប់គ្រង"
+    return routes[pathname || ''] || { 
+      title: "ផ្ទាំងគ្រប់គ្រង", 
+      subtitle: "ការតាមដានសកម្មភាពសិស្ស និងគ្រូបង្រៀន" 
+    }
   }, [pathname])
 
   const handleSearch = (e: React.FormEvent) => {
@@ -93,10 +168,10 @@ export function TopBar({ className, user }: TopBarProps) {
       {/* Left side - Title */}
       <div className="flex-1 min-w-0">
         <h1 className="text-xl md:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-1 truncate">
-          {pageTitle}
+          {pageInfo.title}
         </h1>
         <p className="text-xs md:text-sm text-muted-foreground mt-1 hidden sm:block">
-          សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងសាលា
+          {pageInfo.subtitle}
         </p>
       </div>
 

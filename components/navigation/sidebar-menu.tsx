@@ -183,7 +183,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
   }, [router])
 
   const isActive = useCallback((href: string) => {
-    return pathname === href || pathname.startsWith(`${href}/`)
+    return pathname === href || (pathname && pathname.startsWith(`${href}/`))
   }, [pathname])
 
   const hasActiveSubItem = useCallback((subItems?: { href: string }[]) => {

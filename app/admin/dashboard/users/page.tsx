@@ -258,16 +258,6 @@ export default function AdminUsersPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
-          ការគ្រប់គ្រងអ្នកប្រើប្រាស់
-        </h1>
-        <p className="text-base md:text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
-          គ្រប់គ្រងអ្នកប្រើប្រាស់ និងការកំណត់សិទ្ធិ
-        </p>
-      </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">

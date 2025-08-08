@@ -1,6 +1,5 @@
 'use client'
 
-import React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { 
@@ -142,20 +141,34 @@ export default function RegisterStudentPage() {
     }
   })
 
+  // Function to convert grade number to Khmer label
+  const getGradeLabel = (gradeNumber: string | number) => {
+    const gradeMap: { [key: string]: string } = {
+      "1": "ថ្នាក់ទី១",
+      "2": "ថ្នាក់ទី២", 
+      "3": "ថ្នាក់ទី៣",
+      "4": "ថ្នាក់ទី៤",
+      "5": "ថ្នាក់ទី៥",
+      "6": "ថ្នាក់ទី៦",
+      "7": "ថ្នាក់ទី៧",
+      "8": "ថ្នាក់ទី៨",
+      "9": "ថ្នាក់ទី៩"
+    };
+    return gradeMap[gradeNumber?.toString()] || gradeNumber?.toString() || "N/A";
+  };
+
   // Function to generate next student ID
   const generateNextStudentId = async () => {
     try {
       const response = await fetch('/api/students/next-id')
-      if (response.ok) {
-        const data = await response.json()
-        return data.nextStudentId
-      }
+      const data = await response.json()
+      return data.nextStudentId
     } catch (error) {
       console.error('Error generating student ID:', error)
+      // Fallback: generate simple number based on current students count
+      const nextId = students.length + 1
+      return nextId.toString()
     }
-    // Fallback: generate simple number based on current students count
-    const nextId = students.length + 1
-    return nextId.toString()
   }
 
   // Function to generate simple numeric student ID
@@ -174,11 +187,11 @@ export default function RegisterStudentPage() {
         setStudents(data.students || [])
       } catch (error) {
         console.error('Error fetching students:', error)
-              toast({
-        title: "កំហុស",
-        description: "បរាជ័យក្នុងការទាញយកព័ត៌មានសិស្ស",
-        variant: "destructive"
-      })
+        toast({
+          title: "Error",
+          description: "Failed to fetch students",
+          variant: "destructive"
+        })
       } finally {
         setLoading(false)
       }
@@ -250,8 +263,8 @@ export default function RegisterStudentPage() {
       console.log('Missing fields:', missingFields);
       console.log('Current formData:', formData);
       toast({
-        title: "កំហុសការផ្ទៀងផ្ទាត់",
-        description: `សូមបំពេញវាលដែលត្រូវការ: ${missingFields.join(', ')}`,
+        title: "កំហុសក្នុងការបំពេញព័ត៌មាន",
+        description: `សូមបំពេញព័ត៌មានដែលត្រូវការ: ${missingFields.join(', ')}`,
         variant: "destructive"
       });
       return;
@@ -345,8 +358,8 @@ export default function RegisterStudentPage() {
         console.log('Response received:', result);
         const isNewStudent = !selectedStudent?.studentId || selectedStudent?.studentId === 'new';
         toast({
-          title: "ជោគជ័យ",
-          description: isNewStudent ? "ចុះឈ្មោះសិស្សបានជោគជ័យ" : "កែប្រែសិស្សបានជោគជ័យ",
+          title: "Success",
+          description: isNewStudent ? "Student registered successfully" : "Student updated successfully",
         })
         setIsCompleted(true)
         console.log('Success state set to true')
@@ -371,8 +384,8 @@ export default function RegisterStudentPage() {
       console.error('Error registering student:', error)
       setIsCompleted(false) // Reset completion state on error
       toast({
-        title: "កំហុស",
-        description: "បរាជ័យក្នុងការចុះឈ្មោះសិស្ស",
+        title: "Error",
+        description: `Failed to register student: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       })
     } finally {
@@ -624,20 +637,10 @@ export default function RegisterStudentPage() {
   })
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
-          ចុះឈ្មោះសិស្ស
-        </h1>
-        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
-          បញ្ចូលព័ត៌មានសិស្សថ្មី និងគ្រប់គ្រងព័ត៌មាន
-        </p>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Student List Sidebar */}
-        <div className="w-full lg:w-80 flex-shrink-0">
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Sidebar: Follows height of main content */}
+        <div className="w-full lg:w-80 flex-shrink-0 rounded-xl shadow overflow-y-auto">
           <Card className="h-full border-0 shadow-lg">
             <CardHeader className="border-b">
               <div className="flex items-center justify-between">
@@ -660,7 +663,7 @@ export default function RegisterStudentPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="flex flex-col flex-1 p-0">
               <div className="p-4 border-b">
                 <div className="relative">
                   <Input
@@ -673,9 +676,9 @@ export default function RegisterStudentPage() {
                 </div>
               </div>
 
-              <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+              <div className="max-h-[calc(100vh-100px)] overflow-y-auto">
                 {loading ? (
-                  <div className="text-center py-12">
+                  <div className=" py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">កំពុងផ្ទុក...</p>
                   </div>
@@ -700,7 +703,7 @@ export default function RegisterStudentPage() {
                               {student.lastName} {student.firstName}
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                              ថ្នាក់ {student.class} • ID: {student.studentId}
+                              ថ្នាក់ {getGradeLabel(student.class)} • ID: {student.studentId}
                             </p>
                           </div>
                           {selectedStudent?.studentId === student.studentId && (
@@ -711,7 +714,7 @@ export default function RegisterStudentPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
+                  <div className=" py-12">
                     <User className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {studentName ? 'រកមិនឃើញសិស្ស' : 'គ្មានសិស្ស'}
@@ -723,8 +726,8 @@ export default function RegisterStudentPage() {
           </Card>
         </div>
 
-        {/* Main Form Content */}
-        <div className="flex-1 space-y-6">
+        {/* Main Content: Varies by tab content */}
+        <div className="flex-1 rounded-xl shadow">
           {showForm && selectedStudent ? (
             <>
               {/* Form Navigation Tabs */}
@@ -751,12 +754,13 @@ export default function RegisterStudentPage() {
                     </TabsList>
 
                     {/* Basic Information Tab */}
-                    <TabsContent value="basic" className="space-y-2">
+                    <TabsContent value="basic" className="space-y-6">
+                      {/* Personal Information Card */}
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
                             <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>ព័ត៌មានមូលដ្ឋាន</span>
+                            <span>ព័ត៌មានផ្ទាល់ខ្លួន</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -765,10 +769,14 @@ export default function RegisterStudentPage() {
                               <span className="text-red-500">*</span> បង្ហាញព័ត៌មានដែលត្រូវការ (Required fields)
                             </p>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                          
+                          {/* Personal Details - Row 1 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* Last Name */}
-                            <div className="space-y-1">
-                              <Label htmlFor="last-name">នាមត្រកូល <span className="text-red-500">*</span></Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="last-name" className="text-sm font-medium">
+                                នាមត្រកូល <span className="text-red-500">*</span>
+                              </Label>
                               <Input 
                                 id="last-name" 
                                 value={formData.lastName} 
@@ -777,13 +785,15 @@ export default function RegisterStudentPage() {
                                   setFormData({...formData, lastName: lastName});
                                 }}
                                 placeholder="នាមត្រកូល" 
-                                className="h-11 text-center"
+                                className="h-12 "
                               />
                             </div>
 
                             {/* First Name */}
-                            <div className="space-y-1">
-                              <Label htmlFor="first-name">នាមខ្លួន <span className="text-red-500">*</span></Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="first-name" className="text-sm font-medium">
+                                នាមខ្លួន <span className="text-red-500">*</span>
+                              </Label>
                               <Input 
                                 id="first-name" 
                                 value={formData.firstName} 
@@ -792,18 +802,20 @@ export default function RegisterStudentPage() {
                                   setFormData({...formData, firstName: firstName});
                                 }}
                                 placeholder="នាមខ្លួន" 
-                                className="h-11 text-center"
+                                className="h-12 "
                               />
                             </div>
 
                             {/* Gender */}
-                            <div className="space-y-1">
-                              <Label htmlFor="gender">ភេទ <span className="text-red-500">*</span></Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="gender" className="text-sm font-medium">
+                                ភេទ <span className="text-red-500">*</span>
+                              </Label>
                               <Select
                                 value={formData.gender}
                                 onValueChange={(value) => setFormData({...formData, gender: value})}
                               >
-                                <SelectTrigger id="gender" className="h-11 text-center">
+                                <SelectTrigger id="gender" className="h-12 ">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -814,8 +826,10 @@ export default function RegisterStudentPage() {
                             </div>
 
                             {/* Date of Birth */}
-                            <div className="space-y-1">
-                              <Label htmlFor="dob">ថ្ងៃខែឆ្នាំកំណើត <span className="text-red-500">*</span></Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="dob" className="text-sm font-medium">
+                                ថ្ងៃខែឆ្នាំកំណើត <span className="text-red-500">*</span>
+                              </Label>
                               <Input 
                                 type="date" 
                                 id="dob" 
@@ -853,58 +867,77 @@ export default function RegisterStudentPage() {
                                     setFormData(prev => ({...prev, age: ageString}));
                                   }
                                 }}
-                                className="h-11 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors bg-background text-foreground border-input [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-2 [&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:transform [&::-webkit-calendar-picker-indicator]:-translate-y-1/2 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                                className="h-12  cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors bg-background text-foreground border-input [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-2 [&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:transform [&::-webkit-calendar-picker-indicator]:-translate-y-1/2 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                                 max={new Date().toISOString().split('T')[0]}
                               />
                             </div>
+                          </div>
 
+                          {/* Academic Information - Row 2 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* Age */}
-                            <div className="space-y-1">
-                              <Label htmlFor="age">អាយុ</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="age" className="text-sm font-medium">អាយុ</Label>
                               <Input 
                                 id="age" 
                                 value={formData.age || ""}
                                 readOnly
                                 placeholder="អាយុ" 
-                                className="h-11 text-center bg-gray-50 dark:bg-gray-800 cursor-not-allowed"
+                                className="h-12  bg-gray-50 dark:bg-gray-800 cursor-not-allowed"
                               />
                             </div>
 
                             {/* Class */}
-                            <div className="space-y-1">
-                              <Label htmlFor="class">ចូលរៀនថ្នាក់ទី <span className="text-red-500">*</span></Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="class" className="text-sm font-medium">
+                                ចូលរៀនថ្នាក់ទី <span className="text-red-500">*</span>
+                              </Label>
                               <Select
                                 value={formData.class}
                                 onValueChange={(value) => {
                                   setFormData({...formData, class: value});
                                 }}
                               >
-                                <SelectTrigger id="class" className="h-11 text-center">
+                                <SelectTrigger id="class" className="h-12 text-center">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {["៧ក", "៧ខ", "៦ក", "៦ខ", "៥ក", "៥ខ"].map(grade => (
-                                    <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                                  {[
+                                    { value: "1", label: "ថ្នាក់ទី ១" },
+                                    { value: "2", label: "ថ្នាក់ទី ២" },
+                                    { value: "3", label: "ថ្នាក់ទី ៣" },
+                                    { value: "4", label: "ថ្នាក់ទី ៤" },
+                                    { value: "5", label: "ថ្នាក់ទី ៥" },
+                                    { value: "6", label: "ថ្នាក់ទី ៦" },
+                                    { value: "7", label: "ថ្នាក់ទី ៧" },
+                                    { value: "8", label: "ថ្នាក់ទី ៨" },
+                                    { value: "9", label: "ថ្នាក់ទី ៩" }
+                                  ].map(grade => (
+                                    <SelectItem key={grade.value} value={grade.value}>
+                                      {grade.label}
+                                    </SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
                             </div>
                             
                             {/* Register to Study Checkbox */}
-                            <div className="flex flex-col items-center justify-center space-y-1">
+                            <div className="flex flex-col items-center justify-center space-y-2">
                               <Checkbox 
                                 id="register-to-study" 
                                 checked={formData.registerToStudy}
                                 onCheckedChange={(checked) => setFormData({...formData, registerToStudy: checked as boolean})}
                               />
-                              <Label htmlFor="register-to-study">ចុះឈ្មោះចូលរៀន?</Label>
+                              <Label htmlFor="register-to-study" className="text-sm font-medium ">
+                                ចុះឈ្មោះចូលរៀន?
+                              </Label>
                             </div>
                             
                             {/* Student ID */}
-                            <div className="space-y-1">
-                              <Label>លេខសំគាល់សិស្ស (ID)</Label>
-                              <div className="text-4xl h-11 flex items-center justify-center font-bold bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
-                              {isNewStudent ? formData.studentId || "NEW" : selectedStudent?.studentId || "N/A"}
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">លេខសំគាល់សិស្ស (ID)</Label>
+                              <div className="h-12 flex items-center justify-center font-bold bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                {isNewStudent ? formData.studentId || "NEW" : selectedStudent?.studentId || "N/A"}
                               </div>
                             </div>
                           </div>
@@ -916,73 +949,78 @@ export default function RegisterStudentPage() {
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
                             <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>អាសយដ្ឋានសិស្ស</span>
+                            <span>អាសយដ្ឋាន និង ទំនាក់ទំនង</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                          {/* Address Information - Row 1 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* House Number */}
-                            <div className="space-y-1">
-                              <Label htmlFor="student-house-number">ផ្ទះលេខ</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="student-house-number" className="text-sm font-medium">ផ្ទះលេខ</Label>
                               <Input 
                                 id="student-house-number" 
                                 placeholder="ផ្ទះលេខ" 
                                 value={formData.studentHouseNumber}
                                 onChange={(e) => setFormData({...formData, studentHouseNumber: e.target.value})}
-                                className="h-11 text-center" 
+                                className="h-12 " 
                               />
                             </div>
 
                             {/* Village */}
-                            <div className="space-y-1">
-                              <Label htmlFor="student-village">ភូមិ/សង្កាត់</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="student-village" className="text-sm font-medium">ភូមិ/សង្កាត់</Label>
                               <Input 
                                 id="student-village" 
                                 placeholder="ភូមិ/សង្កាត់" 
                                 value={formData.studentVillage}
                                 onChange={(e) => setFormData({...formData, studentVillage: e.target.value})}
-                                className="h-11 text-center" 
+                                className="h-12 " 
                               />
                             </div>
 
                             {/* District */}
-                            <div className="space-y-1">
-                              <Label htmlFor="student-district">ស្រុក/ខណ្ឌ</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="student-district" className="text-sm font-medium">ស្រុក/ខណ្ឌ</Label>
                               <Input 
                                 id="student-district" 
                                 placeholder="ស្រុក/ខណ្ឌ" 
                                 value={formData.studentDistrict}
                                 onChange={(e) => setFormData({...formData, studentDistrict: e.target.value})}
-                                className="h-11 text-center" 
+                                className="h-12 " 
                               />
                             </div>
 
                             {/* Province */}
-                            <div className="space-y-1">
-                              <Label htmlFor="student-province">ខេត្ត/ក្រុង</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="student-province" className="text-sm font-medium">ខេត្ត/ក្រុង</Label>
                               <Input 
                                 id="student-province" 
                                 placeholder="ខេត្ត/ក្រុង" 
                                 value={formData.studentProvince}
                                 onChange={(e) => setFormData({...formData, studentProvince: e.target.value})}
-                                className="h-11 text-center" 
+                                className="h-12 " 
                               />
                             </div>
+                          </div>
 
+                          {/* Contact Information - Row 2 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {/* Birth District */}
-                            <div className="space-y-1 col-span-3">
-                              <Label htmlFor="student-birth-district">ស្រុកកំណើត</Label>
+                            <div className="space-y-2 lg:col-span-2">
+                              <Label htmlFor="student-birth-district" className="text-sm font-medium">ស្រុកកំណើត</Label>
                               <Input 
                                 id="student-birth-district" 
                                 placeholder="ស្រុកកំណើត" 
                                 value={formData.studentBirthDistrict}
                                 onChange={(e) => setFormData({...formData, studentBirthDistrict: e.target.value})}
-                                className="h-11 text-center" 
+                                className="h-12 " 
                               />
                             </div>
+
                             {/* Phone */}
-                            <div className="space-y-1">
-                              <Label htmlFor="phone">លេខទូរស័ព្ទទំនាក់ទំនងគោល</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="phone" className="text-sm font-medium">លេខទូរស័ព្ទទំនាក់ទំនងគោល</Label>
                               <Input 
                                 id="phone" 
                                 type="tel"
@@ -996,7 +1034,7 @@ export default function RegisterStudentPage() {
                                     setFormData({...formData, phone: value});
                                   }
                                 }}
-                                className="h-11 text-center" 
+                                className="h-12 " 
                               />
                             </div>
                           </div>
@@ -1005,13 +1043,13 @@ export default function RegisterStudentPage() {
                     </TabsContent>
 
                     {/* Guardian Information Tab */}
-                    <TabsContent value="guardian" className="space-y-2">
+                    <TabsContent value="guardian" className="space-y-6">
                       {guardianForms.map((formIndex) => (
                         <Card key={formIndex} className="hover:shadow-lg transition-all duration-200">
                           <CardHeader>
                             <div className="flex justify-between items-center">
                               <CardTitle className="flex items-center space-x-2">
-                                <Home className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                                 <span>
                                   ព័ត៌មានអាណាព្យាបាល {guardianForms.length > 1 ? formIndex + 1 : ''}
                                 </span>
@@ -1030,14 +1068,15 @@ export default function RegisterStudentPage() {
                             </div>
                           </CardHeader>
                           <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
+                            {/* Guardian Personal Information - Row 1 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                               {/* Family's Name */}
-                              <div className="space-y-1">
-                                <Label htmlFor={`family-first-name-${formIndex}`}>នាមត្រកូល</Label>
+                              <div className="space-y-2">
+                                <Label htmlFor={`family-first-name-${formIndex}`} className="text-sm font-medium">នាមត្រកូល</Label>
                                 <Input 
                                   id={`family-first-name-${formIndex}`} 
                                   placeholder="នាមត្រកូល" 
-                                  className="h-11 text-center"
+                                  className="h-12 "
                                   value={formData.guardians[formIndex]?.firstName || ''}
                                   onChange={(e) => {
                                     const newGuardians = [...formData.guardians];
@@ -1046,12 +1085,13 @@ export default function RegisterStudentPage() {
                                   }}
                                 />
                               </div>
-                              <div className="space-y-1">
-                                <Label htmlFor={`family-last-name-${formIndex}`}>នាមខ្លួន</Label>
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor={`family-last-name-${formIndex}`} className="text-sm font-medium">នាមខ្លួន</Label>
                                 <Input 
                                   id={`family-last-name-${formIndex}`} 
                                   placeholder="នាមខ្លួន" 
-                                  className="h-11 text-center"
+                                  className="h-12 "
                                   value={formData.guardians[formIndex]?.lastName || ''}
                                   onChange={(e) => {
                                     const newGuardians = [...formData.guardians];
@@ -1061,9 +1101,9 @@ export default function RegisterStudentPage() {
                                 />
                               </div>
 
-                              {/* Guardian Info */}
-                              <div className="space-y-1">
-                                <Label htmlFor={`guardian-relation-${formIndex}`}>ត្រូវជា</Label>
+                              {/* Guardian Relation */}
+                              <div className="space-y-2">
+                                <Label htmlFor={`guardian-relation-${formIndex}`} className="text-sm font-medium">ត្រូវជា</Label>
                                 <Select
                                   value={formData.guardians[formIndex]?.relation || ''}
                                   onValueChange={(value) => {
@@ -1072,7 +1112,7 @@ export default function RegisterStudentPage() {
                                     setFormData({ ...formData, guardians: newGuardians });
                                   }}
                                 >
-                                  <SelectTrigger id={`guardian-relation-${formIndex}`} className="h-11 text-center">
+                                  <SelectTrigger id={`guardian-relation-${formIndex}`} className="h-12 ">
                                     <SelectValue placeholder="ជ្រើសរើស" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1084,13 +1124,13 @@ export default function RegisterStudentPage() {
                               </div>
 
                               {/* Contact Info */}
-                              <div className="space-y-1">
-                                <Label htmlFor={`phone-${formIndex}`}>លេខទូរស័ព្ទ</Label>
+                              <div className="space-y-2">
+                                <Label htmlFor={`phone-${formIndex}`} className="text-sm font-medium">លេខទូរស័ព្ទ</Label>
                                 <Input 
                                   id={`phone-${formIndex}`} 
                                   type="tel"
                                   placeholder="012 456 789" 
-                                  className="h-11 text-center"
+                                  className="h-12 "
                                   value={formData.guardians[formIndex]?.phone || ''}
                                   onChange={(e) => {
                                     // Only allow numbers and spaces
@@ -1104,14 +1144,17 @@ export default function RegisterStudentPage() {
                                   }}
                                 />
                               </div>
+                            </div>
 
+                            {/* Guardian Work & Income - Row 2 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                               {/* Occupation */}
-                              <div className="space-y-1">
-                                <Label htmlFor={`occupation-${formIndex}`}>មុខរបរ</Label>
+                              <div className="space-y-2">
+                                <Label htmlFor={`occupation-${formIndex}`} className="text-sm font-medium">មុខរបរ</Label>
                                 <Input 
                                   id={`occupation-${formIndex}`} 
                                   placeholder="មុខរបរ" 
-                                  className="h-11 text-center"
+                                  className="h-12 "
                                   value={formData.guardians[formIndex]?.occupation || ''}
                                   onChange={(e) => {
                                     const newGuardians = [...formData.guardians];
@@ -1120,14 +1163,15 @@ export default function RegisterStudentPage() {
                                   }}
                                 />
                               </div>
-                              <div className="space-y-1">
-                                <Label htmlFor={`income-${formIndex}`}>ប្រាក់ចំណូល</Label>
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor={`income-${formIndex}`} className="text-sm font-medium">ប្រាក់ចំណូល</Label>
                                 <div className="relative">
                                   <Input 
                                     id={`income-${formIndex}`} 
                                     type="text"
                                     placeholder="0" 
-                                    className="h-11 text-center pr-16"
+                                    className="h-12  pr-16"
                                     value={formData.guardians[formIndex]?.income ? parseInt(formData.guardians[formIndex]?.income).toLocaleString() : ''}
                                     onChange={(e) => {
                                       // Remove all non-numeric characters and commas
@@ -1144,14 +1188,14 @@ export default function RegisterStudentPage() {
                               </div>
 
                               {/* Children Info */}
-                              <div className="space-y-1">
-                                <Label htmlFor={`children-count-${formIndex}`}>ចំនួនកូនក្នុងបន្ទុក</Label>
+                              <div className="space-y-2">
+                                <Label htmlFor={`children-count-${formIndex}`} className="text-sm font-medium">ចំនួនកូនក្នុងបន្ទុក</Label>
                                 <div className="relative">
                                   <Input 
                                     id={`children-count-${formIndex}`} 
                                     type="text" 
                                     placeholder="0" 
-                                    className="h-11 text-center pr-16"
+                                    className="h-12  pr-16"
                                     value={formData.guardians[formIndex]?.childrenCount || ''}
                                     onChange={(e) => {
                                       // Only allow numbers and limit to reasonable range
@@ -1170,80 +1214,8 @@ export default function RegisterStudentPage() {
                                 </div>
                               </div>
 
-                              {/* Address */}
-                              <div className="space-y-1">
-                                <Label htmlFor={`house-number-${formIndex}`}>ផ្ទះលេខ</Label>
-                                <Input 
-                                  id={`house-number-${formIndex}`} 
-                                  placeholder="ផ្ទះលេខ" 
-                                  className="h-11 text-center"
-                                  value={formData.guardians[formIndex]?.houseNumber || ''}
-                                  onChange={(e) => {
-                                    const newGuardians = [...formData.guardians];
-                                    newGuardians[formIndex] = { ...newGuardians[formIndex], houseNumber: e.target.value };
-                                    setFormData({ ...formData, guardians: newGuardians });
-                                  }}
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <Label htmlFor={`village-${formIndex}`}>ភូមិ/សង្កាត់</Label>
-                                <Input 
-                                  id={`village-${formIndex}`} 
-                                  placeholder="ភូមិ/សង្កាត់" 
-                                  className="h-11 text-center"
-                                  value={formData.guardians[formIndex]?.village || ''}
-                                  onChange={(e) => {
-                                    const newGuardians = [...formData.guardians];
-                                    newGuardians[formIndex] = { ...newGuardians[formIndex], village: e.target.value };
-                                    setFormData({ ...formData, guardians: newGuardians });
-                                  }}
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <Label htmlFor={`district-${formIndex}`}>ស្រុក/ខណ្ឌ</Label>
-                                <Input 
-                                  id={`district-${formIndex}`} 
-                                  placeholder="ស្រុក/ខណ្ឌ" 
-                                  className="h-11 text-center"
-                                  value={formData.guardians[formIndex]?.district || ''}
-                                  onChange={(e) => {
-                                    const newGuardians = [...formData.guardians];
-                                    newGuardians[formIndex] = { ...newGuardians[formIndex], district: e.target.value };
-                                    setFormData({ ...formData, guardians: newGuardians });
-                                  }}
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <Label htmlFor={`province-${formIndex}`}>ខេត្ត/ក្រុង</Label>
-                                <Input 
-                                  id={`province-${formIndex}`} 
-                                  placeholder="ខេត្ត/ក្រុង" 
-                                  className="h-11 text-center"
-                                  value={formData.guardians[formIndex]?.province || ''}
-                                  onChange={(e) => {
-                                    const newGuardians = [...formData.guardians];
-                                    newGuardians[formIndex] = { ...newGuardians[formIndex], province: e.target.value };
-                                    setFormData({ ...formData, guardians: newGuardians });
-                                  }}
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <Label htmlFor={`birth-district-${formIndex}`}>ស្រុកកំណើត</Label>
-                                <Input 
-                                  id={`birth-district-${formIndex}`} 
-                                  placeholder="ស្រុកកំណើត" 
-                                  className="h-11 text-center"
-                                  value={formData.guardians[formIndex]?.birthDistrict || ''}
-                                  onChange={(e) => {
-                                    const newGuardians = [...formData.guardians];
-                                    newGuardians[formIndex] = { ...newGuardians[formIndex], birthDistrict: e.target.value };
-                                    setFormData({ ...formData, guardians: newGuardians });
-                                  }}
-                                />
-                              </div>
-
-                              {/* Religion */}
-                              <div className="flex flex-col items-center justify-center space-y-1">
+                              {/* Religion Checkbox */}
+                              <div className="flex flex-col items-center justify-center space-y-2">
                                 <Checkbox 
                                   id={`believe-jesus-${formIndex}`}
                                   checked={formData.guardians[formIndex]?.believeJesus || false}
@@ -1253,14 +1225,97 @@ export default function RegisterStudentPage() {
                                     setFormData({ ...formData, guardians: newGuardians });
                                   }}
                                 />
-                                <Label htmlFor={`believe-jesus-${formIndex}`}>ជឿព្រះយ៉េស៊ូ?</Label>
+                                <Label htmlFor={`believe-jesus-${formIndex}`} className="text-sm font-medium ">ជឿព្រះយ៉េស៊ូ?</Label>
                               </div>
-                              <div className="space-y-1 col-span-2">
-                                <Label htmlFor={`church-${formIndex}`}>ព្រះវិហារ</Label>
+                            </div>
+
+                            {/* Guardian Address - Row 3 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                              {/* House Number */}
+                              <div className="space-y-2">
+                                <Label htmlFor={`house-number-${formIndex}`} className="text-sm font-medium">ផ្ទះលេខ</Label>
+                                <Input 
+                                  id={`house-number-${formIndex}`} 
+                                  placeholder="ផ្ទះលេខ" 
+                                  className="h-12 "
+                                  value={formData.guardians[formIndex]?.houseNumber || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], houseNumber: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor={`village-${formIndex}`} className="text-sm font-medium">ភូមិ/សង្កាត់</Label>
+                                <Input 
+                                  id={`village-${formIndex}`} 
+                                  placeholder="ភូមិ/សង្កាត់" 
+                                  className="h-12 "
+                                  value={formData.guardians[formIndex]?.village || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], village: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor={`district-${formIndex}`} className="text-sm font-medium">ស្រុក/ខណ្ឌ</Label>
+                                <Input 
+                                  id={`district-${formIndex}`} 
+                                  placeholder="ស្រុក/ខណ្ឌ" 
+                                  className="h-12 "
+                                  value={formData.guardians[formIndex]?.district || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], district: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor={`province-${formIndex}`} className="text-sm font-medium">ខេត្ត/ក្រុង</Label>
+                                <Input 
+                                  id={`province-${formIndex}`} 
+                                  placeholder="ខេត្ត/ក្រុង" 
+                                  className="h-12 "
+                                  value={formData.guardians[formIndex]?.province || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], province: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Birth District & Church - Row 4 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor={`birth-district-${formIndex}`} className="text-sm font-medium">ស្រុកកំណើត</Label>
+                                <Input 
+                                  id={`birth-district-${formIndex}`} 
+                                  placeholder="ស្រុកកំណើត" 
+                                  className="h-12 "
+                                  value={formData.guardians[formIndex]?.birthDistrict || ''}
+                                  onChange={(e) => {
+                                    const newGuardians = [...formData.guardians];
+                                    newGuardians[formIndex] = { ...newGuardians[formIndex], birthDistrict: e.target.value };
+                                    setFormData({ ...formData, guardians: newGuardians });
+                                  }}
+                                />
+                              </div>
+                              
+                              <div className="space-y-2 lg:col-span-3">
+                                <Label htmlFor={`church-${formIndex}`} className="text-sm font-medium">ព្រះវិហារ</Label>
                                 <Input 
                                   id={`church-${formIndex}`} 
                                   placeholder="ព្រះវិហារ" 
-                                  className="h-11 text-center"
+                                  className="h-12 "
                                   value={formData.guardians[formIndex]?.church || ''}
                                   onChange={(e) => {
                                     const newGuardians = [...formData.guardians];
@@ -1281,28 +1336,30 @@ export default function RegisterStudentPage() {
                         variant="outline"
                       >
                         <Plus className="h-4 w-4" />
-                        បន្ថែម
+                        បន្ថែមអាណាព្យាបាល
                       </Button>
                     </TabsContent>
 
                     {/* Family Information Tab */}
                     <TabsContent value="family" className="space-y-6">
+                      {/* Family Background Card */}
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            <Home className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                             <span>ព័ត៌មានពីស្ថានភាពគ្រួសារសិស្ស</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                            {/* Living Situation */}
-                            <div className="space-y-1">
-                              <Label htmlFor="living-with">នៅជាមួយអ្នកណា</Label>
+                          {/* Living Situation - Row 1 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            {/* Living With */}
+                            <div className="space-y-2">
+                              <Label htmlFor="living-with" className="text-sm font-medium">នៅជាមួយអ្នកណា</Label>
                               <Input 
                                 id="living-with" 
                                 placeholder="នៅជាមួយអ្នកណា" 
-                                className="h-11 text-center"
+                                className="h-12 "
                                 value={formData.familyInfo.livingWith || ''}
                                 onChange={(e) => setFormData({
                                   ...formData, 
@@ -1311,7 +1368,8 @@ export default function RegisterStudentPage() {
                               />
                             </div>
                             
-                            <div className="flex flex-col items-center justify-center space-y-1">
+                            {/* Own House Checkbox */}
+                            <div className="flex flex-col items-center justify-center space-y-2">
                               <Checkbox 
                                 id="own-house"
                                 checked={formData.familyInfo.ownHouse || false}
@@ -1320,17 +1378,18 @@ export default function RegisterStudentPage() {
                                   familyInfo: { ...formData.familyInfo, ownHouse: checked as boolean }
                                 })}
                               />
-                              <Label htmlFor="own-house">នៅផ្ទះផ្ទាល់ខ្លួន?</Label>
+                              <Label htmlFor="own-house" className="text-sm font-medium ">នៅផ្ទះផ្ទាល់ខ្លួន?</Label>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label htmlFor="duration-in-kpc">រយៈពេលនៅកំពង់ចាម</Label>
+                            {/* Duration in KPC */}
+                            <div className="space-y-2">
+                              <Label htmlFor="duration-in-kpc" className="text-sm font-medium">រយៈពេលនៅកំពង់ចាម</Label>
                               <div className="relative">
                                 <Input 
                                   id="duration-in-kpc" 
                                   type="text"
                                   placeholder="0" 
-                                  className="h-11 text-center pr-16"
+                                  className="h-12  pr-16"
                                   value={formData.familyInfo.durationInKPC || ''}
                                   onChange={(e) => {
                                     // Only allow numbers
@@ -1348,8 +1407,8 @@ export default function RegisterStudentPage() {
                             </div>
 
                             {/* Living Condition */}
-                            <div className="space-y-1">
-                              <Label htmlFor="living-condition">ជីវភាព</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="living-condition" className="text-sm font-medium">ជីវភាព</Label>
                               <Select
                                 value={formData.familyInfo.livingCondition || ''}
                                 onValueChange={(value) => setFormData({
@@ -1357,7 +1416,7 @@ export default function RegisterStudentPage() {
                                   familyInfo: { ...formData.familyInfo, livingCondition: value }
                                 })}
                               >
-                                <SelectTrigger id="living-condition" className="h-11 text-center">
+                                <SelectTrigger id="living-condition" className="h-12 ">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1367,14 +1426,17 @@ export default function RegisterStudentPage() {
                                 </SelectContent>
                               </Select>
                             </div>
+                          </div>
 
+                          {/* Organization & School Info - Row 2 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* Organization Help */}
-                            <div className="space-y-1">
-                              <Label htmlFor="organization-help">ទទួលជំនួយពីអង្គការ</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="organization-help" className="text-sm font-medium">ទទួលជំនួយពីអង្គការ</Label>
                               <Input 
                                 id="organization-help" 
                                 placeholder="អង្គការ" 
-                                className="h-11 text-center"
+                                className="h-12 "
                                 value={formData.familyInfo.organizationHelp || ''}
                                 onChange={(e) => setFormData({
                                   ...formData, 
@@ -1384,12 +1446,12 @@ export default function RegisterStudentPage() {
                             </div>
 
                             {/* School Info */}
-                            <div className="space-y-1">
-                              <Label htmlFor="know-school">ស្គាល់សាលាតាមរយៈ</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="know-school" className="text-sm font-medium">ស្គាល់សាលាតាមរយៈ</Label>
                               <Input 
                                 id="know-school" 
                                 placeholder="ស្គាល់សាលាតាម" 
-                                className="h-11 text-center"
+                                className="h-12 "
                                 value={formData.familyInfo.knowSchool || ''}
                                 onChange={(e) => setFormData({
                                   ...formData, 
@@ -1399,12 +1461,12 @@ export default function RegisterStudentPage() {
                             </div>
 
                             {/* Religion */}
-                            <div className="space-y-1">
-                              <Label htmlFor="religion">សាសនា</Label>
+                            <div className="space-y-2">
+                              <Label htmlFor="religion" className="text-sm font-medium">សាសនា</Label>
                               <Input 
                                 id="religion" 
                                 placeholder="សាសនា" 
-                                className="h-11 text-center"
+                                className="h-12 "
                                 value={formData.familyInfo.religion || ''}
                                 onChange={(e) => setFormData({
                                   ...formData, 
@@ -1413,12 +1475,13 @@ export default function RegisterStudentPage() {
                               />
                             </div>
 
-                            <div className="space-y-1">
-                              <Label htmlFor="church-name">ឈ្មោះព្រះវិហារ</Label>
+                            {/* Church Name */}
+                            <div className="space-y-2">
+                              <Label htmlFor="church-name" className="text-sm font-medium">ឈ្មោះព្រះវិហារ</Label>
                               <Input 
                                 id="church-name" 
                                 placeholder="ព្រះវិហារ" 
-                                className="h-11 text-center"
+                                className="h-12 "
                                 value={formData.familyInfo.churchName || ''}
                                 onChange={(e) => setFormData({
                                   ...formData, 
@@ -1426,10 +1489,13 @@ export default function RegisterStudentPage() {
                                 })}
                               />
                             </div>
+                          </div>
 
-                            {/* School Support */}
-                            <div className="space-y-1">
-                              <Label htmlFor="can-help-school">លទ្ធភាពជួយសាលា</Label>
+                          {/* School Support - Row 3 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {/* Can Help School */}
+                            <div className="space-y-2">
+                              <Label htmlFor="can-help-school" className="text-sm font-medium">លទ្ធភាពជួយសាលា</Label>
                               <Select
                                 value={formData.familyInfo.canHelpSchool ? 'yes' : 'no'}
                                 onValueChange={(value) => setFormData({
@@ -1437,7 +1503,7 @@ export default function RegisterStudentPage() {
                                   familyInfo: { ...formData.familyInfo, canHelpSchool: value === 'yes' }
                                 })}
                               >
-                                <SelectTrigger id="can-help-school" className="h-11 text-center">
+                                <SelectTrigger id="can-help-school" className="h-12 ">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1447,14 +1513,15 @@ export default function RegisterStudentPage() {
                               </Select>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label htmlFor="help-amount">ថវិកាជួយសាលា</Label>
+                            {/* Help Amount */}
+                            <div className="space-y-2">
+                              <Label htmlFor="help-amount" className="text-sm font-medium">ថវិកាជួយសាលា</Label>
                               <div className="relative">
                                 <Input 
                                   id="help-amount" 
                                   type="text"
                                   placeholder="0" 
-                                  className="h-11 text-center pr-16"
+                                  className="h-12  pr-16"
                                   value={formData.familyInfo.helpAmount ? parseInt(formData.familyInfo.helpAmount).toLocaleString() : ''}
                                   onChange={(e) => {
                                     // Remove all non-numeric characters and commas
@@ -1471,8 +1538,9 @@ export default function RegisterStudentPage() {
                               </div>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label htmlFor="help-frequency">ក្នុងមួយ</Label>
+                            {/* Help Frequency */}
+                            <div className="space-y-2">
+                              <Label htmlFor="help-frequency" className="text-sm font-medium">ក្នុងមួយ</Label>
                               <Select
                                 value={formData.familyInfo.helpFrequency || ''}
                                 onValueChange={(value) => setFormData({
@@ -1480,7 +1548,7 @@ export default function RegisterStudentPage() {
                                   familyInfo: { ...formData.familyInfo, helpFrequency: value }
                                 })}
                               >
-                                <SelectTrigger id="help-frequency" className="h-11 text-center">
+                                <SelectTrigger id="help-frequency" className="h-12 ">
                                   <SelectValue placeholder="ជ្រើសរើស" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1488,6 +1556,12 @@ export default function RegisterStudentPage() {
                                   <SelectItem value="year">ឆ្នាំ</SelectItem>
                                 </SelectContent>
                               </Select>
+                            </div>
+
+                            {/* Empty space for balance */}
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
+                              <div className="h-12"></div>
                             </div>
                           </div>
                         </CardContent>
@@ -1502,36 +1576,47 @@ export default function RegisterStudentPage() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-2">
-                            <div className="space-y-1 col-span-3">
-                              <Label htmlFor="school">សាលារៀនមុន</Label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {/* Previous School */}
+                            <div className="space-y-2">
+                              <Label htmlFor="school" className="text-sm font-medium">សាលារៀនមុន</Label>
                               <Input 
                                 id="school" 
-                                className="h-11 text-center"
+                                className="h-12 "
                                 value={formData.previousSchool || ''}
                                 onChange={(e) => setFormData({...formData, previousSchool: e.target.value})}
+                                placeholder="សាលារៀនមុន"
                               />
                             </div>
                             
-                            <div className="space-y-1 col-span-4">
-                              <Label htmlFor="reason">មូលហេតុផ្លាស់ប្តូរ</Label>
+                            {/* Transfer Reason */}
+                            <div className="space-y-2">
+                              <Label htmlFor="reason" className="text-sm font-medium">មូលហេតុផ្លាស់ប្តូរ</Label>
                               <Input 
                                 id="reason" 
-                                className="h-11 text-center"
+                                className="h-12 "
                                 value={formData.transferReason || ''}
                                 onChange={(e) => setFormData({...formData, transferReason: e.target.value})}
+                                placeholder="មូលហេតុផ្លាស់ប្តូរ"
                               />
                             </div>
                             
-                            <div className="flex flex-col items-center justify-center space-y-1 col-span-5">
+                            {/* Vaccinated Checkbox */}
+                            <div className="flex flex-col items-center justify-center space-y-2">
                               <Checkbox 
                                 id="vaccinated"
                                 checked={formData.vaccinated || false}
                                 onCheckedChange={(checked) => setFormData({...formData, vaccinated: checked as boolean})}
                               />
-                              <Label htmlFor="vaccinated" className="cursor-pointer">
+                              <Label htmlFor="vaccinated" className="text-sm font-medium  cursor-pointer">
                                 សិស្សទទួលបានវ៉ាក់សាំងគ្រប់គ្រាន់ហើយនៅ?
                               </Label>
+                            </div>
+
+                            {/* Empty space for balance */}
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
+                              <div className="h-12"></div>
                             </div>
                           </div>
                         </CardContent>
@@ -1540,6 +1625,7 @@ export default function RegisterStudentPage() {
 
                     {/* Additional Information Tab */}
                     <TabsContent value="additional" className="space-y-6">
+                      {/* School Needs Card */}
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
@@ -1548,35 +1634,47 @@ export default function RegisterStudentPage() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div className="flex items-center space-x-2">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Clothes Need */}
+                            <div className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                               <Checkbox 
                                 id="clothes"
                                 checked={formData.needsClothes || false}
                                 onCheckedChange={(checked) => setFormData({...formData, needsClothes: checked as boolean})}
                               />
-                              <Label htmlFor="clothes">កង្វះខាតសម្លៀកបំពាក់</Label>
+                              <Label htmlFor="clothes" className="text-sm font-medium cursor-pointer flex-1">
+                                កង្វះខាតសម្លៀកបំពាក់
+                              </Label>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            
+                            {/* Materials Need */}
+                            <div className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                               <Checkbox 
                                 id="materials"
                                 checked={formData.needsMaterials || false}
                                 onCheckedChange={(checked) => setFormData({...formData, needsMaterials: checked as boolean})}
                               />
-                              <Label htmlFor="materials">កង្វះខាតសម្ភារៈសិក្សា</Label>
+                              <Label htmlFor="materials" className="text-sm font-medium cursor-pointer flex-1">
+                                កង្វះខាតសម្ភារៈសិក្សា
+                              </Label>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            
+                            {/* Transport Need */}
+                            <div className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                               <Checkbox 
                                 id="transport"
                                 checked={formData.needsTransport || false}
                                 onCheckedChange={(checked) => setFormData({...formData, needsTransport: checked as boolean})}
                               />
-                              <Label htmlFor="transport">ត្រូវការឡានដើម្បីជូនមកសាលា</Label>
+                              <Label htmlFor="transport" className="text-sm font-medium cursor-pointer flex-1">
+                                ត្រូវការឡានដើម្បីជូនមកសាលា
+                              </Label>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
 
+                      {/* Registration & Submission Card */}
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
@@ -1586,16 +1684,38 @@ export default function RegisterStudentPage() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-6">
-                            <div className="space-y-1">
-                              <Label htmlFor="registration-date">ថ្ងៃខែឆ្នាំចុះឈ្មោះចូលរៀន</Label>
-                              <Input
-                                id="registration-date"
-                                type="date"
-                                className="h-11 w-full md:w-auto"
-                                disabled
-                              />
+                            {/* Registration Date */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="registration-date" className="text-sm font-medium">
+                                  ថ្ងៃខែឆ្នាំចុះឈ្មោះចូលរៀន
+                                </Label>
+                                <Input
+                                  id="registration-date"
+                                  type="date"
+                                  className="h-12 "
+                                  disabled
+                                  value={new Date().toISOString().split('T')[0]}
+                                />
+                              </div>
+                              
+                              {/* Empty spaces for balance */}
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
+                                <div className="h-12"></div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
+                                <div className="h-12"></div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
+                                <div className="h-12"></div>
+                              </div>
                             </div>
-                            <div className="flex gap-4 items-center">
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                               <Button 
                                 onClick={handleSubmit}
                                 disabled={isSubmitting || isCompleted}
@@ -1605,7 +1725,7 @@ export default function RegisterStudentPage() {
                                     : isSubmitting
                                     ? 'bg-gradient-to-r from-blue-400 to-purple-400 cursor-not-allowed'
                                     : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
-                                } transition-all duration-200`}
+                                } transition-all duration-200 flex-1 sm:flex-none`}
                                 title={`isSubmitting: ${isSubmitting}, isCompleted: ${isCompleted}`}
                               >
                                 {isSubmitting ? (
@@ -1625,19 +1745,22 @@ export default function RegisterStudentPage() {
                                   </>
                                 )}
                               </Button>
-                              <Button variant="outline">
+                              
+                              <Button variant="outline" className="flex-1 sm:flex-none">
                                 <Download className="h-4 w-4 mr-2" />
                                 បោះពុម្ព
                               </Button>
-                              {isCompleted && (
-                                <div className="flex items-center space-x-2 text-green-600 dark:text-green-400 animate-pulse bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg border border-green-200 dark:border-green-800 shadow-sm">
-                                  <CheckCircle className="h-4 w-4" />
-                                  <span className="text-sm font-medium">
-                                    {isNewStudent ? 'ការចុះឈ្មោះសិស្សបានជោគជ័យ' : 'ការកែប្រែព័ត៌មានសិស្សបានជោគជ័យ'}
-                                  </span>
-                                </div>
-                              )}
                             </div>
+
+                            {/* Success Message */}
+                            {isCompleted && (
+                              <div className="flex items-center space-x-2 text-green-600 dark:text-green-400 animate-pulse bg-green-50 dark:bg-green-900/20 px-4 py-3 rounded-lg border border-green-200 dark:border-green-800 shadow-sm">
+                                <CheckCircle className="h-4 w-4" />
+                                <span className="text-sm font-medium">
+                                  {isNewStudent ? 'ការចុះឈ្មោះសិស្សបានជោគជ័យ' : 'ការកែប្រែព័ត៌មានសិស្សបានជោគជ័យ'}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
@@ -1648,7 +1771,7 @@ export default function RegisterStudentPage() {
             </>
           ) : (
             <Card className="hover:shadow-lg transition-all duration-200">
-              <CardContent className="p-12 text-center">
+              <CardContent className="p-12 ">
                 <div className="mx-auto max-w-md">
                   <UserPlus className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">

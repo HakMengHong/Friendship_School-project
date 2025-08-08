@@ -135,17 +135,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Dashboard Header */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
-          ផ្ទាំងគ្រប់គ្រង
-        </h1>
-        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
-          ការតាមដានសកម្មភាពសិស្ស និងគ្រូបង្រៀន
-        </p>
-      </div>
-
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
