@@ -189,24 +189,6 @@ export function TopBar({ className, user }: TopBarProps) {
             />
           </form>
         </div>
-
-        {/* Notifications */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative bg-gradient-to-br from-primary/10 to-primary/5 hover:from-primary hover:to-primary/80 active:from-primary/90 active:to-primary/70 text-primary hover:text-white active:text-white shadow-sm hover:shadow-lg active:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 group flex-shrink-0"
-          onClick={() => toast({
-            title: "ការជូនដំណឹង",
-            description: "មិនមានការជូនដំណឹងថ្មីទេ",
-          })}
-        >
-          <Bell className="w-4 h-4 md:w-5 md:h-5 text-primary group-hover:text-white group-active:text-white/90 transition-colors duration-200" />
-          <span className="absolute -top-1 -right-1 w-2 h-2 md:w-3 md:h-3 bg-gradient-to-br from-red-500 to-red-600 rounded-full text-xs shadow-sm group-hover:shadow-md transition-all duration-200"></span>
-        </Button>
-
-        {/* Settings Toggle */}
-        <SettingsToggle className="flex-shrink-0" />
-
         {/* Theme Toggle */}
         <ThemeToggle />
 

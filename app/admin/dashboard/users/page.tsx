@@ -117,7 +117,7 @@ export default function AdminUsersPage() {
   };
 
   // Handle add/edit user submit
-  const handleUserFormSubmit = async (data: UserFormData, isEdit: boolean) => {
+  const handleUserFormSubmit = async (data: UserFormData, isEdit: boolean): Promise<boolean> => {
     setFormLoading(true);
     setTimeout(() => {}, 0); // allow loading state to show
     try {
@@ -132,13 +132,15 @@ export default function AdminUsersPage() {
       const result = await res.json();
       if (!res.ok) {
         toast({ title: "បរាជ័យ", description: result.error || "មានបញ្ហា", variant: "destructive" });
-        return;
+        return false;
       }
-      setFormDialogOpen(false);
+      // Refresh list on success; dialog will close from form after showing inline message
       fetchUsers();
       toast({ title: isEdit ? "កែប្រែជោគជ័យ" : "បន្ថែមជោគជ័យ", description: isEdit ? "ព័ត៌មានត្រូវបានកែប្រែ" : "អ្នកប្រើថ្មីត្រូវបានបន្ថែម" });
+      return true;
     } catch (e) {
       toast({ title: "បរាជ័យ", description: "មានបញ្ហាក្នុងការផ្ញើទិន្នន័យ", variant: "destructive" });
+      return false;
     } finally {
       setFormLoading(false);
     }
@@ -343,7 +345,7 @@ export default function AdminUsersPage() {
             statusLoading={statusLoading}
             onEdit={openDialog}
             onViewDetails={handleViewDetails}
-            onDelete={handleDelete}
+            onDelete={(id) => setDeleteId(id)}
             search={search}
             setSearch={setSearch}
           />

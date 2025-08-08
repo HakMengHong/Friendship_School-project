@@ -375,6 +375,17 @@ export default function RegisterStudentPage() {
         const studentsResponse = await fetch('/api/students')
         const studentsData = await studentsResponse.json()
         setStudents(studentsData.students || [])
+
+        // Notify other pages (e.g., student-info) to refresh
+        try {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('students:updated'))
+            // Also use storage to notify other tabs
+            localStorage.setItem('studentsUpdatedAt', String(Date.now()))
+          }
+        } catch (e) {
+          // ignore notification errors
+        }
       } else {
         const errorData = await response.text();
         console.error('Response not ok:', response.status, errorData);
@@ -1557,12 +1568,6 @@ export default function RegisterStudentPage() {
                                 </SelectContent>
                               </Select>
                             </div>
-
-                            {/* Empty space for balance */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
-                              <div className="h-12"></div>
-                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -1611,12 +1616,6 @@ export default function RegisterStudentPage() {
                               <Label htmlFor="vaccinated" className="text-sm font-medium  cursor-pointer">
                                 សិស្សទទួលបានវ៉ាក់សាំងគ្រប់គ្រាន់ហើយនៅ?
                               </Label>
-                            </div>
-
-                            {/* Empty space for balance */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
-                              <div className="h-12"></div>
                             </div>
                           </div>
                         </CardContent>

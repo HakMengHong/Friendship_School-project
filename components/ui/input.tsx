@@ -11,6 +11,11 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, label, error, icon, loading = false, ...props }, ref) => {
+    // Normalize null values to empty string to avoid React warnings
+    const normalizedProps: React.InputHTMLAttributes<HTMLInputElement> = { ...props }
+    if (Object.prototype.hasOwnProperty.call(normalizedProps, "value") && (normalizedProps as any).value === null) {
+      ;(normalizedProps as any).value = ""
+    }
     return (
       <div className="space-y-2">
         {label && (
@@ -35,7 +40,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             )}
             ref={ref}
             disabled={loading}
-            {...props}
+            {...normalizedProps}
           />
           {loading && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">

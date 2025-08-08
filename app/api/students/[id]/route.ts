@@ -43,7 +43,7 @@ export async function PUT(request: NextRequest, context: any) {
 
     // Update the student
     const updatedStudent = await prisma.student.update({
-      where: { id: id },
+      where: { studentId: id },
       data: studentData,
       include: {
         guardians: true,
@@ -63,7 +63,20 @@ export async function PUT(request: NextRequest, context: any) {
       for (const guardian of guardians) {
         await prisma.guardian.create({
           data: {
-            ...guardian,
+            firstName: guardian.firstName,
+            lastName: guardian.lastName,
+            relation: guardian.relation,
+            phone: guardian.phone,
+            occupation: guardian.occupation,
+            income: guardian.income && guardian.income !== '' ? parseFloat(guardian.income) : null,
+            childrenCount: guardian.childrenCount && guardian.childrenCount !== '' ? parseInt(guardian.childrenCount) : null,
+            houseNumber: guardian.houseNumber,
+            village: guardian.village,
+            district: guardian.district,
+            province: guardian.province,
+            birthDistrict: guardian.birthDistrict,
+            believeJesus: guardian.believeJesus || false,
+            church: guardian.church,
             studentId: id
           }
         });
@@ -72,19 +85,53 @@ export async function PUT(request: NextRequest, context: any) {
 
     // Update family info if provided
     if (familyInfo) {
+      const familyData = {
+        livingWith: familyInfo.livingWith,
+        livingCondition: familyInfo.livingCondition,
+        ownHouse: familyInfo.ownHouse || false,
+        canHelpSchool: familyInfo.canHelpSchool || false,
+        helpAmount: familyInfo.helpAmount && familyInfo.helpAmount !== '' ? parseFloat(familyInfo.helpAmount) : null,
+        helpFrequency: familyInfo.helpFrequency,
+        knowSchool: familyInfo.knowSchool,
+        religion: familyInfo.religion,
+        churchName: familyInfo.churchName,
+        durationInKPC: familyInfo.durationInKPC,
+        organizationHelp: familyInfo.organizationHelp
+      };
+
       await prisma.familyInfo.upsert({
         where: { studentId: id },
-        update: familyInfo,
+        update: familyData,
         create: {
-          ...familyInfo,
+          ...familyData,
           studentId: id
         }
       });
     }
 
+    // Update scholarships if provided
+    if (scholarships && scholarships.length > 0) {
+      // Delete existing scholarships for this student
+      await prisma.scholarship.deleteMany({
+        where: { studentId: id }
+      });
+
+      // Create new scholarships
+      for (const scholarship of scholarships) {
+        await prisma.scholarship.create({
+          data: {
+            type: scholarship.type,
+            amount: scholarship.amount && scholarship.amount !== '' ? parseFloat(scholarship.amount) : null,
+            sponsor: scholarship.sponsor,
+            studentId: id
+          }
+        });
+      }
+    }
+
     // Get updated student with all relations
     const finalStudent = await prisma.student.findUnique({
-      where: { id: id },
+      where: { studentId: id },
       include: {
         guardians: true,
         family: true,

@@ -11,11 +11,8 @@ export async function GET() {
 
     let nextId = 1;
     if (lastStudent && lastStudent.studentId) {
-      // Extract numeric part from student ID (e.g., "S001" -> 1, "123" -> 123)
-      const numericPart = parseInt(lastStudent.studentId.replace(/\D/g, ''));
-      if (!isNaN(numericPart)) {
-        nextId = numericPart + 1;
-      }
+      // studentId is already a number
+      nextId = lastStudent.studentId + 1;
     }
 
     return NextResponse.json({ nextStudentId: nextId.toString() });

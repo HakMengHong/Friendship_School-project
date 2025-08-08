@@ -8,6 +8,7 @@ export async function GET() {
         guardians: true,
         family: true,
         scholarships: true,
+        attendances: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -55,14 +56,14 @@ export async function POST(request: NextRequest) {
     };
 
     // Prepare guardians data with proper field mapping
-    const guardiansData = (guardians || []).map(guardian => ({
+    const guardiansData = (guardians || []).map((guardian: any) => ({
       firstName: guardian.firstName,
       lastName: guardian.lastName,
       relation: guardian.relation,
       phone: guardian.phone,
       occupation: guardian.occupation,
-      income: guardian.income ? parseFloat(guardian.income) : null,
-      childrenCount: guardian.childrenCount ? parseInt(guardian.childrenCount) : null,
+      income: guardian.income && guardian.income !== '' ? parseFloat(guardian.income) : null,
+      childrenCount: guardian.childrenCount && guardian.childrenCount !== '' ? parseInt(guardian.childrenCount) : null,
       houseNumber: guardian.houseNumber,
       village: guardian.village,
       district: guardian.district,
@@ -83,9 +84,16 @@ export async function POST(request: NextRequest) {
       religion: familyInfo.religion,
       churchName: familyInfo.churchName,
       canHelpSchool: familyInfo.canHelpSchool || false,
-      helpAmount: familyInfo.helpAmount ? parseFloat(familyInfo.helpAmount) : null,
+      helpAmount: familyInfo.helpAmount && familyInfo.helpAmount !== '' ? parseFloat(familyInfo.helpAmount) : null,
       helpFrequency: familyInfo.helpFrequency
     } : undefined;
+
+    // Prepare scholarships data with proper field mapping
+    const scholarshipsData = (scholarships || []).map((scholarship: any) => ({
+      type: scholarship.type,
+      amount: scholarship.amount && scholarship.amount !== '' ? parseFloat(scholarship.amount) : null,
+      sponsor: scholarship.sponsor
+    }));
 
     const created = await prisma.student.create({
       data: {
@@ -95,7 +103,7 @@ export async function POST(request: NextRequest) {
         },
         family: familyData ? { create: familyData } : undefined,
         scholarships: {
-          create: scholarships || [],
+          create: scholarshipsData,
         },
       },
       include: {

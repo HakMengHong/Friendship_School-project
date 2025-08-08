@@ -56,7 +56,7 @@ export interface UserFormData {
 export interface UsersFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: UserFormData, isEdit: boolean) => Promise<void>;
+  onSubmit: (data: UserFormData, isEdit: boolean) => Promise<boolean>;
   loading: boolean;
   editUser?: Partial<UserFormData> | null;
 }
@@ -106,6 +106,7 @@ export const UsersForm: React.FC<UsersFormProps> = ({ open, onClose, onSubmit, l
   const [showVerifyPassword, setShowVerifyPassword] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+  const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     if (editUser) {
@@ -269,8 +270,19 @@ export const UsersForm: React.FC<UsersFormProps> = ({ open, onClose, onSubmit, l
       const { password, verifyPassword, ...rest } = submitData;
       submitData = rest;
     }
-    
-    await onSubmit(submitData, isEdit);
+
+    setSubmitMessage(null);
+    const ok = await onSubmit(submitData, isEdit);
+    if (ok) {
+      setSubmitMessage({ type: "success", text: isEdit ? "កែប្រែជោគជ័យ" : "បន្ថែមជោគជ័យ" });
+      // Close after a short delay so the user can read the message
+      setTimeout(() => {
+        setSubmitMessage(null);
+        onClose();
+      }, 1200);
+    } else {
+      setSubmitMessage({ type: "error", text: isEdit ? "កែប្រែមិនជោគជ័យ" : "បន្ថែមមិនជោគជ័យ" });
+    }
   };
 
   return (
@@ -683,8 +695,24 @@ export const UsersForm: React.FC<UsersFormProps> = ({ open, onClose, onSubmit, l
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-border/50">
+            {/* Submission Status + Action Buttons */}
+            <div className="flex items-center justify-between pt-6 border-t border-border/50 gap-4">
+              <div className="min-h-[1.5rem]">
+                {submitMessage ? (
+                  <span
+                    className={
+                      submitMessage.type === "success"
+                        ? "text-sm font-semibold text-green-600"
+                        : "text-sm font-semibold text-red-600"
+                    }
+                  >
+                    {submitMessage.text}
+                  </span>
+                ) : (
+                  loading && <span className="text-sm text-muted-foreground">កំពុងរក្សាទុក...</span>
+                )}
+              </div>
+              <div className="flex justify-end space-x-3">
               <Button
                 type="button"
                 variant="outline"
@@ -711,6 +739,7 @@ export const UsersForm: React.FC<UsersFormProps> = ({ open, onClose, onSubmit, l
                   </>
                 )}
               </Button>
+              </div>
             </div>
           </form>
         </div>
