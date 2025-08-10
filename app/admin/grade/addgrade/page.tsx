@@ -154,10 +154,10 @@ export default function AddScorePage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
-          បន្ថែមពិន្ទុ
+          បញ្ចូលពិន្ទុសិស្ស
         </h1>
         <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
-          បញ្ចូលពិន្ទុសិស្សតាមមុខវិជ្ជា
+          បញ្ចូលពិន្ទុថ្មីសម្រាប់សិស្ស
         </p>
       </div>
 

@@ -35,7 +35,6 @@ model Student {
   class                String
   photo                String?
   phone                String?
-  email                String?
   registrationDate     DateTime?
   status               String?
   religion             String?
@@ -124,24 +123,23 @@ model Course {
   teacherId1   Int?
   teacherId2   Int?
   teacherId3   Int?
-  grade        String
+  grade       String
   section      String
   courseName   String
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   schoolYear   SchoolYear   @relation(fields: [schoolYearId], references: [schoolYearId])
-  enrollments  Enrollment[]
-  grades       Grade[]
   teachers     User[]       @relation("ClassTeacher")
+  grades       Grade[]
+  enrollments  Enrollment[]
 }
 
 model Subject {
+  subjectId   Int      @id @default(autoincrement())
   subjectName String
-  credits     Int?
+  subjectCode String   @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  subjectCode String   @unique
-  subjectId   Int      @id @default(autoincrement())
   grades      Grade[]
 }
 
@@ -167,25 +165,22 @@ model Grade {
 }
 
 model Enrollment {
-  studentId      Int
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  enrollmentCode String    @unique
   enrollmentId   Int       @id @default(autoincrement())
   courseId       String
+  studentId      Int
   drop           Boolean
-  dropDate       DateTime?
   dropSemester   String?
+  dropDate       DateTime?
   course         Course    @relation(fields: [courseId], references: [courseId])
   student        Student   @relation(fields: [studentId], references: [studentId])
 }
 
 model SchoolYear {
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  schoolYearId   Int      @id @default(autoincrement())
   schoolyear     String
   schoolYearCode String   @unique
-  schoolYearId   Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   courses        Course[]
 }
 

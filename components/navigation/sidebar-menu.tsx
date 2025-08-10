@@ -66,6 +66,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         href: "/admin/grade",
         requiredRole: "admin" as const,
         subItems: [
+          { id: "admin-add-grade", label: "បញ្ចូលពិន្ទុសិស្ស", href: "/admin/grade/addgrade" },
           { id: "admin-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/admin/grade/report" },
           { id: "admin-grade-gradebook", label: "សៀវភៅតាមដាន", href: "/admin/grade/gradebook" },
         ],
@@ -218,7 +219,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       )}
     >
       {/* Header with logo and school name */}
-      <div className="flex items-center p-6 relative border-b border-border">
+      <div className="flex items-center p-7 relative border-b border-border">
         <div className="flex items-center">
           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
             <img 
