@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const course = await prisma.course.findUnique({
-      where: { courseId: parseInt(params.id) },
+      where: { courseId: params.id },
       include: {
         schoolYear: true
       }
@@ -55,7 +55,7 @@ export async function PUT(
         schoolYearId: parseInt(schoolYearId),
         grade,
         section,
-        courseId: { not: parseInt(params.id) }
+        courseId: { not: params.id }
       }
     })
 
@@ -67,7 +67,7 @@ export async function PUT(
     }
 
     const updatedCourse = await prisma.course.update({
-      where: { courseId: parseInt(params.id) },
+      where: { courseId: params.id },
       data: {
         schoolYearId: parseInt(schoolYearId),
         grade,
@@ -100,7 +100,7 @@ export async function DELETE(
   try {
     // Check if there are enrollments using this course
     const enrollmentsCount = await prisma.enrollment.count({
-      where: { courseId: parseInt(params.id) }
+      where: { courseId: params.id }
     })
 
     if (enrollmentsCount > 0) {
@@ -111,7 +111,7 @@ export async function DELETE(
     }
 
     await prisma.course.delete({
-      where: { courseId: parseInt(params.id) }
+      where: { courseId: params.id }
     })
 
     return NextResponse.json({ message: 'Course deleted successfully' })

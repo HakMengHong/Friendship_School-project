@@ -2,23 +2,6 @@
 
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { 
   Calendar,
@@ -30,10 +13,7 @@ import {
   XCircle,
   Clock,
   UserCheck,
-  Users,
-  FileText,
-  Download as DownloadIcon,
-  Plus as PlusIcon
+  Users
 } from "lucide-react"
 import { Bar } from 'react-chartjs-2'
 import {
@@ -66,10 +46,6 @@ interface Student {
 }
 
 export default function AbsencePage() {
-  const [selectedDate, setSelectedDate] = useState("")
-  const [selectedGrade, setSelectedGrade] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("")
-  const [searchTerm, setSearchTerm] = useState("")
 
   // Sample data
   const classData = [

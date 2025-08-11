@@ -1,6 +1,85 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
+
+// Type definitions
+interface Guardian {
+  guardianId: number;
+  firstName?: string;
+  lastName?: string;
+  relation: string;
+  phone?: string;
+  occupation?: string;
+  houseNumber?: string;
+  village?: string;
+  district?: string;
+  province?: string;
+  birthDistrict?: string;
+  church?: string;
+  income?: number;
+  childrenCount?: number;
+  believeJesus?: boolean;
+}
+
+interface FamilyInfo {
+  familyinfoId: number;
+  canHelpSchool?: boolean;
+  churchName?: string;
+  durationInKPC?: string;
+  helpAmount?: number;
+  helpFrequency?: string;
+  knowSchool?: string;
+  livingCondition?: string;
+  livingWith?: string;
+  organizationHelp?: string;
+  ownHouse?: boolean;
+  religion?: string;
+}
+
+interface Student {
+  studentId: number;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dob: string | Date;
+  class: string;
+  photo?: string;
+  phone?: string;
+  registrationDate?: string | Date;
+  status?: string;
+  religion?: string;
+  health?: string;
+  emergencyContact?: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  classId?: number;
+  needsClothes?: boolean;
+  needsMaterials?: boolean;
+  needsTransport?: boolean;
+  previousSchool?: string;
+  registerToStudy?: boolean;
+  studentBirthDistrict?: string;
+  studentDistrict?: string;
+  studentHouseNumber?: string;
+  studentProvince?: string;
+  studentVillage?: string;
+  transferReason?: string;
+  vaccinated?: boolean;
+  schoolYear?: string;
+  family?: FamilyInfo;
+  guardians?: Guardian[];
+}
+
+// API response interfaces
+interface SchoolYearResponse {
+  schoolYearId: number;
+  schoolYearCode: string;
+  createdAt: string;
+}
+
+interface ClassesResponse {
+  classes: string[];
+}
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,13 +92,9 @@ import {
   Award, 
   CalendarCheck, 
   Grape, 
-  Utensils, 
   ChevronDown, 
   Calendar,
   Search,
-  Filter,
-  Download,
-  Edit,
   Phone,
   MapPin,
   GraduationCap,
@@ -37,7 +112,7 @@ const getGradeLabel = (value?: string | null) => {
   if (!Number.isFinite(n)) return value;
   return `ថ្នាក់ទី${n}`;
 };
-const gradeOptions = Array.from({ length: 9 }, (_, i) => ({ value: String(i + 1), label: `ថ្នាក់ទី${i + 1}` }));
+
 
 // Helpers for dates/age
 const formatDate = (value?: string | Date | null) => {
@@ -80,15 +155,15 @@ const tabs = [
 ];
 
 export default function StudentInfoPage() {
-  const [students, setStudents] = useState<any[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [activeTab, setActiveTab] = useState('basic');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByYearClass, setFilterByYearClass] = useState(false);
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
-  const [filteredStudents, setFilteredStudents] = useState<any[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -106,7 +181,7 @@ export default function StudentInfoPage() {
           setStudents(list);
           setFilteredStudents(list);
         }
-      } catch (e) {
+      } catch {
         // keep empty
       } finally {
         if (isMounted) setLoading(false);
@@ -138,6 +213,7 @@ export default function StudentInfoPage() {
   useEffect(() => {
     let result = students;
     
+    // Apply year and class filters FIRST (this affects both dropdown and student list)
     if (filterByYearClass) {
       if (selectedYear) {
         result = result.filter(student => (student.schoolYear || '') === selectedYear);
@@ -147,25 +223,62 @@ export default function StudentInfoPage() {
       }
     }
     
+    // Apply search term filter to the already filtered results
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(student => 
-        student.firstName.toLowerCase().includes(term) || 
-        student.lastName.toLowerCase().includes(term)
+        student.firstName?.toLowerCase().includes(term) || 
+        student.lastName?.toLowerCase().includes(term) ||
+        (student.studentId && student.studentId.toString().includes(term))
       );
     }
+    
+    // Sort results by name for better UX
+    result.sort((a, b) => {
+      const nameA = `${a.lastName || ''} ${a.firstName || ''}`.toLowerCase();
+      const nameB = `${b.lastName || ''} ${b.firstName || ''}`.toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
     
     setFilteredStudents(result);
   }, [students, searchTerm, filterByYearClass, selectedYear, selectedClass]);
 
-  // Unique filter values from data
-  const academicYears = useMemo(() => {
-    const set = new Set<string>();
-    for (const s of students) {
-      if (s.schoolYear) set.add(s.schoolYear);
-    }
-    return Array.from(set).sort().reverse();
-  }, [students]);
+  // Database-driven filter values
+  const [academicYears, setAcademicYears] = useState<string[]>([]);
+  const [classes, setClasses] = useState<string[]>([]);
+  const [loadingFilters, setLoadingFilters] = useState(false);
+
+
+
+  // Fetch filter data from database
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        setLoadingFilters(true);
+        
+        // Fetch school years
+        const yearsRes = await fetch('/api/admin/school-years');
+        if (yearsRes.ok) {
+          const yearsData: SchoolYearResponse[] = await yearsRes.json();
+          // Extract schoolYearCode from the response
+          setAcademicYears(yearsData.map(year => year.schoolYearCode));
+        }
+        
+        // Fetch classes (grades from courses)
+        const classesRes = await fetch('/api/admin/classes');
+        if (classesRes.ok) {
+          const classesData: ClassesResponse = await classesRes.json();
+          setClasses(classesData.classes);
+        }
+      } catch (error) {
+        console.error('Error fetching filters:', error);
+      } finally {
+        setLoadingFilters(false);
+      }
+    };
+
+    fetchFilters();
+  }, []);
 
   // Handle clicking outside dropdown
   useEffect(() => {
@@ -184,23 +297,12 @@ export default function StudentInfoPage() {
     }
   }, [showDropdown]);
 
-  const handleStudentSelect = (student: any) => {
+  const handleStudentSelect = (student: Student) => {
     setSelectedStudent(student);
     setActiveTab('basic');
   };
 
-  const getAttendanceStatus = (percentage: number) => {
-    if (percentage >= 95) return { color: "text-green-600", bg: "bg-green-100", text: "ល្អ" };
-    if (percentage >= 85) return { color: "text-yellow-600", bg: "bg-yellow-100", text: "មធ្យម" };
-    return { color: "text-red-600", bg: "bg-red-100", text: "ខ្សោយ" };
-  };
 
-  const getGradeStatus = (grade: number) => {
-    if (grade >= 90) return { color: "text-green-600", bg: "bg-green-100", text: "A" };
-    if (grade >= 80) return { color: "text-blue-600", bg: "bg-blue-100", text: "B" };
-    if (grade >= 70) return { color: "text-yellow-600", bg: "bg-yellow-100", text: "C" };
-    return { color: "text-red-600", bg: "bg-red-100", text: "D" };
-  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 p-4">
@@ -217,9 +319,11 @@ export default function StudentInfoPage() {
         <CardContent className="space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-end gap-4">
             <div className="flex-1 min-w-[300px]">
-              <Label className="text-gray-700 dark:text-gray-300 mb-2 text-sm font-medium">
-                សូមបញ្ចូលឈ្មោះសិស្ស
-              </Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                  សូមបញ្ចូលឈ្មោះសិស្ស
+                </Label>
+              </div>
               <div className="relative" ref={dropdownRef}>
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 z-10 pointer-events-none" />
                 <Input
@@ -233,13 +337,14 @@ export default function StudentInfoPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
                   onClick={() => setShowDropdown(!showDropdown)}
                 />
+              
                 {showDropdown && (
                   <div className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
                     <div className="max-h-60 overflow-auto">
                       {filteredStudents.length > 0 ? (
-                        filteredStudents.map((student: any) => (
+                        filteredStudents.map((student: Student) => (
                           <div
-                            key={student.studentId ?? student.id ?? `${student.lastName}-${student.firstName}`}
+                            key={student.studentId}
                             className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-all duration-200 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
                             onClick={(e) => {
                               e.preventDefault();
@@ -298,42 +403,64 @@ export default function StudentInfoPage() {
               </div>
 
               {filterByYearClass && (
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="w-full sm:w-[160px]">
-                    <Select value={selectedYear} onValueChange={setSelectedYear}>
-                      <SelectTrigger className="h-10 text-sm">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        <SelectValue placeholder="ឆ្នាំសិក្សា" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {academicYears.map(year => (
-                          <SelectItem key={year} value={year}>
-                            {year}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="w-full sm:w-[160px]">
-                    <Select value={selectedClass} onValueChange={setSelectedClass}>
-                      <SelectTrigger className="h-10 text-sm">
-                        <BookOpen className="mr-2 h-4 w-4" />
-                        <SelectValue placeholder="ថ្នាក់" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {gradeOptions.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <div className="space-y-3">
+                  {loadingFilters && (
+                    <div className="text-center py-2">
+                      <div className="inline-flex items-center space-x-2 text-sm text-gray-500">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        <span>កំពុងផ្ទុកជម្រើស...</span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="w-full sm:w-[160px]">
+                      <Select value={selectedYear} onValueChange={setSelectedYear}>
+                        <SelectTrigger className="h-10 text-sm">
+                          <Calendar className="mr-2 h-4 w-4" />
+                          <SelectValue placeholder="ឆ្នាំសិក្សា" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {loadingFilters ? (
+                            <SelectItem value="loading" disabled>កំពុងផ្ទុក...</SelectItem>
+                          ) : academicYears.length > 0 ? (
+                            academicYears.map(year => (
+                              <SelectItem key={year} value={year}>
+                                {year}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-data" disabled>គ្មានឆ្នាំសិក្សា</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="w-full sm:w-[160px]">
+                      <Select value={selectedClass} onValueChange={setSelectedClass}>
+                        <SelectTrigger className="h-10 text-sm">
+                          <BookOpen className="mr-2 h-4 w-4" />
+                          <SelectValue placeholder="ថ្នាក់" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {loadingFilters ? (
+                            <SelectItem value="loading" disabled>កំពុងផ្ទុក...</SelectItem>
+                          ) : classes.length > 0 ? (
+                            classes.map(classValue => (
+                              <SelectItem key={classValue} value={classValue}>
+                                {getGradeLabel(classValue)}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-data" disabled>គ្មានថ្នាក់</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
-          </div>
+          </div>         
         </CardContent>
       </Card>
 
@@ -764,7 +891,7 @@ export default function StudentInfoPage() {
                     <h4 className="text-lg font-bold text-gray-900 dark:text-white">ព័ត៌មានអាណាព្យាបាល</h4>
                     {selectedStudent.guardians && selectedStudent.guardians.length > 0 ? (
                       <div className="space-y-6">
-                        {selectedStudent.guardians.map((guardian: any, index: number) => (
+                        {selectedStudent.guardians.map((guardian: Guardian, index: number) => (
                           <div key={guardian.guardianId || index} className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/10 p-6 rounded-lg shadow-sm border border-blue-200 dark:border-blue-800">
                             {/* Guardian Header */}
                             <div className="flex items-center mb-6">

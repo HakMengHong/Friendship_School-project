@@ -10,19 +10,17 @@ import {
   ChevronDown, 
   ArrowLeft, 
   GraduationCap,
-  Shield,
   CheckCircle,
   AlertCircle,
   Loader2,
   Sparkles,
   Crown,
-  BookOpen,
-  ClipboardList
+  BookOpen
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -53,7 +51,7 @@ export default function LoginPage() {
         const response = await fetch('/api/auth/users')
         if (response.ok) {
           const data = await response.json()
-          const options = data.users.map((user: any) => ({
+          const options = data.users.map((user: { username: string; role: string; firstname: string; lastname: string; avatar?: string }) => ({
             name: user.username, // Show username instead of full name
             role: user.role === 'admin' ? 'នាយក' : 'គ្រូបង្រៀន',
     avatar: user.avatar || user.firstname.charAt(0) + user.lastname.charAt(0),

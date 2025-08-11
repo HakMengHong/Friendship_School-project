@@ -17,12 +17,7 @@ import {
   XCircle as XCircleIcon,
   Trash2 as TrashIcon,
   Edit,
-  Eye,
-  Search,
-  Filter,
-  Download as DownloadIcon,
-  Plus as PlusIcon,
-  Download as DownloadIcon2
+  Search
 } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback } from "react"
 
@@ -180,7 +175,7 @@ export default function DailyAbsencePage() {
     } else {
       setStudents([])
     }
-  }, [formData.schoolYear, formData.grade, formData.teacherName])
+  }, [formData.schoolYear, formData.grade, formData.teacherName, allStudentsByClass])
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -571,7 +566,7 @@ export default function DailyAbsencePage() {
               <CardContent>
                 {dailyAbsencesData.length > 0 ? (
                   <div className="space-y-3">
-                    {dailyAbsencesData.map((absence, index) => (
+                    {dailyAbsencesData.map((absence) => (
                       <div key={`${absence.id}-${absence.timePeriod}`} className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">

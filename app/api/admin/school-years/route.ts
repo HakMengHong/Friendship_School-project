@@ -1,22 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-// GET all school years
 export async function GET() {
   try {
+    // Get all school years from SchoolYear table
     const schoolYears = await prisma.schoolYear.findMany({
-      orderBy: { createdAt: 'desc' }
-    })
-    
-    return NextResponse.json(schoolYears)
+      select: {
+        schoolYearId: true,
+        schoolYearCode: true,
+        createdAt: true
+      },
+      orderBy: {
+        schoolYearCode: 'desc'
+      }
+    });
+
+    return NextResponse.json(schoolYears);
   } catch (error) {
-    console.error('Error fetching school years:', error)
+    console.error('Error fetching school years:', error);
     return NextResponse.json(
       { error: 'Failed to fetch school years' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -24,18 +31,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { schoolyear } = body
+    const { schoolYearCode } = body
 
-    if (!schoolyear) {
+    if (!schoolYearCode) {
       return NextResponse.json(
-        { error: 'School year is required' },
+        { error: 'School year code is required' },
         { status: 400 }
       )
     }
 
     const newSchoolYear = await prisma.schoolYear.create({
       data: {
-        schoolyear
+        schoolYearCode
       }
     })
 

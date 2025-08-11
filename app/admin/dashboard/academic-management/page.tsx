@@ -16,27 +16,24 @@ import {
   Check,
   AlertCircle,
   Search,
-  Filter,
   RefreshCw,
   Eye,
   EyeOff
 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
+
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
 interface SchoolYear {
   schoolYearId: number
-  schoolyear: string
+  schoolYearCode: string
   createdAt: string
 }
 
 interface Subject {
   subjectId: number
   subjectName: string
-  subjectCode: string
   createdAt: string
 }
 
@@ -78,8 +75,8 @@ export default function AcademicManagementPage() {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null)
 
   // Form data
-  const [newYear, setNewYear] = useState({ schoolyear: '' })
-  const [newSubject, setNewSubject] = useState({ subjectName: '', subjectCode: '' })
+  const [newYear, setNewYear] = useState({ schoolYearCode: '' })
+  const [newSubject, setNewSubject] = useState({ subjectName: '' })
   const [newCourse, setNewCourse] = useState({ 
     schoolYearId: '', 
     grade: '', 
@@ -124,15 +121,9 @@ export default function AcademicManagementPage() {
   const filteredSubjects = useMemo(() => {
     if (!searchTerm) return subjects
     return subjects.filter(subject => 
-      subject.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subject.subjectCode.toLowerCase().includes(searchTerm.toLowerCase())
+      subject.subjectName.toLowerCase().includes(searchTerm.toLowerCase())
     )
   }, [subjects, searchTerm])
-
-  // Fetch data on component mount
-  useEffect(() => {
-    fetchData()
-  }, [])
 
   const fetchData = useCallback(async () => {
     try {
@@ -193,9 +184,14 @@ export default function AcademicManagementPage() {
     }
   }, [toast])
 
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
   // Add new school year
   const handleAddYear = async () => {
-    if (!newYear.schoolyear.trim()) {
+    if (!newYear.schoolYearCode.trim()) {
       setErrors({ year: 'សូមបំពេញឆ្នាំសិក្សា' })
       return
     }
@@ -207,17 +203,17 @@ export default function AcademicManagementPage() {
       const response = await fetch('/api/admin/school-years', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schoolyear: newYear.schoolyear.trim() })
+        body: JSON.stringify({ schoolYearCode: newYear.schoolYearCode.trim() })
       })
 
       if (response.ok) {
         const addedYear = await response.json()
         setSchoolYears(prev => [addedYear, ...prev])
-        setNewYear({ schoolyear: '' })
+        setNewYear({ schoolYearCode: '' })
         setShowYearForm(false)
         toast({
           title: "បានបន្ថែមឆ្នាំសិក្សាដោយជោគជ័យ",
-          description: `បានបន្ថែមឆ្នាំសិក្សា ${addedYear.schoolyear}`,
+          description: `បានបន្ថែមឆ្នាំសិក្សា ${addedYear.schoolYearCode}`,
         })
       } else {
         throw new Error('Failed to add school year')
@@ -238,7 +234,6 @@ export default function AcademicManagementPage() {
   const handleAddSubject = async () => {
     const errors: Record<string, string> = {}
     if (!newSubject.subjectName.trim()) errors.subjectName = 'សូមបំពេញឈ្មោះមុខវិជ្ជា'
-    if (!newSubject.subjectCode.trim()) errors.subjectCode = 'សូមបំពេញកូដមុខវិជ្ជា'
     
     if (Object.keys(errors).length > 0) {
       setErrors(errors)
@@ -253,15 +248,14 @@ export default function AcademicManagementPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subjectName: newSubject.subjectName.trim(),
-          subjectCode: newSubject.subjectCode.trim()
+          subjectName: newSubject.subjectName.trim()
         })
       })
 
       if (response.ok) {
         const addedSubject = await response.json()
         setSubjects(prev => [addedSubject, ...prev])
-        setNewSubject({ subjectName: '', subjectCode: '' })
+        setNewSubject({ subjectName: '' })
         setShowSubjectForm(false)
         toast({
           title: "បានបន្ថែមមុខវិជ្ជាដោយជោគជ័យ",
@@ -677,7 +671,7 @@ export default function AcademicManagementPage() {
                   <SelectItem value="all">ទាំងអស់</SelectItem>
                   {schoolYears.map((year) => (
                     <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                      {year.schoolyear}
+                      {year.schoolYearCode}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -736,9 +730,9 @@ export default function AcademicManagementPage() {
                     ឆ្នាំសិក្សា
                   </label>
                   <Input
-                    value={newYear.schoolyear}
+                    value={newYear.schoolYearCode}
                     onChange={(e) => {
-                      setNewYear({...newYear, schoolyear: e.target.value})
+                      setNewYear({...newYear, schoolYearCode: e.target.value})
                       if (errors.year) setErrors(prev => ({ ...prev, year: '' }))
                     }}
                     placeholder="ឧ. 2024-2025"
@@ -758,7 +752,7 @@ export default function AcademicManagementPage() {
                   onClick={() => {
                     setShowYearForm(false)
                     setErrors({})
-                    setNewYear({ schoolyear: '' })
+                    setNewYear({ schoolYearCode: '' })
                   }}
                 >
                   បោះបង់
@@ -786,7 +780,7 @@ export default function AcademicManagementPage() {
             {schoolYears.map((year) => (
                 <div key={year.schoolYearId} className="group border rounded-lg p-4 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800">
                 <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{year.schoolyear}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{year.schoolYearCode}</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -845,7 +839,7 @@ export default function AcademicManagementPage() {
                     <SelectContent>
                       {schoolYears.map((year) => (
                         <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                          {year.schoolyear}
+                          {year.schoolYearCode}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1037,7 +1031,7 @@ export default function AcademicManagementPage() {
                   <SelectContent>
                     {schoolYears.map((year) => (
                       <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                        {year.schoolyear}
+                        {year.schoolYearCode}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1095,7 +1089,7 @@ export default function AcademicManagementPage() {
                     <SelectContent>
                       {schoolYears.map((year) => (
                         <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                          {year.schoolyear}
+                          {year.schoolYearCode}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1256,7 +1250,7 @@ export default function AcademicManagementPage() {
                   <SelectItem value="all">ទាំងអស់</SelectItem>
                   {schoolYears.map((year) => (
                     <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                      {year.schoolyear}
+                      {year.schoolYearCode}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1293,7 +1287,7 @@ export default function AcademicManagementPage() {
                 <div className="text-sm text-gray-500">
                   {selectedSchoolYear !== 'all' && (
                     <span>
-                      ឆ្នាំសិក្សា: {schoolYears.find(year => year.schoolYearId.toString() === selectedSchoolYear)?.schoolyear}
+                      ឆ្នាំសិក្សា: {schoolYears.find(year => year.schoolYearId.toString() === selectedSchoolYear)?.schoolYearCode}
                     </span>
                   )}
                 </div>
@@ -1428,7 +1422,7 @@ export default function AcademicManagementPage() {
               <h3 className="text-lg font-semibold mb-4 text-green-700 dark:text-green-300">
                 បន្ថែមមុខវិជ្ជាថ្មី
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                     ឈ្មោះមុខវិជ្ជា
@@ -1449,26 +1443,6 @@ export default function AcademicManagementPage() {
                     </p>
                   )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                    កូដមុខវិជ្ជា
-                  </label>
-                  <Input
-                    value={newSubject.subjectCode}
-                    onChange={(e) => {
-                      setNewSubject({...newSubject, subjectCode: e.target.value})
-                      if (errors.subjectCode) setErrors(prev => ({ ...prev, subjectCode: '' }))
-                    }}
-                    placeholder="ឧ. MATH"
-                    className={errors.subjectCode ? 'border-red-500' : ''}
-                  />
-                  {errors.subjectCode && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.subjectCode}
-                    </p>
-                  )}
-                </div>
               </div>
               <div className="flex justify-end mt-4 space-x-3">
                 <Button 
@@ -1476,7 +1450,7 @@ export default function AcademicManagementPage() {
                   onClick={() => {
                     setShowSubjectForm(false)
                     setErrors({})
-                    setNewSubject({ subjectName: '', subjectCode: '' })
+                    setNewSubject({ subjectName: '' })
                   }}
                 >
                   បោះបង់
@@ -1515,7 +1489,7 @@ export default function AcademicManagementPage() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">កូដ: {subject.subjectCode}</p>
+
                 <p className="text-xs text-gray-500 mt-1">
                   បង្កើត: {new Date(subject.createdAt).toLocaleDateString('km-KH')}
                 </p>

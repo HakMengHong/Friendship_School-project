@@ -40,26 +40,11 @@ export async function PUT(
   try {
     const id = parseInt(params.id)
     const body = await request.json()
-    const { subjectName, subjectCode } = body
+    const { subjectName } = body
 
-    if (!subjectName || !subjectCode) {
+    if (!subjectName) {
       return NextResponse.json(
-        { error: 'Subject name and code are required' },
-        { status: 400 }
-      )
-    }
-
-    // Check if subject code already exists for other subjects
-    const existingSubject = await prisma.subject.findFirst({
-      where: { 
-        subjectCode,
-        subjectId: { not: id }
-      }
-    })
-
-    if (existingSubject) {
-      return NextResponse.json(
-        { error: 'Subject code already exists' },
+        { error: 'Subject name is required' },
         { status: 400 }
       )
     }
@@ -67,8 +52,7 @@ export async function PUT(
     const updatedSubject = await prisma.subject.update({
       where: { subjectId: id },
       data: {
-        subjectName,
-        subjectCode
+        subjectName
       }
     })
 

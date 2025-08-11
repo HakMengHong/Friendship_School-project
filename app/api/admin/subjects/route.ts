@@ -24,31 +24,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { subjectName, subjectCode } = body
+    const { subjectName } = body
 
-    if (!subjectName || !subjectCode) {
+    if (!subjectName) {
       return NextResponse.json(
-        { error: 'Subject name and code are required' },
-        { status: 400 }
-      )
-    }
-
-    // Check if subject code already exists
-    const existingSubject = await prisma.subject.findUnique({
-      where: { subjectCode }
-    })
-
-    if (existingSubject) {
-      return NextResponse.json(
-        { error: 'Subject code already exists' },
+        { error: 'Subject name is required' },
         { status: 400 }
       )
     }
 
     const newSubject = await prisma.subject.create({
       data: {
-        subjectName,
-        subjectCode
+        subjectName
       }
     })
 
