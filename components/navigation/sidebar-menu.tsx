@@ -44,6 +44,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         requiredRole: "admin" as const,
         subItems: [
           { id: "admin-users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/admin/dashboard/users" },
+          { id: "admin-academic", label: "ការគ្រប់គ្រងវិញ្ញាបនបត្រ", href: "/admin/dashboard/academic-management" },
         ],
       },
       // Admin Attendance

@@ -44,7 +44,7 @@ async function addSchoolData() {
        const courseData = {
          courseId: `${i + 1}`,
          schoolYearId: 3, // Use 2024-2025 (ID: 3)
-         grade: `Grade ${grade}`,
+         grade: `${grade}`,
          section: 'A',
          courseName: `ថ្នាក់ទី ${grade}`
        };
@@ -73,7 +73,7 @@ async function addSchoolData() {
        const courseData = {
          courseId: `${i + 10}`,
          schoolYearId: 2, // 2023-2024 (ID: 2)
-         grade: `Grade ${grade}`,
+         grade: `${grade}`,
          section: 'A',
          courseName: `ថ្នាក់ទី ${grade}`
        };
@@ -101,7 +101,7 @@ async function addSchoolData() {
        const courseData = {
          courseId: `${i + 19}`,
          schoolYearId: 1, // 2022-2023 (ID: 1)
-         grade: `Grade ${grade}`,
+         grade: `${grade}`,
          section: 'A',
          courseName: `ថ្នាក់ទី ${grade}`
        };

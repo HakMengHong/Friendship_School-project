@@ -118,12 +118,12 @@ model Scholarship {
 }
 
 model Course {
-  courseId     String       @id @unique
+  courseId     Int          @id @default(autoincrement())
   schoolYearId Int
   teacherId1   Int?
   teacherId2   Int?
   teacherId3   Int?
-  grade       String
+  grade        String
   section      String
   courseName   String
   createdAt    DateTime     @default(now())
@@ -157,7 +157,7 @@ model Grade {
   updatedAt    DateTime   @updatedAt
   gradeCode    String     @unique
   gradeId      Int        @id @default(autoincrement())
-  courseId     String
+  courseId     Int
   course       Course     @relation(fields: [courseId], references: [courseId])
   semester     Semester   @relation(fields: [semesterId], references: [semesterId])
   student      Student    @relation(fields: [studentId], references: [studentId])
@@ -166,7 +166,7 @@ model Grade {
 
 model Enrollment {
   enrollmentId   Int       @id @default(autoincrement())
-  courseId       String
+  courseId       Int
   studentId      Int
   drop           Boolean
   dropSemester   String?
@@ -178,18 +178,17 @@ model Enrollment {
 model SchoolYear {
   schoolYearId   Int      @id @default(autoincrement())
   schoolyear     String
-  schoolYearCode String   @unique
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   courses        Course[]
 }
 
 model Semester {
+  semesterId   Int      @id @default(autoincrement())
   semester     String
+  semesterCode String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  semesterCode String   @unique
-  semesterId   Int      @id @default(autoincrement())
   grades       Grade[]
 }
 
@@ -234,19 +233,6 @@ model Announcement {
   published Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-// File: Uploads (student photos, documents, etc.)
-model File {
-  id           Int      @id @default(autoincrement())
-  filename     String
-  originalName String
-  mimeType     String
-  size         Int
-  path         String
-  uploadedBy   String?  // Username or user ID
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 }
 
 enum AttendanceSession {

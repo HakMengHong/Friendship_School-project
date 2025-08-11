@@ -7,7 +7,9 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "clean:courses": "node scripts/clean-courses.js",
+    "clean:courses:advanced": "node scripts/clean-courses-advanced.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
