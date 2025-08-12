@@ -118,7 +118,7 @@ model Scholarship {
 }
 
 model Course {
-  courseId     String       @id @unique
+  courseId     Int          @id @default(autoincrement())
   schoolYearId Int
   teacherId1   Int?
   teacherId2   Int?
@@ -156,7 +156,7 @@ model Grade {
   updatedAt    DateTime   @updatedAt
   gradeCode    String     @unique
   gradeId      Int        @id @default(autoincrement())
-  courseId     String
+  courseId     Int
   course       Course     @relation(fields: [courseId], references: [courseId])
   semester     Semester   @relation(fields: [semesterId], references: [semesterId])
   student      Student    @relation(fields: [studentId], references: [studentId])
@@ -165,7 +165,7 @@ model Grade {
 
 model Enrollment {
   enrollmentId   Int       @id @default(autoincrement())
-  courseId       String
+  courseId       Int
   studentId      Int
   drop           Boolean
   dropSemester   String?

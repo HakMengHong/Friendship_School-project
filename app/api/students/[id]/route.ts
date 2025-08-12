@@ -20,6 +20,7 @@ export async function PUT(request: NextRequest, context: any) {
       gender: student.gender,
       dob: student.dob ? new Date(student.dob) : new Date(),
       class: student.class,
+      schoolYear: student.schoolYear, // Add school year field
       registerToStudy: student.registerToStudy || false,
       studentHouseNumber: student.studentHouseNumber,
       studentVillage: student.studentVillage,

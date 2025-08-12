@@ -13,6 +13,7 @@ import {
   UserCheck,
   ClipboardList,
   GraduationCap,
+  UserPlus,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getCurrentUser, logout, User, isAdmin, isTeacher } from "@/lib/auth-service"
@@ -44,7 +45,8 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         requiredRole: "admin" as const,
         subItems: [
           { id: "admin-users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/admin/dashboard/users" },
-          { id: "admin-academic", label: "ការគ្រប់គ្រងវិញ្ញាបនបត្រ", href: "/admin/dashboard/academic-management" },
+          { id: "admin-academic", label: "ការគ្រប់គ្រងថ្នាក់", href: "/admin/dashboard/academic-management" },
+          { id: "admin-add-student-class", label: "បន្ថែមសិស្សទៅក្នុងថ្នាក់", href: "/admin/dashboard/add-student-class" },
         ],
       },
       // Admin Attendance

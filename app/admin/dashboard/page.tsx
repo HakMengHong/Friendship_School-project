@@ -15,7 +15,9 @@ import {
   UserCheck,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  UserPlus,
+  GraduationCap
 } from "lucide-react"
 import { KhmerCalendar } from "@/components/calendar/khmer_calendar"
 import { Button } from "@/components/ui/button"
@@ -327,8 +329,77 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-      
+            </div>
+
+      {/* Quick Actions Navigation */}
+      <Card className="hover:shadow-lg transition-all duration-200">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Activity className="h-5 w-5 text-blue-500" />
+            <span>សកម្មភាពរហ័ស</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="/admin/dashboard/academic-management" className="block">
+              <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <BookOpen className="h-6 w-6 text-blue-500" />
+                    <div>
+                      <h3 className="font-semibold">ការគ្រប់គ្រងវិញ្ញាបនបត្រ</h3>
+                      <p className="text-sm text-gray-600">គ្រប់គ្រងថ្នាក់ និងមុខវិជ្ជា</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+            
+            <a href="/admin/dashboard/add-student-class" className="block">
+              <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <UserPlus className="h-6 w-6 text-green-500" />
+                    <div>
+                      <h3 className="font-semibold">បន្ថែមសិស្សទៅក្នុងថ្នាក់</h3>
+                      <p className="text-sm text-gray-600">ជ្រើសរើសសិស្ស និងថ្នាក់</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+            
+            <a href="/admin/dashboard/users" className="block">
+              <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <Users className="h-6 w-6 text-purple-500" />
+                    <div>
+                      <h3 className="font-semibold">គ្រប់គ្រងអ្នកប្រើប្រាស់</h3>
+                      <p className="text-sm text-gray-600">គ្រូ និងបុគ្គលិក</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+            
+            <a href="/admin/student-info" className="block">
+              <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <GraduationCap className="h-6 w-6 text-orange-500" />
+                    <div>
+                      <h3 className="font-semibold">ព័ត៌មានសិស្ស</h3>
+                      <p className="text-sm text-gray-600">មើល និងកែប្រែព័ត៌មាន</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Announcements */}
       <Card className="hover:shadow-lg transition-all duration-200">
         <CardHeader className="flex flex-row items-center justify-between">

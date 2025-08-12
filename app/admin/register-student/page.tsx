@@ -77,6 +77,7 @@ export default function RegisterStudentPage() {
     
     // Academic Information
     class: '',
+    schoolYear: '', // Add school year field
     registerToStudy: false,
     previousSchool: '',
     transferReason: '',
@@ -141,6 +142,9 @@ export default function RegisterStudentPage() {
     }
   })
 
+  // Add school years state
+  const [schoolYears, setSchoolYears] = useState<any[]>([])
+
   // Function to convert grade number to Khmer label
   const getGradeLabel = (gradeNumber: string | number) => {
     const gradeMap: { [key: string]: string } = {
@@ -200,7 +204,25 @@ export default function RegisterStudentPage() {
     fetchStudents()
   }, [toast])
 
+  // Fetch school years from API
+  useEffect(() => {
+    const fetchSchoolYears = async () => {
+      try {
+        const response = await fetch('/api/admin/school-years')
+        const data = await response.json()
+        setSchoolYears(data || []) // API returns array directly
+      } catch (error) {
+        console.error('Error fetching school years:', error)
+        toast({
+          title: "Error",
+          description: "Failed to fetch school years",
+          variant: "destructive"
+        })
+      }
+    }
 
+    fetchSchoolYears()
+  }, [toast])
 
   const addGuardianForm = () => {
     setGuardianForms([...guardianForms, guardianForms.length]);
@@ -250,7 +272,8 @@ export default function RegisterStudentPage() {
       firstName: formData.firstName,
       gender: formData.gender,
       dob: formData.dob,
-      class: formData.class
+      class: formData.class,
+      schoolYear: formData.schoolYear
     };
 
     console.log('Required fields check:', requiredFields);
@@ -285,6 +308,7 @@ export default function RegisterStudentPage() {
           gender: formData.gender,
           dob: formData.dob,
           class: formData.class,
+          schoolYear: formData.schoolYear,
           registerToStudy: formData.registerToStudy,
           studentHouseNumber: formData.studentHouseNumber,
           studentVillage: formData.studentVillage,
@@ -318,6 +342,7 @@ export default function RegisterStudentPage() {
           gender: formData.gender,
           dob: formData.dob,
           class: formData.class,
+          schoolYear: formData.schoolYear,
           registerToStudy: formData.registerToStudy,
           studentHouseNumber: formData.studentHouseNumber,
           studentVillage: formData.studentVillage,
@@ -432,6 +457,7 @@ export default function RegisterStudentPage() {
       
       // Academic Information
       class: '',
+      schoolYear: '',
       registerToStudy: false,
       previousSchool: '',
       transferReason: '',
@@ -541,6 +567,7 @@ export default function RegisterStudentPage() {
       
       // Academic Information
       class: student.class || '',
+      schoolYear: student.schoolYear || '',
       registerToStudy: student.registerToStudy || false,
       previousSchool: student.previousSchool || '',
       transferReason: student.transferReason || '',
@@ -1682,9 +1709,37 @@ export default function RegisterStudentPage() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-6">
-                            {/* Registration Date */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="space-y-6">                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">                             
+                              {/* School Year */}
+                              <div className="space-y-2">
+                                <Label htmlFor="school-year" className="text-sm font-medium">
+                                  ឆ្នាំសិក្សា
+                                </Label>
+                                <Select 
+                                  value={formData.schoolYear} 
+                                  onValueChange={(value) => setFormData(prev => ({ ...prev, schoolYear: value }))}
+                                >
+                                  <SelectTrigger className="h-12">
+                                    <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {schoolYears && schoolYears.length > 0 ? (
+                                      schoolYears.map((year) => (
+                                        <SelectItem key={year.schoolYearId} value={year.schoolYearCode}>
+                                          {year.schoolYearCode}
+                                        </SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem value="" disabled>
+                                        កំពុងទាញយកឆ្នាំសិក្សា...
+                                      </SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Registration Date */}
                               <div className="space-y-2">
                                 <Label htmlFor="registration-date" className="text-sm font-medium">
                                   ថ្ងៃខែឆ្នាំចុះឈ្មោះចូលរៀន
@@ -1696,20 +1751,6 @@ export default function RegisterStudentPage() {
                                   disabled
                                   value={new Date().toISOString().split('T')[0]}
                                 />
-                              </div>
-                              
-                              {/* Empty spaces for balance */}
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
-                                <div className="h-12"></div>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
-                                <div className="h-12"></div>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium text-transparent">ជ្រើសរើស</Label>
-                                <div className="h-12"></div>
                               </div>
                             </div>
 

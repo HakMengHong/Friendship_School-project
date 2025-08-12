@@ -58,7 +58,6 @@ export async function POST(request: NextRequest) {
 
     const newCourse = await prisma.course.create({
       data: {
-        courseId: `${grade}-${section}-${schoolYearId}`,
         schoolYearId: parseInt(schoolYearId),
         grade,
         section,

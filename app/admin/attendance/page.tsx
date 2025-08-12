@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { 
   Calendar,
   BarChart3,
@@ -46,6 +47,11 @@ interface Student {
 }
 
 export default function AbsencePage() {
+  // State variables for filtering
+  const [selectedDate, setSelectedDate] = useState<string>('')
+  const [selectedGrade, setSelectedGrade] = useState<string>('')
+  const [selectedStatus, setSelectedStatus] = useState<string>('')
+  const [searchTerm, setSearchTerm] = useState<string>('')
 
   // Sample data
   const classData = [

@@ -6,11 +6,12 @@ const prisma = new PrismaClient()
 // GET specific course
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const course = await prisma.course.findUnique({
-      where: { courseId: params.id },
+      where: { courseId: parseInt(id) },
       include: {
         schoolYear: true
       }
@@ -36,9 +37,10 @@ export async function GET(
 // PUT update course
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { schoolYearId, grade, section, courseName, teacherId1, teacherId2, teacherId3 } = body
 
@@ -55,7 +57,7 @@ export async function PUT(
         schoolYearId: parseInt(schoolYearId),
         grade,
         section,
-        courseId: { not: params.id }
+        courseId: { not: parseInt(id) }
       }
     })
 
@@ -67,7 +69,7 @@ export async function PUT(
     }
 
     const updatedCourse = await prisma.course.update({
-      where: { courseId: params.id },
+      where: { courseId: parseInt(id) },
       data: {
         schoolYearId: parseInt(schoolYearId),
         grade,
@@ -95,12 +97,14 @@ export async function PUT(
 // DELETE course
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     // Check if there are enrollments using this course
     const enrollmentsCount = await prisma.enrollment.count({
-      where: { courseId: params.id }
+      where: { courseId: parseInt(id) }
     })
 
     if (enrollmentsCount > 0) {
@@ -111,7 +115,7 @@ export async function DELETE(
     }
 
     await prisma.course.delete({
-      where: { courseId: params.id }
+      where: { courseId: parseInt(id) }
     })
 
     return NextResponse.json({ message: 'Course deleted successfully' })

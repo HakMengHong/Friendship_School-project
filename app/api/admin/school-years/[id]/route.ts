@@ -6,10 +6,11 @@ const prisma = new PrismaClient()
 // GET specific school year
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id: idStr } = await params
+    const id = parseInt(idStr)
     
     const schoolYear = await prisma.schoolYear.findUnique({
       where: { schoolYearId: id }
@@ -35,16 +36,17 @@ export async function GET(
 // PUT update school year
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id: idStr } = await params
+    const id = parseInt(idStr)
     const body = await request.json()
-    const { schoolyear, schoolYearCode } = body
+    const { schoolYearCode } = body
 
-    if (!schoolyear || !schoolYearCode) {
+    if (!schoolYearCode) {
       return NextResponse.json(
-        { error: 'School year and code are required' },
+        { error: 'School year code is required' },
         { status: 400 }
       )
     }
@@ -52,7 +54,6 @@ export async function PUT(
     const updatedSchoolYear = await prisma.schoolYear.update({
       where: { schoolYearId: id },
       data: {
-        schoolyear,
         schoolYearCode
       }
     })
@@ -70,10 +71,11 @@ export async function PUT(
 // DELETE school year
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id: idStr } = await params
+    const id = parseInt(idStr)
 
     // Check if there are courses using this school year
     const coursesCount = await prisma.course.count({

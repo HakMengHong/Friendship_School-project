@@ -9,51 +9,54 @@ async function addSchoolData() {
          // Get existing School Years or create them if they don't exist
      console.log('📅 Getting/Creating School Years...');
      const schoolYears = [
-       { schoolYearId: 1, schoolyear: '2022-2023', schoolYearCode: '2022-2023' },
-       { schoolYearId: 2, schoolyear: '2023-2024', schoolYearCode: '2023-2024' },
-       { schoolYearId: 3, schoolyear: '2024-2025', schoolYearCode: '2024-2025' }
+       { schoolYearCode: '2022-2023' },
+       { schoolYearCode: '2023-2024' },
+       { schoolYearCode: '2024-2025' }
      ];
 
      const createdSchoolYears = [];
      for (const schoolYear of schoolYears) {
        // Try to find existing school year first
        let existing = await prisma.schoolYear.findUnique({
-         where: { schoolYearId: schoolYear.schoolYearId }
+         where: { schoolYearCode: schoolYear.schoolYearCode }
        });
        
        if (existing) {
          createdSchoolYears.push(existing);
-         console.log(`✅ School Year found: ${existing.schoolyear} (ID: ${existing.schoolYearId})`);
+         console.log(`✅ School Year found: ${existing.schoolYearCode} (ID: ${existing.schoolYearId})`);
        } else {
          const created = await prisma.schoolYear.create({
            data: schoolYear
          });
          createdSchoolYears.push(created);
-         console.log(`✅ School Year created: ${created.schoolyear} (ID: ${created.schoolYearId})`);
+         console.log(`✅ School Year created: ${created.schoolYearCode} (ID: ${created.schoolYearId})`);
        }
      }
 
     console.log('\n📚 Adding Courses...');
     
-         // Add Courses for each grade (1-9) with section A
-     const grades = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+         // Add Courses for each grade (1-12) with section A
+     const grades = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
      const createdCourses = [];
 
      for (let i = 0; i < grades.length; i++) {
        const grade = grades[i];
        const courseData = {
-         courseId: `${i + 1}`,
-         schoolYearId: 3, // Use 2024-2025 (ID: 3)
+         schoolYearId: createdSchoolYears[2].schoolYearId, // Use 2024-2025
          grade: `${grade}`,
          section: 'A',
          courseName: `ថ្នាក់ទី ${grade}`
        };
 
-       // Check if course already exists
-       const existingCourse = await prisma.course.findUnique({
-         where: { courseId: courseData.courseId }
+              // Check if course already exists
+       const existingCourse = await prisma.course.findFirst({
+         where: { 
+           schoolYearId: courseData.schoolYearId,
+           grade: courseData.grade,
+           section: courseData.section
+         }
        });
-
+       
        if (existingCourse) {
          createdCourses.push(existingCourse);
          console.log(`✅ Course found: ${existingCourse.courseName} - Section ${existingCourse.section} (ID: ${existingCourse.courseId})`);
@@ -71,18 +74,21 @@ async function addSchoolData() {
      for (let i = 0; i < grades.length; i++) {
        const grade = grades[i];
        const courseData = {
-         courseId: `${i + 10}`,
-         schoolYearId: 2, // 2023-2024 (ID: 2)
+         schoolYearId: createdSchoolYears[1].schoolYearId, // 2023-2024
          grade: `${grade}`,
          section: 'A',
          courseName: `ថ្នាក់ទី ${grade}`
        };
 
-       // Check if course already exists
-       const existingCourse = await prisma.course.findUnique({
-         where: { courseId: courseData.courseId }
+              // Check if course already exists
+       const existingCourse = await prisma.course.findFirst({
+         where: { 
+           schoolYearId: courseData.schoolYearId,
+           grade: courseData.grade,
+           section: courseData.section
+         }
        });
-
+       
        if (existingCourse) {
          createdCourses.push(existingCourse);
          console.log(`✅ Course found: ${existingCourse.courseName} - Section ${existingCourse.section} (ID: ${existingCourse.courseId}) - 2023-2024`);
@@ -99,18 +105,21 @@ async function addSchoolData() {
      for (let i = 0; i < grades.length; i++) {
        const grade = grades[i];
        const courseData = {
-         courseId: `${i + 19}`,
-         schoolYearId: 1, // 2022-2023 (ID: 1)
+         schoolYearId: createdSchoolYears[0].schoolYearId, // 2022-2023
          grade: `${grade}`,
          section: 'A',
          courseName: `ថ្នាក់ទី ${grade}`
        };
 
-       // Check if course already exists
-       const existingCourse = await prisma.course.findUnique({
-         where: { courseId: courseData.courseId }
+              // Check if course already exists
+       const existingCourse = await prisma.course.findFirst({
+         where: { 
+           schoolYearId: courseData.schoolYearId,
+           grade: courseData.grade,
+           section: courseData.section
+         }
        });
-
+       
        if (existingCourse) {
          createdCourses.push(existingCourse);
          console.log(`✅ Course found: ${existingCourse.courseName} - Section ${existingCourse.section} (ID: ${existingCourse.courseId}) - 2022-2023`);
