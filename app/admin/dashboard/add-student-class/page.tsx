@@ -65,6 +65,7 @@ export default function AddStudentClassPage() {
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>('')
   const [selectedCourse, setSelectedCourse] = useState<string>('')
+  const [selectedClass, setSelectedClass] = useState<string>('all')
   const [selectedStudents, setSelectedStudents] = useState<number[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
@@ -196,13 +197,17 @@ export default function AddStudentClassPage() {
     )
   }
 
-  // Filter students based on search term and school year
+  // Filter students based on search term, school year, and class
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.lastName.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesSchoolYear = !selectedSchoolYear || student.schoolYear === selectedSchoolYear
-    return matchesSearch && matchesSchoolYear
+    const matchesClass = !selectedClass || selectedClass === 'all' || student.class === selectedClass
+    return matchesSearch && matchesSchoolYear && matchesClass
   })
+
+  // Get unique classes from students
+  const uniqueClasses = [...new Set(students.map(student => student.class))].sort()
 
   // Filter courses based on selected school year
   const filteredCourses = courses.filter(course => 
@@ -215,6 +220,13 @@ export default function AddStudentClassPage() {
         ? prev.filter(id => id !== studentId)
         : [...prev, studentId]
     )
+  }
+
+  const clearAllFilters = () => {
+    setSelectedSchoolYear('')
+    setSelectedClass('all')
+    setSearchTerm('')
+    setSelectedStudents([])
   }
 
   const handleAddStudentsToClass = async () => {
@@ -343,7 +355,7 @@ export default function AddStudentClassPage() {
 
   const getSelectedCourseName = () => {
     const course = courses.find(c => c.courseId.toString() === selectedCourse)
-    return course ? `${course.courseName} - Section ${course.section}` : ''
+    return course ? `${course.courseName}${course.section}` : ''
   }
 
   return (
@@ -351,10 +363,6 @@ export default function AddStudentClassPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            ត្រឡប់
-          </Button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               បន្ថែមសិស្សទៅក្នុងថ្នាក់
@@ -364,10 +372,6 @@ export default function AddStudentClassPage() {
             </p>
           </div>
         </div>
-        <Button onClick={() => setShowAddStudentForm(true)} className="bg-blue-600 hover:bg-blue-700">
-          <UserPlus className="h-4 w-4 mr-2" />
-          បន្ថែមសិស្សថ្មី
-        </Button>
       </div>
 
       {/* Error Message */}
@@ -428,11 +432,11 @@ export default function AddStudentClassPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Users className="h-5 w-5" />
-                <span>ជ្រើសរើសសិស្ស</span>
+                <span>ជ្រើសរើសសិស្ស (ឆ្នាំសិក្សា ថ្នាក់ ស្វែងរកសិស្ស)</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="schoolYear">ឆ្នាំសិក្សា</Label>
                   <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
@@ -443,6 +447,22 @@ export default function AddStudentClassPage() {
                       {schoolYears.map((year) => (
                         <SelectItem key={year.schoolYearId} value={year.schoolYearCode}>
                           {year.schoolYearCode}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="class">ថ្នាក់</Label>
+                  <Select value={selectedClass} onValueChange={setSelectedClass}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">ទាំងអស់</SelectItem>
+                      {uniqueClasses.map((classValue) => (
+                        <SelectItem key={classValue} value={classValue}>
+                          ថ្នាក់ទី {classValue}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -470,6 +490,19 @@ export default function AddStudentClassPage() {
                   </div>
                 </div>
               </div>
+              {/* Clear Filters Button */}
+              {(selectedSchoolYear || (selectedClass && selectedClass !== 'all') || searchTerm) && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearAllFilters}
+                    className="text-sm"
+                  >
+                    លុបការច្រោះទាំងអស់
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -515,7 +548,7 @@ export default function AddStudentClassPage() {
                   ))}
                 </div>
               ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-3 max-h-[550px] overflow-y-auto">
                   {filteredStudents.map((student) => (
                   <div
                     key={student.studentId}
@@ -578,7 +611,7 @@ export default function AddStudentClassPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <BookOpen className="h-5 w-5" />
-                <span>ជ្រើសរើសថ្នាក់</span>
+                <span>ជ្រើសរើសថ្នាក់ដើម្បីបញ្ចូលសិស្ស</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -591,7 +624,7 @@ export default function AddStudentClassPage() {
                   <SelectContent>
                     {filteredCourses.map((course) => (
                       <SelectItem key={course.courseId} value={course.courseId.toString()}>
-                        {course.courseName} - Section {course.section}
+                        {course.courseName}{course.section}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -611,6 +644,78 @@ export default function AddStudentClassPage() {
             </CardContent>
           </Card>
 
+          {/* Student Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Users className="h-5 w-5" />
+                <span>សិស្សដែលបានជ្រើសរើស ({selectedStudents.length})</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {selectedStudents.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>មិនទាន់មានសិស្សដែលបានជ្រើសរើស</p>
+                  <p className="text-sm">សូមជ្រើសរើសសិស្សពីបញ្ជីខាងលើ</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {selectedStudents.map((studentId) => {
+                    const student = students.find(s => s.studentId === studentId)
+                    if (!student) return null
+                    
+                    return (
+                      <div
+                        key={student.studentId}
+                        className="flex items-center justify-between p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
+                              {student.firstName.charAt(0)}{student.lastName.charAt(0)}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">
+                              {student.firstName} {student.lastName}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender} • {student.schoolYear}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleStudentSelection(student.studentId)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
+                            <span className="text-sm">✕</span>
+                          </Button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+              
+              {selectedStudents.length > 0 && (
+                <div className="pt-3 border-t">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      សរុបសិស្សដែលបានជ្រើសរើស:
+                    </span>
+                    <span className="font-medium text-blue-600">
+                      {selectedStudents.length} នាក់
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
           {/* Actions */}
           <Card>
             <CardHeader>

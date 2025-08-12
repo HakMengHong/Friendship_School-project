@@ -647,58 +647,6 @@ export default function AcademicManagementPage() {
         </Card>
       )}
 
-      {/* Search and Filter Bar */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="ស្វែងរកថ្នាក់រៀន ផ្នែក ឬមុខវិជ្ជា..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="ឆ្នាំសិក្សា" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">ទាំងអស់</SelectItem>
-                  {schoolYears.map((year) => (
-                    <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                      {year.schoolYearCode}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="flex items-center border rounded-md">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-r-none"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'table' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('table')}
-                  className="rounded-l-none"
-                >
-                  <EyeOff className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* School Years Section */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

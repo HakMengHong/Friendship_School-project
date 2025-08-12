@@ -8,6 +8,7 @@ datasource db {
 }
 
 model User {
+  userId       Int       @id @default(autoincrement())
   username     String    @unique
   password     String
   lastname     String
@@ -22,12 +23,12 @@ model User {
   lastLogin    DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  userId       Int       @id @default(autoincrement())
   courses      Course[]  @relation("ClassTeacher")
   activityLogs ActivityLog[] @relation("ActivityLogUser")
 }
 
 model Student {
+  studentId            Int           @id @default(autoincrement())
   lastName             String
   firstName            String
   gender               String
@@ -55,7 +56,6 @@ model Student {
   studentVillage       String?
   transferReason       String?
   vaccinated           Boolean?      @default(false)
-  studentId            Int           @id @default(autoincrement())
   schoolYear           String?
   enrollments          Enrollment[]
   family               FamilyInfo?
@@ -66,6 +66,7 @@ model Student {
 }
 
 model Guardian {
+  guardianId    Int      @id @default(autoincrement())
   studentId     Int
   relation      String
   phone         String?
@@ -77,7 +78,6 @@ model Guardian {
   church        String?
   district      String?
   firstName     String?
-  guardianId    Int      @id @default(autoincrement())
   houseNumber   String?
   income        Float?
   lastName      String?
@@ -88,13 +88,13 @@ model Guardian {
 }
 
 model FamilyInfo {
+  familyinfoId     Int      @id @default(autoincrement())
   studentId        Int      @unique
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   canHelpSchool    Boolean? @default(false)
   churchName       String?
   durationInKPC    String?
-  familyinfoId     Int      @id @default(autoincrement())
   helpAmount       Float?
   helpFrequency    String?
   knowSchool       String?
@@ -107,13 +107,13 @@ model FamilyInfo {
 }
 
 model Scholarship {
+  scholarshipId Int      @id @default(autoincrement())
   studentId     Int
   type          String?
   amount        Float?
   sponsor       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  scholarshipId Int      @id @default(autoincrement())
   student       Student  @relation(fields: [studentId], references: [studentId])
 }
 
@@ -143,6 +143,7 @@ model Subject {
 }
 
 model Grade {
+  gradeId      Int        @id @default(autoincrement())
   studentId    Int
   subjectId    Int
   semesterId   Int
@@ -155,7 +156,6 @@ model Grade {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   gradeCode    String     @unique
-  gradeId      Int        @id @default(autoincrement())
   courseId     Int
   course       Course     @relation(fields: [courseId], references: [courseId])
   semester     Semester   @relation(fields: [semesterId], references: [semesterId])

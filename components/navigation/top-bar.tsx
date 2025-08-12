@@ -38,6 +38,10 @@ export function TopBar({ className, user }: TopBarProps) {
         title: "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
         subtitle: "គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងការអនុញ្ញាត"
       },
+      "/admin/dashboard/academic-management": {
+        title: "ការគ្រប់គ្រងថ្នាក់",
+        subtitle: "គ្រប់គ្រងឆ្នាំសិក្សា ថ្នាក់រៀន និងមុខវិជ្ជា"
+      },
       "/admin/users": {
         title: "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
         subtitle: "គ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងការអនុញ្ញាត"
@@ -82,6 +86,14 @@ export function TopBar({ className, user }: TopBarProps) {
         title: "ចុះឈ្មោះសិស្ស",
         subtitle: "បញ្ចូលព័ត៌មានសិស្សថ្មី និងគ្រប់គ្រងព័ត៌មាន"
       },
+      "/admin/dashboard/add-student-class": {
+        title: "បន្ថែមសិស្សទៅក្នុងថ្នាក់",
+        subtitle: "បន្ថែមសិស្សទៅក្នុងថ្នាក់រៀនផ្សេងៗ"
+      },
+      "/admin/dashboard/view-student-class": {
+        title: "មើលថ្នាក់រៀន",
+        subtitle: "មើលព័ត៌មានថ្នាក់រៀន និងសិស្សដែលបានចុះឈ្មោះ"
+      },
       "/teacher/dashboard": {
         title: "ផ្ទាំងគ្រប់គ្រង",
         subtitle: "ការតាមដានសកម្មភាពសិស្ស និងថ្នាក់រៀន"
@@ -101,10 +113,6 @@ export function TopBar({ className, user }: TopBarProps) {
       "/teacher/grade": {
         title: "ពិន្ទុសិស្ស",
         subtitle: "ការគ្រប់គ្រងពិន្ទុសិស្សក្នុងថ្នាក់"
-      },
-      "/teacher/grade/addgrade": {
-        title: "បញ្ចូលពិន្ទុសិស្ស",
-        subtitle: "បញ្ចូលពិន្ទុថ្មីសម្រាប់សិស្ស"
       },
       "/teacher/grade/report": {
         title: "របាយការណ៍ពិន្ទុ",

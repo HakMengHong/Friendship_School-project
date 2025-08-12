@@ -12,7 +12,7 @@ async function checkDatabase() {
     console.log('School Years count:', schoolYears.length);
     if (schoolYears.length > 0) {
       schoolYears.forEach(sy => {
-        console.log(`   - ID: ${sy.schoolYearId}, Year: ${sy.schoolyear}, Code: ${sy.schoolYearCode}`);
+        console.log(`   - ID: ${sy.schoolYearId}, Code: ${sy.schoolYearCode}`);
       });
     } else {
       console.log('   No school years found');
