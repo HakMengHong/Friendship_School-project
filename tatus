@@ -1,0 +1,322 @@
+[1mdiff --git a/app/admin/grade/addgrade/page.tsx b/app/admin/grade/addgrade/page.tsx[m
+[1mindex 8343695..292d9dd 100644[m
+[1m--- a/app/admin/grade/addgrade/page.tsx[m
+[1m+++ b/app/admin/grade/addgrade/page.tsx[m
+[36m@@ -1,6 +1,6 @@[m
+ "use client"[m
+ [m
+[31m-import { useState, useEffect } from "react"[m
+[32m+[m[32mimport { useState, useEffect, useCallback } from "react"[m
+ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"[m
+ import { Input } from "@/components/ui/input"[m
+ import { Button } from "@/components/ui/button"[m
+[36m@@ -31,6 +31,7 @@[m [mimport {[m
+ } from "@/components/ui/table"[m
+ import { Badge } from "@/components/ui/badge"[m
+ import { toast } from "@/hooks/use-toast"[m
+[32m+[m[32mimport { getCurrentUser } from "@/lib/auth-service"[m
+ [m
+ // Database types[m
+ interface SchoolYear {[m
+[36m@@ -96,7 +97,13 @@[m [minterface Grade {[m
+   grade: number[m
+   gradeComment: string | null[m
+   gradeDate: Date[m
+[31m-  gradeType: string[m
+[32m+[m[32m  userId: number | null[m
+[32m+[m[32m  user?: {[m
+[32m+[m[32m    userId: number[m
+[32m+[m[32m    firstname: string[m
+[32m+[m[32m    lastname: string[m
+[32m+[m[32m    role: string[m
+[32m+[m[32m  }[m
+   student: Student[m
+   subject: Subject[m
+   course: Course[m
+[36m@@ -110,7 +117,7 @@[m [minterface GradeInput {[m
+   semesterId: number[m
+   grade: number[m
+   gradeComment?: string[m
+[31m-  gradeType?: string[m
+[32m+[m[32m  userId?: number[m
+ }[m
+ [m
+ export default function AddScorePage() {[m
+[36m@@ -149,6 +156,11 @@[m [mexport default function AddScorePage() {[m
+   // Fetch initial data[m
+   useEffect(() => {[m
+     fetchInitialData()[m
+[32m+[m[32m         // Auto-select current logged-in user[m
+[32m+[m[32m     const currentUser = getCurrentUser()[m
+[32m+[m[32m     if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin')) {[m
+[32m+[m[32m       setSelectedTeacher(currentUser.id.toString())[m
+[32m+[m[32m     }[m
+   }, [])[m
+ [m
+   // Fetch students when filters change[m
+[36m@@ -160,46 +172,122 @@[m [mexport default function AddScorePage() {[m
+     }[m
+   }, [selectedSchoolYear, selectedCourse])[m
+ [m
+[32m+[m[32m  const fetchGrades = useCallback(async () => {[m
+[32m+[m[32m    if (!selectedStudent || !selectedCourse || !selectedSemester) {[m
+[32m+[m[32m      console.log('🔍 fetchGrades: Missing required data:', {[m[41m [m
+[32m+[m[32m        selectedStudent: !!selectedStudent,[m[41m [m
+[32m+[m[32m        selectedCourse: !!selectedCourse,[m[41m [m
+[32m+[m[32m        selectedSemester: !!selectedSemester[m[41m [m
+[32m+[m[32m      })[m
+[32m+[m[32m      return[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      setLoadingGrades(true)[m
+[32m+[m[32m      setError(null)[m
+[32m+[m
+[32m+[m[32m      const params = new URLSearchParams({[m
+[32m+[m[32m        studentId: selectedStudent.studentId.toString(),[m
+[32m+[m[32m        courseId: selectedCourse,[m
+[32m+[m[32m        semesterId: selectedSemester[m
+[32m+[m[32m      })[m
+[32m+[m
+[32m+[m[32m      console.log('🔍 fetchGrades: Fetching with params:', params.toString())[m
+[32m+[m[41m      [m
+[32m+[m[32m      const response = await fetch(`/api/admin/grades?${params}`)[m
+[32m+[m[32m      console.log('🔍 fetchGrades: Response status:', response.status, response.ok)[m
+[32m+[m[41m      [m
+[32m+[m[32m      if (!response.ok) {[m
+[32m+[m[32m        const errorText = await response.text()[m
+[32m+[m[32m        console.error('🔍 fetchGrades: Error response:', errorText)[m
+[32m+[m[32m        throw new Error(`Failed to fetch grades: ${response.status} ${response.statusText}`)[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      const data = await response.json()[m
+[32m+[m[32m      console.log('🔍 fetchGrades: Success, data length:', data.length)[m
+[32m+[m[32m      setGrades(data)[m
+[32m+[m[32m    } catch (error) {[m
+[32m+[m[32m      console.error('🔍 fetchGrades: Error:', error)[m
+[32m+[m[32m      setError('មានបញ្ហាក្នុងការទាញយកពិន្ទុ')[m
+[32m+[m[32m    } finally {[m
+[32m+[m[32m      setLoadingGrades(false)[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }, [selectedStudent, selectedCourse, selectedSemester])[m
+[32m+[m
+   // Fetch grades when student changes[m
+   useEffect(() => {[m
+[32m+[m[32m    console.log('🔍 useEffect grades: Checking conditions:', {[m
+[32m+[m[32m      selectedStudent: !!selectedStudent,[m
+[32m+[m[32m      selectedSchoolYear: !!selectedSchoolYear,[m
+[32m+[m[32m      selectedCourse: !!selectedCourse,[m
+[32m+[m[32m      selectedSemester: !!selectedSemester[m
+[32m+[m[32m    })[m
+[32m+[m[41m    [m
+     if (selectedStudent && selectedSchoolYear && selectedCourse && selectedSemester) {[m
+[32m+[m[32m      console.log('🔍 useEffect grades: All conditions met, calling fetchGrades')[m
+       fetchGrades()[m
+     } else {[m
+[32m+[m[32m      console.log('🔍 useEffect grades: Some conditions missing, clearing grades')[m
+       setGrades([])[m
+     }[m
+[31m-  }, [selectedStudent, selectedSchoolYear, selectedCourse, selectedSemester])[m
+[32m+[m[32m  }, [selectedStudent, selectedSchoolYear, selectedCourse, selectedSemester, fetchGrades])[m
+ [m
+   const fetchInitialData = async () => {[m
+     try {[m
+       setLoading(true)[m
+       setError(null)[m
+ [m
+[31m-      const [schoolYearsRes, semestersRes, subjectsRes, teachersRes] = await Promise.all([[m
+[32m+[m[32m      const [schoolYearsRes, semestersRes, subjectsRes, teachersRes, coursesRes] = await Promise.all([[m
+         fetch('/api/admin/school-years'),[m
+         fetch('/api/admin/semesters'),[m
+         fetch('/api/admin/subjects'),[m
+[31m-        fetch('/api/admin/users')[m
+[32m+[m[32m        fetch('/api/admin/users'),[m
+[32m+[m[32m        fetch('/api/admin/courses')[m
+       ])[m
+ [m
+[31m-      if (!schoolYearsRes.ok || !semestersRes.ok || !subjectsRes.ok || !teachersRes.ok) {[m
+[32m+[m[32m      if (!schoolYearsRes.ok || !semestersRes.ok || !subjectsRes.ok || !teachersRes.ok || !coursesRes.ok) {[m
+         throw new Error('Failed to fetch initial data')[m
+       }[m
+ [m
+[31m-      const [schoolYearsData, semestersData, subjectsData, teachersData] = await Promise.all([[m
+[32m+[m[32m      const [schoolYearsData, semestersData, subjectsData, teachersData, coursesData] = await Promise.all([[m
+         schoolYearsRes.json(),[m
+         semestersRes.json(),[m
+         subjectsRes.json(),[m
+[31m-        teachersRes.json()[m
+[32m+[m[32m        teachersRes.json(),[m
+[32m+[m[32m        coursesRes.json()[m
+       ])[m
+ [m
+       setSchoolYears(schoolYearsData)[m
+       setSemesters(semestersData)[m
+       setSubjects(subjectsData)[m
+[31m-      const teachers = teachersData.users.filter((teacher: User) => teacher.role === 'teacher')[m
+[31m-      setTeachers(teachers)[m
+[32m+[m[32m      setCourses(coursesData)[m
+[32m+[m[41m      [m
+[32m+[m[32m      // Include both teachers and admins in the teacher selection[m
+[32m+[m[32m      const teachersAndAdmins = teachersData.users.filter((user: User) =>[m[41m [m
+[32m+[m[32m        user.role === 'teacher' || user.role === 'admin'[m
+[32m+[m[32m      )[m
+[32m+[m[32m      setTeachers(teachersAndAdmins)[m
+[32m+[m[41m      [m
+[32m+[m[32m      // Debug courses data[m
+[32m+[m[32m      console.log('📚 Courses data:', {[m
+[32m+[m[32m        totalCourses: courses.length,[m
+[32m+[m[32m        coursesList: courses.map(c => ({[m[41m [m
+[32m+[m[32m          id: c.courseId,[m[41m [m
+[32m+[m[32m          name: c.courseName,[m[41m [m
+[32m+[m[32m          grade: c.grade,[m[41m [m
+[32m+[m[32m          section: c.section,[m
+[32m+[m[32m          schoolYear: c.schoolYear?.schoolYearCode[m[41m [m
+[32m+[m[32m        }))[m
+[32m+[m[32m      })[m
+[32m+[m[41m      [m
+[32m+[m[32m      console.log('📊 Teachers and Admins data:', {[m
+[32m+[m[32m        totalUsers: teachersData.users.length,[m
+[32m+[m[32m        teachersAndAdmins: teachersAndAdmins.length,[m
+[32m+[m[32m        userList: teachersAndAdmins.map((t: User) => ({ id: t.userid, name: `${t.firstname} ${t.lastname}`, role: t.role }))[m
+[32m+[m[32m      })[m
+       [m
+[31m-      if (teachers.length === 0) {[m
+[31m-        console.warn('No teachers found in the system')[m
+[32m+[m[32m      if (teachersAndAdmins.length === 0) {[m
+[32m+[m[32m        console.warn('No teachers or admins found in the system')[m
+       }[m
+ [m
+     } catch (error) {[m
+[36m@@ -235,34 +323,6 @@[m [mexport default function AddScorePage() {[m
+     }[m
+   }[m
+ [m
+[31m-  const fetchGrades = async () => {[m
+[31m-    if (!selectedStudent) return[m
+[31m-[m
+[31m-    try {[m
+[31m-      setLoadingGrades(true)[m
+[31m-      setError(null)[m
+[31m-[m
+[31m-      const params = new URLSearchParams({[m
+[31m-        studentId: selectedStudent.studentId.toString(),[m
+[31m-        courseId: selectedCourse,[m
+[31m-        semesterId: selectedSemester[m
+[31m-      })[m
+[31m-[m
+[31m-      const response = await fetch(`/api/admin/grades?${params}`)[m
+[31m-      if (!response.ok) {[m
+[31m-        throw new Error('Failed to fetch grades')[m
+[31m-      }[m
+[31m-[m
+[31m-      const data = await response.json()[m
+[31m-      setGrades(data)[m
+[31m-    } catch (error) {[m
+[31m-      console.error('Error fetching grades:', error)[m
+[31m-      setError('មានបញ្ហាក្នុងការទាញយកពិន្ទុ')[m
+[31m-    } finally {[m
+[31m-      setLoadingGrades(false)[m
+[31m-    }[m
+[31m-  }[m
+[31m-[m
+   const handleSubmit = async (e: React.FormEvent) => {[m
+     e.preventDefault()[m
+     [m
+[36m@@ -286,7 +346,7 @@[m [mexport default function AddScorePage() {[m
+         semesterId: parseInt(selectedSemester),[m
+         grade: parseFloat(score),[m
+         gradeComment: comment || undefined,[m
+[31m-        gradeType: 'exam'[m
+[32m+[m[32m        userId: selectedTeacher ? parseInt(selectedTeacher) : undefined[m
+       }[m
+ [m
+       if (editingGrade) {[m
+[36m@@ -410,10 +470,18 @@[m [mexport default function AddScorePage() {[m
+     setGrades([])[m
+   }[m
+ [m
+[31m-  // Filter courses based on selected school year[m
+[31m-  const filteredCourses = courses.filter(course => [m
+[31m-    course.schoolYear.schoolYearId.toString() === selectedSchoolYear[m
+[31m-  )[m
+[32m+[m[32m  // Filter courses based on selected school year, or show all if none selected[m
+[32m+[m[32m  const filteredCourses = selectedSchoolYear[m[41m [m
+[32m+[m[32m    ? courses.filter(course => course.schoolYear.schoolYearId.toString() === selectedSchoolYear)[m
+[32m+[m[32m    : courses[m
+[32m+[m[41m    [m
+[32m+[m[32m  // Debug filtered courses[m
+[32m+[m[32m  console.log('🔍 Filtered Courses:', {[m
+[32m+[m[32m    selectedSchoolYear,[m
+[32m+[m[32m    totalCourses: courses.length,[m
+[32m+[m[32m    filteredCount: filteredCourses.length,[m
+[32m+[m[32m    filteredCourses: filteredCourses.map(c => ({ id: c.courseId, name: c.courseName, schoolYear: c.schoolYear?.schoolYearCode }))[m
+[32m+[m[32m  })[m
+ [m
+   // Filter students based on search term[m
+   const filteredStudents = students.filter(student => {[m
+[36m@@ -513,33 +581,60 @@[m [mexport default function AddScorePage() {[m
+                   <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />[m
+                 </SelectTrigger>[m
+                 <SelectContent>[m
+[31m-                  {filteredCourses.map((course) => ([m
+[31m-                    <SelectItem key={course.courseId} value={course.courseId.toString()}>[m
+[31m-                      ថ្នាក់ទី {course.grade} {course.section}[m
+[31m-                    </SelectItem>[m
+[31m-                  ))}[m
+[32m+[m[32m                                     {filteredCourses.map((course) => ([m
+[32m+[m[32m                     <SelectItem key={course.courseId} value={course.courseId.toString()}>[m
+[32m+[m[32m                       {course.courseName}[m
+[32m+[m[32m                     </SelectItem>[m
+[32m+[m[32m                   ))}[m
+                 </SelectContent>[m
+               </Select>[m
+             </div>[m
+ [m
+             <div className="space-y-1">[m
+[31m-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឈ្មោះគ្រូ</label>[m
+[31m-              <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>[m
+[32m+[m[32m                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">[m
+[32m+[m[32m                 ឈ្មោះគ្រូ/អ្នកគ្រប់គ្រង[m
+[32m+[m[32m                 {(getCurrentUser()?.role === 'teacher' || getCurrentUser()?.role === 'admin') && ([m
+[32m+[m[32m                   <span className="ml-2 text-xs text-blue-600 dark:text-blue-400 font-medium">[m
+[32m+[m[32m                     (អ្នកប្រើប្រាស់បច្ចុប្បន្ន)[m
+[32m+[m[32m                   </span>[m
+[32m+[m[32m                 )}[m
+[32m+[m[32m               </label>[m
+[32m+[m[32m                             <Select[m[41m [m
+[32m+[m[32m                 value={selectedTeacher}[m[41m [m
+[32m+[m[32m                 onValueChange={setSelectedTeacher}[m
+[32m+[m[32m                 disabled={getCurrentUser()?.role === 'teacher' || getCurrentUser()?.role === 'admin'}[m
+[32m+[m[32m               >[m
+                 <SelectTrigger className="h-12">[m
+[31m-                  <SelectValue placeholder="ជ្រើសរើសគ្រូ" />[m
+[32m+[m[32m                  <SelectValue placeholder="ជ្រើសរើសគ្រូ/អ្នកគ្រប់គ្រង" />[m
+                 </SelectTrigger>[m
+                 <SelectContent>[m
+[31m-                  {teachers.length > 0 ? ([m
+[31m-                    teachers.map((teacher) => ([m
+[31m-                      <SelectItem key={teacher.userid} value={teacher.userid.toString()}>[m
+[31m-                        {teacher.firstname} {teacher.lastname}[m
+[31m-                      </SelectItem>[m
+[31m-                    ))[m
+[31m-                  ) : ([m
+[31m-                    <SelectItem value="" disabled>[m
+[31m-                      មិនមានគ្រូនៅឡើយទេ[m
+[31m-                    </SelectItem>[m
+[31m-                  )}[m
+[32m+[m[32m                                     {teachers.length > 0 ? ([m
+[32m+[m[32m                     teachers.map((user) => ([m
+[32m+[m[32m                       <SelectItem key={user.userid} value={user.userid.toString()}>[m
+[32m+[m[32m                         <div className="flex items-center justify-between w-full">[m
+[32m+[m[32m                           <span>{user.firstname} {user.lastname}</span>[m
+[32m+[m[32m                           <div className="flex items-center space-x-2">[m
+[32m+[m[32m                             <span className={`text-xs px-2 py-1 rounded-full ${[m
+[32m+[m[32m                               user.role === 'teacher'[m[41m [m
+[32m+[m[32m                                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'[m
+[32m+[m[32m                                 : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'[m
+[32m+[m[32m                             }`}>[m
+[32m+[m[32m                               {user.role === 'teacher' ? 'គ្រូ' : 'អ្នកគ្រប់គ្រង'}[m
+[32m+[m[32m                             </span>[m
+[32m+[m[32m                             {getCurrentUser()?.id === user.userid && ([m
+[32m+[m[32m                               <span className="text-xs text-blue-600 dark:text-blue-400">[m
+[32m+[m[32m                                 (អ្នកប្រើ�

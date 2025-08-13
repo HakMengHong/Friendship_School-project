@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/hooks/use-toast"
+import { getCurrentUser } from "@/lib/auth-service"
 
 // Database types
 interface SchoolYear {
@@ -96,7 +97,13 @@ interface Grade {
   grade: number
   gradeComment: string | null
   gradeDate: Date
-  gradeType: string
+  userId: number | null
+  user?: {
+    userId: number
+    firstname: string
+    lastname: string
+    role: string
+  }
   student: Student
   subject: Subject
   course: Course
@@ -110,7 +117,7 @@ interface GradeInput {
   semesterId: number
   grade: number
   gradeComment?: string
-  gradeType?: string
+  userId?: number
 }
 
 export default function AddScorePage() {
@@ -149,6 +156,11 @@ export default function AddScorePage() {
   // Fetch initial data
   useEffect(() => {
     fetchInitialData()
+         // Auto-select current logged-in user
+     const currentUser = getCurrentUser()
+     if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin')) {
+       setSelectedTeacher(currentUser.id.toString())
+     }
   }, [])
 
   // Fetch students when filters change
@@ -160,46 +172,122 @@ export default function AddScorePage() {
     }
   }, [selectedSchoolYear, selectedCourse])
 
+  const fetchGrades = useCallback(async () => {
+    if (!selectedStudent || !selectedCourse || !selectedSemester) {
+      console.log('🔍 fetchGrades: Missing required data:', { 
+        selectedStudent: !!selectedStudent, 
+        selectedCourse: !!selectedCourse, 
+        selectedSemester: !!selectedSemester 
+      })
+      return
+    }
+
+    try {
+      setLoadingGrades(true)
+      setError(null)
+
+      const params = new URLSearchParams({
+        studentId: selectedStudent.studentId.toString(),
+        courseId: selectedCourse,
+        semesterId: selectedSemester
+      })
+
+      console.log('🔍 fetchGrades: Fetching with params:', params.toString())
+      
+      const response = await fetch(`/api/admin/grades?${params}`)
+      console.log('🔍 fetchGrades: Response status:', response.status, response.ok)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('🔍 fetchGrades: Error response:', errorText)
+        throw new Error(`Failed to fetch grades: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      console.log('🔍 fetchGrades: Success, data length:', data.length)
+      setGrades(data)
+    } catch (error) {
+      console.error('🔍 fetchGrades: Error:', error)
+      setError('មានបញ្ហាក្នុងការទាញយកពិន្ទុ')
+    } finally {
+      setLoadingGrades(false)
+    }
+  }, [selectedStudent, selectedCourse, selectedSemester])
+
   // Fetch grades when student changes
   useEffect(() => {
+    console.log('🔍 useEffect grades: Checking conditions:', {
+      selectedStudent: !!selectedStudent,
+      selectedSchoolYear: !!selectedSchoolYear,
+      selectedCourse: !!selectedCourse,
+      selectedSemester: !!selectedSemester
+    })
+    
     if (selectedStudent && selectedSchoolYear && selectedCourse && selectedSemester) {
+      console.log('🔍 useEffect grades: All conditions met, calling fetchGrades')
       fetchGrades()
     } else {
+      console.log('🔍 useEffect grades: Some conditions missing, clearing grades')
       setGrades([])
     }
-  }, [selectedStudent, selectedSchoolYear, selectedCourse, selectedSemester])
+  }, [selectedStudent, selectedSchoolYear, selectedCourse, selectedSemester, fetchGrades])
 
   const fetchInitialData = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      const [schoolYearsRes, semestersRes, subjectsRes, teachersRes] = await Promise.all([
+      const [schoolYearsRes, semestersRes, subjectsRes, teachersRes, coursesRes] = await Promise.all([
         fetch('/api/admin/school-years'),
         fetch('/api/admin/semesters'),
         fetch('/api/admin/subjects'),
-        fetch('/api/admin/users')
+        fetch('/api/admin/users'),
+        fetch('/api/admin/courses')
       ])
 
-      if (!schoolYearsRes.ok || !semestersRes.ok || !subjectsRes.ok || !teachersRes.ok) {
+      if (!schoolYearsRes.ok || !semestersRes.ok || !subjectsRes.ok || !teachersRes.ok || !coursesRes.ok) {
         throw new Error('Failed to fetch initial data')
       }
 
-      const [schoolYearsData, semestersData, subjectsData, teachersData] = await Promise.all([
+      const [schoolYearsData, semestersData, subjectsData, teachersData, coursesData] = await Promise.all([
         schoolYearsRes.json(),
         semestersRes.json(),
         subjectsRes.json(),
-        teachersRes.json()
+        teachersRes.json(),
+        coursesRes.json()
       ])
 
       setSchoolYears(schoolYearsData)
       setSemesters(semestersData)
       setSubjects(subjectsData)
-      const teachers = teachersData.users.filter((teacher: User) => teacher.role === 'teacher')
-      setTeachers(teachers)
+      setCourses(coursesData)
       
-      if (teachers.length === 0) {
-        console.warn('No teachers found in the system')
+      // Include both teachers and admins in the teacher selection
+      const teachersAndAdmins = teachersData.users.filter((user: User) => 
+        user.role === 'teacher' || user.role === 'admin'
+      )
+      setTeachers(teachersAndAdmins)
+      
+      // Debug courses data
+      console.log('📚 Courses data:', {
+        totalCourses: courses.length,
+        coursesList: courses.map(c => ({ 
+          id: c.courseId, 
+          name: c.courseName, 
+          grade: c.grade, 
+          section: c.section,
+          schoolYear: c.schoolYear?.schoolYearCode 
+        }))
+      })
+      
+      console.log('📊 Teachers and Admins data:', {
+        totalUsers: teachersData.users.length,
+        teachersAndAdmins: teachersAndAdmins.length,
+        userList: teachersAndAdmins.map((t: User) => ({ id: t.userid, name: `${t.firstname} ${t.lastname}`, role: t.role }))
+      })
+      
+      if (teachersAndAdmins.length === 0) {
+        console.warn('No teachers or admins found in the system')
       }
 
     } catch (error) {
@@ -235,34 +323,6 @@ export default function AddScorePage() {
     }
   }
 
-  const fetchGrades = async () => {
-    if (!selectedStudent) return
-
-    try {
-      setLoadingGrades(true)
-      setError(null)
-
-      const params = new URLSearchParams({
-        studentId: selectedStudent.studentId.toString(),
-        courseId: selectedCourse,
-        semesterId: selectedSemester
-      })
-
-      const response = await fetch(`/api/admin/grades?${params}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch grades')
-      }
-
-      const data = await response.json()
-      setGrades(data)
-    } catch (error) {
-      console.error('Error fetching grades:', error)
-      setError('មានបញ្ហាក្នុងការទាញយកពិន្ទុ')
-    } finally {
-      setLoadingGrades(false)
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -286,7 +346,7 @@ export default function AddScorePage() {
         semesterId: parseInt(selectedSemester),
         grade: parseFloat(score),
         gradeComment: comment || undefined,
-        gradeType: 'exam'
+        userId: selectedTeacher ? parseInt(selectedTeacher) : undefined
       }
 
       if (editingGrade) {
@@ -410,10 +470,18 @@ export default function AddScorePage() {
     setGrades([])
   }
 
-  // Filter courses based on selected school year
-  const filteredCourses = courses.filter(course => 
-    course.schoolYear.schoolYearId.toString() === selectedSchoolYear
-  )
+  // Filter courses based on selected school year, or show all if none selected
+  const filteredCourses = selectedSchoolYear 
+    ? courses.filter(course => course.schoolYear.schoolYearId.toString() === selectedSchoolYear)
+    : courses
+    
+  // Debug filtered courses
+  console.log('🔍 Filtered Courses:', {
+    selectedSchoolYear,
+    totalCourses: courses.length,
+    filteredCount: filteredCourses.length,
+    filteredCourses: filteredCourses.map(c => ({ id: c.courseId, name: c.courseName, schoolYear: c.schoolYear?.schoolYearCode }))
+  })
 
   // Filter students based on search term
   const filteredStudents = students.filter(student => {
@@ -513,33 +581,60 @@ export default function AddScorePage() {
                   <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredCourses.map((course) => (
-                    <SelectItem key={course.courseId} value={course.courseId.toString()}>
-                      ថ្នាក់ទី {course.grade} {course.section}
-                    </SelectItem>
-                  ))}
+                                     {filteredCourses.map((course) => (
+                     <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                       {course.courseName}
+                     </SelectItem>
+                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឈ្មោះគ្រូ</label>
-              <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>
+                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                 ឈ្មោះគ្រូ/អ្នកគ្រប់គ្រង
+                 {(getCurrentUser()?.role === 'teacher' || getCurrentUser()?.role === 'admin') && (
+                   <span className="ml-2 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                     (អ្នកប្រើប្រាស់បច្ចុប្បន្ន)
+                   </span>
+                 )}
+               </label>
+                             <Select 
+                 value={selectedTeacher} 
+                 onValueChange={setSelectedTeacher}
+                 disabled={getCurrentUser()?.role === 'teacher' || getCurrentUser()?.role === 'admin'}
+               >
                 <SelectTrigger className="h-12">
-                  <SelectValue placeholder="ជ្រើសរើសគ្រូ" />
+                  <SelectValue placeholder="ជ្រើសរើសគ្រូ/អ្នកគ្រប់គ្រង" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teachers.length > 0 ? (
-                    teachers.map((teacher) => (
-                      <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
-                        {teacher.firstname} {teacher.lastname}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="" disabled>
-                      មិនមានគ្រូនៅឡើយទេ
-                    </SelectItem>
-                  )}
+                                     {teachers.length > 0 ? (
+                     teachers.map((user) => (
+                       <SelectItem key={user.userid} value={user.userid.toString()}>
+                         <div className="flex items-center justify-between w-full">
+                           <span>{user.firstname} {user.lastname}</span>
+                           <div className="flex items-center space-x-2">
+                             <span className={`text-xs px-2 py-1 rounded-full ${
+                               user.role === 'teacher' 
+                                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                 : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                             }`}>
+                               {user.role === 'teacher' ? 'គ្រូ' : 'អ្នកគ្រប់គ្រង'}
+                             </span>
+                             {getCurrentUser()?.id === user.userid && (
+                               <span className="text-xs text-blue-600 dark:text-blue-400">
+                                 (អ្នកប្រើប្រាស់បច្ចុប្បន្ន)
+                               </span>
+                             )}
+                           </div>
+                         </div>
+                       </SelectItem>
+                     ))
+                   ) : (
+                     <SelectItem value="no-teachers" disabled>
+                       កំពុងទាញយកគ្រូ/អ្នកគ្រប់គ្រង...
+                     </SelectItem>
+                   )}
                 </SelectContent>
               </Select>
             </div>
@@ -792,6 +887,7 @@ export default function AddScorePage() {
                             <TableHead className="font-semibold">មុខវិជ្ជា</TableHead>
                             <TableHead className="font-semibold">ចំនួនពិន្ទុ</TableHead>
                             <TableHead className="font-semibold">កាលបរិច្ឆេទ</TableHead>
+                            <TableHead className="font-semibold">គ្រូ/អ្នកគ្រប់គ្រង</TableHead>
                             <TableHead className="font-semibold">មតិ</TableHead>
                             <TableHead className="font-semibold">សកម្មភាព</TableHead>
                           </TableRow>
@@ -811,6 +907,24 @@ export default function AddScorePage() {
                                 </span>
                               </TableCell>
                               <TableCell>{new Date(grade.gradeDate).toLocaleDateString('km-KH')}</TableCell>
+                              <TableCell>
+                                {grade.user ? (
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-sm font-medium">
+                                      {grade.user.firstname} {grade.user.lastname}
+                                    </span>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${
+                                      grade.user.role === 'teacher' 
+                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                        : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                    }`}>
+                                      {grade.user.role === 'teacher' ? 'គ្រូ' : 'អ្នកគ្រប់គ្រង'}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-gray-500">មិនមាន</span>
+                                )}
+                              </TableCell>
                               <TableCell className="max-w-xs truncate">{grade.gradeComment || '-'}</TableCell>
                               <TableCell>
                                 <div className="flex space-x-1">

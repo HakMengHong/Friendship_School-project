@@ -4,131 +4,119 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function addTeachers() {
-  try {
-    console.log('👨‍🏫 Adding Sample Teachers...\n');
+  console.log('👥 Adding Teachers to Database');
+  console.log('==============================\n');
 
+  try {
+    // Sample teachers data
     const teachers = [
       {
-        username: 'sok.meng',
-        password: 'password123',
-        firstname: 'សុខ',
-        lastname: 'ម៉េង',
+        username: 'ហាក់ម៉េងហុង',
+        firstname: 'ហាក់',
+        lastname: 'ម៉េងហុង',
         role: 'teacher',
-        position: 'គ្រូបង្រៀនគណិតវិទ្យា',
+        position: 'គ្រូបង្រៀន',
         phonenumber1: '012345678',
         status: 'active'
       },
       {
-        username: 'mao.sreyni',
-        password: 'password123',
-        firstname: 'ម៉ៅ',
-        lastname: 'ស្រីនី',
+        username: 'ហេងសុនី',
+        firstname: 'ហេង',
+        lastname: 'សុនី',
         role: 'teacher',
-        position: 'គ្រូបង្រៀនភាសាអង់គ្លេស',
+        position: 'គ្រូបង្រៀន',
         phonenumber1: '012345679',
         status: 'active'
       },
       {
-        username: 'vong.sokha',
-        password: 'password123',
-        firstname: 'វង្ស',
-        lastname: 'សុខា',
+        username: 'វ៉ាន់សុផល',
+        firstname: 'វ៉ាន់',
+        lastname: 'សុផល',
         role: 'teacher',
-        position: 'គ្រូបង្រៀនវិទ្យាសាស្រ្ត',
+        position: 'គ្រូបង្រៀន',
         phonenumber1: '012345680',
         status: 'active'
       },
       {
-        username: 'kim.sopheak',
-        password: 'password123',
+        username: 'គឹមសុខា',
         firstname: 'គឹម',
-        lastname: 'សុភាក្រោម',
+        lastname: 'សុខា',
         role: 'teacher',
-        position: 'គ្រូបង្រៀនភាសាខ្មែរ',
+        position: 'គ្រូបង្រៀន',
         phonenumber1: '012345681',
         status: 'active'
       },
       {
-        username: 'chhem.vanna',
-        password: 'password123',
-        firstname: 'ឈឹម',
-        lastname: 'វណ្ណា',
+        username: 'ម៉ៅសុធារី',
+        firstname: 'ម៉ៅ',
+        lastname: 'សុធារី',
         role: 'teacher',
-        position: 'គ្រូបង្រៀនប្រវត្តិវិទ្យា',
+        position: 'គ្រូបង្រៀន',
         phonenumber1: '012345682',
         status: 'active'
       }
     ];
 
-    console.log(`📝 Adding ${teachers.length} teachers...\n`);
+    console.log('📝 Adding teachers...\n');
 
-    for (const teacherData of teachers) {
+    for (const teacher of teachers) {
       try {
         // Check if teacher already exists
         const existingTeacher = await prisma.user.findUnique({
-          where: { username: teacherData.username }
+          where: { username: teacher.username }
         });
 
         if (existingTeacher) {
-          console.log(`   ⚠️  Teacher ${teacherData.username} already exists, skipping...`);
+          console.log(`⚠️  Teacher ${teacher.firstname} ${teacher.lastname} already exists`);
           continue;
         }
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(teacherData.password, 10);
+        // Hash password (default password: 'password')
+        const hashedPassword = await bcrypt.hash('password', 10);
 
         // Create teacher
-        const teacher = await prisma.user.create({
+        const newTeacher = await prisma.user.create({
           data: {
-            username: teacherData.username,
+            username: teacher.username,
             password: hashedPassword,
-            firstname: teacherData.firstname,
-            lastname: teacherData.lastname,
-            role: teacherData.role,
-            position: teacherData.position,
-            phonenumber1: teacherData.phonenumber1,
-            avatar: `${teacherData.firstname.charAt(0)}${teacherData.lastname.charAt(0)}`,
-            status: teacherData.status
+            firstname: teacher.firstname,
+            lastname: teacher.lastname,
+            role: teacher.role,
+            position: teacher.position,
+            phonenumber1: teacher.phonenumber1,
+            status: teacher.status,
+            avatar: `${teacher.firstname.charAt(0)}${teacher.lastname.charAt(0)}`
           }
         });
 
-        console.log(`   ✅ Added: ${teacher.firstname} ${teacher.lastname} (${teacher.username}) - ${teacher.position}`);
+        console.log(`✅ Added teacher: ${teacher.firstname} ${teacher.lastname} (ID: ${newTeacher.userId})`);
       } catch (error) {
-        console.error(`   ❌ Error adding teacher ${teacherData.username}:`, error.message);
+        console.error(`❌ Error adding teacher ${teacher.firstname} ${teacher.lastname}:`, error.message);
       }
     }
 
-    // Verify teachers were added
-    const teacherCount = await prisma.user.count({
-      where: { role: 'teacher' }
-    });
+    // Show final count
+    const teacherCount = await prisma.user.count({ where: { role: 'teacher' } });
+    const totalUsers = await prisma.user.count();
+    
+    console.log('\n📊 Final Database Status:');
+    console.log('---------------------------');
+    console.log(`Total Users: ${totalUsers}`);
+    console.log(`Teachers: ${teacherCount}`);
 
-    console.log(`\n🎉 Successfully added teachers!`);
-    console.log(`📊 Total teachers in database: ${teacherCount}`);
-
-    // Show all teachers
-    const allTeachers = await prisma.user.findMany({
-      where: { role: 'teacher' },
-      select: {
-        username: true,
-        firstname: true,
-        lastname: true,
-        position: true,
-        status: true
-      }
-    });
-
-    console.log('\n👨‍🏫 Current Teachers:');
-    allTeachers.forEach(teacher => {
-      console.log(`   - ${teacher.firstname} ${teacher.lastname} (${teacher.username}) - ${teacher.position}`);
-    });
+    if (teacherCount > 0) {
+      console.log('\n🎉 Teachers added successfully!');
+      console.log('Default password for all teachers: password');
+    } else {
+      console.log('\n⚠️  No teachers were added. Check the errors above.');
+    }
 
   } catch (error) {
-    console.error('❌ Error adding teachers:', error);
+    console.error('❌ Error in addTeachers function:', error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-// Run the script
+// Run the function
 addTeachers();

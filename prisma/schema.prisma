@@ -25,6 +25,7 @@ model User {
   updatedAt    DateTime  @updatedAt
   courses      Course[]  @relation("ClassTeacher")
   activityLogs ActivityLog[] @relation("ActivityLogUser")
+  grades       Grade[]
 }
 
 model Student {
@@ -151,15 +152,15 @@ model Grade {
   gradeDate    DateTime
   grade        Float
   gradeComment String?
-  user         String?
+  userId       Int?
   lastEdit     DateTime?
-  gradeType    GradeType?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   course       Course     @relation(fields: [courseId], references: [courseId])
   semester     Semester   @relation(fields: [semesterId], references: [semesterId])
   student      Student    @relation(fields: [studentId], references: [studentId])
   subject      Subject    @relation(fields: [subjectId], references: [subjectId])
+  user         User?      @relation(fields: [userId], references: [userId])
 }
 
 model Enrollment {
@@ -190,13 +191,7 @@ model Semester {
   grades       Grade[]
 }
 
-enum GradeType {
-  exam
-  quiz
-  assignment
-  participation
-  other
-}
+
 
 enum AttendanceSession {
   AM

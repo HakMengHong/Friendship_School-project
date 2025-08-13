@@ -76,6 +76,14 @@ export async function GET(request: NextRequest) {
             semester: true,
             semesterCode: true
           }
+        },
+        user: {
+          select: {
+            userId: true,
+            firstname: true,
+            lastname: true,
+            role: true
+          }
         }
       },
       orderBy: [
@@ -108,8 +116,7 @@ export async function POST(request: NextRequest) {
       semesterId,
       grade,
       gradeComment,
-      gradeType = 'exam',
-      user = 'admin'
+      userId
     } = body
 
     // Validate required fields
@@ -159,8 +166,6 @@ export async function POST(request: NextRequest) {
       where: { semesterId: parseInt(semesterId) }
     })
 
-    const gradeCode = `G${student?.class || '0'}-${subject?.subjectId || '0'}-${course?.courseId || '0'}-${semester?.semesterId || '0'}`
-
     // Create new grade
     const newGrade = await prisma.grade.create({
       data: {
@@ -170,9 +175,7 @@ export async function POST(request: NextRequest) {
         semesterId: parseInt(semesterId),
         grade: parseFloat(grade),
         gradeComment: gradeComment || null,
-        gradeType,
-        user,
-        gradeCode,
+        userId: userId ? parseInt(userId) : null,
         gradeDate: new Date()
       },
       include: {
@@ -212,6 +215,14 @@ export async function POST(request: NextRequest) {
             semester: true,
             semesterCode: true
           }
+        },
+        user: {
+          select: {
+            userId: true,
+            firstname: true,
+            lastname: true,
+            role: true
+          }
         }
       }
     })
@@ -222,8 +233,18 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
   } catch (error) {
     console.error('Error creating grade:', error)
+    
+    // Provide more detailed error information
+    let errorMessage = 'Failed to create grade'
+    if (error instanceof Error) {
+      errorMessage = error.message
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to create grade' },
+      { 
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : 'Unknown error'
+      },
       { status: 500 }
     )
   }
@@ -237,8 +258,7 @@ export async function PUT(request: NextRequest) {
       gradeId,
       grade,
       gradeComment,
-      gradeType,
-      user = 'admin'
+      userId
     } = body
 
     if (!gradeId || grade === undefined) {
@@ -260,8 +280,7 @@ export async function PUT(request: NextRequest) {
       data: {
         grade: parseFloat(grade),
         gradeComment: gradeComment || null,
-        gradeType: gradeType || undefined,
-        user,
+        userId: userId ? parseInt(userId) : null,
         lastEdit: new Date(),
         updatedAt: new Date()
       },
@@ -301,6 +320,14 @@ export async function PUT(request: NextRequest) {
             semesterId: true,
             semester: true,
             semesterCode: true
+          }
+        },
+        user: {
+          select: {
+            userId: true,
+            firstname: true,
+            lastname: true,
+            role: true
           }
         }
       }
