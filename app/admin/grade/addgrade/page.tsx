@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,12 @@ import {
 import { 
   BookOpen,
   Users,
-  Plus as PlusIcon
+  Plus as PlusIcon,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Trash2,
+  Edit3
 } from "lucide-react"
 import {
   Table,
@@ -24,130 +29,427 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { toast } from "@/hooks/use-toast"
 
-interface Student {
-  id: number
-  name: string
-  photo: string
-  grade: string
-  academicYear: string
-  semester: string
-  teacher: string
+// Database types
+interface SchoolYear {
+  schoolYearId: number
+  schoolYearCode: string
 }
 
-interface Score {
-  id: number
+interface Semester {
+  semesterId: number
+  semester: string
+  semesterCode: string
+}
+
+interface Course {
+  courseId: number
+  courseName: string
+  grade: string
+  section: string
+  schoolYear: SchoolYear
+}
+
+interface Subject {
+  subjectId: number
+  subjectName: string
+}
+
+interface User {
+  userid: number
+  username: string
+  firstname: string
+  lastname: string
+  role: string
+  position: string
+  avatar: string
+  phonenumber1: string | null
+  phonenumber2: string | null
+  photo: string | null
+  status: string
+  createdAt: string
+  updatedAt: string
+  lastLogin: string | null
+}
+
+interface Student {
   studentId: number
-  subject: string
-  score: number
-  date: string
-  comment: string
+  firstName: string
+  lastName: string
+  photo: string | null
+  class: string
+  gender: string
+  enrollments: Array<{
+    enrollmentId: number
+    course: Course
+  }>
+}
+
+interface Grade {
+  gradeId: number
+  studentId: number
+  subjectId: number
+  courseId: number
+  semesterId: number
+  grade: number
+  gradeComment: string | null
+  gradeDate: Date
+  gradeType: string
+  student: Student
+  subject: Subject
+  course: Course
+  semester: Semester
+}
+
+interface GradeInput {
+  studentId: number
+  subjectId: number
+  courseId: number
+  semesterId: number
+  grade: number
+  gradeComment?: string
+  gradeType?: string
 }
 
 export default function AddScorePage() {
   // Filter states
-  const [academicYear, setAcademicYear] = useState("")
-  const [semester, setSemester] = useState("")
-  const [monthYear, setMonthYear] = useState("")
-  const [grade, setGrade] = useState("")
-  const [teacher, setTeacher] = useState("")
+  const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("")
+  const [selectedSemester, setSelectedSemester] = useState<string>("")
+  const [selectedCourse, setSelectedCourse] = useState<string>("")
+  const [selectedTeacher, setSelectedTeacher] = useState<string>("")
   const [searchTerm, setSearchTerm] = useState("")
 
   // Score input states
-  const [subject, setSubject] = useState("")
+  const [selectedSubject, setSelectedSubject] = useState<string>("")
   const [score, setScore] = useState("")
   const [comment, setComment] = useState("")
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [editingScore, setEditingScore] = useState<Score | null>(null)
+  const [editingGrade, setEditingGrade] = useState<Grade | null>(null)
 
-  // Sample data with more comprehensive student information
-  const allStudents: Student[] = [
-    { id: 1, name: "សុខ ចន្ទា", photo: "", grade: "10A", academicYear: "2023-2024", semester: "1", teacher: "1" },
-    { id: 2, name: "ម៉ៅ សុធារ៉ា", photo: "", grade: "10A", academicYear: "2023-2024", semester: "1", teacher: "1" },
-    { id: 3, name: "វង្ស សុផល", photo: "", grade: "10A", academicYear: "2023-2024", semester: "1", teacher: "1" },
-    { id: 4, name: "គឹម សុខា", photo: "", grade: "10B", academicYear: "2023-2024", semester: "1", teacher: "2" },
-    { id: 5, name: "ឈឹម វណ្ណា", photo: "", grade: "10B", academicYear: "2023-2024", semester: "1", teacher: "2" },
-    { id: 6, name: "អ៊ុក សុវណ្ណា", photo: "", grade: "11A", academicYear: "2023-2024", semester: "1", teacher: "1" },
-  ]
+  // Data states
+  const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
+  const [semesters, setSemesters] = useState<Semester[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [teachers, setTeachers] = useState<User[]>([])
+  const [students, setStudents] = useState<Student[]>([])
+  const [grades, setGrades] = useState<Grade[]>([])
 
-  // Filter students based on selected criteria
-  const filteredStudents = allStudents.filter(student => {
-    // Show students only when ALL required filters are selected
-    const hasAllRequiredFilters = academicYear && semester && monthYear && grade && teacher
-    
-    // If not all required filters are selected, don't show any students
-    if (!hasAllRequiredFilters) {
-      return false
-    }
-    
-    const matchesAcademicYear = student.academicYear === academicYear
-    const matchesSemester = student.semester === semester
-    const matchesGrade = student.grade === grade
-    const matchesTeacher = student.teacher === teacher
-    const matchesSearch = !searchTerm || student.name.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    return matchesAcademicYear && matchesSemester && matchesGrade && matchesTeacher && matchesSearch
-  })
+  // Loading states
+  const [loading, setLoading] = useState(true)
+  const [loadingStudents, setLoadingStudents] = useState(false)
+  const [loadingGrades, setLoadingGrades] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  const [scores, setScores] = useState<Score[]>([
-    { id: 1, studentId: 1, subject: "គណិតវិទ្យា", score: 92, date: "2023-11-15", comment: "ល្អណាស់" },
-    { id: 2, studentId: 2, subject: "ភាសាអង់គ្លេស", score: 88, date: "2023-11-10", comment: "ល្អ" },
-  ])
+  // Error states
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedStudent || !subject || !score) return
-    
-    if (editingScore) {
-      // Update existing score
-      const updatedScores = scores.map(s => 
-        s.id === editingScore.id 
-          ? { ...s, subject, score: parseInt(score), comment }
-          : s
-      )
-      setScores(updatedScores)
-      setEditingScore(null)
+  // Fetch initial data
+  useEffect(() => {
+    fetchInitialData()
+  }, [])
+
+  // Fetch students when filters change
+  useEffect(() => {
+    if (selectedSchoolYear && selectedCourse) {
+      fetchStudents()
     } else {
-      // Add new score
-      const newScore: Score = {
-        id: scores.length + 1,
-        studentId: selectedStudent.id,
-        subject,
-        score: parseInt(score),
-        date: new Date().toISOString().split('T')[0],
-        comment
-      }
-      setScores([...scores, newScore])
+      setStudents([])
     }
-    
-    // Reset form
-    setSubject("")
-    setScore("")
-    setComment("")
+  }, [selectedSchoolYear, selectedCourse])
+
+  // Fetch grades when student changes
+  useEffect(() => {
+    if (selectedStudent && selectedSchoolYear && selectedCourse && selectedSemester) {
+      fetchGrades()
+    } else {
+      setGrades([])
+    }
+  }, [selectedStudent, selectedSchoolYear, selectedCourse, selectedSemester])
+
+  const fetchInitialData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const [schoolYearsRes, semestersRes, subjectsRes, teachersRes] = await Promise.all([
+        fetch('/api/admin/school-years'),
+        fetch('/api/admin/semesters'),
+        fetch('/api/admin/subjects'),
+        fetch('/api/admin/users')
+      ])
+
+      if (!schoolYearsRes.ok || !semestersRes.ok || !subjectsRes.ok || !teachersRes.ok) {
+        throw new Error('Failed to fetch initial data')
+      }
+
+      const [schoolYearsData, semestersData, subjectsData, teachersData] = await Promise.all([
+        schoolYearsRes.json(),
+        semestersRes.json(),
+        subjectsRes.json(),
+        teachersRes.json()
+      ])
+
+      setSchoolYears(schoolYearsData)
+      setSemesters(semestersData)
+      setSubjects(subjectsData)
+      const teachers = teachersData.users.filter((teacher: User) => teacher.role === 'teacher')
+      setTeachers(teachers)
+      
+      if (teachers.length === 0) {
+        console.warn('No teachers found in the system')
+      }
+
+    } catch (error) {
+      console.error('Error fetching initial data:', error)
+      setError('មានបញ្ហាក្នុងការទាញយកទិន្នន័យ')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleEdit = (scoreToEdit: Score) => {
-    setEditingScore(scoreToEdit)
-    setSubject(scoreToEdit.subject)
-    setScore(scoreToEdit.score.toString())
-    setComment(scoreToEdit.comment)
+  const fetchStudents = async () => {
+    try {
+      setLoadingStudents(true)
+      setError(null)
+
+      const params = new URLSearchParams({
+        schoolYearId: selectedSchoolYear,
+        courseId: selectedCourse
+      })
+
+      const response = await fetch(`/api/admin/students/enrolled?${params}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch students')
+      }
+
+      const data = await response.json()
+      setStudents(data)
+    } catch (error) {
+      console.error('Error fetching students:', error)
+      setError('មានបញ្ហាក្នុងការទាញយកបញ្ជីសិស្ស')
+    } finally {
+      setLoadingStudents(false)
+    }
+  }
+
+  const fetchGrades = async () => {
+    if (!selectedStudent) return
+
+    try {
+      setLoadingGrades(true)
+      setError(null)
+
+      const params = new URLSearchParams({
+        studentId: selectedStudent.studentId.toString(),
+        courseId: selectedCourse,
+        semesterId: selectedSemester
+      })
+
+      const response = await fetch(`/api/admin/grades?${params}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch grades')
+      }
+
+      const data = await response.json()
+      setGrades(data)
+    } catch (error) {
+      console.error('Error fetching grades:', error)
+      setError('មានបញ្ហាក្នុងការទាញយកពិន្ទុ')
+    } finally {
+      setLoadingGrades(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!selectedStudent || !selectedSubject || !score) {
+      toast({
+        title: "កំហុស",
+        description: "សូមបំពេញគ្រប់ផ្នែកដែលត្រូវការ",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      setError(null)
+
+      const gradeData: GradeInput = {
+        studentId: selectedStudent.studentId,
+        subjectId: parseInt(selectedSubject),
+        courseId: parseInt(selectedCourse),
+        semesterId: parseInt(selectedSemester),
+        grade: parseFloat(score),
+        gradeComment: comment || undefined,
+        gradeType: 'exam'
+      }
+
+      if (editingGrade) {
+        // Update existing grade
+        const response = await fetch('/api/admin/grades', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gradeId: editingGrade.gradeId,
+            ...gradeData
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update grade')
+        }
+
+        toast({
+          title: "ជោគជ័យ",
+          description: "ពិន្ទុត្រូវបានកែសម្រួលដោយជោគជ័យ",
+        })
+
+        setEditingGrade(null)
+      } else {
+        // Create new grade
+        const response = await fetch('/api/admin/grades', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(gradeData)
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create grade')
+        }
+
+        toast({
+          title: "ជោគជ័យ",
+          description: "ពិន្ទុត្រូវបានបញ្ចូលដោយជោគជ័យ",
+        })
+      }
+
+      // Reset form and refresh data
+      setScore("")
+      setComment("")
+      setSelectedSubject("")
+      fetchGrades()
+
+    } catch (error) {
+      console.error('Error submitting grade:', error)
+      setError('មានបញ្ហាក្នុងការបញ្ចូលពិន្ទុ')
+      toast({
+        title: "កំហុស",
+        description: "មានបញ្ហាក្នុងការបញ្ចូលពិន្ទុ",
+        variant: "destructive"
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleEdit = (gradeToEdit: Grade) => {
+    setEditingGrade(gradeToEdit)
+    setSelectedSubject(gradeToEdit.subjectId.toString())
+    setScore(gradeToEdit.grade.toString())
+    setComment(gradeToEdit.gradeComment || "")
   }
 
   const handleCancelEdit = () => {
-    setEditingScore(null)
-    setSubject("")
+    setEditingGrade(null)
     setScore("")
     setComment("")
+    setSelectedSubject("")
   }
 
-  const handleDelete = (id: number) => {
-    setScores(scores.filter(score => score.id !== id))
+  const handleDelete = async (gradeId: number) => {
+    if (!confirm('តើអ្នកប្រាកដជាចង់លុបពិន្ទុនេះមែនទេ?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/grades?gradeId=${gradeId}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete grade')
+      }
+
+      toast({
+        title: "ជោគជ័យ",
+        description: "ពិន្ទុត្រូវបានលុបដោយជោគជ័យ",
+      })
+
+      fetchGrades()
+    } catch (error) {
+      console.error('Error deleting grade:', error)
+      toast({
+        title: "កំហុស",
+        description: "មានបញ្ហាក្នុងការលុបពិន្ទុ",
+        variant: "destructive"
+      })
+    }
   }
+
+  const handleSchoolYearChange = (value: string) => {
+    setSelectedSchoolYear(value)
+    setSelectedCourse("")
+    setSelectedStudent(null)
+    setStudents([])
+    setGrades([])
+  }
+
+  const handleCourseChange = (value: string) => {
+    setSelectedCourse(value)
+    setSelectedStudent(null)
+    setGrades([])
+  }
+
+  const handleSemesterChange = (value: string) => {
+    setSelectedSemester(value)
+    setGrades([])
+  }
+
+  // Filter courses based on selected school year
+  const filteredCourses = courses.filter(course => 
+    course.schoolYear.schoolYearId.toString() === selectedSchoolYear
+  )
+
+  // Filter students based on search term
+  const filteredStudents = students.filter(student => {
+    if (!searchTerm) return true
+    const fullName = `${student.firstName} ${student.lastName}`.toLowerCase()
+    return fullName.includes(searchTerm.toLowerCase())
+  })
 
   // Calculate stats
-  const totalScores = scores.length
-  const totalPoints = scores.reduce((sum, item) => sum + item.score, 0)
-  const averageScore = totalScores > 0 ? (totalPoints / totalScores).toFixed(2) : 0
+  const totalGrades = grades.length
+  const totalPoints = grades.reduce((sum, grade) => sum + grade.grade, 0)
+  const averageScore = totalGrades > 0 ? (totalPoints / totalGrades).toFixed(2) : "0.00"
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-lg text-muted-foreground">កំពុងទាញយកទិន្នន័យ...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <p className="text-lg text-destructive mb-2">មានបញ្ហាក្នុងការទាញយកទិន្នន័យ</p>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={fetchInitialData}>ព្យាយាមម្តងទៀត</Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -170,82 +472,89 @@ export default function AddScorePage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* First Row - Main Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Filter Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
-              <Select value={academicYear} onValueChange={setAcademicYear}>
+              <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2023-2024">2023-2024</SelectItem>
-                  <SelectItem value="2022-2023">2022-2023</SelectItem>
-                  <SelectItem value="2021-2022">2021-2022</SelectItem>
+                  {schoolYears.map((year) => (
+                    <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
+                      {year.schoolYearCode}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឆមាស</label>
-              <Select value={semester} onValueChange={setSemester}>
+              <Select value={selectedSemester} onValueChange={handleSemesterChange}>
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="ជ្រើសរើសឆមាស" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">ឆមាស 1</SelectItem>
-                  <SelectItem value="2">ឆមាស 2</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ខែ/ឆ្នាំពិន្ទុ</label>
-              <Select value={monthYear} onValueChange={setMonthYear}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="ជ្រើសរើសខែ/ឆ្នាំ" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2023-11">វិច្ឆិកា 2023</SelectItem>
-                  <SelectItem value="2023-12">ធ្នូ 2023</SelectItem>
-                  <SelectItem value="2024-01">មករា 2024</SelectItem>
+                  {semesters.map((semester) => (
+                    <SelectItem key={semester.semesterId} value={semester.semesterId.toString()}>
+                      {semester.semester}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ថ្នាក់</label>
-              <Select value={grade} onValueChange={setGrade}>
+              <Select value={selectedCourse} onValueChange={handleCourseChange}>
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="10A">10A</SelectItem>
-                  <SelectItem value="10B">10B</SelectItem>
-                  <SelectItem value="11A">11A</SelectItem>
-                  <SelectItem value="11B">11B</SelectItem>
-                  <SelectItem value="12A">12A</SelectItem>
-                  <SelectItem value="12B">12B</SelectItem>
+                  {filteredCourses.map((course) => (
+                    <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                      ថ្នាក់ទី {course.grade} {course.section}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឈ្មោះគ្រូ</label>
-              <Select value={teacher} onValueChange={setTeacher}>
+              <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="ជ្រើសរើសគ្រូ" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">សុខ ម៉េង</SelectItem>
-                  <SelectItem value="2">ម៉ៅ ស្រីនី</SelectItem>
-                  <SelectItem value="3">វង្ស សុខា</SelectItem>
+                  {teachers.length > 0 ? (
+                    teachers.map((teacher) => (
+                      <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
+                        {teacher.firstname} {teacher.lastname}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      មិនមានគ្រូនៅឡើយទេ
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-
+          {/* Search */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ស្វែងរកសិស្ស</label>
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="ស្វែងរកឈ្មោះសិស្ស..."
+              className="h-12"
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -265,13 +574,18 @@ export default function AddScorePage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map(student => (
+            {loadingStudents ? (
+              <div className="text-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                <p className="text-sm text-muted-foreground">កំពុងទាញយក...</p>
+              </div>
+            ) : filteredStudents.length > 0 ? (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {filteredStudents.map(student => (
                   <div 
-                    key={student.id}
+                    key={student.studentId}
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      selectedStudent?.id === student.id 
+                      selectedStudent?.studentId === student.studentId 
                         ? 'bg-blue-50 border-blue-400 dark:bg-blue-900/20 dark:border-blue-500 shadow-md' 
                         : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
                     }`}
@@ -279,25 +593,33 @@ export default function AddScorePage() {
                   >
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                        {student.name.charAt(0)}
+                        {student.photo ? (
+                          <img
+                            src={student.photo}
+                            alt={`${student.firstName} ${student.lastName}`}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          student.firstName.charAt(0)
+                        )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 dark:text-white">{student.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">ថ្នាក់ {student.grade}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">{student.firstName} {student.lastName}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">ថ្នាក់ទី {student.class}</p>
                       </div>
                       <div className="text-right">
                         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                       </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>សូមបំពេញគ្រប់ផ្នែកដើម្បីមើលបញ្ជីសិស្ស</p>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <p>សូមបំពេញគ្រប់ផ្នែកដើម្បីមើលបញ្ជីសិស្ស</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -307,7 +629,7 @@ export default function AddScorePage() {
             <div className="flex items-center space-x-1">
               <PlusIcon className="h-5 w-5 text-orange-600" />
               <CardTitle className="text-lg">
-                {editingScore ? 'កែសម្រួលពិន្ទុ' : 'កន្លែងបញ្ចូលពិន្ទុ'}
+                {editingGrade ? 'កែសម្រួលពិន្ទុ' : 'កន្លែងបញ្ចូលពិន្ទុ'}
               </CardTitle>
             </div>
           </CardHeader>
@@ -318,11 +640,19 @@ export default function AddScorePage() {
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border">
                   <div className="flex items-center space-x-4">
                     <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                      {selectedStudent.name.charAt(0)}
+                      {selectedStudent.photo ? (
+                        <img
+                          src={selectedStudent.photo}
+                          alt={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      ) : (
+                        selectedStudent.firstName.charAt(0)
+                      )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white">{selectedStudent.name}</h3>
-                      <p className="text-gray-600 dark:text-gray-400">ថ្នាក់ {selectedStudent.grade}</p>
+                      <h3 className="font-bold text-lg text-gray-900 dark:text-white">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
+                      <p className="text-gray-600 dark:text-gray-400">ថ្នាក់ទី {selectedStudent.class}</p>
                     </div>
                   </div>
                 </div>
@@ -332,37 +662,34 @@ export default function AddScorePage() {
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">មុខវិជ្ជា</label>
-                      <Select value={subject} onValueChange={setSubject}>
+                      <Select value={selectedSubject} onValueChange={setSelectedSubject}>
                         <SelectTrigger className="h-14 text-base">
                           <SelectValue placeholder="សូមជ្រើសរើស" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="គណិតវិទ្យា">គណិតវិទ្យា</SelectItem>
-                          <SelectItem value="ភាសាអង់គ្លេស">ភាសាអង់គ្លេស</SelectItem>
-                          <SelectItem value="ភាសាខ្មែរ">ភាសាខ្មែរ</SelectItem>
-                          <SelectItem value="វិទ្យាសាស្ត្រ">វិទ្យាសាស្ត្រ</SelectItem>
-                          <SelectItem value="ប្រវត្តិវិទ្យា">ប្រវត្តិវិទ្យា</SelectItem>
-                          <SelectItem value="ភូមិវិទ្យា">ភូមិវិទ្យា</SelectItem>
-                          <SelectItem value="គីមីវិទ្យា">គីមីវិទ្យា</SelectItem>
-                          <SelectItem value="រូបវិទ្យា">រូបវិទ្យា</SelectItem>
+                          {subjects.map((subject) => (
+                            <SelectItem key={subject.subjectId} value={subject.subjectId.toString()}>
+                              {subject.subjectName}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
-                    <div className="flex items-center grid-cols-1 gap-4">
-                      <label className="text-lg font-medium text-gray-700 dark:text-gray-300">លេខពិន្ទុ:</label>
-                      <Input
-                        type="number"
-                        value={score}
-                        onChange={(e) => setScore(e.target.value)}
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        placeholder="សូមបញ្ចូល"
-                        className="h-16 text-xl flex text-center"
-                      />
-                    </div>
+                  <div className="flex items-center grid-cols-1 gap-4">
+                    <label className="text-lg font-medium text-gray-700 dark:text-gray-300">លេខពិន្ទុ:</label>
+                    <Input
+                      type="number"
+                      value={score}
+                      onChange={(e) => setScore(e.target.value)}
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      placeholder="សូមបញ្ចូល"
+                      className="h-16 text-xl flex text-center"
+                    />
+                  </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">មតិផ្សេងៗ</label>
@@ -376,17 +703,23 @@ export default function AddScorePage() {
                 </div>
 
                 <div className="flex justify-end space-x-2 pt-1">
-                  {editingScore ? (
+                  {editingGrade ? (
                     <>
                       <Button 
                         type="button" 
                         variant="outline" 
                         onClick={handleCancelEdit}
                         className="px-6 py-3 text-base"
+                        disabled={submitting}
                       >
                         បោះបង់
                       </Button>
-                      <Button type="submit" className="px-5 py-3 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                      <Button 
+                        type="submit" 
+                        className="px-5 py-3 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                        disabled={submitting}
+                      >
+                        {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                         ធ្វើបច្ចុប្បន្នភាព
                       </Button>
                     </>
@@ -396,20 +729,22 @@ export default function AddScorePage() {
                         type="button" 
                         variant="outline" 
                         onClick={() => {
-                          setSubject("")
+                          setSelectedSubject("")
                           setScore("")
                           setComment("")
-                          setEditingScore(null)
+                          setEditingGrade(null)
                         }}
                         className="px-8 py-3 text-base"
+                        disabled={submitting}
                       >
                         សម្អាត
                       </Button>
                       <Button 
                         type="submit" 
                         className="px-5 py-3 text-base"
-                        variant="gradient"
+                        disabled={submitting}
                       >
+                        {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                         បន្ថែមពិន្ទុ
                       </Button>
                     </>
@@ -431,11 +766,11 @@ export default function AddScorePage() {
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-1">
-                <CardTitle className="text-lg">បញ្ជីពិន្ទុសិស្ស {selectedStudent?.name || ''}</CardTitle>
+                <CardTitle className="text-lg">បញ្ជីពិន្ទុសិស្ស {selectedStudent?.firstName} {selectedStudent?.lastName || ''}</CardTitle>
               </div>
               {selectedStudent && (
                 <div className="text-sm text-gray-500">
-                  សរុប: {scores.filter(s => s.studentId === selectedStudent.id).length} ពិន្ទុ
+                  សរុប: {grades.length} ពិន្ទុ
                 </div>
               )}
             </div>
@@ -443,78 +778,95 @@ export default function AddScorePage() {
           <CardContent>
             {selectedStudent ? (
               <>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="font-semibold">មុខវិជ្ជា</TableHead>
-                        <TableHead className="font-semibold">ចំនួនពិន្ទុ</TableHead>
-                        <TableHead className="font-semibold">កាលបរិច្ឆេទ</TableHead>
-                        <TableHead className="font-semibold">មតិ</TableHead>
-                        <TableHead className="font-semibold">សកម្មភាព</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {scores.filter(s => s.studentId === selectedStudent.id).map((score) => (
-                        <TableRow key={score.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <TableCell className="font-medium">{score.subject}</TableCell>
-                          <TableCell>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              score.score >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                              score.score >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
-                              score.score >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                              'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                            }`}>
-                              {score.score}
-                            </span>
-                          </TableCell>
-                          <TableCell>{score.date}</TableCell>
-                          <TableCell className="max-w-xs truncate">{score.comment}</TableCell>
-                                                      <TableCell>
-                              <div className="flex space-x-1">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="text-blue-600 border-blue-300"
-                                  onClick={() => handleEdit(score)}
-                                >
-                                  កែ
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="text-red-600 border-red-300"
-                                  onClick={() => handleDelete(score.id)}
-                                >
-                                  លុប
-                                </Button>
-                              </div>
-                            </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                {loadingGrades ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                    <p className="text-sm text-muted-foreground">កំពុងទាញយកពិន្ទុ...</p>
+                  </div>
+                ) : grades.length > 0 ? (
+                  <>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="font-semibold">មុខវិជ្ជា</TableHead>
+                            <TableHead className="font-semibold">ចំនួនពិន្ទុ</TableHead>
+                            <TableHead className="font-semibold">កាលបរិច្ឆេទ</TableHead>
+                            <TableHead className="font-semibold">មតិ</TableHead>
+                            <TableHead className="font-semibold">សកម្មភាព</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {grades.map((grade) => (
+                            <TableRow key={grade.gradeId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <TableCell className="font-medium">{grade.subject.subjectName}</TableCell>
+                              <TableCell>
+                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                  grade.grade >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                                  grade.grade >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
+                                  grade.grade >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                                  'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                                }`}>
+                                  {grade.grade}
+                                </span>
+                              </TableCell>
+                              <TableCell>{new Date(grade.gradeDate).toLocaleDateString('km-KH')}</TableCell>
+                              <TableCell className="max-w-xs truncate">{grade.gradeComment || '-'}</TableCell>
+                              <TableCell>
+                                <div className="flex space-x-1">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-blue-600 border-blue-300"
+                                    onClick={() => handleEdit(grade)}
+                                  >
+                                    <Edit3 className="h-3 w-3 mr-1" />
+                                    កែ
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-red-600 border-red-300"
+                                    onClick={() => handleDelete(grade.gradeId)}
+                                  >
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    លុប
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
 
-                {/* Enhanced Stats Summary */}
-                <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t">
-                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">ចំនួនពិន្ទុ</p>
-                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalScores}</p>
+                    {/* Enhanced Stats Summary */}
+                    <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t">
+                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">ចំនួនពិន្ទុ</p>
+                        <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalGrades}</p>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">សរុបពិន្ទុ</p>
+                        <p className="text-2xl font-bold text-green-700 dark:text-green-300">{totalPoints}</p>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">មធ្យមភាគ</p>
+                        <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{averageScore}</p>
+                      </div>
+                      <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                        <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">ថ្នាក់</p>
+                        <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">{selectedStudent.class}</p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <CheckCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">មិនមានពិន្ទុ</p>
+                    <p className="text-sm">សិស្សនេះមិនទាន់មានពិន្ទុនៅឡើយទេ</p>
                   </div>
-                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <p className="text-sm text-green-600 dark:text-green-400 font-medium">សរុបពិន្ទុ</p>
-                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">{totalPoints}</p>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">មធ្យមភាគ</p>
-                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{averageScore}</p>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                    <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">និន្នាការ</p>
-                    <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">+5.3%</p>
-                  </div>
-                </div>
+                )}
               </>
             ) : (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">

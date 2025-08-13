@@ -3,20 +3,25 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// GET all courses
-export async function GET() {
+// GET: Fetch all courses with school year information
+export async function GET(request: NextRequest) {
   try {
     const courses = await prisma.course.findMany({
       include: {
-        schoolYear: true
+        schoolYear: {
+          select: {
+            schoolYearId: true,
+            schoolYearCode: true
+          }
+        }
       },
       orderBy: [
-        { schoolYearId: 'asc' },
+        { schoolYear: { schoolYearCode: 'desc' } },
         { grade: 'asc' },
         { section: 'asc' }
       ]
     })
-    
+
     return NextResponse.json(courses)
   } catch (error) {
     console.error('Error fetching courses:', error)

@@ -20,7 +20,9 @@ import {
   School,
   ChevronDown,
   ChevronUp,
-  AlertCircle
+  AlertCircle,
+  Trash2,
+  AlertTriangle
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -90,6 +92,13 @@ export default function ViewStudentClassPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(true)
 
+  // Remove student states
+  const [removingStudent, setRemovingStudent] = useState<Enrollment | null>(null)
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false)
+
+  // Auto-show students when both filters are selected
+  const [autoShowStudents, setAutoShowStudents] = useState(false)
+
   // Fetch all data function
   const fetchAllData = async () => {
     setDataLoading(true)
@@ -117,9 +126,10 @@ export default function ViewStudentClassPage() {
       if (response.ok) {
         const data = await response.json()
         setSchoolYears(data)
-        if (data.length > 0 && !selectedSchoolYear) {
-          setSelectedSchoolYear(data[0].schoolYearCode)
-        }
+        // Remove automatic selection - let user choose manually
+        // if (data.length > 0 && !selectedSchoolYear) {
+        //   setSelectedSchoolYear(data[0].schoolYearCode)
+        // }
       }
     } catch (error) {
       console.error('Error fetching school years:', error)
@@ -181,6 +191,43 @@ export default function ViewStudentClassPage() {
     }
   }
 
+  // Remove student from course
+  const removeStudentFromCourse = async (enrollment: Enrollment) => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/admin/enrollments?enrollmentId=${enrollment.enrollmentId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Remove from local state
+        setEnrollments(prev => prev.filter(e => e.enrollmentId !== enrollment.enrollmentId))
+        
+        toast.success(`បានដក ${enrollment.student.firstName} ${enrollment.student.lastName} ចេញពីថ្នាក់រៀនដោយជោគជ័យ`)
+        
+        // Close confirmation dialog
+        setShowRemoveConfirm(false)
+        setRemovingStudent(null)
+      } else {
+        const errorData = await response.json()
+        toast.error(`មានបញ្ហា: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error('Error removing student:', error)
+      toast.error('មានបញ្ហាក្នុងការដកសិស្សចេញពីថ្នាក់រៀន')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle remove student confirmation
+  const handleRemoveStudent = (enrollment: Enrollment) => {
+    setRemovingStudent(enrollment)
+    setShowRemoveConfirm(true)
+  }
+
   // Get teacher name by ID
   const getTeacherName = (teacherId?: number) => {
     if (!teacherId) return 'មិនទាន់ចាត់តាំង'
@@ -208,7 +255,7 @@ export default function ViewStudentClassPage() {
 
   // Get selected course details
   const getSelectedCourseDetails = () => {
-    if (!selectedCourse) return null
+    if (!selectedCourse || selectedCourse === 'all') return null
     return courses.find(c => c.courseId === parseInt(selectedCourse))
   }
 
@@ -217,6 +264,7 @@ export default function ViewStudentClassPage() {
     setSelectedSchoolYear('')
     setSelectedCourse('all')
     setSearchTerm('')
+    setAutoShowStudents(false)
   }
 
   // Handle student search
@@ -232,9 +280,37 @@ export default function ViewStudentClassPage() {
            student.lastName.toLowerCase().includes(searchTerm.toLowerCase())
   })
 
+  // Check if we should auto-show students
+  const shouldShowStudents = selectedSchoolYear && selectedCourse && selectedCourse !== 'all'
+
+  // Handle school year change
+  const handleSchoolYearChange = (value: string) => {
+    setSelectedSchoolYear(value)
+    setSelectedCourse('all') // Reset course selection when school year changes
+    setAutoShowStudents(false)
+  }
+
+  // Handle course change
+  const handleCourseChange = (value: string) => {
+    setSelectedCourse(value)
+    // Auto-show students when both school year and course are selected
+    if (selectedSchoolYear && value !== 'all') {
+      setAutoShowStudents(true)
+    } else {
+      setAutoShowStudents(false)
+    }
+  }
+
   useEffect(() => {
     fetchAllData()
   }, [])
+
+  // Auto-show students when both filters are selected
+  useEffect(() => {
+    if (shouldShowStudents) {
+      setAutoShowStudents(true)
+    }
+  }, [selectedSchoolYear, selectedCourse])
 
   if (error) {
     return (
@@ -305,7 +381,7 @@ export default function ViewStudentClassPage() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="schoolYear">ឆ្នាំសិក្សា</Label>
-                  <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
+                  <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                     </SelectTrigger>
@@ -321,7 +397,7 @@ export default function ViewStudentClassPage() {
                 
                 <div>
                   <Label htmlFor="course">ថ្នាក់រៀន</Label>
-                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                  <Select value={selectedCourse} onValueChange={handleCourseChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="ជ្រើសរើសថ្នាក់រៀន" />
                     </SelectTrigger>
@@ -350,6 +426,21 @@ export default function ViewStudentClassPage() {
                   </div>
                 </div>
 
+                {/* Auto-show indicator */}
+                {shouldShowStudents && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center space-x-2 text-green-800">
+                      <Users className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ
+                      </span>
+                    </div>
+                    <p className="text-xs text-green-600 mt-1">
+                      បានជ្រើសរើសឆ្នាំសិក្សា និងថ្នាក់រៀនរួចហើយ
+                    </p>
+                  </div>
+                )}
+
                 {/* Clear Filters Button */}
                 {(selectedSchoolYear || (selectedCourse && selectedCourse !== 'all') || searchTerm) && (
                   <div className="flex justify-end">
@@ -368,7 +459,7 @@ export default function ViewStudentClassPage() {
           )}
 
           {/* Course Information */}
-          {selectedCourse && (
+          {selectedCourse && selectedCourse !== 'all' && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -433,18 +524,26 @@ export default function ViewStudentClassPage() {
                 <span className="text-sm">ថ្នាក់រៀនសរុប:</span>
                 <span className="font-medium">{filteredCourses.length}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm">សិស្សដែលបានចុះឈ្មោះ:</span>
-                <span className="font-medium">{filteredEnrollments.length}</span>
-              </div>
-              {selectedCourse && (
-                <div className="pt-2 border-t">
+              {shouldShowStudents ? (
+                <>
                   <div className="flex justify-between">
-                    <span className="text-sm">សិស្សក្នុងថ្នាក់នេះ:</span>
-                    <span className="font-medium text-blue-600">
-                      {filteredEnrollments.filter(e => e.courseId === parseInt(selectedCourse)).length}
-                    </span>
+                    <span className="text-sm">សិស្សដែលបានចុះឈ្មោះ:</span>
+                    <span className="font-medium">{filteredEnrollments.length}</span>
                   </div>
+                  <div className="pt-2 border-t">
+                    <div className="flex justify-between">
+                      <span className="text-sm">សិស្សក្នុងថ្នាក់នេះ:</span>
+                      <span className="font-medium text-blue-600">
+                        {filteredEnrollments.filter(e => e.courseId === parseInt(selectedCourse)).length}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  <p className="text-sm">
+                    ជ្រើសរើសឆ្នាំសិក្សា និងថ្នាក់រៀនដើម្បីមើលស្ថិតិសិស្ស
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -460,25 +559,49 @@ export default function ViewStudentClassPage() {
                 <div className="flex items-center space-x-2">
                   <Users className="h-5 w-5" />
                   <span>បញ្ជីសិស្ស</span>
+                  {shouldShowStudents && (
+                    <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                      បង្ហាញដោយស្វ័យប្រវត្តិ
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Badge variant="secondary">
-                    សរុប: {filteredStudentsBySearch.length}
-                  </Badge>
+                  {shouldShowStudents && (
+                    <Badge variant="secondary">
+                      សរុប: {filteredStudentsBySearch.length}
+                    </Badge>
+                  )}
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {filteredStudentsBySearch.length === 0 ? (
+              {/* Only show students when both filters are selected */}
+              {!shouldShowStudents ? (
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium mb-2">សូមជ្រើសរើសថ្នាក់រៀន និងឆ្នាំសិក្សា</p>
+                  <p className="text-sm">
+                    សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ នៅពេលអ្នកជ្រើសរើសឆ្នាំសិក្សា និងថ្នាក់រៀន
+                  </p>
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      <strong>ជំហាន:</strong>
+                    </p>
+                    <ol className="text-sm text-blue-700 dark:text-blue-300 mt-2 space-y-1 text-left max-w-xs mx-auto">
+                      <li>1. ជ្រើសរើសឆ្នាំសិក្សា</li>
+                      <li>2. ជ្រើសរើសថ្នាក់រៀន</li>
+                      <li>3. សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ</li>
+                    </ol>
+                  </div>
+                </div>
+              ) : filteredStudentsBySearch.length === 0 ? (
                 <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                   <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                   <p className="text-lg font-medium mb-2">មិនមានសិស្ស</p>
                   <p className="text-sm">
-                    {!selectedCourse 
-                      ? 'សូមជ្រើសរើសថ្នាក់រៀនដើម្បីមើលសិស្ស'
-                      : searchTerm 
-                        ? 'មិនរកឃើញសិស្សដែលត្រូវនឹងការស្វែងរក'
-                        : 'មិនមានសិស្សដែលបានចុះឈ្មោះក្នុងថ្នាក់នេះ'
+                    {searchTerm 
+                      ? 'មិនរកឃើញសិស្សដែលត្រូវនឹងការស្វែងរក'
+                      : 'មិនមានសិស្សដែលបានចុះឈ្មោះក្នុងថ្នាក់នេះ'
                     }
                   </p>
                 </div>
@@ -523,13 +646,11 @@ export default function ViewStudentClassPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              // TODO: Implement view student details
-                              toast.info('មុខងារនេះនឹងមកដល់ឆាប់ៗ')
-                            }}
+                            onClick={() => handleRemoveStudent(enrollment)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                           >
-                            <Eye className="h-4 w-4 mr-2" />
-                            មើល
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            ដកចេញ
                           </Button>
                         </div>
                       </div>
@@ -541,6 +662,68 @@ export default function ViewStudentClassPage() {
           </Card>
         </div>
       </div>
+
+      {/* Remove Student Confirmation Dialog */}
+      {showRemoveConfirm && removingStudent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  បញ្ជាក់ការដកសិស្ស
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  តើអ្នកប្រាកដជាចង់ដកសិស្សនេះចេញពីថ្នាក់រៀនមែនទេ?
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+              <div className="font-medium text-gray-900 dark:text-white">
+                {removingStudent.student.firstName} {removingStudent.student.lastName}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                ថ្នាក់ទី {removingStudent.student.class} • {removingStudent.student.schoolYear}
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowRemoveConfirm(false)
+                  setRemovingStudent(null)
+                }}
+                className="flex-1"
+                disabled={loading}
+              >
+                បោះបង់
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => removeStudentFromCourse(removingStudent)}
+                className="flex-1"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>កំពុងដក...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Trash2 className="h-4 w-4" />
+                    <span>ដកចេញ</span>
+                  </div>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

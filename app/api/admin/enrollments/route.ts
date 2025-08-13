@@ -123,3 +123,79 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// DELETE: Remove student from course
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const enrollmentId = searchParams.get('enrollmentId')
+    const studentId = searchParams.get('studentId')
+    const courseId = searchParams.get('courseId')
+
+    if (!enrollmentId && (!studentId || !courseId)) {
+      return NextResponse.json(
+        { error: 'Enrollment ID or both Student ID and Course ID are required' },
+        { status: 400 }
+      )
+    }
+
+    let deletedEnrollment
+
+    if (enrollmentId) {
+      // Delete by enrollment ID
+      deletedEnrollment = await prisma.enrollment.delete({
+        where: { enrollmentId: parseInt(enrollmentId) },
+        include: {
+          student: true,
+          course: {
+            include: {
+              schoolYear: true
+            }
+          }
+        }
+      })
+    } else {
+      // Delete by student ID and course ID
+      deletedEnrollment = await prisma.enrollment.deleteMany({
+        where: {
+          studentId: parseInt(studentId!),
+          courseId: parseInt(courseId!)
+        }
+      })
+
+      if (deletedEnrollment.count === 0) {
+        return NextResponse.json(
+          { error: 'Enrollment not found' },
+          { status: 404 }
+        )
+      }
+
+      // Fetch the deleted enrollment details for response
+      const student = await prisma.student.findUnique({
+        where: { studentId: parseInt(studentId!) }
+      })
+      const course = await prisma.course.findUnique({
+        where: { courseId: parseInt(courseId!) },
+        include: { schoolYear: true }
+      })
+
+      deletedEnrollment = {
+        studentId: parseInt(studentId!),
+        courseId: parseInt(courseId!),
+        student,
+        course
+      }
+    }
+
+    return NextResponse.json({
+      message: 'Student successfully removed from course',
+      removedEnrollment: deletedEnrollment
+    })
+  } catch (error) {
+    console.error('Error removing enrollment:', error)
+    return NextResponse.json(
+      { error: 'Failed to remove student from course' },
+      { status: 500 }
+    )
+  }
+}
