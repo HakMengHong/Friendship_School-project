@@ -133,6 +133,7 @@ model Course {
   teachers     User[]       @relation("ClassTeacher")
   grades       Grade[]
   enrollments  Enrollment[]
+  attendances  Attendance[]
 }
 
 model Subject {
@@ -201,9 +202,10 @@ enum AttendanceSession {
 
 // Attendance: Student attendance records
 model Attendance {
-  id           Int                @id @default(autoincrement())
+  attendanceId Int                @id @default(autoincrement())
   studentId    Int
-  date         DateTime
+  courseId     Int
+  attendanceDate DateTime
   session      AttendanceSession  // AM, PM, or FULL
   status       String             // "present", "absent", "late", "excused"
   reason       String?            // Reason for absence if applicable
@@ -211,6 +213,7 @@ model Attendance {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   student      Student            @relation(fields: [studentId], references: [studentId])
+  course       Course             @relation(fields: [courseId], references: [courseId])
 }
 
 // ActivityLog: Audit/history of user actions

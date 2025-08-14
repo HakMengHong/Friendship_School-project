@@ -24,10 +24,51 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { Loader2, AlertCircle } from "lucide-react"
 
 export default function DashboardPage() {
+  // Database interfaces
+  interface Student {
+    studentId: number
+    firstName: string
+    lastName: string
+    class: string
+    status: string
+  }
+
+  interface User {
+    userId: number
+    firstname: string
+    lastname: string
+    role: string
+    status: string
+  }
+
+  interface Course {
+    courseId: number
+    courseName: string
+    grade: string
+    section: string
+  }
+
+  interface Attendance {
+    attendanceId: number
+    status: string
+    attendanceDate: string
+  }
+
+  // State for real data
+  const [students, setStudents] = useState<Student[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
+  const [attendances, setAttendances] = useState<Attendance[]>([])
+  
+  // Loading and error states
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   // State for announcements
   const [announcements, setAnnouncements] = useState([
     { id: "1", title: "ការប្រជុំគ្រូ", content: "មានការប្រជុំគ្រូនៅថ្ងៃសៅរ៍នេះ នៅម៉ោង ៨:០០ ព្រឹក", date: "2024-01-15", author: "អ្នកគ្រប់គ្រង", priority: "high" },
@@ -106,6 +147,73 @@ export default function DashboardPage() {
     setAnnouncements(announcements.filter(announcement => announcement.id !== id));
   };
 
+  // Fetch data from database
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Fetch all data in parallel
+      const [studentsRes, usersRes, coursesRes, attendancesRes] = await Promise.all([
+        fetch('/api/admin/students'),
+        fetch('/api/admin/users'),
+        fetch('/api/admin/courses'),
+        fetch('/api/admin/attendance?date=' + new Date().toISOString().split('T')[0])
+      ])
+
+      // Check responses and parse data
+      if (!studentsRes.ok) throw new Error(`Failed to fetch students: ${studentsRes.status}`)
+      if (!usersRes.ok) throw new Error(`Failed to fetch users: ${usersRes.status}`)
+      if (!coursesRes.ok) throw new Error(`Failed to fetch courses: ${coursesRes.status}`)
+      if (!attendancesRes.ok) throw new Error(`Failed to fetch attendances: ${attendancesRes.status}`)
+
+      const [studentsData, usersData, coursesData, attendancesData] = await Promise.all([
+        studentsRes.json(),
+        usersRes.json(),
+        coursesRes.json(),
+        attendancesRes.json()
+      ])
+
+      setStudents(studentsData)
+      setUsers(usersData)
+      setCourses(coursesData)
+      setAttendances(attendancesData)
+
+      console.log('✅ Dashboard data loaded successfully')
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+      setError(error instanceof Error ? error.message : 'Failed to fetch dashboard data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Calculate real-time statistics
+  const dashboardStats = {
+    totalStudents: students.length,
+    totalTeachers: users.filter(user => user.role === 'TEACHER').length,
+    totalCourses: courses.length,
+    totalAnnouncements: announcements.length,
+    activeStudents: students.filter(student => student.status === 'ACTIVE').length,
+    todayAttendance: attendances.length,
+    presentToday: attendances.filter(a => a.status === 'present').length,
+    absentToday: attendances.filter(a => a.status === 'absent').length,
+    lateToday: attendances.filter(a => a.status === 'late').length,
+    excusedToday: attendances.filter(a => a.status === 'excused').length
+  }
+
+  // Generate real attendance data for pie chart
+  const realAttendanceData = [
+    { name: 'វត្តមាន', value: dashboardStats.presentToday, color: '#10b981' },
+    { name: 'អវត្តមាន', value: dashboardStats.absentToday, color: '#ef4444' },
+    { name: 'យឺត', value: dashboardStats.lateToday, color: '#f59e0b' },
+    { name: 'ច្បាប់', value: dashboardStats.excusedToday, color: '#3b82f6' },
+  ]
+
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -138,19 +246,80 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-red-500" />
+            <span className="text-red-700 font-medium">កំហុស:</span>
+            <span className="text-red-600">{error}</span>
+            <button
+              onClick={fetchDashboardData}
+              className="ml-auto px-3 py-1 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+            >
+              ព្យាយាមម្តងទៀត
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-12">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-lg text-muted-foreground">កំពុងទាញយកទិន្នន័យផ្ទាំងគ្រប់គ្រង...</p>
+        </div>
+      )}
+
+      {/* Dashboard Content - Only show when not loading */}
+      {!loading && (
+        <>
+          {/* No Data State */}
+          {students.length === 0 && users.length === 0 && (
+            <div className="text-center py-12">
+              <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">មិនមានទិន្នន័យ</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                សូមពិនិត្យការតភ្ជាប់ទៅមូលដ្ឋានទិន្នន័យ ឬព្យាយាមម្តងទៀត
+              </p>
+              <Button onClick={fetchDashboardData} variant="outline">
+                ព្យាយាមម្តងទៀត
+              </Button>
+            </div>
+          )}
+
+          {/* Dashboard Content */}
+          {students.length > 0 || users.length > 0 ? (
+            <>
+          {/* Dashboard Header with Refresh */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">ផ្ទាំងគ្រប់គ្រង</h1>
+              <p className="text-gray-600 dark:text-gray-400">ទិន្នន័យពេញលេញនៃសាលារៀន</p>
+            </div>
+            <Button 
+              onClick={fetchDashboardData}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Loader2 className="h-4 w-4" />
+              ធ្វើបច្ចុប្បន្នភាព
+            </Button>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">សិស្សទាំងអស់</CardTitle>
             <Users className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">1,234</div>
+            <div className="text-2xl font-bold text-blue-600">{dashboardStats.totalStudents}</div>
             <p className="text-xs text-muted-foreground">សិស្សកំពុងសិក្សា</p>
             <div className="flex items-center mt-2">
               <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">+20.1% ពីខែមុន</span>
+              <span className="text-xs text-green-500">{dashboardStats.activeStudents} សកម្ម</span>
             </div>
           </CardContent>
         </Card>
@@ -161,11 +330,11 @@ export default function DashboardPage() {
             <BookOpen className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">24</div>
+            <div className="text-2xl font-bold text-green-600">{dashboardStats.totalTeachers}</div>
             <p className="text-xs text-muted-foreground">គ្រូបង្រៀនសកម្ម</p>
             <div className="flex items-center mt-2">
               <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">+2 នាក់ថ្មី</span>
+              <span className="text-xs text-green-500">{dashboardStats.totalCourses} ថ្នាក់</span>
             </div>
           </CardContent>
         </Card>
@@ -176,11 +345,11 @@ export default function DashboardPage() {
             <Award className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">15</div>
-            <p className="text-xs text-muted-foreground">សិស្សពូកែក្នុងខែនេះ</p>
+            <div className="text-2xl font-bold text-purple-600">{dashboardStats.activeStudents}</div>
+            <p className="text-xs text-muted-foreground">សិស្សសកម្ម</p>
             <div className="flex items-center mt-2">
               <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">+3 នាក់ថ្មី</span>
+              <span className="text-xs text-green-500">{dashboardStats.totalStudents} សរុប</span>
             </div>
           </CardContent>
         </Card>
@@ -191,11 +360,11 @@ export default function DashboardPage() {
             <MessageSquare className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{announcements.length}</div>
+            <div className="text-2xl font-bold text-orange-600">{dashboardStats.totalAnnouncements}</div>
             <p className="text-xs text-muted-foreground">ដំណឹងសកម្ម</p>
             <div className="flex items-center mt-2">
               <Clock className="h-3 w-3 text-blue-500 mr-1" />
-              <span className="text-xs text-blue-500">ថ្មីៗ</span>
+              <span className="text-xs text-blue-500">ថ្ងៃនេះ: {dashboardStats.todayAttendance}</span>
             </div>
           </CardContent>
         </Card>
@@ -270,7 +439,7 @@ export default function DashboardPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={attendanceData}
+                      data={realAttendanceData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -279,7 +448,7 @@ export default function DashboardPage() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {attendanceData.map((entry, index) => (
+                      {realAttendanceData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -539,32 +708,45 @@ export default function DashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {outstandingStudents.map((student) => (
-              <div key={student.id} className="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {student.name.charAt(0)}
+          {students.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {students.slice(0, 4).map((student) => (
+                <div key={student.studentId} className="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {student.firstName.charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {student.firstName} {student.lastName}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{student.class}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900 dark:text-white">{student.name}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{student.grade}</p>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">សិស្សសកម្ម</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">ថ្នាក់ {student.class}</span>
+                      <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+                        {student.status === 'ACTIVE' ? 'សកម្ម' : 'អសកម្ម'}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{student.achievement}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{student.subject}</span>
-                    <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
-                      {student.score}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+              <p>មិនមានសិស្ស</p>
+            </div>
+          )}
         </CardContent>
       </Card>
+            </>
+          ) : null}
+        </>
+      )}
     </div>
   )
 }

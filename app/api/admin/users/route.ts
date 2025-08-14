@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
 
 // GET - Fetch all users
 export async function GET(request: NextRequest) {
@@ -13,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     // Transform the data to match the frontend interface
     const transformedUsers = users.map(user => ({
-      userid: user.userId,
+      userId: user.userId,
       username: user.username,
       password: '', // Don't send password
       firstname: user.firstname,
@@ -30,7 +28,7 @@ export async function GET(request: NextRequest) {
       status: user.status
     }))
 
-    return NextResponse.json({ users: transformedUsers })
+    return NextResponse.json(transformedUsers)
   } catch (error) {
     console.error('Error fetching users:', error)
     return NextResponse.json(
