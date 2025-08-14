@@ -96,7 +96,7 @@ interface Grade {
   semesterId: number
   grade: number
   gradeComment: string | null
-  gradeDate: Date
+  gradeDate: string  // Now stores "MM/YY" format like "12/25"
   userId: number | null
   user?: {
     userId: number
@@ -118,6 +118,9 @@ interface GradeInput {
   grade: number
   gradeComment?: string
   userId?: number
+  month?: string
+  gradeYear?: string
+  gradeDate: string
 }
 
 export default function AddScorePage() {
@@ -125,7 +128,9 @@ export default function AddScorePage() {
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("")
   const [selectedSemester, setSelectedSemester] = useState<string>("")
   const [selectedCourse, setSelectedCourse] = useState<string>("")
-  const [selectedTeacher, setSelectedTeacher] = useState<string>("")
+
+  const [selectedMonth, setSelectedMonth] = useState<string>("")
+  const [selectedGradeYear, setSelectedGradeYear] = useState<string>("")
   const [searchTerm, setSearchTerm] = useState("")
 
   // Score input states
@@ -140,9 +145,32 @@ export default function AddScorePage() {
   const [semesters, setSemesters] = useState<Semester[]>([])
   const [courses, setCourses] = useState<Course[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
-  const [teachers, setTeachers] = useState<User[]>([])
+
   const [students, setStudents] = useState<Student[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
+  
+  // Month and Grade Year options
+  const months = [
+    { value: "01", label: "មករា" },
+    { value: "02", label: "កុម្ភៈ" },
+    { value: "03", label: "មីនា" },
+    { value: "04", label: "មេសា" },
+    { value: "05", label: "ឧសភា" },
+    { value: "06", label: "មិថុនា" },
+    { value: "07", label: "កក្កដា" },
+    { value: "08", label: "សីហា" },
+    { value: "09", label: "កញ្ញា" },
+    { value: "10", label: "តុលា" },
+    { value: "11", label: "វិច្ឆិកា" },
+    { value: "12", label: "ធ្នូ" }
+  ]
+  
+  const gradeYears = [
+    { value: "2023", label: "2023" },
+    { value: "2024", label: "2024" },
+    { value: "2025", label: "2025" },
+    { value: "2026", label: "2026" }
+  ]
 
   // Loading states
   const [loading, setLoading] = useState(true)
@@ -152,15 +180,28 @@ export default function AddScorePage() {
 
   // Error states
   const [error, setError] = useState<string | null>(null)
+  
+  // Helper function to get current date
+  const getCurrentDate = () => {
+    const currentDate = new Date()
+    return {
+      month: String(currentDate.getMonth() + 1).padStart(2, '0'),
+      year: String(currentDate.getFullYear())
+    }
+  }
 
   // Fetch initial data
   useEffect(() => {
     fetchInitialData()
-         // Auto-select current logged-in user
-     const currentUser = getCurrentUser()
-     if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin')) {
-       setSelectedTeacher(currentUser.id.toString())
-     }
+    
+
+    
+    // Auto-select current month and year
+    const { month, year } = getCurrentDate()
+    setSelectedMonth(month)
+    setSelectedGradeYear(year)
+    
+    console.log('🔍 Auto-selected current date:', { month, year })
   }, [])
 
   // Fetch students when filters change
@@ -237,23 +278,21 @@ export default function AddScorePage() {
       setLoading(true)
       setError(null)
 
-      const [schoolYearsRes, semestersRes, subjectsRes, teachersRes, coursesRes] = await Promise.all([
+      const [schoolYearsRes, semestersRes, subjectsRes, coursesRes] = await Promise.all([
         fetch('/api/admin/school-years'),
         fetch('/api/admin/semesters'),
         fetch('/api/admin/subjects'),
-        fetch('/api/admin/users'),
         fetch('/api/admin/courses')
       ])
 
-      if (!schoolYearsRes.ok || !semestersRes.ok || !subjectsRes.ok || !teachersRes.ok || !coursesRes.ok) {
+      if (!schoolYearsRes.ok || !semestersRes.ok || !subjectsRes.ok || !coursesRes.ok) {
         throw new Error('Failed to fetch initial data')
       }
 
-      const [schoolYearsData, semestersData, subjectsData, teachersData, coursesData] = await Promise.all([
+      const [schoolYearsData, semestersData, subjectsData, coursesData] = await Promise.all([
         schoolYearsRes.json(),
         semestersRes.json(),
         subjectsRes.json(),
-        teachersRes.json(),
         coursesRes.json()
       ])
 
@@ -261,12 +300,6 @@ export default function AddScorePage() {
       setSemesters(semestersData)
       setSubjects(subjectsData)
       setCourses(coursesData)
-      
-      // Include both teachers and admins in the teacher selection
-      const teachersAndAdmins = teachersData.users.filter((user: User) => 
-        user.role === 'teacher' || user.role === 'admin'
-      )
-      setTeachers(teachersAndAdmins)
       
       // Debug courses data
       console.log('📚 Courses data:', {
@@ -279,16 +312,6 @@ export default function AddScorePage() {
           schoolYear: c.schoolYear?.schoolYearCode 
         }))
       })
-      
-      console.log('📊 Teachers and Admins data:', {
-        totalUsers: teachersData.users.length,
-        teachersAndAdmins: teachersAndAdmins.length,
-        userList: teachersAndAdmins.map((t: User) => ({ id: t.userid, name: `${t.firstname} ${t.lastname}`, role: t.role }))
-      })
-      
-      if (teachersAndAdmins.length === 0) {
-        console.warn('No teachers or admins found in the system')
-      }
 
     } catch (error) {
       console.error('Error fetching initial data:', error)
@@ -326,10 +349,19 @@ export default function AddScorePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!selectedStudent || !selectedSubject || !score) {
+    if (!selectedStudent || !selectedSubject || !score || !selectedCourse || !selectedSemester || !selectedMonth || !selectedGradeYear) {
+      console.log('🔍 Validation failed:', {
+        selectedStudent: !!selectedStudent,
+        selectedSubject: !!selectedSubject,
+        score: !!score,
+        selectedCourse: !!selectedCourse,
+        selectedSemester: !!selectedSemester,
+        selectedMonth: !!selectedMonth,
+        selectedGradeYear: !!selectedGradeYear
+      })
       toast({
         title: "កំហុស",
-        description: "សូមបំពេញគ្រប់ផ្នែកដែលត្រូវការ",
+        description: "សូមបំពេញគ្រប់ផ្នែកដែលត្រូវការ (រួមទាំងខែ និងឆ្នាំពិន្ទុ)",
         variant: "destructive"
       })
       return
@@ -339,6 +371,11 @@ export default function AddScorePage() {
       setSubmitting(true)
       setError(null)
 
+      // Format gradeDate as "MM/YY" (e.g., "12/25" for December 2025)
+      const formattedGradeDate = selectedMonth && selectedGradeYear 
+        ? `${selectedMonth}/${selectedGradeYear.slice(-2)}`  // Take last 2 digits of year
+        : `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
+
       const gradeData: GradeInput = {
         studentId: selectedStudent.studentId,
         subjectId: parseInt(selectedSubject),
@@ -346,8 +383,25 @@ export default function AddScorePage() {
         semesterId: parseInt(selectedSemester),
         grade: parseFloat(score),
         gradeComment: comment || undefined,
-        userId: selectedTeacher ? parseInt(selectedTeacher) : undefined
+        userId: getCurrentUser()?.id,
+        month: selectedMonth || undefined,
+        gradeYear: selectedGradeYear || undefined,
+        gradeDate: formattedGradeDate
       }
+
+      console.log('🔍 Submitting grade data:', gradeData)
+      console.log('🔍 Selected values:', {
+        selectedStudent: selectedStudent?.studentId,
+        selectedSubject,
+        selectedCourse,
+        selectedSemester,
+        selectedMonth,
+        selectedGradeYear,
+        score,
+        currentTeacher: `${getCurrentUser()?.firstname} ${getCurrentUser()?.lastname}`,
+        currentUserId: getCurrentUser()?.id
+      })
+      console.log('🔍 Formatted gradeDate:', formattedGradeDate)
 
       if (editingGrade) {
         // Update existing grade
@@ -379,7 +433,13 @@ export default function AddScorePage() {
         })
 
         if (!response.ok) {
-          throw new Error('Failed to create grade')
+          const errorData = await response.text()
+          console.error('Grade creation failed:', {
+            status: response.status,
+            statusText: response.statusText,
+            errorData
+          })
+          throw new Error(`Failed to create grade: ${response.status} ${response.statusText}`)
         }
 
         toast({
@@ -392,6 +452,12 @@ export default function AddScorePage() {
       setScore("")
       setComment("")
       setSelectedSubject("")
+      
+      // Reset to current date instead of empty
+      const { month, year } = getCurrentDate()
+      setSelectedMonth(month)
+      setSelectedGradeYear(year)
+      
       fetchGrades()
 
     } catch (error) {
@@ -412,6 +478,13 @@ export default function AddScorePage() {
     setSelectedSubject(gradeToEdit.subjectId.toString())
     setScore(gradeToEdit.grade.toString())
     setComment(gradeToEdit.gradeComment || "")
+    
+    // Parse gradeDate (format: "MM/YY") to populate month and year fields
+    if (gradeToEdit.gradeDate && gradeToEdit.gradeDate.includes('/')) {
+      const [month, year] = gradeToEdit.gradeDate.split('/')
+      setSelectedMonth(month)
+      setSelectedGradeYear(`20${year}`) // Convert "25" to "2025"
+    }
   }
 
   const handleCancelEdit = () => {
@@ -419,6 +492,11 @@ export default function AddScorePage() {
     setScore("")
     setComment("")
     setSelectedSubject("")
+    
+    // Reset to current date instead of empty
+    const { month, year } = getCurrentDate()
+    setSelectedMonth(month)
+    setSelectedGradeYear(year)
   }
 
   const handleDelete = async (gradeId: number) => {
@@ -468,6 +546,16 @@ export default function AddScorePage() {
   const handleSemesterChange = (value: string) => {
     setSelectedSemester(value)
     setGrades([])
+  }
+
+  const handleMonthChange = (value: string) => {
+    setSelectedMonth(value)
+    // You can add additional logic here if needed
+  }
+
+  const handleGradeYearChange = (value: string) => {
+    setSelectedGradeYear(value)
+    // You can add additional logic here if needed
   }
 
   // Filter courses based on selected school year, or show all if none selected
@@ -540,8 +628,8 @@ export default function AddScorePage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Filter Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Filter Row 1 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
               <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
@@ -581,75 +669,60 @@ export default function AddScorePage() {
                   <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
                 </SelectTrigger>
                 <SelectContent>
-                                     {filteredCourses.map((course) => (
-                     <SelectItem key={course.courseId} value={course.courseId.toString()}>
-                       {course.courseName}
-                     </SelectItem>
-                   ))}
+                  {filteredCourses.map((course) => (
+                    <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                      {course.courseName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Filter Row 2 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ខែ</label>
+              <Select value={selectedMonth} onValueChange={handleMonthChange}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="ជ្រើសរើសខែ" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((month) => (
+                    <SelectItem key={month.value} value={month.value}>
+                      {month.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
-                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                 ឈ្មោះគ្រូ/អ្នកគ្រប់គ្រង
-                 {(getCurrentUser()?.role === 'teacher' || getCurrentUser()?.role === 'admin') && (
-                   <span className="ml-2 text-xs text-blue-600 dark:text-blue-400 font-medium">
-                     (អ្នកប្រើប្រាស់បច្ចុប្បន្ន)
-                   </span>
-                 )}
-               </label>
-                             <Select 
-                 value={selectedTeacher} 
-                 onValueChange={setSelectedTeacher}
-                 disabled={getCurrentUser()?.role === 'teacher' || getCurrentUser()?.role === 'admin'}
-               >
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំពិន្ទុ</label>
+              <Select value={selectedGradeYear} onValueChange={handleGradeYearChange}>
                 <SelectTrigger className="h-12">
-                  <SelectValue placeholder="ជ្រើសរើសគ្រូ/អ្នកគ្រប់គ្រង" />
+                  <SelectValue placeholder="ជ្រើសរើសឆ្នាំពិន្ទុ" />
                 </SelectTrigger>
                 <SelectContent>
-                                     {teachers.length > 0 ? (
-                     teachers.map((user) => (
-                       <SelectItem key={user.userid} value={user.userid.toString()}>
-                         <div className="flex items-center justify-between w-full">
-                           <span>{user.firstname} {user.lastname}</span>
-                           <div className="flex items-center space-x-2">
-                             <span className={`text-xs px-2 py-1 rounded-full ${
-                               user.role === 'teacher' 
-                                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                 : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                             }`}>
-                               {user.role === 'teacher' ? 'គ្រូ' : 'អ្នកគ្រប់គ្រង'}
-                             </span>
-                             {getCurrentUser()?.id === user.userid && (
-                               <span className="text-xs text-blue-600 dark:text-blue-400">
-                                 (អ្នកប្រើប្រាស់បច្ចុប្បន្ន)
-                               </span>
-                             )}
-                           </div>
-                         </div>
-                       </SelectItem>
-                     ))
-                   ) : (
-                     <SelectItem value="no-teachers" disabled>
-                       កំពុងទាញយកគ្រូ/អ្នកគ្រប់គ្រង...
-                     </SelectItem>
-                   )}
+                  {gradeYears.map((year) => (
+                    <SelectItem key={year.value} value={year.value}>
+                      {year.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឈ្មេាះគ្រូ</label>
+              <div className="h-12 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md flex items-center">
+                <span className="text-gray-900 dark:text-white font-medium">
+                  {getCurrentUser()?.firstname} {getCurrentUser()?.lastname}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Search */}
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ស្វែងរកសិស្ស</label>
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="ស្វែងរកឈ្មោះសិស្ស..."
-              className="h-12"
-            />
-          </div>
         </CardContent>
       </Card>
 
@@ -718,278 +791,281 @@ export default function AddScorePage() {
           </CardContent>
         </Card>
 
-        {/* Score Input Form */}
-        <Card className="xl:col-span-3">
-          <CardHeader className="pb-4">
-            <div className="flex items-center space-x-1">
-              <PlusIcon className="h-5 w-5 text-orange-600" />
-              <CardTitle className="text-lg">
-                {editingGrade ? 'កែសម្រួលពិន្ទុ' : 'កន្លែងបញ្ចូលពិន្ទុ'}
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {selectedStudent ? (
-              <form onSubmit={handleSubmit} className="space-y-2">
-                {/* Student Info Display */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                      {selectedStudent.photo ? (
-                        <img
-                          src={selectedStudent.photo}
-                          alt={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
-                      ) : (
-                        selectedStudent.firstName.charAt(0)
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
-                      <p className="text-gray-600 dark:text-gray-400">ថ្នាក់ទី {selectedStudent.class}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Score Input Fields */}
-                <div className="space-y-2">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">មុខវិជ្ជា</label>
-                      <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                        <SelectTrigger className="h-14 text-base">
-                          <SelectValue placeholder="សូមជ្រើសរើស" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {subjects.map((subject) => (
-                            <SelectItem key={subject.subjectId} value={subject.subjectId.toString()}>
-                              {subject.subjectName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center grid-cols-1 gap-4">
-                    <label className="text-lg font-medium text-gray-700 dark:text-gray-300">លេខពិន្ទុ:</label>
-                    <Input
-                      type="number"
-                      value={score}
-                      onChange={(e) => setScore(e.target.value)}
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      placeholder="សូមបញ្ចូល"
-                      className="h-16 text-xl flex text-center"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">មតិផ្សេងៗ</label>
-                    <Input
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="សូមបញ្ចូលមតិ"
-                      className="h-14 text-base"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-2 pt-1">
-                  {editingGrade ? (
-                    <>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={handleCancelEdit}
-                        className="px-6 py-3 text-base"
-                        disabled={submitting}
-                      >
-                        បោះបង់
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        className="px-5 py-3 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                        disabled={submitting}
-                      >
-                        {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        ធ្វើបច្ចុប្បន្នភាព
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => {
-                          setSelectedSubject("")
-                          setScore("")
-                          setComment("")
-                          setEditingGrade(null)
-                        }}
-                        className="px-8 py-3 text-base"
-                        disabled={submitting}
-                      >
-                        សម្អាត
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        className="px-5 py-3 text-base"
-                        disabled={submitting}
-                      >
-                        {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        បន្ថែមពិន្ទុ
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </form>
-            ) : (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                <PlusIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg font-medium mb-2">ជ្រើសរើសសិស្ស</p>
-                <p className="text-sm">សូមជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Score List */}
-        <Card className="xl:col-span-6">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
+        {/* Right Side Content - Score Input Form above Score List */}
+        <div className="xl:col-span-9 space-y-4">
+          {/* Score Input Form */}
+          <Card>
+            <CardHeader className="pb-4">
               <div className="flex items-center space-x-1">
-                <CardTitle className="text-lg">បញ្ជីពិន្ទុសិស្ស {selectedStudent?.firstName} {selectedStudent?.lastName || ''}</CardTitle>
+                <PlusIcon className="h-5 w-5 text-orange-600" />
+                <CardTitle className="text-lg">
+                  {editingGrade ? 'កែសម្រួលពិន្ទុ' : 'កន្លែងបញ្ចូលពិន្ទុ'}
+                </CardTitle>
               </div>
-              {selectedStudent && (
-                <div className="text-sm text-gray-500">
-                  សរុប: {grades.length} ពិន្ទុ
+            </CardHeader>
+            <CardContent>
+              {selectedStudent ? (
+                <form onSubmit={handleSubmit} className="space-y-2">
+                  {/* Student Info Display */}
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                        {selectedStudent.photo ? (
+                          <img
+                            src={selectedStudent.photo}
+                            alt={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
+                            className="w-16 h-16 rounded-full object-cover"
+                          />
+                        ) : (
+                          selectedStudent.firstName.charAt(0)
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-lg text-gray-900 dark:text-white">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
+                        <p className="text-gray-600 dark:text-gray-400">ថ្នាក់ទី {selectedStudent.class}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Score Input Fields */}
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">មុខវិជ្ជា</label>
+                        <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                          <SelectTrigger className="h-14 text-base">
+                            <SelectValue placeholder="សូមជ្រើសរើស" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {subjects.map((subject) => (
+                              <SelectItem key={subject.subjectId} value={subject.subjectId.toString()}>
+                                {subject.subjectName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center grid-cols-1 gap-4">
+                      <label className="text-lg font-medium text-gray-700 dark:text-gray-300">លេខពិន្ទុ:</label>
+                      <Input
+                        type="number"
+                        value={score}
+                        onChange={(e) => setScore(e.target.value)}
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        placeholder="សូមបញ្ចូល"
+                        className="h-16 text-xl flex text-center"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">មតិផ្សេងៗ</label>
+                      <Input
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="សូមបញ្ចូលមតិ"
+                        className="h-14 text-base"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-2 pt-1">
+                    {editingGrade ? (
+                      <>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={handleCancelEdit}
+                          className="px-6 py-3 text-base"
+                          disabled={submitting}
+                        >
+                          បោះបង់
+                        </Button>
+                        <Button 
+                          type="submit" 
+                          className="px-5 py-3 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                          disabled={submitting}
+                        >
+                          {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          ធ្វើបច្ចុប្បន្នភាព
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => {
+                            setSelectedSubject("")
+                            setScore("")
+                            setComment("")
+                            setEditingGrade(null)
+                          }}
+                          className="px-8 py-3 text-base"
+                          disabled={submitting}
+                        >
+                          សម្អាត
+                        </Button>
+                        <Button 
+                          type="submit" 
+                          className="px-5 py-3 text-base"
+                          disabled={submitting}
+                        >
+                          {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          បន្ថែមពិន្ទុ
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </form>
+              ) : (
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <PlusIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium mb-2">ជ្រើសរើសសិស្ស</p>
+                  <p className="text-sm">សូមជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ</p>
                 </div>
               )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {selectedStudent ? (
-              <>
-                {loadingGrades ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                    <p className="text-sm text-muted-foreground">កំពុងទាញយកពិន្ទុ...</p>
-                  </div>
-                ) : grades.length > 0 ? (
-                  <>
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="font-semibold">មុខវិជ្ជា</TableHead>
-                            <TableHead className="font-semibold">ចំនួនពិន្ទុ</TableHead>
-                            <TableHead className="font-semibold">កាលបរិច្ឆេទ</TableHead>
-                            <TableHead className="font-semibold">គ្រូ/អ្នកគ្រប់គ្រង</TableHead>
-                            <TableHead className="font-semibold">មតិ</TableHead>
-                            <TableHead className="font-semibold">សកម្មភាព</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {grades.map((grade) => (
-                            <TableRow key={grade.gradeId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <TableCell className="font-medium">{grade.subject.subjectName}</TableCell>
-                              <TableCell>
-                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                  grade.grade >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                                  grade.grade >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
-                                  grade.grade >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                                  'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                                }`}>
-                                  {grade.grade}
-                                </span>
-                              </TableCell>
-                              <TableCell>{new Date(grade.gradeDate).toLocaleDateString('km-KH')}</TableCell>
-                              <TableCell>
-                                {grade.user ? (
-                                  <div className="flex items-center space-x-2">
-                                    <span className="text-sm font-medium">
-                                      {grade.user.firstname} {grade.user.lastname}
-                                    </span>
-                                    <span className={`text-xs px-2 py-1 rounded-full ${
-                                      grade.user.role === 'teacher' 
-                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                        : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                                    }`}>
-                                      {grade.user.role === 'teacher' ? 'គ្រូ' : 'អ្នកគ្រប់គ្រង'}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm text-gray-500">មិនមាន</span>
-                                )}
-                              </TableCell>
-                              <TableCell className="max-w-xs truncate">{grade.gradeComment || '-'}</TableCell>
-                              <TableCell>
-                                <div className="flex space-x-1">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="text-blue-600 border-blue-300"
-                                    onClick={() => handleEdit(grade)}
-                                  >
-                                    <Edit3 className="h-3 w-3 mr-1" />
-                                    កែ
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="text-red-600 border-red-300"
-                                    onClick={() => handleDelete(grade.gradeId)}
-                                  >
-                                    <Trash2 className="h-3 w-3 mr-1" />
-                                    លុប
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+            </CardContent>
+          </Card>
 
-                    {/* Enhanced Stats Summary */}
-                    <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t">
-                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">ចំនួនពិន្ទុ</p>
-                        <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalGrades}</p>
-                      </div>
-                      <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">សរុបពិន្ទុ</p>
-                        <p className="text-2xl font-bold text-green-700 dark:text-green-300">{totalPoints}</p>
-                      </div>
-                      <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                        <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">មធ្យមភាគ</p>
-                        <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{averageScore}</p>
-                      </div>
-                      <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                        <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">ថ្នាក់</p>
-                        <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">{selectedStudent.class}</p>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <CheckCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                    <p className="text-lg font-medium mb-2">មិនមានពិន្ទុ</p>
-                    <p className="text-sm">សិស្សនេះមិនទាន់មានពិន្ទុនៅឡើយទេ</p>
+          {/* Score List */}
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1">
+                  <CardTitle className="text-lg">បញ្ជីពិន្ទុសិស្ស {selectedStudent?.firstName} {selectedStudent?.lastName || ''}</CardTitle>
+                </div>
+                {selectedStudent && (
+                  <div className="text-sm text-gray-500">
+                    សរុប: {grades.length} ពិន្ទុ
                   </div>
                 )}
-              </>
-            ) : (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                <p className="text-lg font-medium mb-2">គ្មានពិន្ទុ</p>
-                <p className="text-sm">សូមជ្រើសរើសសិស្សដើម្បីមើលពិន្ទុ</p>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              {selectedStudent ? (
+                <>
+                  {loadingGrades ? (
+                    <div className="text-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                      <p className="text-sm text-muted-foreground">កំពុងទាញយកពិន្ទុ...</p>
+                    </div>
+                  ) : grades.length > 0 ? (
+                    <>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="font-semibold">មុខវិជ្ជា</TableHead>
+                              <TableHead className="font-semibold">ចំនួនពិន្ទុ</TableHead>
+                              <TableHead className="font-semibold">ខែ/ឆ្នាំ</TableHead>
+                              <TableHead className="font-semibold">គ្រូ/អ្នកគ្រប់គ្រង</TableHead>
+                              <TableHead className="font-semibold">មតិ</TableHead>
+                              <TableHead className="font-semibold">សកម្មភាព</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {grades.map((grade) => (
+                              <TableRow key={grade.gradeId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <TableCell className="font-medium">{grade.subject.subjectName}</TableCell>
+                                <TableCell>
+                                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                    grade.grade >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                                    grade.grade >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
+                                    grade.grade >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                                    'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                                  }`}>
+                                    {grade.grade}
+                                  </span>
+                                </TableCell>
+                                <TableCell>{grade.gradeDate}</TableCell>
+                                <TableCell>
+                                  {grade.user ? (
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-sm font-medium">
+                                        {grade.user.firstname} {grade.user.lastname}
+                                      </span>
+                                      <span className={`text-xs px-2 py-1 rounded-full ${
+                                        grade.user.role === 'teacher' 
+                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                          : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                      }`}>
+                                        {grade.user.role === 'teacher' ? 'គ្រូ' : 'អ្នកគ្រប់គ្រង'}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-gray-500">មិនមាន</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="max-w-xs truncate">{grade.gradeComment || '-'}</TableCell>
+                                <TableCell>
+                                  <div className="flex space-x-1">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="text-blue-600 border-blue-300"
+                                      onClick={() => handleEdit(grade)}
+                                    >
+                                      <Edit3 className="h-3 w-3 mr-1" />
+                                      កែ
+                                    </Button>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="text-red-600 border-red-300"
+                                      onClick={() => handleDelete(grade.gradeId)}
+                                    >
+                                      <Trash2 className="h-3 w-3 mr-1" />
+                                      លុប
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      {/* Enhanced Stats Summary */}
+                      <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t">
+                        <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">ចំនួនពិន្ទុ</p>
+                          <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalGrades}</p>
+                        </div>
+                        <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <p className="text-sm text-green-600 dark:text-green-400 font-medium">សរុបពិន្ទុ</p>
+                          <p className="text-2xl font-bold text-green-700 dark:text-green-300">{totalPoints}</p>
+                        </div>
+                        <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                          <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">មធ្យមភាគ</p>
+                          <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{averageScore}</p>
+                        </div>
+                        <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                          <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">ថ្នាក់</p>
+                          <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">{selectedStudent.class}</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                      <CheckCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg font-medium mb-2">មិនមានពិន្ទុ</p>
+                      <p className="text-sm">សិស្សនេះមិនទាន់មានពិន្ទុនៅឡើយទេ</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <p className="text-lg font-medium mb-2">គ្មានពិន្ទុ</p>
+                  <p className="text-sm">សូមជ្រើសរើសសិស្សដើម្បីមើលពិន្ទុ</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
