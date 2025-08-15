@@ -129,9 +129,9 @@ model Course {
   courseName   String
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  attendances  Attendance[]
   schoolYear   SchoolYear   @relation(fields: [schoolYearId], references: [schoolYearId])
   enrollments  Enrollment[]
-  attendances  Attendance[]
   grades       Grade[]
   teachers     User[]       @relation("ClassTeacher")
 }
@@ -193,25 +193,25 @@ model Semester {
 }
 
 model Attendance {
-  attendanceId Int                @id @default(autoincrement())
-  studentId    Int
-  courseId     Int
+  studentId      Int
+  session        AttendanceSession
+  status         String
+  reason         String?
+  recordedBy     String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
   attendanceDate DateTime
-  session      AttendanceSession  // AM, PM, or FULL
-  status       String             // "present", "absent", "late", "excused"
-  reason       String?            // Reason for absence if applicable
-  recordedBy   String?            // Username or user ID who recorded
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  student      Student            @relation(fields: [studentId], references: [studentId])
-  course       Course             @relation(fields: [courseId], references: [courseId])
+  attendanceId   Int               @id @default(autoincrement())
+  courseId       Int
+  course         Course            @relation(fields: [courseId], references: [courseId])
+  student        Student           @relation(fields: [studentId], references: [studentId])
 }
 
 model ActivityLog {
   id        Int      @id @default(autoincrement())
   userId    Int
-  action    String   // e.g., "login", "create_student", "update_grade"
-  details   String?  // JSON or text details
+  action    String
+  details   String?
   timestamp DateTime @default(now())
   user      User     @relation("ActivityLogUser", fields: [userId], references: [userId])
 }
@@ -220,7 +220,7 @@ model Announcement {
   id        Int      @id @default(autoincrement())
   title     String
   content   String
-  author    String   // Username or user ID
+  author    String
   published Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

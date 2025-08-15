@@ -627,9 +627,9 @@ export default function AddScorePage() {
             <CardTitle className="text-lg">សូមជ្រើសរើស</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Filter Rows Combined */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <CardContent className="space-y-6">
+          {/* Filter Row 1 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
               <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
@@ -677,7 +677,10 @@ export default function AddScorePage() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          {/* Filter Row 2 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ខែ</label>
               <Select value={selectedMonth} onValueChange={handleMonthChange}>
@@ -714,7 +717,7 @@ export default function AddScorePage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឈ្មេាះគ្រូ</label>
               <div className="h-12 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md flex items-center">
                 <span className="text-gray-900 dark:text-white font-medium">
-                  {getCurrentUser()?.lastname}{getCurrentUser()?.firstname}
+                  {getCurrentUser()?.firstname} {getCurrentUser()?.lastname}
                 </span>
               </div>
             </div>
