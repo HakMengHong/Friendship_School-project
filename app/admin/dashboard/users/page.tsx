@@ -23,7 +23,7 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, User as UserIcon, Users, Shield, UserCheck, Search, Eye, EyeOff, Upload, X, ToggleLeft, Info } from "lucide-react";
+import { Plus, Edit, Trash2, User as UserIcon, Users, Shield, UserCheck, Search, Eye, EyeOff, Upload, X, ToggleLeft, Info, Sparkles, BarChart3, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { UsersForm, UserFormData } from "./usersform";
@@ -97,8 +97,12 @@ export default function AdminUsersPage() {
     try {
       const res = await fetch("/api/admin/users");
       const data = await res.json();
+      console.log('🔍 Users API response:', data);
+      console.log('🔍 Users data.users:', data.users);
+      console.log('🔍 Users array length:', data.users?.length || 0);
       setUsers(data.users || []);
     } catch (e) {
+      console.error('❌ Error fetching users:', e);
       toast({ title: "បរាជ័យ", description: "មិនអាចទាញយកទិន្នន័យបានទេ", variant: "destructive" });
     } finally {
       setLoading(false);
@@ -257,88 +261,186 @@ export default function AdminUsersPage() {
   const activeUsers = users.filter(u => u.status === "active").length;
   const adminUsers = users.filter(u => u.role === "admin").length;
   const teacherUsers = users.filter(u => u.role === "teacher").length;
+  
+  // Debug logging
+  console.log('🔍 Users state:', users);
+  console.log('🔍 Total users:', totalUsers);
+  console.log('🔍 Active users:', activeUsers);
+  console.log('🔍 Admin users:', adminUsers);
+  console.log('🔍 Teacher users:', teacherUsers);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">អ្នកប្រើទាំងអស់</CardTitle>
-            <Users className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">អ្នកប្រើប្រាស់សរុប</p>
-          </CardContent>
-        </Card>
+    <div className="max-w-7xl mx-auto space-y-8 p-6">
+      {/* Modern Header Section */}
+      <div className="relative">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
+        
+        {/* Main Header Content */}
+        <div className="text-center space-y-6 p-8">
+          {/* Title Section */}
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+              ការគ្រប់គ្រងអ្នកប្រើប្រាស់
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              ប្រព័ន្ធគ្រប់គ្រងអ្នកប្រើប្រាស់ដែលមានប្រសិទ្ធភាព និងទំនើបសម្រាប់សាលាមិត្តភាព
+            </p>
+          </div>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">អ្នកប្រើសកម្ម</CardTitle>
-            <UserCheck className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{activeUsers}</div>
-            <p className="text-xs text-muted-foreground">អ្នកប្រើប្រាស់សកម្ម</p>
-          </CardContent>
-        </Card>
+          {/* Enhanced Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {/* Total Users Card */}
+            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{totalUsers}</p>
+                    <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">អ្នកប្រើទាំងអស់</p>
+                  </div>
+                </div>
+                <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </div>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">អ្នកគ្រប់គ្រង</CardTitle>
-            <Shield className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{adminUsers}</div>
-            <p className="text-xs text-muted-foreground">អ្នកគ្រប់គ្រងប្រព័ន្ធ</p>
-          </CardContent>
-        </Card>
+            {/* Active Users Card */}
+            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                    <UserCheck className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">{activeUsers}</p>
+                    <p className="text-xs text-green-500 dark:text-green-300 font-medium">អ្នកប្រើសកម្ម</p>
+                  </div>
+                </div>
+                <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </div>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">គ្រូបង្រៀន</CardTitle>
-            <UserIcon className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{teacherUsers}</div>
-            <p className="text-xs text-muted-foreground">គ្រូបង្រៀនសកម្ម</p>
-          </CardContent>
-        </Card>
+            {/* Admin Users Card */}
+            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{adminUsers}</p>
+                    <p className="text-xs text-purple-500 dark:text-purple-300 font-medium">អ្នកគ្រប់គ្រង</p>
+                  </div>
+                </div>
+                <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </div>
+
+            {/* Teacher Users Card */}
+            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                    <UserIcon className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{teacherUsers}</p>
+                    <p className="text-xs text-orange-500 dark:text-orange-300 font-medium">គ្រូបង្រៀន</p>
+                  </div>
+                </div>
+                <div className="h-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex flex-wrap justify-center gap-4 mt-8">
+            <Button 
+              onClick={() => openDialog()}
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              បន្ថែមអ្នកប្រើ
+            </Button>
+            <Button 
+              variant="outline"
+              className="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300 hover:scale-105"
+            >
+              <BarChart3 className="h-5 w-5 mr-2" />
+              របាយការណ៍
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* Users Table Card */}
-      <Card className="hover:shadow-lg transition-all duration-200">
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <CardTitle className="flex items-center space-x-2">
-            <Users className="h-5 w-5 text-blue-600" />
-            <span className="text-lg">បញ្ជីអ្នកប្រើប្រាស់</span>
-          </CardTitle>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+      {/* Users Table Section */}
+      <div className="relative">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50/20 via-blue-50/20 to-gray-50/20 dark:from-gray-950/10 dark:via-blue-950/10 dark:to-gray-950/10 rounded-3xl -z-10" />
+        
+        <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
+          {/* Enhanced Header */}
+          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-gray-500 via-gray-600 to-blue-600 text-white p-8">
+            <div className="absolute inset-0 bg-black/10" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
+            
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-white">បញ្ជីអ្នកប្រើប្រាស់</h2>
+                  <div className="flex items-center space-x-3 mt-2">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                      {totalUsers} អ្នកប្រើ
+                    </Badge>
+                    <div className="h-1 w-8 bg-white/30 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
             <div className="relative w-full sm:w-64">
               <Input
                 placeholder="ស្វែងរក..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                icon={<Search className="w-4 h-4" />}
-                className="w-full pr-10"
+                    className="w-full pr-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm border-white/30 text-white placeholder:text-white/70 focus:bg-white/30 transition-all duration-300"
               />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
               {search && (
                 <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-10 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors duration-200"
                   onClick={() => setSearch("")}
-                  tabIndex={-1}
                 >
-                  ×
+                      <X className="h-4 w-4" />
                 </button>
               )}
             </div>
-            <Button onClick={() => openDialog()} variant="gradient" size="sm" className="whitespace-nowrap">
-              <Plus className="mr-2" /> បន្ថែមអ្នកប្រើ
+                
+                <Button 
+                  onClick={() => openDialog()}
+                  className="group px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  variant="ghost"
+                >
+                  <div className="flex items-center gap-2">
+                    <Plus className="h-5 w-5" />
+                    <span>បន្ថែមអ្នកប្រើ</span>
+                  </div>
             </Button>
+              </div>
           </div>
         </CardHeader>
-        <CardContent>
+
+          <CardContent className="p-8">
           <UsersTable
             users={filteredUsers}
             loading={loading}
@@ -351,8 +453,9 @@ export default function AdminUsersPage() {
           />
         </CardContent>
       </Card>
+      </div>
 
-      {/* Add/Edit Dialog */}
+      {/* Enhanced Add/Edit Dialog */}
       <UsersForm
         open={formDialogOpen}
         onClose={() => setFormDialogOpen(false)}
@@ -361,7 +464,7 @@ export default function AdminUsersPage() {
         editUser={editUser}
       />
 
-      {/* Delete Confirmation Dialog */}
+      {/* Enhanced Delete Confirmation Dialog */}
       <Dialog open={!!deleteId} onOpenChange={open => { if (!open) setDeleteId(null); }}>
         <DialogContent className="max-w-md w-full bg-gradient-to-br from-background to-muted/20 rounded-2xl shadow-2xl border-0 p-0">
           <Card className="w-full bg-transparent border-0 shadow-none">
@@ -416,7 +519,7 @@ export default function AdminUsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* View Details Dialog */}
+      {/* Enhanced View Details Dialog */}
       <Dialog open={!!viewDetailsUser} onOpenChange={open => { if (!open) setViewDetailsUser(null); }}>
         <DialogContent className="max-w-2xl w-full bg-gradient-to-br from-background to-muted/20 rounded-2xl shadow-2xl border-0 p-0">
           <Card className="w-full bg-transparent border-0 shadow-none">
@@ -462,6 +565,7 @@ export default function AdminUsersPage() {
                       </Badge>
                     </div>
                   </div>
+                  
                   {/* Status Toggle */}
                   <div className="flex items-center gap-3 mt-2 mb-4">
                     <label htmlFor="status-toggle-details" className="text-sm font-semibold flex items-center gap-2">

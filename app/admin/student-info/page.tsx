@@ -305,7 +305,37 @@ export default function StudentInfoPage() {
 
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 p-4">
+    <div className="max-w-7xl mx-auto space-y-6 p-6">
+      {/* Modern Header Section */}
+      <div className="text-center space-y-6 p-8 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl">
+        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+          ព័ត៌មានសិស្ស
+        </h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          ប្រព័ន្ធគ្រប់គ្រង និងមើលព័ត៌មានលម្អិតរបស់សិស្ស
+        </p>
+        
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
+            <div className="text-2xl font-bold text-blue-600">{students.length}</div>
+            <div className="text-sm text-blue-500">សិស្សសរុប</div>
+          </div>
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
+            <div className="text-2xl font-bold text-purple-600">{classes.length}</div>
+            <div className="text-sm text-purple-500">ថ្នាក់រៀន</div>
+          </div>
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
+            <div className="text-2xl font-bold text-green-600">{academicYears.length}</div>
+            <div className="text-sm text-green-500">ឆ្នាំសិក្សា</div>
+          </div>
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
+            <div className="text-2xl font-bold text-orange-600">{selectedStudent ? '1' : '0'}</div>
+            <div className="text-sm text-orange-500">សិស្សជ្រើសរើស</div>
+          </div>
+        </div>
+      </div>
+
       {/* Search and Filter Section */}
       <Card className="hover:shadow-lg transition-all duration-200 border-0 shadow-md">
         <CardHeader className="pb-4">

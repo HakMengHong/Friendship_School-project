@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     // Transform the data to match the frontend interface
     const transformedUsers = users.map(user => ({
-      userId: user.userId,
+      userid: user.userId, // Changed from userId to userid to match frontend
       username: user.username,
       password: '', // Don't send password
       firstname: user.firstname,
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       status: user.status
     }))
 
-    return NextResponse.json(transformedUsers)
+    return NextResponse.json({ users: transformedUsers }) // Wrap in users object
   } catch (error) {
     console.error('Error fetching users:', error)
     return NextResponse.json(
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       status: newUser.status
     }
 
-    return NextResponse.json({ user: transformedUser }, { status: 201 })
+    return NextResponse.json({ user: transformedUser, users: [transformedUser] }, { status: 201 })
   } catch (error) {
     console.error('Error creating user:', error)
     return NextResponse.json(

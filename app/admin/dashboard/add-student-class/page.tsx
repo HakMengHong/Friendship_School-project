@@ -359,17 +359,93 @@ export default function AddStudentClassPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              បន្ថែមសិស្សទៅក្នុងថ្នាក់
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              ជ្រើសរើសសិស្ស និងបន្ថែមទៅក្នុងថ្នាក់ដែលបានជ្រើសរើស
-            </p>
+    <div className="container mx-auto max-w-7xl p-6">
+      <div className="animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-8 p-6">
+          {/* Modern Header Section */}
+          <div className="relative">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
+            
+            <div className="text-center space-y-6 p-8">
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+                  បន្ថែមសិស្សទៅក្នុងថ្នាក់
+                </h1>
+                <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                  ប្រព័ន្ធគ្រប់គ្រងការចុះឈ្មោះសិស្សទៅក្នុងថ្នាក់រៀនដែលមានប្រសិទ្ធភាព
+                </p>
+              </div>
+              
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                        <Users className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{students.length}</p>
+                        <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">សិស្សសរុប</p>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+                
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                        <BookOpen className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{courses.length}</p>
+                        <p className="text-xs text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់សរុប</p>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+                
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                        <GraduationCap className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">{schoolYears.length}</p>
+                        <p className="text-xs text-green-500 dark:text-green-300 font-medium">ឆ្នាំសិក្សា</p>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Quick Actions */}
+              <div className="flex flex-wrap justify-center gap-4 mt-8">
+                <Button 
+                  onClick={() => setShowAddStudentForm(true)}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <UserPlus className="h-5 w-5 mr-2" />
+                  បន្ថែមសិស្សថ្មី
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300 hover:scale-105"
+                >
+                  <ArrowLeft className="h-5 w-5 mr-2" />
+                  ត្រឡប់ក្រោយ
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -427,15 +503,35 @@ export default function AddStudentClassPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Student Selection */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Filters */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>ជ្រើសរើសសិស្ស (ឆ្នាំសិក្សា ថ្នាក់ ស្វែងរកសិស្ស)</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          {/* Enhanced Filters */}
+          <div className="relative">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/20 to-blue-50/20 dark:from-blue-950/10 dark:via-indigo-950/10 dark:to-blue-950/10 rounded-3xl -z-10" />
+            
+            <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
+              {/* Enhanced Header */}
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-8">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
+                
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-white">ជ្រើសរើសសិស្ស</h2>
+                    <div className="flex items-center space-x-3 mt-2">
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                        ឆ្នាំសិក្សា • ថ្នាក់ • ស្វែងរក
+                      </Badge>
+                      <div className="h-1 w-8 bg-white/30 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="schoolYear">ឆ្នាំសិក្សា</Label>
@@ -505,32 +601,60 @@ export default function AddStudentClassPage() {
               )}
             </CardContent>
           </Card>
+        </div>
 
-          {/* Students List */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>បញ្ជីសិស្ស ({filteredStudents.length})</span>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (selectedStudents.length === filteredStudents.length) {
-                        setSelectedStudents([])
-                      } else {
-                        setSelectedStudents(filteredStudents.map(s => s.studentId))
-                      }
-                    }}
-                  >
-                    {selectedStudents.length === filteredStudents.length ? 'ដោះជ្រើសរើសទាំងអស់' : 'ជ្រើសរើសទាំងអស់'}
-                  </Button>
-                  <Badge variant="secondary">
-                    ជ្រើសរើស: {selectedStudents.length}
-                  </Badge>
+          {/* Enhanced Students List */}
+          <div className="relative">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-pink-50/20 to-purple-50/20 dark:from-purple-950/10 dark:via-pink-950/10 dark:to-purple-950/10 rounded-3xl -z-10" />
+            
+            <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
+              {/* Enhanced Header */}
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-8">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
+                
+                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+                      <Users className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold text-white">បញ្ជីសិស្ស</h2>
+                      <div className="flex items-center space-x-3 mt-2">
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                          {filteredStudents.length} សិស្ស
+                        </Badge>
+                        <div className="h-1 w-8 bg-white/30 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedStudents.length === filteredStudents.length) {
+                          setSelectedStudents([])
+                        } else {
+                          setSelectedStudents(filteredStudents.map(s => s.studentId))
+                        }
+                      }}
+                      className="group px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    >
+                      <div className="flex items-center gap-2">
+                        {selectedStudents.length === filteredStudents.length ? 'ដោះជ្រើសរើសទាំងអស់' : 'ជ្រើសរើសទាំងអស់'}
+                      </div>
+                    </Button>
+                    
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                      ជ្រើសរើស: {selectedStudents.length}
+                    </Badge>
+                  </div>
                 </div>
-              </CardTitle>
-            </CardHeader>
+              </CardHeader>
             <CardContent>
               {dataLoading ? (
                 <div className="space-y-3">
@@ -602,6 +726,7 @@ export default function AddStudentClassPage() {
                 )}
             </CardContent>
           </Card>
+        </div>
         </div>
 
         {/* Right Column - Class Selection and Actions */}

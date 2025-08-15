@@ -323,15 +323,7 @@ export default function DailyAbsencePage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
-          ការគ្រប់គ្រងវត្តមានប្រចាំងថ្ងៃ
-        </h1>
-        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
-          កត់ត្រាវត្តមានសិស្សប្រចាំងថ្ងៃ
-        </p>
-      </div>
+
 
       {/* Form Section */}
       <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">

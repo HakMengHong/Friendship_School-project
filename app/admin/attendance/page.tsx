@@ -333,25 +333,7 @@ export default function AbsencePage() {
          </div>
        )}
 
-       {/* Header */}
-       <div className="mb-6">
-         <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
-           ផ្ទាំងគ្រប់គ្រងវត្តមានសិស្ស
-         </h1>
-         <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
-           ការគ្រប់គ្រង និងតាមដានវត្តមានសិស្សទាំងស្រុង
-         </p>
-         <div className="flex items-center gap-4 mt-4">
-           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-             <Calendar className="h-4 w-4" />
-             <span>ថ្ងៃដែលបានជ្រើសរើស: {selectedDate}</span>
-           </div>
-           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-             <Users className="h-4 w-4" />
-             <span>ថ្នាក់ដែលបានជ្រើសរើស: {selectedCourse ? courses.find(c => c.courseId.toString() === selectedCourse)?.courseName || 'ទាំងអស់' : 'ទាំងអស់'}</span>
-           </div>
-         </div>
-       </div>
+
 
              {/* Admin Control Panel */}
        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">

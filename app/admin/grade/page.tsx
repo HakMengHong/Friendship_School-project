@@ -116,15 +116,7 @@ export default function GradePage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
-          ការគ្រប់គ្រងពិន្ទុ
-        </h1>
-        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
-          តាមដានពិន្ទុសិស្ស និងវឌ្ឍនភាពការសិក្សា
-        </p>
-      </div>
+
 
       {/* Top Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

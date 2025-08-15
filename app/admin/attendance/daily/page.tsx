@@ -21,7 +21,10 @@ import {
   Loader2,
   Calendar,
   BookOpen,
-  Users
+  Users,
+  CalendarDays,
+  TrendingUp,
+  AlertTriangle
 } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { toast } from "@/hooks/use-toast"
@@ -494,31 +497,111 @@ export default function DailyAttendancePage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
-          ការគ្រប់គ្រងវត្តមានប្រចាំងថ្ងៃ
-        </h1>
-        <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">
-          កត់ត្រាវត្តមានសិស្សប្រចាំងថ្ងៃ
-        </p>
-      </div>
+    <div className="container mx-auto max-w-7xl p-6">
+      <div className="animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-8 p-6">
+          {/* Modern Header Section */}
+          <div className="relative">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
 
-      {/* Form Section */}
-      <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Calendar className="h-5 w-5 text-blue-600" />
-            ព័ត៌មានមុខងារ
-          </CardTitle>
+            <div className="text-center space-y-6 p-8">
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+                  ការកត់ត្រាវត្តមានប្រចាំថ្ងៃ
+                </h1>
+                <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                  ប្រព័ន្ធគ្រប់គ្រងការកត់ត្រាវត្តមានសិស្សប្រចាំថ្ងៃ និងពេលវេលារៀន
+                </p>
+              </div>
+              
+              {/* Quick Stats Overview */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                        <CalendarDays className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                          {formData.date ? new Date(formData.date).toLocaleDateString('km-KH') : 'ថ្ងៃនេះ'}
+                        </p>
+                        <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">កាលបរិច្ឆេទ</p>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                        <BookOpen className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                          {formData.course ? courses.find(c => c.courseId.toString() === formData.course)?.courseName || 'ថ្នាក់' : 'ថ្នាក់'}
+                        </p>
+                        <p className="text-xs text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់រៀន</p>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                        <Users className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                          {students.length}
+                        </p>
+                        <p className="text-xs text-green-500 dark:text-green-300 font-medium">សិស្សសរុប</p>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Enhanced Form Section */}
+          <div className="relative">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/20 to-blue-50/20 dark:from-blue-950/10 dark:via-indigo-950/10 dark:to-blue-950/10 rounded-3xl -z-10" />
+
+            <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
+              {/* Enhanced Header */}
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-6">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12" />
+                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
+
+                <div className="relative z-10 flex items-center space-x-3">
+                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                    <Calendar className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">ព័ត៌មានមុខងារ</h2>
+                    <div className="h-1 w-8 bg-white/30 rounded-full mt-2" />
+                  </div>
+                </div>
         </CardHeader>
-        <CardContent>
+              <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">ឆ្នាំសិក្សា *</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា *</Label>
               <Select value={formData.schoolYear} onValueChange={(value) => handleSelectChange('schoolYear', value)}>
-                <SelectTrigger className="h-11">
+                      <SelectTrigger className="h-11 bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200">
                   <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                 </SelectTrigger>
                 <SelectContent>
@@ -531,9 +614,9 @@ export default function DailyAttendancePage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium">ថ្នាក់ *</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">ថ្នាក់ *</Label>
               <Select value={formData.course} onValueChange={(value) => handleSelectChange('course', value)}>
-                <SelectTrigger className="h-11">
+                      <SelectTrigger className="h-11 bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200">
                   <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
                 </SelectTrigger>
                 <SelectContent>
@@ -546,18 +629,18 @@ export default function DailyAttendancePage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium">កាលបរិច្ឆេទ</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">កាលបរិច្ឆេទ</Label>
               <Input
                 type="date"
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
-                className="h-11"
+                      className="h-11 bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200"
               />
             </div>
                          <div className="space-y-2">
-               <Label className="text-sm font-medium">ឈ្មោះគ្រូ</Label>
-               <div className="h-12 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md flex items-center">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">ឈ្មោះគ្រូ</Label>
+                    <div className="h-11 px-3 py-2 bg-gradient-to-r from-gray-50 via-gray-50/95 to-gray-50/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border border-gray-200 dark:border-gray-600 rounded-md flex items-center">
                  <span className="text-gray-900 dark:text-white font-medium">
                    {currentUser ? `${currentUser.lastname || ''}${currentUser.firstname || ''}` : 'កំពុងទាញយក...'}
                  </span>
@@ -565,9 +648,9 @@ export default function DailyAttendancePage() {
             </div>
           </div>
           {!isFormValid && (
-            <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 via-yellow-50/95 to-yellow-50/90 dark:from-yellow-900/10 dark:via-yellow-900/15 dark:to-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <div className="flex items-center gap-2">
-                <XCircle className="h-5 w-5 text-yellow-600" />
+                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 <span className="text-sm text-yellow-800 dark:text-yellow-200">
                   សូមបំពេញព័ត៌មានមុខងារទាំងអស់ដើម្បីមើលបញ្ជីសិស្ស
                 </span>
@@ -576,97 +659,184 @@ export default function DailyAttendancePage() {
           )}
         </CardContent>
       </Card>
+          </div>
 
-      {/* Statistics Cards - Only show when form is valid */}
+          {/* Enhanced Statistics Cards - Only show when form is valid */}
       {isFormValid && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Morning Summary */}
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ពេលព្រឹក</CardTitle>
-                <Clock className="h-4 w-4 text-blue-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{statistics.amPresent + statistics.amAbsent + statistics.amLate + statistics.amExcused} នាក់</div>
-                <p className="text-xs text-muted-foreground">វត្តមាន: {statistics.amPresent} • អវត្តមាន: {statistics.amAbsent} • យឺត: {statistics.amLate}</p>
-                <div className="flex items-center mt-2">
-                  <UserCheck className="h-3 w-3 text-blue-500 mr-1" />
-                  <span className="text-xs text-blue-500">វត្តមាន {statistics.amPresent} នាក់</span>
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                        <Clock className="h-6 w-6 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          {statistics.amPresent + statistics.amAbsent + statistics.amLate + statistics.amExcused} នាក់
+                        </p>
+                        <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">ពេលព្រឹក</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">វត្តមាន:</span>
+                        <span className="font-medium text-green-600">{statistics.amPresent}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">អវត្តមាន:</span>
+                        <span className="font-medium text-red-600">{statistics.amAbsent}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">យឺត:</span>
+                        <span className="font-medium text-yellow-600">{statistics.amLate}</span>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300 mt-4" />
+                  </div>
+                </div>
 
             {/* Afternoon Summary */}
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ពេលរសៀល</CardTitle>
-                <Clock className="h-4 w-4 text-orange-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-orange-600">{statistics.pmPresent + statistics.pmAbsent + statistics.pmLate + statistics.pmExcused} នាក់</div>
-                <p className="text-xs text-muted-foreground">វត្តមាន: {statistics.pmPresent} • អវត្តមាន: {statistics.pmAbsent} • យឺត: {statistics.pmLate}</p>
-                <div className="flex items-center mt-2">
-                  <UserCheck className="h-3 w-3 text-orange-500 mr-1" />
-                  <span className="text-xs text-orange-500">វត្តមាន {statistics.pmPresent} នាក់</span>
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                        <Clock className="h-6 w-6 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                          {statistics.pmPresent + statistics.pmAbsent + statistics.pmLate + statistics.pmExcused} នាក់
+                        </p>
+                        <p className="text-xs text-orange-500 dark:text-orange-300 font-medium">ពេលរសៀល</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">វត្តមាន:</span>
+                        <span className="font-medium text-green-600">{statistics.pmPresent}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">អវត្តមាន:</span>
+                        <span className="font-medium text-red-600">{statistics.pmAbsent}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">យឺត:</span>
+                        <span className="font-medium text-yellow-600">{statistics.pmLate}</span>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300 mt-4" />
+                  </div>
+                </div>
 
             {/* Total Present */}
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">សរុបវត្តមាន</CardTitle>
-                <UserCheck className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">{statistics.totalPresent} នាក់</div>
-                <p className="text-xs text-muted-foreground">{students.length > 0 ? ((statistics.totalPresent / students.length) * 100).toFixed(1) : 0}% នៃសិស្សទាំងអស់</p>
-                <div className="flex items-center mt-2">
-                  <UserCheck className="h-3 w-3 text-green-500 mr-1" />
-                  <span className="text-xs text-green-500">+{statistics.amPresent + statistics.pmPresent} ពីពេលព្រឹក</span>
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                        <TrendingUp className="h-6 w-6 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          {statistics.totalPresent} នាក់
+                        </p>
+                        <p className="text-xs text-green-500 dark:text-green-300 font-medium">សរុបវត្តមាន</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">ភាគរយ:</span>
+                        <span className="font-medium text-green-600">
+                          {students.length > 0 ? ((statistics.totalPresent / students.length) * 100).toFixed(1) : 0}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">ពីពេលព្រឹក:</span>
+                        <span className="font-medium text-blue-600">+{statistics.amPresent}</span>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300 mt-4" />
+                  </div>
+                </div>
 
             {/* Total Absent */}
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">សរុបអវត្តមាន</CardTitle>
-                <XCircleIcon className="h-4 w-4 text-red-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">{statistics.totalAbsent} នាក់</div>
-                <p className="text-xs text-muted-foreground">{students.length > 0 ? ((statistics.totalAbsent / students.length) * 100).toFixed(1) : 0}% នៃសិស្សទាំងអស់</p>
-                <div className="flex items-center mt-2">
-                  <XCircle className="h-3 w-3 text-red-500 mr-1" />
-                  <span className="text-xs text-red-500">+{statistics.amAbsent + statistics.pmAbsent} ពីពេលព្រឹក</span>
+                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg">
+                        <XCircleIcon className="h-6 w-6 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                          {statistics.totalAbsent} នាក់
+                        </p>
+                        <p className="text-xs text-red-500 dark:text-red-300 font-medium">សរុបអវត្តមាន</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">ភាគរយ:</span>
+                        <span className="font-medium text-red-600">
+                          {students.length > 0 ? ((statistics.totalAbsent / students.length) * 100).toFixed(1) : 0}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">ពីពេលព្រឹក:</span>
+                        <span className="font-medium text-orange-600">+{statistics.amAbsent}</span>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-gradient-to-r from-red-400 to-red-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300 mt-4" />
+                  </div>
+                </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Student List */}
-            <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-blue-600" />
-                    បញ្ជីឈ្មោះសិស្ស - {courses.find(c => c.courseId.toString() === formData.course)?.courseName || ''} ({filteredStudents.length} នាក់)
-                  </CardTitle>
+                {/* Enhanced Student List */}
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  {/* Background Pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-pink-50/20 to-purple-50/20 dark:from-purple-950/10 dark:via-pink-950/10 dark:to-purple-950/10 rounded-3xl -z-10" />
+
+                  <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
+                    {/* Enhanced Header */}
+                    <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-6">
+                      <div className="absolute inset-0 bg-black/10" />
+                      <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -translate-y-14 translate-x-14" />
+                      <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-10" />
+
+                      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                            <Users className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h2 className="text-2xl font-bold text-white">បញ្ជីឈ្មោះសិស្ស</h2>
+                            <div className="flex items-center space-x-3 mt-2">
+                              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                                {courses.find(c => c.courseId.toString() === formData.course)?.courseName || ''}
+                              </Badge>
+                              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                                {filteredStudents.length} នាក់
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
                     <Input
                       placeholder="ស្វែងរកសិស្ស..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 h-9 w-64"
+                            className="pl-10 h-11 w-64 bg-white/20 border-white/30 text-white placeholder-white/70 backdrop-blur-sm focus:bg-white/30 focus:border-white/50 transition-all duration-200"
                     />
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+                    <CardContent className="p-6">
                 {loadingStudents ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
@@ -749,16 +919,31 @@ export default function DailyAttendancePage() {
                 )}
               </CardContent>
             </Card>
+                </div>
 
-            {/* Daily Absences */}
-            <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-              <CardHeader>
-                                 <CardTitle className="flex items-center gap-2">
-                   <XCircle className="h-5 w-5 text-red-600" />
-                   ឈ្មោះសិស្សអវត្តមានប្រចាំថ្ងៃ
-                 </CardTitle>
+                {/* Enhanced Daily Absences */}
+                <div className="relative">
+                  {/* Background Pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-50/20 via-pink-50/20 to-red-50/20 dark:from-red-950/10 dark:via-pink-950/10 dark:to-red-950/10 rounded-3xl -z-10" />
+
+                  <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
+                    {/* Enhanced Header */}
+                    <CardHeader className="relative overflow-hidden bg-gradient-to-r from-red-500 via-red-600 to-pink-600 text-white p-6">
+                      <div className="absolute inset-0 bg-black/10" />
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10" />
+                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
+
+                      <div className="relative z-10 flex items-center space-x-3">
+                        <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                          <XCircle className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold text-white">ឈ្មោះសិស្សអវត្តមានប្រចាំថ្ងៃ</h2>
+                          <div className="h-1 w-8 bg-white/30 rounded-full mt-2" />
+                        </div>
+                      </div>
               </CardHeader>
-              <CardContent>
+                    <CardContent className="p-6">
                 {loadingAttendances ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
@@ -769,7 +954,7 @@ export default function DailyAttendancePage() {
                                          {attendances
                        .filter(a => a.status !== 'present')
                        .map((attendance) => (
-                        <div key={attendance.attendanceId} className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                              <div key={attendance.attendanceId} className="bg-gradient-to-r from-red-50 via-red-50/95 to-red-50/90 dark:from-red-900/10 dark:via-red-900/15 dark:to-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4 hover:shadow-lg transition-all duration-200">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
@@ -791,7 +976,7 @@ export default function DailyAttendancePage() {
                                 variant="ghost"
                                 size="sm"
                                   onClick={() => handleStudentClick(attendance.student, attendance.session)}
-                                className="h-8 w-8 p-0"
+                                        className="h-8 w-8 p-0 hover:bg-white/20 text-white"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -799,7 +984,7 @@ export default function DailyAttendancePage() {
                                 variant="ghost"
                                 size="sm"
                                   onClick={() => handleDeleteAttendance(attendance.attendanceId)}
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                        className="h-8 w-8 p-0 text-white hover:text-red-200 hover:bg-white/20"
                               >
                                 <TrashIcon className="h-4 w-4" />
                               </Button>
@@ -833,15 +1018,16 @@ export default function DailyAttendancePage() {
                  )}
               </CardContent>
             </Card>
+                </div>
           </div>
         </>
       )}
 
-      {/* Attendance Form Dialog */}
+          {/* Enhanced Attendance Form Dialog */}
       <Dialog open={showAttendanceForm} onOpenChange={setShowAttendanceForm}>
-        <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-0 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+                <DialogTitle className="flex items-center gap-2 text-lg">
               <Edit className="h-5 w-5 text-blue-600" />
               {editingAttendance ? 'កែសម្រួលវត្តមាន' : 'កត់ត្រាវត្តមាន'}
             </DialogTitle>
@@ -853,7 +1039,7 @@ export default function DailyAttendancePage() {
                 <Input
                   value={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
                   readOnly
-                  className="bg-gray-50 dark:bg-gray-800"
+                      className="bg-gradient-to-r from-gray-50 via-gray-50/95 to-gray-50/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-gray-200 dark:border-gray-600"
                 />
               </div>
 
@@ -864,7 +1050,7 @@ export default function DailyAttendancePage() {
                     type="date"
                     value={formData.date}
                     readOnly
-                    className="bg-gray-50 dark:bg-gray-800"
+                        className="bg-gradient-to-r from-gray-50 via-gray-50/95 to-gray-50/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-gray-200 dark:border-gray-600"
                   />
                 </div>
                 <div className="space-y-2">
@@ -873,7 +1059,7 @@ export default function DailyAttendancePage() {
                     value={attendanceForm.session} 
                     onValueChange={(value: 'AM' | 'PM' | 'FULL') => setAttendanceForm(prev => ({ ...prev, session: value }))}
                   >
-                    <SelectTrigger>
+                        <SelectTrigger className="bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -909,6 +1095,7 @@ export default function DailyAttendancePage() {
                   onChange={(e) => setAttendanceForm(prev => ({ ...prev, reason: e.target.value }))}
                   placeholder="បញ្ចូលមូលហេតុ..."
                   rows={3}
+                      className="bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20"
                 />
               </div>
 
@@ -917,10 +1104,11 @@ export default function DailyAttendancePage() {
                   type="button"
                   variant="outline"
                   onClick={() => setShowAttendanceForm(false)}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   បោះបង់
                 </Button>
-                <Button type="submit">
+                    <Button type="submit" className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
                   {editingAttendance ? 'ធ្វើបច្ចុប្បន្នភាព' : 'រក្សាទុក'}
                 </Button>
               </div>
@@ -928,6 +1116,8 @@ export default function DailyAttendancePage() {
           )}
         </DialogContent>
       </Dialog>
+        </div>
+      </div>
     </div>
   )
 }

@@ -93,15 +93,7 @@ export default function StudentListReportPage() {
 
   return (
     <div>
-      {/* Header Section */}
-      <div className="flex items-center justify-between space-y-6">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent leading-relaxed py-2">
-            របាយការណ៍បញ្ជីឈ្មោះសិស្ស
-          </h1>
-          <p className="text-lg font-medium text-muted-foreground mt-3 leading-relaxed">បង្កើតរបាយការណ៍បញ្ជីឈ្មោះសិស្សតាមថ្នាក់</p>
-        </div>
-      </div>
+
 
       <Separator className="my-4" />   
 
