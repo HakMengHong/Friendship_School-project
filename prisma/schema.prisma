@@ -98,30 +98,28 @@ model FamilyInfo {
   durationInKPC    String?
   helpAmount       Float?
   helpFrequency    String?
-  helpType         String?
-  isChristian      Boolean? @default(false)
-  isMember         Boolean? @default(false)
-  memberSince      String?
-  monthlyIncome    Float?
-  numberOfChildren Int?
-  occupation       String?
-  pastorName       String?
-  pastorPhone      String?
+  knowSchool       String?
+  livingCondition  String?
+  livingWith       String?
+  organizationHelp String?
+  ownHouse         Boolean? @default(false)
+  religion         String?
   student          Student  @relation(fields: [studentId], references: [studentId])
 }
 
 model Scholarship {
   scholarshipId Int      @id @default(autoincrement())
   studentId     Int
-  amount        Float
-  reason        String?
+  type          String?
+  amount        Float?
+  sponsor       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   student       Student  @relation(fields: [studentId], references: [studentId])
 }
 
 model Course {
-  courseId     Int           @id @default(autoincrement())
+  courseId     Int          @id @default(autoincrement())
   schoolYearId Int
   teacherId1   Int?
   teacherId2   Int?
@@ -133,6 +131,7 @@ model Course {
   updatedAt    DateTime     @updatedAt
   schoolYear   SchoolYear   @relation(fields: [schoolYearId], references: [schoolYearId])
   enrollments  Enrollment[]
+  attendances  Attendance[]
   grades       Grade[]
   teachers     User[]       @relation("ClassTeacher")
 }
@@ -194,23 +193,25 @@ model Semester {
 }
 
 model Attendance {
-  id         Int               @id @default(autoincrement())
-  studentId  Int
-  date       DateTime
-  session    AttendanceSession
-  status     String
-  reason     String?
-  recordedBy String?
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-  student    Student           @relation(fields: [studentId], references: [studentId])
+  attendanceId Int                @id @default(autoincrement())
+  studentId    Int
+  courseId     Int
+  attendanceDate DateTime
+  session      AttendanceSession  // AM, PM, or FULL
+  status       String             // "present", "absent", "late", "excused"
+  reason       String?            // Reason for absence if applicable
+  recordedBy   String?            // Username or user ID who recorded
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  student      Student            @relation(fields: [studentId], references: [studentId])
+  course       Course             @relation(fields: [courseId], references: [courseId])
 }
 
 model ActivityLog {
   id        Int      @id @default(autoincrement())
   userId    Int
-  action    String
-  details   String?
+  action    String   // e.g., "login", "create_student", "update_grade"
+  details   String?  // JSON or text details
   timestamp DateTime @default(now())
   user      User     @relation("ActivityLogUser", fields: [userId], references: [userId])
 }
@@ -219,7 +220,7 @@ model Announcement {
   id        Int      @id @default(autoincrement())
   title     String
   content   String
-  author    String
+  author    String   // Username or user ID
   published Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
