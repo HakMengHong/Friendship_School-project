@@ -14,8 +14,8 @@ async function addTeachers() {
         username: 'ហាក់ម៉េងហុង',
         firstname: 'ហាក់',
         lastname: 'ម៉េងហុង',
-        role: 'teacher',
-        position: 'គ្រូបង្រៀន',
+        role: 'admin',
+        position: 'នាយក',
         phonenumber1: '012345678',
         status: 'active'
       },
@@ -24,35 +24,8 @@ async function addTeachers() {
         firstname: 'ហេង',
         lastname: 'សុនី',
         role: 'teacher',
-        position: 'គ្រូបង្រៀន',
+        position: 'គ្រូបង្រៀនថ្នាក់ទី១',
         phonenumber1: '012345679',
-        status: 'active'
-      },
-      {
-        username: 'វ៉ាន់សុផល',
-        firstname: 'វ៉ាន់',
-        lastname: 'សុផល',
-        role: 'teacher',
-        position: 'គ្រូបង្រៀន',
-        phonenumber1: '012345680',
-        status: 'active'
-      },
-      {
-        username: 'គឹមសុខា',
-        firstname: 'គឹម',
-        lastname: 'សុខា',
-        role: 'teacher',
-        position: 'គ្រូបង្រៀន',
-        phonenumber1: '012345681',
-        status: 'active'
-      },
-      {
-        username: 'ម៉ៅសុធារី',
-        firstname: 'ម៉ៅ',
-        lastname: 'សុធារី',
-        role: 'teacher',
-        position: 'គ្រូបង្រៀន',
-        phonenumber1: '012345682',
         status: 'active'
       }
     ];
