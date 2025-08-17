@@ -146,17 +146,17 @@ model Subject {
 
 model Grade {
   gradeId      Int       @id @default(autoincrement())
+  courseId     Int
   studentId    Int
   subjectId    Int
   semesterId   Int
-  gradeDate    String
+  gradeDate    DateTime
   grade        Float
   gradeComment String?
+  userId       Int?
   lastEdit     DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  courseId     Int
-  userId       Int?
   course       Course    @relation(fields: [courseId], references: [courseId])
   semester     Semester  @relation(fields: [semesterId], references: [semesterId])
   student      Student   @relation(fields: [studentId], references: [studentId])

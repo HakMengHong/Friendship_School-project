@@ -662,7 +662,7 @@ export default function AcademicManagementPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{schoolYears.length}</p>
-                    <p className="text-base text-blue-500 dark:text-blue-300 font-medium">ឆ្នាំសិក្សា</p>
+                    <p className="text-lg text-blue-500 dark:text-blue-300 font-medium">ឆ្នាំសិក្សា</p>
                   </div>
                 </div>
                 <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
@@ -679,7 +679,7 @@ export default function AcademicManagementPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{courses.length}</p>
-                    <p className="text-base text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់រៀន</p>
+                    <p className="text-lg text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់រៀន</p>
                   </div>
                 </div>
                 <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
@@ -696,7 +696,7 @@ export default function AcademicManagementPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-green-600 dark:text-green-400">{subjects.length}</p>
-                    <p className="text-base text-green-500 dark:text-green-300 font-medium">មុខវិជ្ជា</p>
+                    <p className="text-lg text-green-500 dark:text-green-300 font-medium">មុខវិជ្ជា</p>
                   </div>
                 </div>
                 <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
@@ -713,7 +713,7 @@ export default function AcademicManagementPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{safeTeachers.length}</p>
-                    <p className="text-base text-orange-500 dark:text-orange-300 font-medium">គ្រូបង្រៀន</p>
+                    <p className="text-lg text-orange-500 dark:text-orange-300 font-medium">គ្រូបង្រៀន</p>
                   </div>
                 </div>
                 <div className="h-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />

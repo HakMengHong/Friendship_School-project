@@ -339,21 +339,9 @@ export default function ViewStudentClassPage() {
     <div className="container mx-auto max-w-7xl p-6">
       <div className="animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8 p-6">
-          {/* Modern Header Section */}
           <div className="relative">
-            {/* Background Pattern */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
-            
             <div className="text-center space-y-6 p-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
-                  មើលសិស្សក្នុងថ្នាក់
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                  ប្រព័ន្ធគ្រប់គ្រងការមើល និងគ្រប់គ្រងសិស្សក្នុងថ្នាក់រៀនផ្សេងៗ
-                </p>
-              </div>
-
               {/* Enhanced Stats Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 {/* Total Students Card */}
@@ -366,7 +354,7 @@ export default function ViewStudentClassPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{students.length}</p>
-                        <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">សិស្សសរុប</p>
+                        <p className="text-lg text-blue-500 dark:text-blue-300 font-medium">សិស្សសរុប</p>
                       </div>
                     </div>
                     <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
@@ -383,7 +371,7 @@ export default function ViewStudentClassPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{courses.length}</p>
-                        <p className="text-xs text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់សរុប</p>
+                        <p className="text-lg text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់សរុប</p>
                       </div>
                     </div>
                     <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
@@ -400,30 +388,12 @@ export default function ViewStudentClassPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-3xl font-bold text-green-600 dark:text-green-400">{schoolYears.length}</p>
-                        <p className="text-xs text-green-500 dark:text-green-300 font-medium">ឆ្នាំសិក្សា</p>
+                        <p className="text-lg text-green-500 dark:text-green-300 font-medium">ឆ្នាំសិក្សា</p>
                       </div>
                     </div>
                     <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
                 </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex flex-wrap justify-center gap-4 mt-8">
-                <Button 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                >
-                  <Filter className="h-5 w-5 mr-2" />
-                  {showFilters ? 'លាក់ការច្រោះ' : 'បង្ហាញការច្រោះ'}
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300 hover:scale-105"
-                >
-                  <ArrowLeft className="h-5 w-5 mr-2" />
-                  ត្រឡប់ក្រោយ
-                </Button>
               </div>
             </div>
           </div>

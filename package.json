@@ -54,9 +54,11 @@
     "embla-carousel-react": "8.5.1",
     "formidable": "^3.5.4",
     "input-otp": "1.4.1",
+
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
     "next-themes": "^0.4.4",
+    "puppeteer": "^24.16.2",
     "react": "^18.0.0",
     "react-chartjs-2": "^5.2.0",
     "react-day-picker": "^9.8.1",

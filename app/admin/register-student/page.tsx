@@ -31,7 +31,8 @@ import {
   Upload,
   Shield,
   Target,
-  Award
+  Award,
+  Printer
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -42,6 +43,9 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { useToast } from "@/hooks/use-toast"
+
+// PDF generation types
+import type { StudentData } from '@/lib/puppeteer-pdf-generator'
 
 export default function RegisterStudentPage() {
   const [studentName, setStudentName] = useState("")
@@ -180,6 +184,110 @@ export default function RegisterStudentPage() {
     // Generate simple number based on current students count + 1
     const nextId = students.length + 1;
     return nextId.toString();
+  }
+
+  // Function to format Khmer text for better display
+  const formatKhmerText = (text: string, defaultValue: string = 'មិនមាន') => {
+    if (!text || text.trim() === '') {
+      return defaultValue;
+    }
+    return text.trim();
+  }
+
+  // Note: PDF generation is now handled by the dedicated utility file
+  // This provides better code organization and reusability
+
+  // Function to export student registration as PDF
+  const exportToPDF = async () => {
+    console.log('PDF export function called');
+    console.log('Selected student:', selectedStudent);
+    console.log('Form data:', formData);
+    
+    if (!selectedStudent || selectedStudent.id === 'new') {
+      console.log('No student selected, showing error');
+      toast({
+        title: "កំហុស",
+        description: "សូមជ្រើសរើសសិស្សដើម្បីបោះពុម្ភ",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      console.log('Generating PDF using utility function...');
+      
+      // Convert formData to StudentData format
+      const studentData: StudentData = {
+        lastName: formData.lastName,
+        firstName: formData.firstName,
+        gender: formData.gender,
+        dob: formData.dob,
+        age: formData.age,
+        class: formData.class,
+        studentId: formData.studentId,
+        phone: formData.phone,
+        emergencyContact: formData.emergencyContact,
+        studentHouseNumber: formData.studentHouseNumber,
+        studentVillage: formData.studentVillage,
+        studentDistrict: formData.studentDistrict,
+        studentProvince: formData.studentProvince,
+        studentBirthDistrict: formData.studentBirthDistrict,
+        previousSchool: formData.previousSchool,
+        transferReason: formData.transferReason,
+        vaccinated: formData.vaccinated,
+        schoolYear: formData.schoolYear,
+        needsClothes: formData.needsClothes,
+        needsMaterials: formData.needsMaterials,
+        needsTransport: formData.needsTransport,
+        guardians: formData.guardians,
+        familyInfo: formData.familyInfo
+      };
+      
+      // Generate PDF using Puppeteer API
+      const response = await fetch('/api/admin/generate-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(studentData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`PDF generation failed: ${response.statusText}`);
+      }
+      
+      // Get the PDF blob and trigger download
+      const pdfBlob = await response.blob();
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `student-registration-${selectedStudent.studentId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      // Show success message
+      toast({
+        title: "ជោគជ័យ",
+        description: "ទម្រង់ចុះឈ្មោះសិស្សត្រូវបានបោះពុម្ភជា PDF ដោយជោគជ័យ",
+      });
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+      }
+      toast({
+        title: "កំហុស",
+        description: "មានបញ្ហាក្នុងការបោះពុម្ភ PDF",
+        variant: "destructive"
+      });
+    }
   }
 
   // Fetch students from API
@@ -1786,9 +1894,14 @@ export default function RegisterStudentPage() {
                                 )}
                               </Button>
                               
-                              <Button variant="outline" className="flex-1 sm:flex-none">
-                                <Download className="h-4 w-4 mr-2" />
-                                បោះពុម្ព
+                              <Button 
+                                variant="outline" 
+                                className="flex-1 sm:flex-none"
+                                onClick={exportToPDF}
+                                disabled={!selectedStudent || selectedStudent.id === 'new'}
+                              >
+                                <Printer className="h-4 w-4 mr-2" />
+                                បោះពុម្ភ PDF
                               </Button>
                             </div>
 
