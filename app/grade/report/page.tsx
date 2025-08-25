@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,6 +23,14 @@ import {
 import { useState } from "react"
 
 export default function ScoreReportPage() {
+  return (
+    <RoleGuard allowedRoles={['admin', 'teacher']}>
+      <ScoreReportContent />
+    </RoleGuard>
+  )
+}
+
+function ScoreReportContent() {
   const [showReportModal, setShowReportModal] = useState(false)
   const [reportType, setReportType] = useState("monthly")
   const [isGenerating, setIsGenerating] = useState(false)

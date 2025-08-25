@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from "react";
+import { RoleGuard } from "@/components/ui/role-guard";
 
 // Type definitions
 interface Guardian {
@@ -155,6 +156,14 @@ const tabs = [
 ];
 
 export default function StudentInfoPage() {
+  return (
+    <RoleGuard allowedRoles={['admin', 'teacher']}>
+      <StudentInfoContent />
+    </RoleGuard>
+  )
+}
+
+function StudentInfoContent() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);

@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -88,6 +89,14 @@ interface AttendanceFormData {
 }
 
 export default function DailyAttendancePage() {
+  return (
+    <RoleGuard allowedRoles={['admin', 'teacher']}>
+      <DailyAttendanceContent />
+    </RoleGuard>
+  )
+}
+
+function DailyAttendanceContent() {
   const [formData, setFormData] = useState<FormData>({
     schoolYear: "",
     course: "",

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { 
   UserPlus, 
   FileText, 
@@ -48,6 +49,14 @@ import { useToast } from "@/hooks/use-toast"
 import type { StudentData } from '@/lib/puppeteer-pdf-generator'
 
 export default function RegisterStudentPage() {
+  return (
+    <RoleGuard allowedRoles={['admin', 'teacher']}>
+      <RegisterStudentContent />
+    </RoleGuard>
+  )
+}
+
+function RegisterStudentContent() {
   const [studentName, setStudentName] = useState("")
   const [selectedStudent, setSelectedStudent] = useState<any>({
     id: 'new',

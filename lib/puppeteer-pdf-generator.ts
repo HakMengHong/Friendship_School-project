@@ -1,14 +1,17 @@
 import puppeteer from 'puppeteer'
+import fs from 'fs'
+import path from 'path'
 
 /*
- * Puppeteer PDF Generator for Perfect Khmer Font Support
+ * Professional Puppeteer PDF Generator for Perfect Khmer Font Support
  * 
  * This approach uses Puppeteer to render HTML with proper fonts
  * and then convert to PDF, ensuring perfect Khmer text display.
  * 
  * ✅ Perfect Khmer font rendering
- * ✅ Professional PDF layout
- * ✅ Better control over styling
+ * ✅ Professional document layout
+ * ✅ Enhanced typography and styling
+ * ✅ Better visual hierarchy
  * ✅ Consistent output across platforms
  */
 
@@ -49,6 +52,12 @@ export interface StudentData {
     livingCondition: string
     religion: string
     churchName: string
+    // Optional/extended fields to support the new form
+    helpAmount?: string
+    helpFrequency?: string
+    knowSchool?: string
+    organizationHelp?: string
+    childrenInCare?: string
   }
 }
 
@@ -66,359 +75,551 @@ export const getGradeLabel = (grade: string): string => {
   return gradeMap[grade] || `ថ្នាក់ទី ${grade}`
 }
 
+// Function to convert gender to Khmer
+export const getGenderKhmer = (gender: string): string => {
+  const genderMap: { [key: string]: string } = {
+    'male': 'ប្រុស',
+    'female': 'ស្រី',
+    'Male': 'ប្រុស',
+    'Female': 'ស្រី',
+    'M': 'ប្រុស',
+    'F': 'ស្រី'
+  }
+  return genderMap[gender] || gender
+}
+
+// Function to convert family relations to Khmer
+export const getRelationKhmer = (relation: string): string => {
+  const relationMap: { [key: string]: string } = {
+    'father': 'ឪពុក',
+    'mother': 'ម្តាយ',
+    'Father': 'ឪពុក',
+    'Mother': 'ម្តាយ',
+    'parent': 'ឪពុកម្តាយ',
+    'Parent': 'ឪពុកម្តាយ',
+    'guardian': 'អាណាព្យាបាល',
+    'Guardian': 'អាណាព្យាបាល',
+    'grandfather': 'ជីតា',
+    'grandmother': 'ជីដូន',
+    'uncle': 'ពូ',
+    'aunt': 'មីង',
+    'brother': 'បងប្រុស',
+    'sister': 'បងស្រី',
+    'cousin': 'បងប្អូនជីដូនមួយ'
+  }
+  return relationMap[relation] || relation
+}
+
+// Function to convert boolean to Khmer
+export const getBooleanKhmer = (value: boolean): string => {
+  return value ? 'បាន' : 'មិនទាន់'
+}
+
+// Function to convert vaccination status to Khmer
+export const getVaccinationKhmer = (vaccinated: boolean): string => {
+  return vaccinated ? 'បាន' : 'មិនទាន់'
+}
+
 // Function to generate HTML content for PDF
 export const generateStudentRegistrationHTML = (data: StudentData): string => {
+  const studentFullName = `${data.lastName || ''} ${data.firstName || ''}`.trim()
+  const genderText = getGenderKhmer(data.gender || '')
+  const classLabel = getGradeLabel(data.class)
+  const houseType = data.familyInfo?.ownHouse ? 'ផ្ទះផ្ទាល់ខ្លួន' : 'ផ្ទះជួល'
+  const guardianLines = (data.guardians || []).map(g => `
+      <div class="line">${[g.lastName, g.firstName].filter(Boolean).join(' ')}
+        &nbsp;&nbsp;ជា${getRelationKhmer(g.relation || '')}&nbsp;&nbsp;មុខរបរ&nbsp;${g.occupation || ''}
+        &nbsp;&nbsp;លេខទូរស័ព្ទ&nbsp;${g.phone || ''}</div>
+  `).join('')
+  const familyIncome = (data.guardians && data.guardians[0] && data.guardians[0].income) ? data.guardians[0].income : ''
+  const guardianRows = (data.guardians || []).map(g => `
+    <tr>
+      <td class="border-cell">${[g.lastName, g.firstName].filter(Boolean).join(' ')}</td>
+      <td class="border-cell">${getRelationKhmer(g.relation || '')}</td>
+      <td class="border-cell">${g.occupation || ''}</td>
+      <td class="border-cell">${g.phone || ''}</td>
+    </tr>
+  `).join('')
+
   const html = `
 <!DOCTYPE html>
 <html lang="km">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Registration Form</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Noto Sans Khmer', 'Khmer OS', 'Khmer OS System', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: white;
-            padding: 20px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #2563eb;
-            padding-bottom: 20px;
-        }
-        
-        .school-name {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1e40af;
-            margin-bottom: 10px;
-        }
-        
-        .form-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 5px;
-        }
-        
-        .form-subtitle {
-            font-size: 16px;
-            color: #6b7280;
-        }
-        
-        .section {
-            margin-bottom: 25px;
-            page-break-inside: avoid;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            background: #f3f4f6;
-            padding: 10px 15px;
-            border-left: 4px solid #2563eb;
-            margin-bottom: 15px;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-        
-        .label {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 5px;
-            display: block;
-            font-size: 14px;
-        }
-        
-        .value {
-            padding: 8px 12px;
-            background: #f9fafb;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            min-height: 20px;
-            font-size: 14px;
-            color: #111827;
-        }
-        
-        .guardian-section {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .guardian-title {
-            font-weight: 600;
-            color: #1e40af;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-            color: #6b7280;
-            font-size: 12px;
-        }
-        
-        @media print {
-            body {
-                padding: 0;
-            }
-            
-            .section {
-                page-break-inside: avoid;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ទម្រង់ចុះឈ្មោះសិស្ស</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap');
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body {
+      font-family: 'Noto Sans Khmer', 'Inter', sans-serif;
+      font-size: 10px;
+      line-height: 1.2;
+      color: #000;
+      background: white;
+      padding: 15px;
+      margin: 0;
+    }
+
+    .document {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 0;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 12px;
+      padding: 5px 0;
+      border-bottom: 1px solid #000;
+    }
+
+    .header h1 {
+      font-size: 14px;
+      margin: 0 0 3px 0;
+      font-weight: bold;
+    }
+
+    .header h2 {
+      font-size: 11px;
+      margin: 0 0 2px 0;
+      font-weight: bold;
+    }
+
+    .header h3 {
+      font-size: 9px;
+      margin: 0;
+      font-weight: bold;
+    }
+
+    .section {
+      margin: 8px 0;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #000;
+      text-decoration: underline;
+    }
+
+    .info-grid {
+      margin-bottom: 6px;
+    }
+
+    .info-row {
+      margin: 3px 0;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .info-label {
+      width: 150px;
+      padding: 1px 0;
+      font-weight: bold;
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+
+    .info-value {
+      padding: 1px 0;
+      font-size: 9px;
+      flex: 1;
+      margin-left: 8px;
+    }
+
+    .guardian-info {
+      margin: 4px 0;
+    }
+
+    .guardian-item {
+      margin: 3px 0;
+      padding: 3px 0;
+    }
+
+    .guardian-name {
+      font-size: 9px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .guardian-details {
+      font-size: 8px;
+      margin: 1px 0;
+    }
+
+    .checkbox-section {
+      margin: 4px 0;
+    }
+
+    .checkbox-item {
+      font-size: 9px;
+      margin: 2px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .checkbox {
+      width: 8px;
+      height: 8px;
+      margin-right: 5px;
+      border: 1px solid #000;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6px;
+    }
+
+    .rules {
+      margin: 6px 0;
+      text-align: justify;
+    }
+
+    .rule {
+      margin: 2px 0;
+      text-indent: 12px;
+      font-size: 8px;
+      line-height: 1.1;
+    }
+
+    .signature-section {
+      margin-top: 8px;
+    }
+
+    .signature-grid {
+      display: flex;
+      width: 100%;
+      margin-top: 6px;
+      gap: 15px;
+    }
+
+    .signature-cell {
+      flex: 1;
+      padding: 0;
+    }
+
+    .signature-box {
+      padding: 5px;
+      min-height: 30px;
+      text-align: center;
+    }
+
+    .signature-label {
+      font-size: 8px;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .signature-line {
+      border-bottom: 1px solid #000;
+      margin: 8px 0 4px 0;
+      min-height: 12px;
+    }
+
+    .date {
+      text-align: right;
+      margin: 8px 0;
+      font-size: 9px;
+      font-weight: bold;
+    }
+
+    .formal-letter {
+      margin: 8px 0;
+      font-size: 9px;
+      line-height: 1.2;
+    }
+
+    .letter-greeting {
+      margin-bottom: 6px;
+      text-align: justify;
+      font-size: 9px;
+      line-height: 1.2;
+    }
+
+    .letter-greeting strong {
+      font-weight: bold;
+      color: #000;
+    }
+
+    .letter-rules {
+      margin: 6px 0;
+      text-align: justify;
+    }
+
+    .letter-rules .rule {
+      margin: 1px 0;
+      text-indent: 10px;
+      font-size: 7px;
+      line-height: 1.1;
+    }
+
+    .letter-closing {
+      margin: 6px 0;
+      text-align: justify;
+      font-size: 8px;
+      line-height: 1.1;
+    }
+
+    .letter-date {
+      text-align: right;
+      margin: 8px 0 4px 0;
+      font-size: 8px;
+      font-weight: bold;
+    }
+
+    .letter-signatures {
+      display: flex;
+      gap: 15px;
+      margin-top: 8px;
+    }
+
+    .signature-item {
+      flex: 1;
+      text-align: center;
+    }
+
+    .signature-label {
+      font-size: 7px;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .signature-line {
+      border-bottom: 1px solid #000;
+      margin: 6px 0 4px 0;
+      min-height: 10px;
+    }
+
+    .signature-name {
+      font-size: 7px;
+      margin-top: 2px;
+    }
+
+    .student-summary {
+      font-size: 9px;
+      line-height: 1.2;
+      margin: 4px 0;
+      text-align: justify;
+      padding: 3px 0;
+    }
+
+    .student-summary strong {
+      font-weight: bold;
+      color: #000;
+    }
+
+    .address-summary {
+      font-size: 9px;
+      line-height: 1.2;
+      margin: 4px 0;
+      text-align: justify;
+      padding: 3px 0;
+    }
+
+    .address-summary strong {
+      font-weight: bold;
+      color: #000;
+    }
+
+    .family-summary {
+      font-size: 9px;
+      line-height: 1.2;
+      margin: 4px 0;
+      text-align: justify;
+      padding: 3px 0;
+    }
+
+    .family-summary strong {
+      font-weight: bold;
+      color: #000;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      
+      .document {
+        max-width: none;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="document">
     <div class="header">
-        <div class="school-name">សាលាមិត្តភាព</div>
-        <div class="form-title">ទម្រង់ចុះឈ្មោះសិស្ស</div>
-        <div class="form-subtitle">Student Registration Form</div>
+      <h1>ទម្រង់ចុះឈ្មោះសិស្ស</h1>
+      <h2>សាលាមិត្តភាព</h2>
+      <h3>កំពង់ចាម</h3>
     </div>
 
     <div class="section">
-        <div class="section-title">ព័ត៌មានផ្ទាល់ខ្លួន / Personal Information</div>
-        <div class="form-grid">
-            <div class="form-group">
-                <div class="label">នាមត្រកូល / Last Name</div>
-                <div class="value">${data.lastName || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">នាមខ្លួន / First Name</div>
-                <div class="value">${data.firstName || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ភេទ / Gender</div>
-                <div class="value">${data.gender || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ថ្ងៃខែឆ្នាំកំណើត / Date of Birth</div>
-                <div class="value">${data.dob || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">អាយុ / Age</div>
-                <div class="value">${data.age || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ថ្នាក់ / Class</div>
-                <div class="value">${getGradeLabel(data.class)}</div>
-            </div>
-        </div>
+      <div class="section-title">ព័ត៌មានសិស្ស</div>
+      <div class="student-summary">
+        ឈ្មោះសិស្ស <strong>${studentFullName || '........................'}</strong> ភេទ <strong>${genderText || '......'}</strong> ថ្ងៃខែឆ្នាំកំណើត <strong>${data.dob || '..................'}</strong> លេខសម្គាល់ <strong>${data.studentId || '....'}</strong> ថ្នាក់ <strong>${classLabel}</strong> ឆ្នាំសិក្សា <strong>${data.schoolYear || ''}</strong>
+      </div>
     </div>
 
     <div class="section">
-        <div class="section-title">ព័ត៌មានការចុះឈ្មោះ / Registration Information</div>
-        <div class="form-grid">
-            <div class="form-group">
-                <div class="label">លេខសិស្ស / Student ID</div>
-                <div class="value">${data.studentId || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">លេខទូរស័ព្ទ / Phone Number</div>
-                <div class="value">${data.phone || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">លេខទូរស័ព្ទអាសន្ន / Emergency Contact</div>
-                <div class="value">${data.emergencyContact || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ឆ្នាំសិក្សា / School Year</div>
-                <div class="value">${data.schoolYear || 'មិនមាន'}</div>
-            </div>
-        </div>
+      <div class="section-title">អាស័យដ្ឋានបច្ចុប្បន្ន</div>
+      <div class="address-summary">
+        ផ្ទះលេខ <strong>${data.studentHouseNumber || '........................'}</strong> ភូមិ <strong>${data.studentVillage || '........................'}</strong> ស្រុក/ក្រុង <strong>${data.studentDistrict || '........................'}</strong> ខេត្ត <strong>${data.studentProvince || '........................'}</strong> ស្រុកកំណើត <strong>${data.studentBirthDistrict || '........................'}</strong>
+      </div>
     </div>
 
     <div class="section">
-        <div class="section-title">អាសយដ្ឋាន / Address</div>
-        <div class="form-grid">
-            <div class="form-group">
-                <div class="label">លេខផ្ទះ / House Number</div>
-                <div class="value">${data.studentHouseNumber || 'មិនមាន'}</div>
+      <div class="section-title">អាណាព្យាបាលគ្រួសារ</div>
+      <div class="guardian-info">
+        ${(data.guardians || []).map(g => `
+          <div class="guardian-item">
+            <div class="guardian-name">${[g.lastName, g.firstName].filter(Boolean).join(' ')}</div>
+            <div class="guardian-details">
+              ទំនាក់ទំនង: ${getRelationKhmer(g.relation || '')} | 
+              មុខរបរ: ${g.occupation || ''} | 
+              ទូរស័ព្ទ: ${g.phone || ''}
             </div>
-            <div class="form-group">
-                <div class="label">ភូមិ / Village</div>
-                <div class="value">${data.studentVillage || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ស្រុក / District</div>
-                <div class="value">${data.studentDistrict || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ខេត្ត / Province</div>
-                <div class="value">${data.studentProvince || 'មិនមាន'}</div>
-            </div>
-        </div>
-    </div>
-
-    ${data.guardians && data.guardians.length > 0 ? `
-    <div class="section">
-        <div class="section-title">អាណាព្យាបាទ / Guardians</div>
-        ${data.guardians.map((guardian, index) => `
-        <div class="guardian-section">
-            <div class="guardian-title">អាណាព្យាបាទ ${index + 1} / Guardian ${index + 1}</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <div class="label">នាមត្រកូល / Last Name</div>
-                    <div class="value">${guardian.lastName || 'មិនមាន'}</div>
-                </div>
-                <div class="form-group">
-                    <div class="label">នាមខ្លួន / First Name</div>
-                    <div class="value">${guardian.firstName || 'មិនមាន'}</div>
-                </div>
-                <div class="form-group">
-                    <div class="label">ទំនាក់ទំនង / Relation</div>
-                    <div class="value">${guardian.relation || 'មិនមាន'}</div>
-                </div>
-                <div class="form-group">
-                    <div class="label">លេខទូរស័ព្ទ / Phone</div>
-                    <div class="value">${guardian.phone || 'មិនមាន'}</div>
-                </div>
-                <div class="form-group">
-                    <div class="label">មុខរបរ / Occupation</div>
-                    <div class="value">${guardian.occupation || 'មិនមាន'}</div>
-                </div>
-                <div class="form-group">
-                    <div class="label">ចំណូល / Income</div>
-                    <div class="value">${guardian.income || 'មិនមាន'}</div>
-                </div>
-            </div>
-        </div>
-        `).join('')}
-    </div>
-    ` : ''}
-
-    <div class="section">
-        <div class="section-title">ព័ត៌មានបន្ថែម / Additional Information</div>
-        <div class="form-grid">
-            <div class="form-group">
-                <div class="label">អតីតសាលា / Previous School</div>
-                <div class="value">${data.previousSchool || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">មូលហេតុផ្លាស់ប្តូរ / Transfer Reason</div>
-                <div class="value">${data.transferReason || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ថ្ងៃខែឆ្នាំកំណើត / Birth District</div>
-                <div class="value">${data.studentBirthDistrict || 'មិនមាន'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ចាក់វ៉ាក់សាំង / Vaccinated</div>
-                <div class="value">${data.vaccinated ? 'បាន / Yes' : 'មិនទាន់ / No'}</div>
-            </div>
-        </div>
+          </div>
+        `).join('') || '<div class="guardian-item">មិនមានព័ត៌មានអាណាព្យាបាល</div>'}
+      </div>
     </div>
 
     <div class="section">
-        <div class="section-title">តម្រូវការ / Needs Assessment</div>
-        <div class="form-grid">
-            <div class="form-group">
-                <div class="label">ត្រូវការសម្លៀកបំពាក់ / Needs Clothes</div>
-                <div class="value">${data.needsClothes ? 'បាទ / Yes' : 'ទេ / No'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ត្រូវការសម្ភារៈ / Needs Materials</div>
-                <div class="value">${data.needsMaterials ? 'បាទ / Yes' : 'ទេ / No'}</div>
-            </div>
-            <div class="form-group">
-                <div class="label">ត្រូវការការដឹកជញ្ជូន / Needs Transport</div>
-                <div class="value">${data.needsTransport ? 'បាទ / Yes' : 'ទេ / No'}</div>
-            </div>
-        </div>
+      <div class="section-title">ព័ត៌មានគ្រួសារ</div>
+      <div class="family-summary">
+        នៅជាមួយ <strong>${data.familyInfo?.livingWith || '........................'}</strong> ប្រភេទលំនៅឋាន <strong>${houseType}</strong> រយៈពេលនៅកំពង់ចាម <strong>${data.familyInfo?.durationInKPC || '........................'} ឆ្នាំ</strong> ចំនួនកូនក្នុងបន្ទុក <strong>${data.familyInfo?.childrenInCare || '........................'} នាក់</strong> ជីវភាពគ្រួសារ <strong>${data.familyInfo?.livingCondition || '........................'}</strong> ប្រាក់ចំណូល <strong>${familyIncome || '........................'} រៀល</strong> ជំនួយអង្គការ <strong>${data.familyInfo?.organizationHelp || '........................'}</strong> លទ្ធភាពជួយសាលា <strong>${data.familyInfo?.helpAmount || '........................'} រៀល ក្នុងមួយ ${data.familyInfo?.helpFrequency || '........................'}</strong> វ៉ាក់សាំង <strong>${getVaccinationKhmer(data.vaccinated)}</strong> សាសនា <strong>${data.familyInfo?.religion || '........................'}</strong> ព្រះវិហារ <strong>${data.familyInfo?.churchName || '........................'}</strong> ស្គាល់សាលាតាមរយៈ <strong>${data.familyInfo?.knowSchool || '........................'}</strong>
+      </div>
     </div>
 
-    <div class="footer">
-        <p>ទម្រង់នេះត្រូវបានបង្កើតឡើងនៅក្នុងប្រព័ន្ធគ្រប់គ្រងសាលា</p>
-        <p>This form was generated by the School Management System</p>
-        <p>Generated on: ${new Date().toLocaleDateString('km-KH')} - ${new Date().toLocaleTimeString('km-KH')}</p>
+    <div class="section">
+      <div class="section-title">តម្រូវការពីសាលា</div>
+      <div class="checkbox-section">
+        <div class="checkbox-item">
+          <span class="checkbox">${data.needsClothes ? '✓' : ''}</span>
+          កង្វះខាតសម្លៀកបំពាក់
+        </div>
+        <div class="checkbox-item">
+          <span class="checkbox">${data.needsMaterials ? '✓' : ''}</span>
+          កង្វះខាតសម្ភារសិក្សា
+        </div>
+        <div class="checkbox-item">
+          <span class="checkbox">${data.needsTransport ? '✓' : ''}</span>
+          ត្រូវការឡានជូនមកសាលា
+        </div>
+      </div>
     </div>
+
+    <div class="formal-letter">
+      <div class="letter-greeting">
+        សូមគោរពចូលមក លោកស្រីនាយិកាសាលាមិត្តភាព សូមលោកស្រីអនុញ្ញាតឱ្យកូន ខ្ញុំបាទ/នាងខ្ញុំ ឈ្មោះ <strong>${studentFullName || '........................'}</strong> ភេទ <strong>${genderText || '......'}</strong> ចូលរៀននៅ <strong>${classLabel}</strong> នៃសាលារបស់លោកស្រីដោយអនុគ្រោះ។ ខ្ញុំបាទ/នាងខ្ញុំ សូមសន្យាថានឹងគោរពតាមបទបញ្ជារបស់សាលាដូចខាងក្រោម៖
+      </div>
+
+      <div class="letter-rules">
+        <div class="rule">១. ខ្ញុំបាទ/នាងខ្ញុំ នឹងបញ្ជូនកូនឱ្យមករៀនបានទៀងទាត់ និងទាន់ពេលវេលា។</div>
+        <div class="rule">២. ខ្ញុំបាទ/នាងខ្ញុំ នឹងខិតខំអប់រំកូនឱ្យក្លាយជាកូនល្អ មិត្តល្អ សិស្សល្អ។</div>
+        <div class="rule">៣. ខ្ញុំបាទ/នាងខ្ញុំ មិនបញ្ឈប់កូនឱ្យឈប់រៀនដោយគ្មានការអនុញ្ញាតពីសាលារៀនឡើយ។</div>
+        <div class="rule">៤. ខ្ញុំបាទ/នាងខ្ញុំ នឹងថែរក្សាសម្ភារសិក្សារបស់កូនឱ្យបានល្អ (ក្នុងករណីសៀវភៅរហែកឬបាត់ ខ្ញុំត្រូវទិញសងសាលាវិញ)។</div>
+        <div class="rule">៥. សិស្សមិនត្រូវយកទូរស័ព្ទដៃមកសាលាជាដាច់ខាត (លើកទី១ឱ្យវិញ លើកទី២មិនឱ្យវិញទេ)។</div>
+        <div class="rule">៦. ខ្ញុំបាទ/នាងខ្ញុំ នឹងប្រើប្រាស់លេខទូរស័ព្ទឱ្យបានច្បាស់លាស់ ដែលសាលាអាចទាក់ទងបាន (ប្តូរលេខថ្មីត្រូវឱ្យលេខថ្មីមកសាលាជាដាច់ខាត)។</div>
+        <div class="rule">៧. សិស្សដែលមានអវត្តមានឥតច្បាប់ ៣០ដង/១ឆ្នាំ នឹងត្រូវបញ្ឈប់ពីការសិក្សា។ អវត្តមានច្បាប់ ២ដងស្មើនឹងឥតច្បាប់ ១ដង។</div>
+        <div class="rule">៨. ប្រសិនបើអាណាព្យាបាលមិនចូលរួមក្នុងការប្រជុំដែលសាលាអញ្ជើញនោះទេ សាលាមានសិទ្ធិបញ្ឈប់កូនដោយស្វ័យប្រវត្តិ។</div>
+        <div class="rule">៩. សិស្សដែលមិនខិតខំរៀន ធ្លាក់មធ្យមភាគដំណាច់ឆ្នាំ សាលាមានសិទ្ធិបញ្ឈប់សិស្សនោះបន្ទាប់ពីបញ្ចប់ឆ្នាំសិក្សា។</div>
+        <div class="rule">១០. សិស្សដែលបង្កកំហុសធំៗ (បំផ្លាញទ្រព្យសម្បត្តិ វាយគ្នា ជេរគ្នា លេងអសីលធម៌ មិនគោរពគ្រូ) និងកំហុសស្រាល ៥ដង សាលាមានសិទ្ធិបញ្ឈប់សិស្សនោះ។</div>
+        <div class="rule">១១. ខ្ញុំបាទ/នាងខ្ញុំ នឹងជួយអប់រំកូនឱ្យគោរពវិន័យ/បទបញ្ជាផ្ទៃក្នុងរបស់សាលាឱ្យបានហ្មត់ចត់។</div>
+        <div class="rule">១២. អាណាព្យាបាលត្រូវផ្តល់សិទ្ធិសេរីភាពឱ្យសិស្សក្នុងការទទួលជឿលើព្រះយេស៊ូវគ្រីស្ទ។</div>
+      </div>
+      
+      <div class="letter-closing">
+        បើខ្ញុំបាទ/នាងខ្ញុំ មិនគោរពតាមកិច្ចសន្យាណាមួយដែលមានចែងនៅខាងលើទេនោះ ខ្ញុំបាទ/នាងខ្ញុំ សូមទទួលខុសត្រូវចំពោះមុខបទបញ្ជាផ្ទៃក្នុងរបស់សាលា។
+      </div>
+      
+      <div class="letter-date">
+        កំពង់ចាម ថ្ងៃទី ${new Date().toLocaleDateString('km-KH')}
+      </div>
+      
+      <div class="letter-signatures">
+        <div class="signature-item">
+          <div class="signature-label">ហត្ថលេខាអ្នកទទួល</div>
+          <div class="signature-line"></div>
+          <div class="signature-name">ឈ្មោះ</div>
+        </div>
+        <div class="signature-item">
+          <div class="signature-label">ហត្ថលេខា ឫ ស្នាមមេដៃ</div>
+          <div class="signature-line"></div>
+          <div class="signature-name">ឈ្មោះ</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
   `
   return html
 }
 
-// Function to generate PDF using Puppeteer
-export const generateStudentRegistrationPDF = async (data: StudentData): Promise<Uint8Array> => {
+// Function to generate PDF and save to file
+export const generateStudentRegistrationPDF = async (data: StudentData): Promise<{ buffer: Buffer, filename: string }> => {
+  const htmlContent = generateStudentRegistrationHTML(data)
+  
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor'
+    ]
+  })
+
   try {
-    console.log('🚀 Starting Puppeteer PDF generation...')
-    
-    // Launch browser
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    })
-    
-    console.log('🌐 Browser launched successfully')
-    
-    // Create new page
     const page = await browser.newPage()
+    await page.setDefaultTimeout(60000)
+    await page.setDefaultNavigationTimeout(60000)
     
-    // Generate HTML content
-    const htmlContent = generateStudentRegistrationHTML(data)
+    await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' })
     
-    // Set content and wait for fonts to load
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' })
-    
-    console.log('📄 HTML content loaded, waiting for fonts...')
-    
-    // Wait a bit more for fonts to fully load
+    // Wait for fonts to load
     await new Promise(resolve => setTimeout(resolve, 2000))
     
-    // Generate PDF
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
       margin: {
-        top: '20mm',
-        right: '20mm',
-        bottom: '20mm',
-        left: '20mm'
+        top: '15mm',
+        right: '15mm',
+        bottom: '15mm',
+        left: '15mm'
       }
     })
+
+    // Generate filename with student info and timestamp
+    const studentName = `${data.lastName || ''} ${data.firstName || ''}`.trim() || 'Unknown'
+    const studentId = data.studentId || 'NoID'
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+    const filename = `student-registration-${studentId}-${studentName.replace(/\s+/g, '-')}-${timestamp}.pdf`
     
-    console.log('✅ PDF generated successfully with Puppeteer!')
-    console.log(`📏 PDF size: ${(pdfBuffer.length / 1024).toFixed(2)} KB`)
+    // Ensure the pdf-exports directory exists
+    const exportDir = path.join(process.cwd(), 'public', 'pdf-exports')
+    if (!fs.existsSync(exportDir)) {
+      fs.mkdirSync(exportDir, { recursive: true })
+    }
     
-    // Close browser
+    // Save file to the exports folder
+    const filePath = path.join(exportDir, filename)
+    fs.writeFileSync(filePath, Buffer.from(pdfBuffer))
+    
+    return { buffer: Buffer.from(pdfBuffer), filename }
+  } finally {
     await browser.close()
-    
-    return pdfBuffer
-    
-  } catch (error) {
-    console.error('❌ Error generating PDF with Puppeteer:', error)
-    throw new Error(`PDF generation failed: ${error}`)
   }
 }
 
@@ -429,7 +630,7 @@ export const saveStudentRegistrationPDF = async (data: StudentData, filename: st
     
     // In a browser environment, we'll trigger download
     // In Node.js, we could save to file system
-    console.log('💾 PDF ready for download:', filename)
+    console.log('💾 Professional PDF ready for download:', filename)
     
     return pdfBuffer
   } catch (error) {

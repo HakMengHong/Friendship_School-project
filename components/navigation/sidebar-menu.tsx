@@ -36,121 +36,76 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
 
   const menuItems = useMemo(() => {
     const baseItems = [
-      // Admin Dashboard
+      // Dashboard (Admin only)
       {
-        id: "admin-dashboard",
+        id: "dashboard",
         icon: LayoutDashboard,
         label: "ផ្ទាំងគ្រប់គ្រង",
-        href: "/admin/dashboard",
+        href: "/dashboard",
         requiredRole: "admin" as const,
         subItems: [
-          { id: "admin-users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/admin/dashboard/users" },
-          { id: "admin-academic", label: "ការគ្រប់គ្រងថ្នាក់", href: "/admin/dashboard/academic-management" },
-          { id: "admin-add-student-class", label: "បន្ថែមសិស្សទៅក្នុងថ្នាក់", href: "/admin/dashboard/add-student-class" },
-          { id: "admin-view-student-class", label: "មើលថ្នាក់រៀន", href: "/admin/dashboard/view-student-class" },
+          { id: "users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/dashboard/users" },
+          { id: "academic", label: "ការគ្រប់គ្រងថ្នាក់", href: "/dashboard/academic-management" },
+          { id: "add-student-class", label: "បន្ថែមសិស្សទៅក្នុងថ្នាក់", href: "/dashboard/add-student-class" },
+          { id: "view-student-class", label: "មើលថ្នាក់រៀន", href: "/dashboard/view-student-class" },
         ],
       },
-      // Admin Attendance
+      // Attendance Daily (Both admin and teacher)
       {
-        id: "admin-attendance",
+        id: "attendance-daily",
         icon: UserCheck,
-        label: "អវត្តមានសិស្ស",
-        href: "/admin/attendance",
-        requiredRole: "admin" as const,
-        subItems: [
-          { id: "admin-attendance-daily", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/admin/attendance/daily" },
-          { id: "admin-attendance-report", label: "របាយការណ៍អវត្តមាន", href: "/admin/attendance/report" },
-        ],
+        label: "អវត្តមានប្រចាំថ្ងៃ",
+        href: "/attendance/daily",
+        requiredRole: "both" as const,
       },
-      // Admin Grade
+      // Grade Add (Both admin and teacher)
       {
-        id: "admin-grade",
+        id: "grade-add",
         icon: BarChart2,
-        label: "ពិន្ទុសិស្ស",
-        href: "/admin/grade",
-        requiredRole: "admin" as const,
-        subItems: [
-          { id: "admin-add-grade", label: "បញ្ចូលពិន្ទុសិស្ស", href: "/admin/grade/addgrade" },
-          { id: "admin-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/admin/grade/report" },
-          { id: "admin-grade-gradebook", label: "សៀវភៅតាមដាន", href: "/admin/grade/gradebook" },
-        ],
+        label: "បញ្ចូលពិន្ទុសិស្ស",
+        href: "/grade/addgrade",
+        requiredRole: "both" as const,
       },
-      // Admin Student Info
+      // Grade Report (Both admin and teacher)
       {
-        id: "admin-student-info",
+        id: "grade-report",
+        icon: BarChart2,
+        label: "របាយការណ៍ពិន្ទុ",
+        href: "/grade/report",
+        requiredRole: "both" as const,
+      },
+      // Student Info (Both admin and teacher)
+      {
+        id: "student-info",
         icon: UserIcon,
         label: "ព័ត៌មានសិស្ស",
-        href: "/admin/student-info",
-        requiredRole: "admin" as const,
-        subItems: [
-          { id: "admin-student-info-list", label: "បញ្ជីឈ្មោះសិស្ស", href: "/admin/student-info/list" },
-        ],
+        href: "/student-info",
+        requiredRole: "both" as const,
       },
-      // Admin Register Student
+      // Register Student (Both admin and teacher)
       {
-        id: "admin-register-student",
+        id: "register-student",
         icon: ClipboardList,
         label: "ចុះឈ្មោះសិស្ស",
-        href: "/admin/register-student",
+        href: "/register-student",
+        requiredRole: "both" as const,
+      },
+      // PDF Exports (Admin only)
+      {
+        id: "pdf-exports",
+        icon: GraduationCap,
+        label: "ការនាំចេញ PDF",
+        href: "/pdf-exports",
         requiredRole: "admin" as const,
       },
-      // Teacher Dashboard
-      {
-        id: "teacher-dashboard",
-        icon: LayoutDashboard,
-        label: "ផ្ទាំងគ្រប់គ្រង",
-        href: "/teacher/dashboard",
-        requiredRole: "teacher" as const,
-      },
-      // Teacher Attendance
-      {
-        id: "teacher-attendance",
-        icon: UserCheck,
-        label: "អវត្តមានសិស្ស",
-        href: "/teacher/attendance",
-        requiredRole: "teacher" as const,
-        subItems: [
-          { id: "teacher-attendance-daily", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/teacher/attendance/daily" },
-          { id: "teacher-attendance-report", label: "របាយការណ៍អវត្តមាន", href: "/teacher/attendance/report" },
-        ],
-      },
-      // Teacher Grade
-      {
-        id: "teacher-grade",
-        icon: BarChart2,
-        label: "ពិន្ទុសិស្ស",
-        href: "/teacher/grade",
-        requiredRole: "teacher" as const,
-        subItems: [
-          { id: "teacher-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/teacher/grade/report" },
-          { id: "teacher-grade-gradebook", label: "សៀវភៅតាមដាន", href: "/teacher/grade/gradebook" },
-        ],
-      },
-      // Teacher Student Info
-      {
-        id: "teacher-student-info",
-        icon: UserIcon,
-        label: "ព័ត៌មានសិស្ស",
-        href: "/teacher/student-info",
-        requiredRole: "teacher" as const,
-        subItems: [
-          { id: "teacher-student-info-list", label: "បញ្ជីឈ្មោះសិស្ស", href: "/teacher/student-info/list" },
-        ],
-      },
-      // Teacher Register Student
-      {
-        id: "teacher-register-student",
-        icon: ClipboardList,
-        label: "ចុះឈ្មោះសិស្ស",
-        href: "/teacher/register-student",
-        requiredRole: "teacher" as const,
-      },
+
     ]
 
     // Filter menu items based on user role
     return baseItems.filter(item => {
       if (item.requiredRole === 'admin') return isAdmin(currentUser)
       if (item.requiredRole === 'teacher') return isTeacher(currentUser)
+      if (item.requiredRole === 'both') return isAdmin(currentUser) || isTeacher(currentUser)
       return false
     })
   }, [currentUser])

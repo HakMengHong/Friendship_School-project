@@ -173,7 +173,7 @@ export const isTeacher = (user: User | null): boolean => {
 export const canAccess = (user: User | null, requiredRole: 'admin' | 'teacher' | 'both'): boolean => {
   if (!user) return false
   
-  if (requiredRole === 'both') return true
+  if (requiredRole === 'both') return isAdmin(user) || isTeacher(user)
   if (requiredRole === 'admin') return isAdmin(user)
   if (requiredRole === 'teacher') return isTeacher(user)
   

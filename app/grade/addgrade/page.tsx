@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -128,6 +129,14 @@ interface GradeInput {
 }
 
 export default function AddScorePage() {
+  return (
+    <RoleGuard allowedRoles={['admin', 'teacher']}>
+      <AddScoreContent />
+    </RoleGuard>
+  )
+}
+
+function AddScoreContent() {
   // Filter states
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("")
   const [selectedSemester, setSelectedSemester] = useState<string>("")

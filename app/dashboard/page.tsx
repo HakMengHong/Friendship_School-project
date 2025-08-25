@@ -503,7 +503,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="/admin/dashboard/academic-management" className="block">
+                          <a href="/dashboard/academic-management" className="block">
               <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
@@ -517,7 +517,7 @@ export default function DashboardPage() {
               </Card>
             </a>
             
-            <a href="/admin/dashboard/add-student-class" className="block">
+                          <a href="/dashboard/add-student-class" className="block">
               <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
@@ -531,7 +531,7 @@ export default function DashboardPage() {
               </Card>
             </a>
             
-            <a href="/admin/dashboard/users" className="block">
+                          <a href="/dashboard/users" className="block">
               <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
@@ -545,7 +545,7 @@ export default function DashboardPage() {
               </Card>
             </a>
             
-            <a href="/admin/student-info" className="block">
+                          <a href="/student-info" className="block">
               <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">

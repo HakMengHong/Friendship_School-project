@@ -1,46 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateStudentRegistrationPDF } from '../../../../lib/puppeteer-pdf-generator'
+import { generateStudentRegistrationPDF } from '@/lib/puppeteer-pdf-generator'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🚀 PDF generation API endpoint called')
-    
-    // Parse the request body
     const data = await request.json()
     
-    if (!data) {
-      return NextResponse.json(
-        { error: 'No data provided' },
-        { status: 400 }
-      )
-    }
+    console.log('📄 Generating PDF for student:', data.firstName, data.lastName)
     
-    console.log('📄 Received data for PDF generation:', Object.keys(data))
+    const result = await generateStudentRegistrationPDF(data)
     
-    // Generate PDF using Puppeteer
-    const pdfBuffer = await generateStudentRegistrationPDF(data)
+    console.log('✅ PDF generated successfully:', result.filename)
     
-    console.log('✅ PDF generated successfully!')
-    console.log(`📏 PDF size: ${(pdfBuffer.length / 1024).toFixed(2)} KB`)
-    
-    // Return the PDF as a response
-    return new NextResponse(Buffer.from(pdfBuffer), {
+    // Return the PDF buffer with proper headers
+    return new NextResponse(result.buffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="student-registration.pdf"',
-        'Content-Length': pdfBuffer.length.toString(),
-      },
+        'Content-Disposition': `attachment; filename="${result.filename}"`,
+        'Content-Length': result.buffer.length.toString()
+      }
     })
     
   } catch (error) {
-    console.error('❌ Error in PDF generation API:', error)
-    
+    console.error('❌ Error generating PDF:', error)
     return NextResponse.json(
       { 
-        error: 'PDF generation failed',
+        error: 'PDF generation failed', 
         details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      }, 
       { status: 500 }
     )
   }

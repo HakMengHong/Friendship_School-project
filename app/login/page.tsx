@@ -103,12 +103,12 @@ export default function LoginPage() {
 
     // Redirect to appropriate dashboard based on role
     if (user.role === 'admin') {
-      router.push("/admin/dashboard")
+      router.push("/dashboard")
     } else if (user.role === 'teacher') {
-      router.push("/teacher/dashboard")
+      router.push("/dashboard")
     } else {
       // Default fallback
-      router.push("/admin/dashboard")
+      router.push("/dashboard")
     }
     } catch (error) {
       console.error('Login error:', error)
