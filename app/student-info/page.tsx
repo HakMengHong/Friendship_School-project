@@ -185,7 +185,7 @@ function StudentInfoContent() {
         const res = await fetch('/api/students');
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
-        const list = Array.isArray(data.students) ? data.students : [];
+        const list = Array.isArray(data) ? data : []; // API returns array directly, not wrapped in students object
         if (isMounted) {
           setStudents(list);
           setFilteredStudents(list);
@@ -266,7 +266,7 @@ function StudentInfoContent() {
         setLoadingFilters(true);
         
         // Fetch school years
-        const yearsRes = await fetch('/api/admin/school-years');
+        const yearsRes = await fetch('/api/school-years');
         if (yearsRes.ok) {
           const yearsData: SchoolYearResponse[] = await yearsRes.json();
           // Extract schoolYearCode from the response
@@ -274,7 +274,7 @@ function StudentInfoContent() {
         }
         
         // Fetch classes (grades from courses)
-        const classesRes = await fetch('/api/admin/classes');
+        const classesRes = await fetch('/api/classes');
         if (classesRes.ok) {
           const classesData: ClassesResponse = await classesRes.json();
           setClasses(classesData.classes);

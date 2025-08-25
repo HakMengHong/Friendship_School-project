@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -57,6 +58,14 @@ interface SchoolYear {
 }
 
 export default function AddStudentClassPage() {
+  return (
+    <RoleGuard allowedRoles={['admin']}>
+      <AddStudentClassContent />
+    </RoleGuard>
+  )
+}
+
+function AddStudentClassContent() {
   const [loading, setLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -124,7 +133,7 @@ export default function AddStudentClassPage() {
 
   const fetchSchoolYears = async () => {
     try {
-      const response = await fetch('/api/admin/school-years')
+              const response = await fetch('/api/school-years')
       if (response.ok) {
         const data = await response.json()
         setSchoolYears(data)
@@ -142,7 +151,7 @@ export default function AddStudentClassPage() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('/api/admin/courses')
+              const response = await fetch('/api/courses')
       if (response.ok) {
         const data = await response.json()
         setCourses(data)
@@ -160,7 +169,7 @@ export default function AddStudentClassPage() {
       const response = await fetch('/api/students')
       if (response.ok) {
         const data = await response.json()
-        setStudents(data.students || [])
+        setStudents(data || []) // API returns array directly, not wrapped in students object
       } else {
         setError('មានបញ្ហាក្នុងការទាញយកសិស្ស')
       }
@@ -173,7 +182,7 @@ export default function AddStudentClassPage() {
   const fetchEnrollments = async () => {
     try {
       setEnrollmentsLoading(true)
-      const response = await fetch('/api/admin/enrollments')
+              const response = await fetch('/api/enrollments')
       if (response.ok) {
         const data = await response.json()
         setEnrollments(data || [])
@@ -245,7 +254,7 @@ export default function AddStudentClassPage() {
     setLoading(true)
     try {
       // Make API call to create enrollments
-      const response = await fetch('/api/admin/enrollments', {
+              const response = await fetch('/api/enrollments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

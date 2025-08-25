@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { 
   Users, 
   BookOpen, 
@@ -29,6 +30,14 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Loader2, AlertCircle } from "lucide-react"
 
 export default function DashboardPage() {
+  return (
+    <RoleGuard allowedRoles={['admin']}>
+      <DashboardContent />
+    </RoleGuard>
+  )
+}
+
+function DashboardContent() {
   // Database interfaces
   interface Student {
     studentId: number
@@ -159,10 +168,10 @@ export default function DashboardPage() {
 
       // Fetch all data in parallel
       const [studentsRes, usersRes, coursesRes, attendancesRes] = await Promise.all([
-        fetch('/api/admin/students'),
-        fetch('/api/admin/users'),
-        fetch('/api/admin/courses'),
-        fetch('/api/admin/attendance?date=' + new Date().toISOString().split('T')[0])
+        fetch('/api/students'),
+        fetch('/api/users'),
+        fetch('/api/courses'),
+        fetch('/api/attendance?date=' + new Date().toISOString().split('T')[0])
       ])
 
       // Check responses and parse data

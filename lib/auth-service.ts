@@ -76,7 +76,7 @@ export const authenticateUser = async (username: string, password: string): Prom
       lastLogin: dbUser.lastLogin || undefined,
       photo: dbUser.photo || undefined,
       status: dbUser.status,
-      assignedClass: dbUser.courses[0]?.courseId || undefined
+      assignedClass: dbUser.courses[0]?.courseId?.toString() || undefined
     }
 
     return user
@@ -119,7 +119,7 @@ export const getAllUsers = async (): Promise<User[]> => {
       lastLogin: dbUser.lastLogin || undefined,
       photo: dbUser.photo || undefined,
       status: dbUser.status,
-      assignedClass: dbUser.courses[0]?.courseId || undefined
+      assignedClass: dbUser.courses[0]?.courseId?.toString() || undefined
     }))
   } catch (error) {
     console.error('Error fetching users:', error)
@@ -127,34 +127,93 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
 }
 
-// Get current user from localStorage
+// Get current user from localStorage or cookie
 export const getCurrentUser = (): User | null => {
   if (typeof window === "undefined") return null
   
-  const userData = localStorage.getItem("user")
-  if (!userData) return null
-  
   try {
-    return JSON.parse(userData)
-  } catch {
+    // First try localStorage
+    const userData = localStorage.getItem("currentUser")
+    if (userData) {
+      return JSON.parse(userData)
+    }
+    
+    // Fallback to cookie if localStorage is empty
+    const cookies = document.cookie.split(';')
+    const userCookie = cookies.find(cookie => cookie.trim().startsWith('user='))
+    
+    if (userCookie) {
+      const cookieValue = userCookie.split('=')[1]
+      const decodedValue = decodeURIComponent(cookieValue)
+      return JSON.parse(decodedValue)
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error getting current user:', error)
     return null
   }
 }
 
-// Set current user in localStorage
-export const setCurrentUser = (user: User): void => {
-  if (typeof window === "undefined") return
-  
-  localStorage.setItem("user", JSON.stringify(user))
-  localStorage.setItem("username", user.username)
+// Set user data in cookies for middleware access
+export const setUserCookie = (user: User): void => {
+  if (typeof window !== 'undefined') {
+    const userData = {
+      id: user.id,
+      username: user.username,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      role: user.role,
+      position: user.position,
+      avatar: user.avatar,
+      phonenumber1: user.phonenumber1,
+      phonenumber2: user.phonenumber2,
+      lastLogin: user.lastLogin,
+      photo: user.photo,
+      status: user.status,
+    }
+    
+    // Set cookie with user data (encoded)
+    const cookieValue = encodeURIComponent(JSON.stringify(userData))
+    document.cookie = `user=${cookieValue}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict` // 7 days
+    
+    // Also store in localStorage for client-side access
+    localStorage.setItem('currentUser', JSON.stringify(user))
+  }
 }
 
-// Logout user
+// Clear user cookie and localStorage
+export const clearUserCookie = (): void => {
+  if (typeof window !== 'undefined') {
+    // Clear cookie
+    document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    
+    // Clear localStorage
+    localStorage.removeItem('currentUser')
+    sessionStorage.removeItem('currentUser')
+  }
+}
+
+// Enhanced setCurrentUser function
+export const setCurrentUser = (user: User): void => {
+  if (typeof window !== 'undefined') {
+    // Store in localStorage for client-side access
+    localStorage.setItem('currentUser', JSON.stringify(user))
+    
+    // Also set cookie for middleware access
+    setUserCookie(user)
+  }
+}
+
+// Enhanced logout function
 export const logout = (): void => {
-  if (typeof window === "undefined") return
-  
-  localStorage.removeItem("user")
-  localStorage.removeItem("username")
+  if (typeof window !== 'undefined') {
+    clearUserCookie()
+    
+    // Clear any other stored data
+    localStorage.clear()
+    sessionStorage.clear()
+  }
 }
 
 // Role checking functions

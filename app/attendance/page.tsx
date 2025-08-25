@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { 
@@ -74,6 +75,14 @@ interface Attendance {
 }
 
 export default function AbsencePage() {
+  return (
+    <RoleGuard allowedRoles={['admin']}>
+      <AbsenceContent />
+    </RoleGuard>
+  )
+}
+
+function AbsenceContent() {
   // State variables for filtering
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0])
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>('')
@@ -105,8 +114,8 @@ export default function AbsencePage() {
     try {
       setLoading(true)
       const [schoolYearsRes, coursesRes] = await Promise.all([
-        fetch('/api/admin/school-years'),
-        fetch('/api/admin/courses')
+        fetch('/api/school-years'),
+        fetch('/api/courses')
       ])
 
       if (!schoolYearsRes.ok || !coursesRes.ok) {
@@ -157,7 +166,7 @@ export default function AbsencePage() {
         params.append('status', selectedStatus)
       }
 
-      const response = await fetch(`/api/admin/attendance?${params}`)
+              const response = await fetch(`/api/attendance?${params}`)
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`)

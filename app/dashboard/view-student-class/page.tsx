@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -79,6 +80,14 @@ interface Teacher {
 }
 
 export default function ViewStudentClassPage() {
+  return (
+    <RoleGuard allowedRoles={['admin']}>
+      <ViewStudentClassContent />
+    </RoleGuard>
+  )
+}
+
+function ViewStudentClassContent() {
   const [loading, setLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -124,7 +133,7 @@ export default function ViewStudentClassPage() {
   // Fetch school years
   const fetchSchoolYears = async () => {
     try {
-      const response = await fetch('/api/admin/school-years')
+              const response = await fetch('/api/school-years')
       if (response.ok) {
         const data = await response.json()
         setSchoolYears(data)
@@ -141,7 +150,7 @@ export default function ViewStudentClassPage() {
   // Fetch courses
   const fetchCourses = async () => {
     try {
-      const response = await fetch('/api/admin/courses')
+              const response = await fetch('/api/courses')
       if (response.ok) {
         const data = await response.json()
         setCourses(data)
@@ -167,7 +176,7 @@ export default function ViewStudentClassPage() {
   // Fetch enrollments
   const fetchEnrollments = async () => {
     try {
-      const response = await fetch('/api/admin/enrollments')
+              const response = await fetch('/api/enrollments')
       if (response.ok) {
         const data = await response.json()
         setEnrollments(data)
@@ -180,7 +189,7 @@ export default function ViewStudentClassPage() {
   // Fetch teachers
   const fetchTeachers = async () => {
     try {
-      const response = await fetch('/api/admin/users')
+              const response = await fetch('/api/users')
       if (response.ok) {
         const data = await response.json()
         // Handle the nested structure where users are in data.users
@@ -197,7 +206,7 @@ export default function ViewStudentClassPage() {
   const removeStudentFromCourse = async (enrollment: Enrollment) => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/admin/enrollments?enrollmentId=${enrollment.enrollmentId}`, {
+              const response = await fetch(`/api/enrollments?enrollmentId=${enrollment.enrollmentId}`, {
         method: 'DELETE'
       })
 

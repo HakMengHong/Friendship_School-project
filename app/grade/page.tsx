@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -36,6 +37,14 @@ import {
 import { useState } from "react"
 
 export default function GradePage() {
+  return (
+    <RoleGuard allowedRoles={['admin']}>
+      <GradeContent />
+    </RoleGuard>
+  )
+}
+
+function GradeContent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('all')
 

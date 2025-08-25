@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RoleGuard } from "@/components/ui/role-guard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -72,6 +73,14 @@ interface Teacher {
 }
 
 export default function AcademicManagementPage() {
+  return (
+    <RoleGuard allowedRoles={['admin']}>
+      <AcademicManagementContent />
+    </RoleGuard>
+  )
+}
+
+function AcademicManagementContent() {
   const { toast } = useToast()
   
   // State for data
@@ -164,10 +173,10 @@ export default function AcademicManagementPage() {
       
       // Fetch all data in parallel
       const [yearsResponse, subjectsResponse, coursesResponse, teachersResponse] = await Promise.all([
-        fetch('/api/admin/school-years'),
-        fetch('/api/admin/subjects'),
-        fetch('/api/admin/courses'),
-        fetch('/api/admin/users')
+        fetch('/api/school-years'),
+        fetch('/api/subjects'),
+        fetch('/api/courses'),
+        fetch('/api/users')
       ])
 
       if (yearsResponse.ok) {
@@ -238,7 +247,7 @@ export default function AcademicManagementPage() {
       setSubmitting(true)
       setErrors({})
 
-      const response = await fetch('/api/admin/school-years', {
+              const response = await fetch('/api/school-years', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ schoolYearCode: newYear.schoolYearCode.trim() })
@@ -282,7 +291,7 @@ export default function AcademicManagementPage() {
       setSubmitting(true)
       setErrors({})
 
-      const response = await fetch('/api/admin/subjects', {
+              const response = await fetch('/api/subjects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -330,7 +339,7 @@ export default function AcademicManagementPage() {
       setSubmitting(true)
       setErrors({})
 
-      const response = await fetch('/api/admin/courses', {
+              const response = await fetch('/api/courses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -382,7 +391,7 @@ export default function AcademicManagementPage() {
       setSubmitting(true)
       setErrors({})
 
-      const response = await fetch(`/api/admin/courses/${editingCourse.courseId}`, {
+              const response = await fetch(`/api/courses/${editingCourse.courseId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -435,7 +444,7 @@ export default function AcademicManagementPage() {
 
     try {
       setSubmitting(true)
-      const response = await fetch(`/api/admin/school-years/${id}`, {
+              const response = await fetch(`/api/school-years/${id}`, {
         method: 'DELETE'
       })
 
@@ -465,7 +474,7 @@ export default function AcademicManagementPage() {
 
     try {
       setSubmitting(true)
-      const response = await fetch(`/api/admin/subjects/${id}`, {
+              const response = await fetch(`/api/subjects/${id}`, {
         method: 'DELETE'
       })
 
@@ -495,7 +504,7 @@ export default function AcademicManagementPage() {
 
     try {
       setSubmitting(true)
-      const response = await fetch(`/api/admin/courses/${id}`, {
+              const response = await fetch(`/api/courses/${id}`, {
         method: 'DELETE'
       })
 
@@ -552,7 +561,7 @@ export default function AcademicManagementPage() {
       // Create courses one by one
       const createdCourses: Course[] = []
       for (const courseData of coursesToCreate) {
-        const response = await fetch('/api/admin/courses', {
+        const response = await fetch('/api/courses', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(courseData)

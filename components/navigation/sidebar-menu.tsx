@@ -36,76 +36,106 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
 
   const menuItems = useMemo(() => {
     const baseItems = [
-      // Dashboard (Admin only)
+      // Admin Dashboard
       {
-        id: "dashboard",
+        id: "admin-dashboard",
         icon: LayoutDashboard,
         label: "ផ្ទាំងគ្រប់គ្រង",
         href: "/dashboard",
         requiredRole: "admin" as const,
         subItems: [
-          { id: "users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/dashboard/users" },
-          { id: "academic", label: "ការគ្រប់គ្រងថ្នាក់", href: "/dashboard/academic-management" },
-          { id: "add-student-class", label: "បន្ថែមសិស្សទៅក្នុងថ្នាក់", href: "/dashboard/add-student-class" },
-          { id: "view-student-class", label: "មើលថ្នាក់រៀន", href: "/dashboard/view-student-class" },
+          { id: "admin-users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/dashboard/users" },
+          { id: "admin-academic", label: "ការគ្រប់គ្រងថ្នាក់", href: "/dashboard/academic-management" },
+          { id: "admin-add-student-class", label: "បន្ថែមសិស្សទៅក្នុងថ្នាក់", href: "/dashboard/add-student-class" },
+          { id: "admin-view-student-class", label: "មើលថ្នាក់រៀន", href: "/dashboard/view-student-class" },
         ],
       },
-      // Attendance Daily (Both admin and teacher)
+      // Admin Attendance
       {
-        id: "attendance-daily",
+        id: "admin-attendance",
         icon: UserCheck,
-        label: "អវត្តមានប្រចាំថ្ងៃ",
-        href: "/attendance/daily",
-        requiredRole: "both" as const,
+        label: "អវត្តមានសិស្ស",
+        href: "/attendance",
+        requiredRole: "admin" as const,
+        subItems: [
+          { id: "admin-attendance-daily", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/attendance/daily" },
+          { id: "admin-attendance-report", label: "របាយការណ៍អវត្តមាន", href: "/attendance/report" },
+        ],
       },
-      // Grade Add (Both admin and teacher)
+      // Admin Grade
       {
-        id: "grade-add",
+        id: "admin-grade",
         icon: BarChart2,
-        label: "បញ្ចូលពិន្ទុសិស្ស",
-        href: "/grade/addgrade",
-        requiredRole: "both" as const,
+        label: "ពិន្ទុសិស្ស",
+        href: "/grade",
+        requiredRole: "admin" as const,
+        subItems: [
+          { id: "admin-add-grade", label: "បញ្ចូលពិន្ទុសិស្ស", href: "/grade/addgrade" },
+          { id: "admin-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/grade/report" },
+          { id: "admin-grade-gradebook", label: "សៀវភៅតាមដាន", href: "/grade/gradebook" },
+        ],
       },
-      // Grade Report (Both admin and teacher)
+      // Admin Student Info
       {
-        id: "grade-report",
-        icon: BarChart2,
-        label: "របាយការណ៍ពិន្ទុ",
-        href: "/grade/report",
-        requiredRole: "both" as const,
-      },
-      // Student Info (Both admin and teacher)
-      {
-        id: "student-info",
+        id: "admin-student-info",
         icon: UserIcon,
         label: "ព័ត៌មានសិស្ស",
         href: "/student-info",
-        requiredRole: "both" as const,
+        requiredRole: "admin" as const,
+        subItems: [
+          { id: "admin-student-info-list", label: "បញ្ជីឈ្មោះសិស្ស", href: "/student-info/list" },
+        ],
       },
-      // Register Student (Both admin and teacher)
+      // Admin Register Student
       {
-        id: "register-student",
+        id: "admin-register-student",
         icon: ClipboardList,
         label: "ចុះឈ្មោះសិស្ស",
         href: "/register-student",
-        requiredRole: "both" as const,
-      },
-      // PDF Exports (Admin only)
-      {
-        id: "pdf-exports",
-        icon: GraduationCap,
-        label: "ការនាំចេញ PDF",
-        href: "/pdf-exports",
         requiredRole: "admin" as const,
       },
 
+      // Teacher Attendance
+      {
+        id: "teacher-attendance",
+        icon: UserCheck,
+        label: "អវត្តមានប្រចាំថ្ងៃ",
+        href: "/attendance/daily",
+        requiredRole: "teacher" as const,
+      },
+      // Teacher Grade
+      {
+        id: "teacher-grade",
+        icon: BarChart2,
+        label: "ពិន្ទុសិស្ស",
+        href: "/grade/addgrade",
+        requiredRole: "teacher" as const,
+        subItems: [
+          { id: "teacher-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/grade/report" }
+        ],
+      },
+      // Teacher Student Info
+      {
+        id: "teacher-student-info",
+        icon: UserIcon,
+        label: "ព័ត៌មានសិស្ស",
+        href: "/student-info",
+        requiredRole: "teacher" as const,
+      },
+      // Teacher Register Student
+      {
+        id: "teacher-register-student",
+        icon: ClipboardList,
+        label: "ចុះឈ្មោះសិស្ស",
+        href: "/register-student",
+        requiredRole: "teacher" as const,
+      },
     ]
 
     // Filter menu items based on user role
     return baseItems.filter(item => {
       if (item.requiredRole === 'admin') return isAdmin(currentUser)
       if (item.requiredRole === 'teacher') return isTeacher(currentUser)
-      if (item.requiredRole === 'both') return isAdmin(currentUser) || isTeacher(currentUser)
       return false
     })
   }, [currentUser])

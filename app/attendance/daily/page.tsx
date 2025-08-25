@@ -192,8 +192,8 @@ function DailyAttendanceContent() {
     try {
       setLoading(true)
       const [schoolYearsRes, coursesRes] = await Promise.all([
-        fetch('/api/admin/school-years'),
-        fetch('/api/admin/courses')
+        fetch('/api/school-years'),
+        fetch('/api/courses')
       ])
 
       if (!schoolYearsRes.ok || !coursesRes.ok) {
@@ -226,7 +226,7 @@ function DailyAttendanceContent() {
         courseId: formData.course
       })
 
-      const response = await fetch(`/api/admin/students/enrolled?${params}`)
+              const response = await fetch(`/api/students/enrolled?${params}`)
       if (!response.ok) {
         throw new Error('Failed to fetch students')
       }
@@ -253,7 +253,7 @@ function DailyAttendanceContent() {
         date: formData.date
       })
 
-      const response = await fetch(`/api/admin/attendance?${params}`)
+              const response = await fetch(`/api/attendance?${params}`)
       if (!response.ok) {
         throw new Error('Failed to fetch attendances')
       }
@@ -341,8 +341,8 @@ function DailyAttendanceContent() {
       
       const method = isEditing ? 'PUT' : 'POST'
       const url = isEditing 
-        ? `/api/admin/attendance?attendanceId=${editingAttendance.attendanceId}`
-        : '/api/admin/attendance'
+        ? `/api/attendance?attendanceId=${editingAttendance.attendanceId}`
+        : '/api/attendance'
 
       console.log('Submitting attendance:', {
         method,
@@ -400,7 +400,7 @@ function DailyAttendanceContent() {
     }
 
     try {
-      const response = await fetch(`/api/admin/attendance?attendanceId=${attendanceId}`, {
+              const response = await fetch(`/api/attendance?attendanceId=${attendanceId}`, {
         method: 'DELETE'
       })
 

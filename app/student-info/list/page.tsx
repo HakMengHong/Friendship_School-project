@@ -16,8 +16,17 @@ import {
   X
 } from "lucide-react"
 import { useState } from "react"
+import { RoleGuard } from "@/components/ui/role-guard"
 
 export default function StudentListReportPage() {
+  return (
+    <RoleGuard allowedRoles={['admin']}>
+      <StudentListReportContent />
+    </RoleGuard>
+  )
+}
+
+function StudentListReportContent() {
   const [showReportModal, setShowReportModal] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [reportData, setReportData] = useState({
@@ -93,8 +102,6 @@ export default function StudentListReportPage() {
 
   return (
     <div>
-
-
       <Separator className="my-4" />   
 
       {/* Report Types Grid */}

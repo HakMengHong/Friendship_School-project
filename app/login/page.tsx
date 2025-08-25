@@ -92,29 +92,35 @@ export default function LoginPage() {
       if (!response.ok) {
         const errorData = await response.json()
         setLoginError(errorData.error || "ឈ្មោះឬលេខកូដសម្ងាត់មិនត្រឹមត្រូវ")
-      return
-    }
+        return
+      }
 
       const data = await response.json()
       const user = data.user
 
-    // Store user data
-    setCurrentUser(user)
+      // Store user data with enhanced auth service
+      setCurrentUser(user)
 
-    // Redirect to appropriate dashboard based on role
-    if (user.role === 'admin') {
-      router.push("/dashboard")
-    } else if (user.role === 'teacher') {
-      router.push("/dashboard")
-    } else {
-      // Default fallback
-      router.push("/dashboard")
-    }
+      // Check for redirect parameter
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirectTo = urlParams.get('redirect')
+
+      // Redirect to appropriate page
+      if (redirectTo && redirectTo !== '/login') {
+        router.push(redirectTo)
+      } else if (user.role === 'admin') {
+        router.push("/dashboard")
+      } else if (user.role === 'teacher') {
+        router.push("/attendance/daily")
+      } else {
+        // Default fallback
+        router.push("/dashboard")
+      }
     } catch (error) {
       console.error('Login error:', error)
       setLoginError("មានបញ្ហាក្នុងការចូល សូមព្យាយាមម្តងទៀត")
     } finally {
-    setIsLoading(false)
+      setIsLoading(false)
     }
   }
 

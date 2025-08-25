@@ -253,7 +253,7 @@ function RegisterStudentContent() {
       };
       
       // Generate PDF using Puppeteer API
-      const response = await fetch('/api/admin/generate-pdf', {
+      const response = await fetch('/api/generate-pdf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -305,7 +305,7 @@ function RegisterStudentContent() {
       try {
         const response = await fetch('/api/students')
         const data = await response.json()
-        setStudents(data.students || [])
+        setStudents(data || []) // API returns array directly, not wrapped in students object
       } catch (error) {
         console.error('Error fetching students:', error)
         toast({
@@ -325,7 +325,7 @@ function RegisterStudentContent() {
   useEffect(() => {
     const fetchSchoolYears = async () => {
       try {
-        const response = await fetch('/api/admin/school-years')
+        const response = await fetch('/api/school-years')
         const data = await response.json()
         setSchoolYears(data || []) // API returns array directly
       } catch (error) {
@@ -516,7 +516,7 @@ function RegisterStudentContent() {
         // Refresh students list
         const studentsResponse = await fetch('/api/students')
         const studentsData = await studentsResponse.json()
-        setStudents(studentsData.students || [])
+        setStudents(studentsData || []) // API returns array directly, not wrapped in students object
 
         // Notify other pages (e.g., student-info) to refresh
         try {

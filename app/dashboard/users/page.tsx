@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RoleGuard } from "@/components/ui/role-guard";
 import {
   Table,
   TableHeader,
@@ -78,6 +79,14 @@ const emptyFormData: FormData = {
 };
 
 export default function AdminUsersPage() {
+  return (
+    <RoleGuard allowedRoles={['admin']}>
+      <AdminUsersContent />
+    </RoleGuard>
+  )
+}
+
+function AdminUsersContent() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -95,7 +104,7 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/users");
+      const res = await fetch("/api/users");
       const data = await res.json();
       console.log('🔍 Users API response:', data);
       console.log('🔍 Users data.users:', data.users);
@@ -126,7 +135,7 @@ export default function AdminUsersPage() {
     setTimeout(() => {}, 0); // allow loading state to show
     try {
       const res = await fetch(
-        isEdit ? `/api/admin/users/${editUser!.userid}` : "/api/admin/users",
+        isEdit ? `/api/users/${editUser!.userid}` : "/api/users",
         {
           method: isEdit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -154,7 +163,7 @@ export default function AdminUsersPage() {
   const handleDelete = async (userid: number) => {
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/admin/users/${userid}`, { method: "DELETE" });
+              const res = await fetch(`/api/users/${userid}`, { method: "DELETE" });
       await res.json();
       setDeleteId(null);
       fetchUsers();
@@ -190,7 +199,7 @@ export default function AdminUsersPage() {
     }
     
     try {
-      const res = await fetch(`/api/admin/users/${user.userid}/status`, {
+              const res = await fetch(`/api/users/${user.userid}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !isCurrentlyActive }),

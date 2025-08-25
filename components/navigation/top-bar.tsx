@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useMemo, useState } from "react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { User as UserType } from "@/lib/auth-service"
+import { getCurrentUser, logout, User as UserType } from "@/lib/auth-service"
 import { SettingsToggle } from "@/components/ui/settings-toggle"
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 interface TopBarProps {
   className?: string
@@ -27,6 +28,7 @@ export function TopBar({ className, user }: TopBarProps) {
   const pathname = usePathname()
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
+  const router = useRouter()
 
   const pageInfo = useMemo(() => {
     const routes: Record<string, { title: string; subtitle: string }> = {
@@ -96,16 +98,8 @@ export function TopBar({ className, user }: TopBarProps) {
   }
 
   const handleLogout = () => {
-    // Clear user data from localStorage
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("currentUser")
-    }
-    toast({
-      title: "ចាកចេញ",
-      description: "អ្នកបានចាកចេញដោយជោគជ័យ",
-    })
-    // Redirect to login
-    window.location.href = "/login"
+    logout()
+    router.push("/login")
   }
 
   const handleProfileClick = () => {

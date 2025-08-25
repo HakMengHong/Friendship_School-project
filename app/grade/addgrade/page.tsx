@@ -248,7 +248,7 @@ function AddScoreContent() {
 
       console.log('🔍 fetchGrades: Fetching with params:', params.toString())
       
-      const response = await fetch(`/api/admin/grades?${params}`)
+              const response = await fetch(`/api/grades?${params}`)
       console.log('🔍 fetchGrades: Response status:', response.status, response.ok)
       
       if (!response.ok) {
@@ -292,10 +292,10 @@ function AddScoreContent() {
       setError(null)
 
       const [schoolYearsRes, semestersRes, subjectsRes, coursesRes] = await Promise.all([
-        fetch('/api/admin/school-years'),
-        fetch('/api/admin/semesters'),
-        fetch('/api/admin/subjects'),
-        fetch('/api/admin/courses')
+        fetch('/api/school-years'),
+        fetch('/api/semesters'),
+        fetch('/api/subjects'),
+        fetch('/api/courses')
       ])
 
       if (!schoolYearsRes.ok || !semestersRes.ok || !subjectsRes.ok || !coursesRes.ok) {
@@ -344,7 +344,7 @@ function AddScoreContent() {
         courseId: selectedCourse
       })
 
-      const response = await fetch(`/api/admin/students/enrolled?${params}`)
+              const response = await fetch(`/api/students/enrolled?${params}`)
       if (!response.ok) {
         throw new Error('Failed to fetch students')
       }
@@ -418,7 +418,7 @@ function AddScoreContent() {
 
       if (editingGrade) {
         // Update existing grade
-        const response = await fetch('/api/admin/grades', {
+        const response = await fetch('/api/grades', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -439,7 +439,7 @@ function AddScoreContent() {
         setEditingGrade(null)
       } else {
         // Create new grade
-        const response = await fetch('/api/admin/grades', {
+        const response = await fetch('/api/grades', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(gradeData)
@@ -518,7 +518,7 @@ function AddScoreContent() {
     }
 
     try {
-      const response = await fetch(`/api/admin/grades?gradeId=${gradeId}`, {
+              const response = await fetch(`/api/grades?gradeId=${gradeId}`, {
         method: 'DELETE'
       })
 
