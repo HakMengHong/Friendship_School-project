@@ -120,7 +120,15 @@ export function useAcademicManagement() {
     try {
       const response = await fetch('/api/users')
       const data = await response.json()
-      const teacherUsers = data.filter((user: Teacher) => 
+      
+      // Check if data has the expected structure
+      if (!data || !data.users || !Array.isArray(data.users)) {
+        console.error('Invalid data structure received:', data)
+        setTeachers([])
+        return
+      }
+      
+      const teacherUsers = data.users.filter((user: Teacher) => 
         user.role === 'teacher' && user.status === 'active'
       )
       setTeachers(teacherUsers || [])
@@ -131,6 +139,7 @@ export function useAcademicManagement() {
         description: "Failed to fetch teachers",
         variant: "destructive"
       })
+      setTeachers([])
     }
   }, [toast])
 

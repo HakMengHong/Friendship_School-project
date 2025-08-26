@@ -179,7 +179,7 @@ export function UserTable({
         </CardHeader>
         <CardContent className="p-6">
           <div className="text-center py-12">
-            <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <Users className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
               គ្មានអ្នកប្រើ
             </h3>
@@ -240,8 +240,8 @@ export function UserTable({
                             className="h-10 w-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                            <User className="h-5 w-5 text-purple-600" />
+                          <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center">
+                            <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                           </div>
                         )}
                       </div>
@@ -265,14 +265,14 @@ export function UserTable({
                     <div className="space-y-1">
                       {user.phonenumber1 && (
                         <div className="flex items-center space-x-1">
-                          <Phone className="h-3 w-3 text-gray-400" />
+                          <Phone className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                           <span className="text-sm">{user.phonenumber1}</span>
                         </div>
                       )}
                       {user.phonenumber2 && (
                         <div className="flex items-center space-x-1">
-                          <Phone className="h-3 w-3 text-gray-400" />
-                          <span className="text-sm text-gray-500">{user.phonenumber2}</span>
+                          <Phone className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                          <span className="text-sm text-gray-500 dark:text-gray-400">{user.phonenumber2}</span>
                         </div>
                       )}
                     </div>
@@ -299,7 +299,7 @@ export function UserTable({
                         disabled={statusLoading === user.userid}
                         size="sm"
                         variant="outline"
-                        className="h-6 w-6 p-0 border-purple-200 hover:border-purple-500"
+                        className="h-6 w-6 p-0 border-purple-200 dark:border-purple-700 hover:border-purple-500 dark:hover:border-purple-400"
                       >
                         {statusLoading === user.userid ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -312,16 +312,16 @@ export function UserTable({
                   
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="h-3 w-3 text-gray-400" />
+                                            <div className="flex items-center space-x-1">
+                        <Calendar className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                         <span className="text-sm">
                           {formatDate(user.createdAt)}
                         </span>
                       </div>
                       {user.lastLogin && (
                         <div className="flex items-center space-x-1">
-                          <UserCheck className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-500">
+                          <UserCheck className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
                             {formatDate(user.lastLogin)}
                           </span>
                         </div>
@@ -351,7 +351,7 @@ export function UserTable({
                         onClick={() => onDelete(user.userid)}
                         size="sm"
                         variant="outline"
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="h-8 w-8 p-0 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -377,7 +377,7 @@ export function UserTable({
               <span className="text-sm text-gray-600 dark:text-gray-400">Active</span>
             </div>
             <div className="flex items-center space-x-2">
-              <User className="h-4 w-4 text-gray-600" />
+              <User className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400">
                 អសកម្ម
               </Badge>

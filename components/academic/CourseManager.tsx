@@ -271,7 +271,7 @@ export function CourseManager({
                     <SelectValue placeholder="ជ្រើសរើសគ្រូទី១" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">មិនមាន</SelectItem>
+                    <SelectItem value="none">មិនមាន</SelectItem>
                     {teachers.map((teacher) => (
                       <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
                         {teacher.firstname} {teacher.lastname}
@@ -297,7 +297,7 @@ export function CourseManager({
                     <SelectValue placeholder="ជ្រើសរើសគ្រូទី២" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">មិនមាន</SelectItem>
+                    <SelectItem value="none">មិនមាន</SelectItem>
                     {teachers.map((teacher) => (
                       <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
                         {teacher.firstname} {teacher.lastname}
@@ -323,7 +323,7 @@ export function CourseManager({
                     <SelectValue placeholder="ជ្រើសរើសគ្រូទី៣" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">មិនមាន</SelectItem>
+                    <SelectItem value="none">មិនមាន</SelectItem>
                     {teachers.map((teacher) => (
                       <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
                         {teacher.firstname} {teacher.lastname}

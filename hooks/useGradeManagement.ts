@@ -28,20 +28,18 @@ interface Subject {
 }
 
 interface User {
-  userid: number
+  id: number
   username: string
   firstname: string
   lastname: string
-  role: string
-  position: string
-  avatar: string
-  phonenumber1: string | null
-  phonenumber2: string | null
-  photo: string | null
-  status: string
-  createdAt: string
-  updatedAt: string
-  lastLogin: string | null
+  role: 'admin' | 'teacher'
+  position?: string
+  avatar?: string
+  phonenumber1?: string
+  phonenumber2?: string
+  photo?: string
+  status?: string
+  lastLogin?: Date
 }
 
 interface Student {
@@ -330,18 +328,18 @@ export function useGradeManagement() {
       const currentUser = await getCurrentUser()
       const currentDate = getCurrentDate()
       
-      const gradeData: GradeInput = {
+      const gradeData = {
         studentId: selectedStudent.studentId,
         subjectId: parseInt(selectedSubject),
         courseId: parseInt(selectedCourse),
         semesterId: parseInt(selectedSemester),
         grade: parseFloat(score),
         gradeComment: comment || undefined,
-        userId: currentUser?.userid,
-        month: selectedMonth || currentDate.month,
-        gradeYear: selectedGradeYear || currentDate.year,
+        userId: currentUser?.id,
         gradeDate: `${selectedMonth || currentDate.month}/${selectedGradeYear || currentDate.year}`
       }
+
+      console.log('🔍 Sending grade data:', gradeData)
 
       const response = await fetch('/api/grades', {
         method: 'POST',
@@ -350,6 +348,8 @@ export function useGradeManagement() {
         },
         body: JSON.stringify(gradeData),
       })
+
+      const responseData = await response.json()
 
       if (response.ok) {
         toast({
@@ -361,13 +361,17 @@ export function useGradeManagement() {
         setSelectedStudent(null)
         fetchGrades()
       } else {
-        throw new Error('Failed to add grade')
+        // Handle specific error messages from the API
+        const errorMessage = responseData.error || 'Failed to add grade'
+        console.error('API Error:', responseData)
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('Error adding grade:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add grade'
       toast({
         title: "Error",
-        description: "Failed to add grade",
+        description: errorMessage,
         variant: "destructive"
       })
     } finally {
@@ -387,6 +391,8 @@ export function useGradeManagement() {
         gradeComment: comment || null
       }
 
+      console.log('🔍 Updating grade data:', gradeData)
+
       const response = await fetch(`/api/grades/${editingGrade.gradeId}`, {
         method: 'PUT',
         headers: {
@@ -394,6 +400,8 @@ export function useGradeManagement() {
         },
         body: JSON.stringify(gradeData),
       })
+
+      const responseData = await response.json()
 
       if (response.ok) {
         toast({
@@ -406,13 +414,17 @@ export function useGradeManagement() {
         setEditingGrade(null)
         fetchGrades()
       } else {
-        throw new Error('Failed to update grade')
+        // Handle specific error messages from the API
+        const errorMessage = responseData.error || 'Failed to update grade'
+        console.error('API Error:', responseData)
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('Error updating grade:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update grade'
       toast({
         title: "Error",
-        description: "Failed to update grade",
+        description: errorMessage,
         variant: "destructive"
       })
     } finally {

@@ -84,16 +84,30 @@ export function useUserManagement() {
   }
 
   // Handle add/edit user submit
-  const handleUserFormSubmit = async (data: FormData, isEdit: boolean): Promise<boolean> => {
+  const handleUserFormSubmit = async (data: any, isEdit: boolean): Promise<boolean> => {
     setFormLoading(true)
     setTimeout(() => {}, 0) // allow loading state to show
     try {
+      // Prepare the data for API
+      const userData = {
+        username: data.username,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        phonenumber1: data.phonenumber1,
+        phonenumber2: data.phonenumber2 || null,
+        role: data.role,
+        position: data.position || null,
+        photo: data.photo || null,
+        status: data.status,
+        password: data.password // Only for new users
+      }
+
       const res = await fetch(
         isEdit ? `/api/users/${editUser!.userid}` : "/api/users",
         {
           method: isEdit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify(userData),
         }
       )
       const result = await res.json()

@@ -135,7 +135,7 @@ export function AttendanceDailyFilter({
                 <SelectValue placeholder="ឆ្នាំសិក្សា" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">ទាំងអស់</SelectItem>
+                <SelectItem value="all">ទាំងអស់</SelectItem>
                 {schoolYears.map((year) => (
                   <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
                     {year.schoolYearCode}
@@ -150,7 +150,7 @@ export function AttendanceDailyFilter({
                 <SelectValue placeholder="ថ្នាក់" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">ជ្រើសរើសថ្នាក់</SelectItem>
+                <SelectItem value="select">ជ្រើសរើសថ្នាក់</SelectItem>
                 {courses.map((course) => (
                   <SelectItem key={course.courseId} value={course.courseId.toString()}>
                     {course.courseName} - {course.grade}{course.section}

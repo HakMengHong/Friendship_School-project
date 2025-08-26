@@ -123,9 +123,33 @@ export async function POST(request: NextRequest) {
     } = body
 
     // Validate required fields
-    if (!studentId || !subjectId || !courseId || !semesterId || grade === undefined) {
+    if (!studentId) {
       return NextResponse.json(
-        { error: 'Missing required fields: studentId, subjectId, courseId, semesterId, grade' },
+        { error: 'Missing required field: studentId' },
+        { status: 400 }
+      )
+    }
+    if (!subjectId) {
+      return NextResponse.json(
+        { error: 'Missing required field: subjectId' },
+        { status: 400 }
+      )
+    }
+    if (!courseId) {
+      return NextResponse.json(
+        { error: 'Missing required field: courseId' },
+        { status: 400 }
+      )
+    }
+    if (!semesterId) {
+      return NextResponse.json(
+        { error: 'Missing required field: semesterId' },
+        { status: 400 }
+      )
+    }
+    if (grade === undefined) {
+      return NextResponse.json(
+        { error: 'Missing required field: grade' },
         { status: 400 }
       )
     }
@@ -289,13 +313,19 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('🔍 API: Received grade update request:', body)
+    
     const {
-      gradeId,
       grade,
       gradeComment,
       userId,
       gradeDate
     } = body
+
+    // Get gradeId from URL path
+    const url = new URL(request.url)
+    const pathParts = url.pathname.split('/')
+    const gradeId = pathParts[pathParts.length - 1]
 
     if (!gradeId || grade === undefined) {
       return NextResponse.json(

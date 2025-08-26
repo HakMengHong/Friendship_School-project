@@ -183,7 +183,7 @@ export function ViewStudentClassFilter({
                     <SelectValue placeholder="ឆ្នាំសិក្សា" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">ទាំងអស់</SelectItem>
+                    <SelectItem value="all">ទាំងអស់</SelectItem>
                     {schoolYears.map((year) => (
                       <SelectItem key={year.schoolYearId} value={year.schoolYearCode}>
                         {year.schoolYearCode}

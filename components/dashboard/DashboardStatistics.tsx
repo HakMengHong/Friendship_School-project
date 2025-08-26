@@ -75,7 +75,7 @@ export function DashboardStatistics({
       {/* Main Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Students */}
-        <Card className="border-2 border-blue-200 hover:shadow-lg transition-all duration-200">
+        <Card className="border-2 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-200 bg-card">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg">
@@ -95,7 +95,7 @@ export function DashboardStatistics({
         </Card>
 
         {/* Total Users */}
-        <Card className="border-2 border-green-200 hover:shadow-lg transition-all duration-200">
+        <Card className="border-2 border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-200 bg-card">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
@@ -135,7 +135,7 @@ export function DashboardStatistics({
         </Card>
 
         {/* Attendance Rate */}
-        <Card className="border-2 border-orange-200 hover:shadow-lg transition-all duration-200">
+        <Card className="border-2 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all duration-200 bg-card">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg">
@@ -158,7 +158,7 @@ export function DashboardStatistics({
       {/* Attendance Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Present Students */}
-        <Card className="border-2 border-green-200 hover:shadow-lg transition-all duration-200">
+        <Card className="border-2 border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-200 bg-card">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
@@ -178,7 +178,7 @@ export function DashboardStatistics({
         </Card>
 
         {/* Absent Students */}
-        <Card className="border-2 border-red-200 hover:shadow-lg transition-all duration-200">
+        <Card className="border-2 border-red-200 dark:border-red-800 hover:shadow-lg transition-all duration-200 bg-card">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg">
@@ -198,7 +198,7 @@ export function DashboardStatistics({
         </Card>
 
         {/* Late Students */}
-        <Card className="border-2 border-yellow-200 hover:shadow-lg transition-all duration-200">
+        <Card className="border-2 border-yellow-200 dark:border-yellow-800 hover:shadow-lg transition-all duration-200 bg-card">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg">
@@ -218,7 +218,7 @@ export function DashboardStatistics({
         </Card>
 
         {/* Excused Students */}
-        <Card className="border-2 border-blue-200 hover:shadow-lg transition-all duration-200">
+        <Card className="border-2 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-200 bg-card">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg">

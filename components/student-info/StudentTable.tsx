@@ -218,23 +218,23 @@ export function StudentTable({
   }
 
   return (
-    <Card className="border-2 border-blue-200">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
+    <Card className="border-2 border-blue-200 dark:border-blue-800 bg-card">
+      <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white rounded-t-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+            <div className="p-2 bg-white/20 dark:bg-white/10 rounded-lg backdrop-blur-sm">
               <Users className="h-6 w-6 text-white" />
             </div>
             <div>
               <CardTitle className="text-xl font-bold text-white">
                 តារាងសិស្ស
               </CardTitle>
-              <p className="text-white/80 text-sm">
+              <p className="text-white/80 dark:text-white/70 text-sm">
                 Student Table - {students.length} សិស្ស
               </p>
             </div>
           </div>
-          <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+          <Badge variant="secondary" className="bg-white/20 dark:bg-white/10 text-white border-white/30 dark:border-white/20 backdrop-blur-sm">
             {students.length} សិស្ស
           </Badge>
         </div>

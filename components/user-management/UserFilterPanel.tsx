@@ -72,7 +72,7 @@ export function UserFilterPanel({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
               <Input
                 placeholder="ស្វែងរកអ្នកប្រើ..."
                 value={search}
@@ -81,7 +81,7 @@ export function UserFilterPanel({
               />
               {search && (
                 <button
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-200"
                   onClick={() => onSearchChange("")}
                 >
                   <X className="h-4 w-4" />
@@ -118,58 +118,58 @@ export function UserFilterPanel({
           {/* Statistics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Total Users */}
-            <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-              <div className="p-2 bg-blue-100 rounded-lg w-fit mx-auto mb-2">
-                <Users className="h-6 w-6 text-blue-600" />
+            <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+              <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg w-fit mx-auto mb-2">
+                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-2xl font-bold text-blue-900">{userStats.totalUsers}</p>
-              <p className="text-sm text-blue-600">អ្នកប្រើសរុប</p>
+              <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{userStats.totalUsers}</p>
+              <p className="text-sm text-blue-600 dark:text-blue-400">អ្នកប្រើសរុប</p>
             </div>
             
             {/* Active Users */}
-            <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-              <div className="p-2 bg-green-100 rounded-lg w-fit mx-auto mb-2">
-                <UserCheck className="h-6 w-6 text-green-600" />
+            <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-700">
+              <div className="p-2 bg-green-100 dark:bg-green-800 rounded-lg w-fit mx-auto mb-2">
+                <UserCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <p className="text-2xl font-bold text-green-900">{userStats.activeUsers}</p>
-              <p className="text-sm text-green-600">អ្នកប្រើសកម្ម</p>
+              <p className="text-2xl font-bold text-green-900 dark:text-green-100">{userStats.activeUsers}</p>
+              <p className="text-sm text-green-600 dark:text-green-400">អ្នកប្រើសកម្ម</p>
             </div>
             
             {/* Admin Users */}
-            <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
-              <div className="p-2 bg-purple-100 rounded-lg w-fit mx-auto mb-2">
-                <Shield className="h-6 w-6 text-purple-600" />
+            <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+              <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg w-fit mx-auto mb-2">
+                <Shield className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <p className="text-2xl font-bold text-purple-900">{userStats.adminUsers}</p>
-              <p className="text-sm text-purple-600">អ្នកគ្រប់គ្រង</p>
+              <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{userStats.adminUsers}</p>
+              <p className="text-sm text-purple-600 dark:text-purple-400">អ្នកគ្រប់គ្រង</p>
             </div>
             
             {/* Teacher Users */}
-            <div className="text-center p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-200">
-              <div className="p-2 bg-orange-100 rounded-lg w-fit mx-auto mb-2">
-                <UserIcon className="h-6 w-6 text-orange-600" />
+            <div className="text-center p-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
+              <div className="p-2 bg-orange-100 dark:bg-orange-800 rounded-lg w-fit mx-auto mb-2">
+                <UserIcon className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </div>
-              <p className="text-2xl font-bold text-orange-900">{userStats.teacherUsers}</p>
-              <p className="text-sm text-orange-600">គ្រូបង្រៀន</p>
+              <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">{userStats.teacherUsers}</p>
+              <p className="text-sm text-orange-600 dark:text-orange-400">គ្រូបង្រៀន</p>
             </div>
           </div>
 
           {/* Detailed Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Activity Status */}
-            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-700 mb-3">
+            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 ស្ថានភាពសកម្មភាព
               </h4>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">សកម្ម</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">សកម្ម</span>
                   <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
                     {userStats.activeUsers}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">អសកម្ម</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">អសកម្ម</span>
                   <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
                     {userStats.inactiveUsers}
                   </Badge>
@@ -178,19 +178,19 @@ export function UserFilterPanel({
             </div>
 
             {/* Role Distribution */}
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-              <h4 className="text-sm font-semibold text-blue-700 mb-3">
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+              <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-3">
                 ការបែងចែកតួនាទី
               </h4>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-blue-600">អ្នកគ្រប់គ្រង</span>
+                  <span className="text-sm text-blue-600 dark:text-blue-400">អ្នកគ្រប់គ្រង</span>
                   <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400">
                     {userStats.adminUsers}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-blue-600">គ្រូបង្រៀន</span>
+                  <span className="text-sm text-blue-600 dark:text-blue-400">គ្រូបង្រៀន</span>
                   <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
                     {userStats.teacherUsers}
                   </Badge>
@@ -199,23 +199,23 @@ export function UserFilterPanel({
             </div>
 
             {/* Performance Metrics */}
-            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-              <h4 className="text-sm font-semibold text-green-700 mb-3">
+            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-700">
+              <h4 className="text-sm font-semibold text-green-700 dark:text-green-300 mb-3">
                 ការវាយតម្លៃដំណើរការ
               </h4>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-green-600">អត្រាសកម្មភាព</span>
+                  <span className="text-sm text-green-600 dark:text-green-400">អត្រាសកម្មភាព</span>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-green-900">{activeRate}%</p>
-                    <p className="text-xs text-green-600">
+                    <p className="text-lg font-bold text-green-900 dark:text-green-100">{activeRate}%</p>
+                    <p className="text-xs text-green-600 dark:text-green-400">
                       {userStats.activeUsers}/{userStats.totalUsers}
                     </p>
                   </div>
                 </div>
-                <div className="w-full bg-green-200 rounded-full h-2">
+                <div className="w-full bg-green-200 dark:bg-green-800 rounded-full h-2">
                   <div 
-                    className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-green-600 dark:bg-green-400 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${activeRate}%` }}
                   ></div>
                 </div>
@@ -224,17 +224,17 @@ export function UserFilterPanel({
           </div>
 
           {/* Quick Actions */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-1">
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 សកម្មភាពរហ័ស (Quick Actions)
               </h4>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 គ្រប់គ្រងអ្នកប្រើប្រាស់យ៉ាងមានប្រសិទ្ធភាព
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge variant="outline" className="text-purple-600 border-purple-300">
+              <Badge variant="outline" className="text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-600">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 ប្រព័ន្ធដំណើរការ
               </Badge>

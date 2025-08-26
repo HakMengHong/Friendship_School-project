@@ -164,7 +164,7 @@ export function AttendanceFilterPanel({
                 <SelectValue placeholder="ជ្រើសរើសស្ថានភាព" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">ទាំងអស់ (All)</SelectItem>
+                <SelectItem value="all">ទាំងអស់ (All)</SelectItem>
                 <SelectItem value="PRESENT">មានវត្តមាន (Present)</SelectItem>
                 <SelectItem value="ABSENT">អវត្តមាន (Absent)</SelectItem>
                 <SelectItem value="LATE">មកយឺត (Late)</SelectItem>
