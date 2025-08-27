@@ -3,7 +3,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCap
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, Edit, Info, Trash2, Search } from "lucide-react";
+import { Users, Edit, Info, Trash2, Search, Unlock, Lock } from "lucide-react";
 
 export interface User {
   userid: number;
@@ -20,15 +20,21 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   status: string; // "active", "inactive", "suspended"
+  failedLoginAttempts?: number;
+  lastFailedLogin?: string;
+  accountLockedUntil?: string;
 }
 
 interface UsersTableProps {
   users: User[];
   loading: boolean;
   statusLoading: number | null;
+  skipLockoutLoading: number | null;
   onEdit: (user: User) => void;
   onViewDetails: (user: User) => void;
   onDelete: (id: number) => void;
+  onSkipLockout: (user: User) => void;
+  onResetAttempts: (user: User) => void;
   search: string;
   setSearch: (s: string) => void;
 }
@@ -40,7 +46,7 @@ const getPhotoUrl = (photo?: string) => {
   return `/uploads/${photo}`;
 };
 
-const UsersTable: React.FC<UsersTableProps> = ({ users, loading, statusLoading, onEdit, onViewDetails, onDelete, search, setSearch }) => {
+const UsersTable: React.FC<UsersTableProps> = ({ users, loading, statusLoading, skipLockoutLoading, onEdit, onViewDetails, onDelete, onSkipLockout, onResetAttempts, search, setSearch }) => {
   return (
     <div className="overflow-x-auto rounded-xl shadow border bg-card">
       <Table>
@@ -104,9 +110,23 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, statusLoading, 
                 </TableCell>
                 <TableCell>{user.position || "-"}</TableCell>
                 <TableCell>
-                  <Badge className={user.status === "active" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}>
-                    {user.status === "active" ? "ដំណើរការ" : "បិទដំណើរការ"}
-                  </Badge>
+                  <div className="flex flex-col gap-1">
+                    <Badge className={user.status === "active" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}>
+                      {user.status === "active" ? "ដំណើរការ" : "បិទដំណើរការ"}
+                    </Badge>
+                    {/* Show lockout status */}
+                    {user.accountLockedUntil && new Date(user.accountLockedUntil) > new Date() && (
+                      <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 text-xs">
+                        ចាក់សោរហូត {new Date(user.accountLockedUntil).toLocaleTimeString()}
+                      </Badge>
+                    )}
+                    {/* Show failed attempts */}
+                    {user.failedLoginAttempts && user.failedLoginAttempts > 0 && (
+                      <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 text-xs">
+                        ព្យាយាមខុស {user.failedLoginAttempts} ដង
+                      </Badge>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                   {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "-"}
@@ -130,6 +150,36 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, statusLoading, 
                       aria-label="មើលព័ត៌មានលម្អិត"
                     >
                       <Info className="w-4 h-4" />
+                    </Button>
+                    {/* Skip Lockout Button - Show for all users for testing */}
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      onClick={() => onSkipLockout(user)}
+                      disabled={skipLockoutLoading === user.userid}
+                      className="h-8 w-8 bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/20 dark:hover:bg-orange-900/30 dark:text-orange-400"
+                      aria-label="រំសាយការចាក់សោ"
+                    >
+                      {skipLockoutLoading === user.userid ? (
+                        <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></span>
+                      ) : (
+                        <Unlock className="w-4 h-4" />
+                      )}
+                    </Button>
+                    {/* Reset Attempts Button - Show for all users for testing */}
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      onClick={() => onResetAttempts(user)}
+                      disabled={skipLockoutLoading === user.userid}
+                      className="h-8 w-8 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400"
+                      aria-label="កំណត់ឡើងវិញ"
+                    >
+                      {skipLockoutLoading === user.userid ? (
+                        <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></span>
+                      ) : (
+                        <Lock className="w-4 h-4" />
+                      )}
                     </Button>
                     <Button
                       size="icon"

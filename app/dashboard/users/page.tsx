@@ -44,6 +44,9 @@ interface User {
   createdAt: string;
   updatedAt: string;
   status: string; // "active", "inactive", "suspended"
+  failedLoginAttempts?: number;
+  lastFailedLogin?: string;
+  accountLockedUntil?: string;
 }
 
 interface FormData {
@@ -97,6 +100,7 @@ function AdminUsersContent() {
   const [search, setSearch] = useState("");
   const [statusLoading, setStatusLoading] = useState<number | null>(null);
   const [viewDetailsUser, setViewDetailsUser] = useState<User | null>(null);
+  const [skipLockoutLoading, setSkipLockoutLoading] = useState<number | null>(null);
   const { toast } = useToast();
   const [optimisticStatus, setOptimisticStatus] = useState<{ userid: number; status: string } | null>(null);
 
@@ -249,6 +253,120 @@ function AdminUsersContent() {
   // View user details
   const handleViewDetails = (user: User) => {
     setViewDetailsUser(user);
+  };
+
+  // Skip lockout for user
+  const handleSkipLockout = async (user: User) => {
+    setSkipLockoutLoading(user.userid);
+    
+    try {
+      const res = await fetch(`/api/users/${user.userid}/skip-lockout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      
+      const result = await res.json();
+      
+      if (!res.ok) {
+        toast({ 
+          title: "បរាជ័យ", 
+          description: result.error || "មិនអាចរំសាយការចាក់សោបានទេ", 
+          variant: "destructive" 
+        });
+        return;
+      }
+      
+      // Update the user in the list
+      setUsers(prevUsers => 
+        prevUsers.map(u => 
+          u.userid === user.userid 
+            ? { ...u, accountLockedUntil: undefined }
+            : u
+        )
+      );
+      
+      // Update viewDetailsUser if it's the same user
+      if (viewDetailsUser && viewDetailsUser.userid === user.userid) {
+        setViewDetailsUser({ ...viewDetailsUser, accountLockedUntil: undefined });
+      }
+      
+      toast({
+        title: "ជោគជ័យ",
+        description: "បានរំសាយការចាក់សោគណនីដោយជោគជ័យ"
+      });
+      
+    } catch (error) {
+      toast({ 
+        title: "បរាជ័យ", 
+        description: "មានបញ្ហាក្នុងការរំសាយការចាក់សោ", 
+        variant: "destructive" 
+      });
+    } finally {
+      setSkipLockoutLoading(null);
+    }
+  };
+
+  // Reset failed login attempts for user
+  const handleResetAttempts = async (user: User) => {
+    setSkipLockoutLoading(user.userid);
+    
+    try {
+      const res = await fetch(`/api/users/${user.userid}/reset-login-attempts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      
+      const result = await res.json();
+      
+      if (!res.ok) {
+        toast({ 
+          title: "បរាជ័យ", 
+          description: result.error || "មិនអាចកំណត់ឡើងវិញបានទេ", 
+          variant: "destructive" 
+        });
+        return;
+      }
+      
+      // Update the user in the list
+      setUsers(prevUsers => 
+        prevUsers.map(u => 
+          u.userid === user.userid 
+            ? { 
+                ...u, 
+                failedLoginAttempts: 0,
+                lastFailedLogin: undefined,
+                accountLockedUntil: undefined,
+                status: 'active'
+              }
+            : u
+        )
+      );
+      
+      // Update viewDetailsUser if it's the same user
+      if (viewDetailsUser && viewDetailsUser.userid === user.userid) {
+        setViewDetailsUser({ 
+          ...viewDetailsUser, 
+          failedLoginAttempts: 0,
+          lastFailedLogin: undefined,
+          accountLockedUntil: undefined,
+          status: 'active'
+        });
+      }
+      
+      toast({
+        title: "ជោគជ័យ",
+        description: "បានកំណត់ឡើងវិញនូវការព្យាយាមចូលខុស"
+      });
+      
+    } catch (error) {
+      toast({ 
+        title: "បរាជ័យ", 
+        description: "មានបញ្ហាក្នុងការកំណត់ឡើងវិញ", 
+        variant: "destructive" 
+      });
+    } finally {
+      setSkipLockoutLoading(null);
+    }
   };
 
   // Filtered users
@@ -422,9 +540,12 @@ function AdminUsersContent() {
             users={filteredUsers}
             loading={loading}
             statusLoading={statusLoading}
+            skipLockoutLoading={skipLockoutLoading}
             onEdit={openDialog}
             onViewDetails={handleViewDetails}
             onDelete={(id) => setDeleteId(id)}
+            onSkipLockout={handleSkipLockout}
+            onResetAttempts={handleResetAttempts}
             search={search}
             setSearch={setSearch}
           />
@@ -475,7 +596,7 @@ function AdminUsersContent() {
                   <DialogClose asChild>
                     <Button 
                       variant="outline" 
-                      className="h-10 px-6 text-sm font-semibold hover:bg-muted/50 border-border/50"
+                      className="h-10 px-6 text-sm font-semibold"
                       disabled={deleteLoading}
                     >
                       បោះបង់
