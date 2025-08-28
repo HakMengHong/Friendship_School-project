@@ -1,102 +1,71 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { 
-  Search,
-  Filter,
-  Download,
-  RefreshCw,
-  Users,
-  BookOpen,
-  Calendar
-} from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter, X } from "lucide-react";
 
 interface StudentFilterPanelProps {
-  schoolYears: Array<{ schoolYearId: number; schoolYearCode: string }>
-  classes: string[]
-  selectedSchoolYear: string
-  selectedClass: string
-  searchTerm: string
-  studentStats: {
-    total: number
-    active: number
-    male: number
-    female: number
-    needsSupport: number
-    inactive: number
-  }
-  onSchoolYearChange: (value: string) => void
-  onClassChange: (value: string) => void
-  onSearchChange: (value: string) => void
-  onExport: (format: 'excel' | 'pdf' | 'csv') => void
-  onRefresh: () => void
-  loading?: boolean
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  selectedSchoolYear: string;
+  setSelectedSchoolYear: (year: string) => void;
+  selectedClass: string;
+  setSelectedClass: (class_: string) => void;
+  selectedStatus: string;
+  setSelectedStatus: (status: string) => void;
+  schoolYears: Array<{ schoolYearId: number; schoolYearCode: string }>;
+  classes: string[];
+  clearFilters: () => void;
 }
 
-export function StudentFilterPanel({
+export const StudentFilterPanel = ({
+  searchTerm,
+  setSearchTerm,
+  selectedSchoolYear,
+  setSelectedSchoolYear,
+  selectedClass,
+  setSelectedClass,
+  selectedStatus,
+  setSelectedStatus,
   schoolYears,
   classes,
-  selectedSchoolYear,
-  selectedClass,
-  searchTerm,
-  studentStats,
-  onSchoolYearChange,
-  onClassChange,
-  onSearchChange,
-  onExport,
-  onRefresh,
-  loading = false
-}: StudentFilterPanelProps) {
-  return (
-    <Card className="border-2 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-200 bg-card">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white rounded-t-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-white/20 dark:bg-white/10 rounded-lg backdrop-blur-sm">
-              <Users className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-xl font-bold text-white">
-                ព័ត៌មានសិស្ស
-              </CardTitle>
-              <p className="text-white/80 dark:text-white/70 text-sm">
-                Student Information Management
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary" className="bg-white/20 dark:bg-white/10 text-white border-white/30 dark:border-white/20 backdrop-blur-sm">
-              {studentStats.total} សិស្ស
-            </Badge>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-6">
-          {/* Search and Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="ស្វែងរកសិស្ស..."
-                value={searchTerm}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10 h-12 text-lg border-2 border-blue-200 dark:border-blue-800 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-200 dark:focus:ring-blue-800 bg-background text-foreground"
-              />
-            </div>
+  clearFilters,
+}: StudentFilterPanelProps) => {
+  const hasActiveFilters = selectedSchoolYear || selectedClass || selectedStatus || searchTerm;
 
-            {/* School Year Filter */}
-            <Select value={selectedSchoolYear} onValueChange={onSchoolYearChange}>
-              <SelectTrigger className="h-12 border-2 border-blue-200 dark:border-blue-800 focus:border-blue-500 dark:focus:border-blue-400 bg-background text-foreground">
-                <SelectValue placeholder="ឆ្នាំសិក្សា" />
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Filter className="w-5 h-5" />
+          ត្រងសិស្ស (Student Filters)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="ស្វែងរកឈ្មោះ ឬលេខទូរស័ព្ទ... (Search by name or phone...)"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Filter Options */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* School Year Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">ឆ្នាំសិក្សា (School Year)</label>
+            <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
+              <SelectTrigger>
+                <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា (Select school year)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">ទាំងអស់</SelectItem>
+                <SelectItem value="">ទាំងអស់ (All)</SelectItem>
                 {schoolYears.map((year) => (
                   <SelectItem key={year.schoolYearId} value={year.schoolYearCode}>
                     {year.schoolYearCode}
@@ -104,114 +73,58 @@ export function StudentFilterPanel({
                 ))}
               </SelectContent>
             </Select>
+          </div>
 
-            {/* Class Filter */}
-            <Select value={selectedClass} onValueChange={onClassChange}>
-              <SelectTrigger className="h-12 border-2 border-blue-200 dark:border-blue-800 focus:border-blue-500 dark:focus:border-blue-400 bg-background text-foreground">
-                <SelectValue placeholder="ថ្នាក់" />
+          {/* Class Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">ថ្នាក់ (Class)</label>
+            <Select value={selectedClass} onValueChange={setSelectedClass}>
+              <SelectTrigger>
+                <SelectValue placeholder="ជ្រើសរើសថ្នាក់ (Select class)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">ទាំងអស់</SelectItem>
-                {classes.map((className) => (
-                  <SelectItem key={className} value={className}>
-                    {className}
+                <SelectItem value="">ទាំងអស់ (All)</SelectItem>
+                {classes.map((class_) => (
+                  <SelectItem key={class_} value={class_}>
+                    {class_}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-
-            {/* Actions */}
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={onRefresh}
-                disabled={loading}
-                variant="outline"
-                className="h-12 border-2 border-blue-200 dark:border-blue-800 hover:border-blue-500 dark:hover:border-blue-400 bg-background text-foreground"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                ផ្ទុកឡើងវិញ
-              </Button>
-            </div>
           </div>
 
-          {/* Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-            <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 rounded-lg border border-blue-200 dark:border-blue-800">
-              <Users className="h-8 w-8 mx-auto mb-2 text-blue-600 dark:text-blue-400" />
-              <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{studentStats.total}</p>
-              <p className="text-sm text-blue-600 dark:text-blue-400">សិស្សសរុប</p>
-            </div>
-            
-            <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 rounded-lg border border-green-200 dark:border-green-800">
-              <BookOpen className="h-8 w-8 mx-auto mb-2 text-green-600 dark:text-green-400" />
-              <p className="text-2xl font-bold text-green-900 dark:text-green-100">{studentStats.active}</p>
-              <p className="text-sm text-green-600 dark:text-green-400">សកម្ម</p>
-            </div>
-            
-            <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 rounded-lg border border-blue-200 dark:border-blue-800">
-              <Users className="h-8 w-8 mx-auto mb-2 text-blue-600 dark:text-blue-400" />
-              <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{studentStats.male}</p>
-              <p className="text-sm text-blue-600 dark:text-blue-400">ប្រុស</p>
-            </div>
-            
-            <div className="text-center p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/50 dark:to-rose-950/50 rounded-lg border border-pink-200 dark:border-pink-800">
-              <Users className="h-8 w-8 mx-auto mb-2 text-pink-600 dark:text-pink-400" />
-              <p className="text-2xl font-bold text-pink-900 dark:text-pink-100">{studentStats.female}</p>
-              <p className="text-sm text-pink-600 dark:text-pink-400">ស្រី</p>
-            </div>
-            
-            <div className="text-center p-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/50 dark:to-amber-950/50 rounded-lg border border-orange-200 dark:border-orange-800">
-              <Calendar className="h-8 w-8 mx-auto mb-2 text-orange-600 dark:text-orange-400" />
-              <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">{studentStats.needsSupport}</p>
-              <p className="text-sm text-orange-600 dark:text-orange-400">ត្រូវការជំនួយ</p>
-            </div>
-            
-            <div className="text-center p-4 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-slate-800 rounded-lg border border-gray-200 dark:border-gray-700">
-              <Users className="h-8 w-8 mx-auto mb-2 text-gray-600 dark:text-gray-400" />
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{studentStats.inactive}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">អសកម្ម</p>
-            </div>
-          </div>
-
-          {/* Export Options */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div>
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                នាំចេញទិន្នន័យ (Export Data)
-              </h4>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                នាំចេញព័ត៌មានសិស្សជាទម្រង់ផ្សេងៗ
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => onExport('excel')}
-                size="sm"
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Excel
-              </Button>
-              <Button
-                onClick={() => onExport('pdf')}
-                size="sm"
-                className="bg-red-600 hover:bg-red-700"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                PDF
-              </Button>
-              <Button
-                onClick={() => onExport('csv')}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                CSV
-              </Button>
-            </div>
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">ស្ថានភាព (Status)</label>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="ជ្រើសរើសស្ថានភាព (Select status)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">ទាំងអស់ (All)</SelectItem>
+                <SelectItem value="active">សកម្ម (Active)</SelectItem>
+                <SelectItem value="inactive">អសកម្ម (Inactive)</SelectItem>
+                <SelectItem value="graduated">បញ្ចប់ការសិក្សា (Graduated)</SelectItem>
+                <SelectItem value="transferred">បានផ្លាស់ទី (Transferred)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
+
+        {/* Clear Filters Button */}
+        {hasActiveFilters && (
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              onClick={clearFilters}
+              className="flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              លុបតម្រង (Clear Filters)
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
