@@ -717,7 +717,7 @@ export const UsersForm: React.FC<UsersFormProps> = ({ open, onClose, onSubmit, l
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="h-12 px-6 text-sm font-semibold hover:bg-muted/50 border-border/50"
+                className="h-12 px-6 text-sm font-semibold"
                 disabled={loading}
               >
                 បោះបង់
