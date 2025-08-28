@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 // GET - Fetch attendances by course and date
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const courseId = searchParams.get('courseId')
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build where clause
-    const whereClause: any = {
+    const whereClause: Record<string, unknown> = {
       attendanceDate: new Date(date)
     }
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(attendances)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching attendances:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -70,9 +70,17 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Create new attendance record
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    const body: {
+      studentId: number
+      courseId: number
+      attendanceDate: string
+      session: 'AM' | 'PM' | 'FULL'
+      status: string
+      reason?: string
+      recordedBy?: string
+    } = await request.json()
     const { studentId, courseId, attendanceDate, session, status, reason, recordedBy } = body
 
     // Validate required fields
@@ -86,8 +94,8 @@ export async function POST(request: NextRequest) {
     // Check if attendance already exists for this student, course, date, and session
     const existingAttendance = await prisma.attendance.findFirst({
       where: {
-        studentId: parseInt(studentId),
-        courseId: parseInt(courseId),
+        studentId: studentId,
+        courseId: courseId,
         attendanceDate: new Date(attendanceDate),
         session: session
       }
@@ -103,8 +111,8 @@ export async function POST(request: NextRequest) {
     // Create new attendance record
     const attendance = await prisma.attendance.create({
       data: {
-        studentId: parseInt(studentId),
-        courseId: parseInt(courseId),
+        studentId: studentId,
+        courseId: courseId,
         attendanceDate: new Date(attendanceDate),
         session: session,
         status: status,
@@ -118,7 +126,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(attendance, { status: 201 })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating attendance:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -128,11 +136,19 @@ export async function POST(request: NextRequest) {
 }
 
 // PUT - Update existing attendance record
-export async function PUT(request: NextRequest) {
+export async function PUT(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const attendanceId = searchParams.get('attendanceId')
-    const body = await request.json()
+    const body: {
+      studentId: number
+      courseId: number
+      attendanceDate: string
+      session: 'AM' | 'PM' | 'FULL'
+      status: string
+      reason?: string
+      recordedBy?: string
+    } = await request.json()
     const { studentId, courseId, attendanceDate, session, status, reason, recordedBy } = body
 
     if (!attendanceId) {
@@ -166,8 +182,8 @@ export async function PUT(request: NextRequest) {
     const attendance = await prisma.attendance.update({
       where: { attendanceId: parseInt(attendanceId) },
       data: {
-        studentId: parseInt(studentId),
-        courseId: parseInt(courseId),
+        studentId: studentId,
+        courseId: courseId,
         attendanceDate: new Date(attendanceDate),
         session: session,
         status: status,
@@ -181,14 +197,8 @@ export async function PUT(request: NextRequest) {
     })
 
     return NextResponse.json(attendance)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating attendance:', error)
-    if (error.code === 'P2025') {
-      return NextResponse.json(
-        { error: 'Attendance record not found' },
-        { status: 404 }
-      )
-    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -215,9 +225,9 @@ export async function DELETE(request: NextRequest) {
     })
 
     return NextResponse.json({ message: 'Attendance record deleted successfully' })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting attendance:', error)
-    if (error.code === 'P2025') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Attendance record not found' },
         { status: 404 }

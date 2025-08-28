@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+import { useTheme } from "@/hooks/use-theme"
 
 interface SettingsToggleProps {
   className?: string
@@ -27,6 +28,7 @@ interface SettingsToggleProps {
 
 export function SettingsToggle({ className, variant = "ghost", size = "icon" }: SettingsToggleProps) {
   const { toast } = useToast()
+  const { setTheme, theme } = useTheme()
   const [settings, setSettings] = useState({
     notifications: true,
     sound: false,
@@ -60,6 +62,10 @@ export function SettingsToggle({ className, variant = "ghost", size = "icon" }: 
         description: `${settingLabels[key]} ${value ? 'បានបើក' : 'បានបិទ'}`,
       })
     }
+  }
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme as "light" | "dark" | "system")
   }
 
   const handleMenuItemClick = (action: string) => {

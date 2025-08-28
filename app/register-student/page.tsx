@@ -58,7 +58,15 @@ export default function RegisterStudentPage() {
 
 function RegisterStudentContent() {
   const [studentName, setStudentName] = useState("")
-  const [selectedStudent, setSelectedStudent] = useState<any>({
+  const [selectedStudent, setSelectedStudent] = useState<{
+    id: string
+    lastName: string
+    firstName: string
+    class: string
+    dob: string
+    gender: string
+    studentId: string
+  }>({
     id: 'new',
     lastName: '',
     firstName: '',
@@ -73,7 +81,14 @@ function RegisterStudentContent() {
     const [isCompleted, setIsCompleted] = useState(false)
     const [showForm, setShowForm] = useState(true) // Show form by default
     const [isNewStudent, setIsNewStudent] = useState(true) // Set to true by default
-  const [students, setStudents] = useState<any[]>([])
+  const [students, setStudents] = useState<{
+    studentId: number
+    firstName: string
+    lastName: string
+    class: string
+    dob: string
+    gender: string
+  }[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
 
@@ -156,7 +171,10 @@ function RegisterStudentContent() {
   })
 
   // Add school years state
-  const [schoolYears, setSchoolYears] = useState<any[]>([])
+  const [schoolYears, setSchoolYears] = useState<{
+    schoolYearId: number
+    schoolYearCode: string
+  }[]>([])
 
   // Function to convert grade number to Khmer label
   const getGradeLabel = (gradeNumber: string | number) => {
@@ -844,7 +862,7 @@ function RegisterStudentContent() {
                         key={student.studentId}
                         onClick={() => handleSelectStudent(student)}
                         className={`p-4 cursor-pointer transition-colors duration-150 ${
-                          selectedStudent?.studentId === student.studentId 
+                          selectedStudent?.studentId === student.studentId.toString() 
                             ? 'bg-blue-50 dark:bg-blue-900/20 border-r-4 border-r-blue-600' 
                             : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                         }`}
@@ -861,7 +879,7 @@ function RegisterStudentContent() {
                               ថ្នាក់ {getGradeLabel(student.class)} • ID: {student.studentId}
                             </p>
                           </div>
-                          {selectedStudent?.studentId === student.studentId && (
+                          {selectedStudent?.studentId === student.studentId.toString() && (
                             <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                           )}
                         </div>

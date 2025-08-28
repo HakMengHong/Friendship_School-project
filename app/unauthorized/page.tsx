@@ -11,7 +11,12 @@ import { ThemeToggle } from "@/components/ui/theme-toggle"
 function UnauthorizedContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{
+    role?: string
+    username?: string
+    firstname?: string
+    lastname?: string
+  } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   
   // Refs for button focus management

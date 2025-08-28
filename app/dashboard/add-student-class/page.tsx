@@ -28,18 +28,19 @@ interface Student {
   dob: string
   class: string
   phone?: string
-  status: string
-  schoolYear: string
-  // Additional fields from API
-  classId?: number
+  status?: string
+  schoolYear?: string
+  religion?: string
+  health?: string
+  emergencyContact?: string
   createdAt?: string
   updatedAt?: string
   photo?: string
   registrationDate?: string
-  scholarships?: any[]
-  attendances?: any[]
-  family?: any[]
-  guardians?: any[]
+  scholarships?: unknown[]
+  attendances?: unknown[]
+  family?: unknown[]
+  guardians?: unknown[]
 }
 
 interface Course {
@@ -78,7 +79,14 @@ function AddStudentClassContent() {
   const [selectedStudents, setSelectedStudents] = useState<number[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
-  const [enrollments, setEnrollments] = useState<any[]>([])
+  const [enrollments, setEnrollments] = useState<{
+    enrollmentId: number
+    courseId: number
+    studentId: number
+    drop: boolean
+    dropSemester?: string
+    dropDate?: string
+  }[]>([])
   const [enrollmentsLoading, setEnrollmentsLoading] = useState(false)
 
   // Fetch all data function

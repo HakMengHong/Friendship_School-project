@@ -5,10 +5,24 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 // PUT - Update user
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const userId = parseInt(params.id)
-    const body = await request.json()
+    const body: {
+      username?: string
+      firstname?: string
+      lastname?: string
+      phonenumber1?: string
+      phonenumber2?: string
+      role?: string
+      position?: string
+      photo?: string
+      status?: string
+      password?: string
+    } = await request.json()
     const { username, password, firstname, lastname, phonenumber1, phonenumber2, role, position, photo, status } = body
 
     // Validate required fields
@@ -67,7 +81,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     // Update user
     const updatedUser = await prisma.user.update({
       where: { userId },
-      data: updateData
+      data: updateData,
+      select: {
+        userId: true,
+        username: true,
+        firstname: true,
+        lastname: true,
+        phonenumber1: true,
+        phonenumber2: true,
+        role: true,
+        position: true,
+        photo: true,
+        avatar: true,
+        status: true,
+        lastLogin: true,
+        createdAt: true,
+        updatedAt: true
+      }
     })
 
     const transformedUser = {

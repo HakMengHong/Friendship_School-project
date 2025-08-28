@@ -273,8 +273,8 @@ function AbsenceContent() {
       },
       tooltip: {
         callbacks: {
-          label: function(context: any) {
-            return `${context.dataset.label}: ${context.parsed.y} ដង`
+          label: function(tooltipItem: any) {
+            return `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y} ដង`
           }
         }
       }
@@ -283,8 +283,8 @@ function AbsenceContent() {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value: any) {
-            return `${value} ដង`
+          callback: function(tickValue: any) {
+            return `${tickValue} ដង`
           }
         }
       }
