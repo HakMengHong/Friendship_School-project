@@ -875,7 +875,7 @@ function AcademicManagementContent() {
                   <Calendar className="absolute inset-0 m-auto h-12 w-12 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">គ្មានឆ្នាំសិក្សាទេ</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">ចុចប៊ូតុង "បន្ថែមឆ្នាំ" ដើម្បីចាប់ផ្តើម</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-6">ចុចប៊ូតុង &quot;បន្ថែមឆ្នាំ&quot; ដើម្បីចាប់ផ្តើម</p>
                 <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full mx-auto"></div>
               </div>
             ) : (
@@ -2139,7 +2139,7 @@ function AcademicManagementContent() {
                 </h3>
                 
                 <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                  ចុចប៊ូតុង "បន្ថែមមុខវិជ្ជា" ដើម្បីចាប់ផ្តើមបង្កើតមុខវិជ្ជាថ្មី
+                  ចុចប៊ូតុង &quot;បន្ថែមមុខវិជ្ជា&quot; ដើម្បីចាប់ផ្តើមបង្កើតមុខវិជ្ជាថ្មី
                 </p>
                 
                 <Button

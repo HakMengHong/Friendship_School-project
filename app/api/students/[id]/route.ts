@@ -1,6 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// GET - Fetch individual student with complete data
+export async function GET(request: NextRequest, context: any) {
+  const { params } = await context;
+  try {
+    const id = parseInt(params.id as string);
+    
+    const student = await prisma.student.findUnique({
+      where: { studentId: id },
+      include: {
+        guardians: true,
+        family: true,
+        scholarships: true
+      }
+    });
+
+    if (!student) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(student);
+  } catch (error) {
+    console.error('Error fetching student:', error);
+    return NextResponse.json({ error: String(error) }, { status: 500 });
+  }
+}
+
 export async function PUT(request: NextRequest, context: any) {
   const { params } = await context;
   try {

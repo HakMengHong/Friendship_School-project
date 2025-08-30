@@ -194,7 +194,7 @@ function ViewStudentClassContent() {
         const data = await response.json()
         // Handle the nested structure where users are in data.users
         const users = data.users || data
-        const teacherUsers = users.filter((user: any) => user.role === 'teacher')
+        const teacherUsers = users.filter((user: { role: string }) => user.role === 'teacher')
         setTeachers(teacherUsers)
       }
     } catch (error) {

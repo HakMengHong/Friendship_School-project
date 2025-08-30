@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// GET - Fetch all students
+// GET - Fetch all students with complete data
 export async function GET(request: NextRequest) {
   try {
     const students = await prisma.student.findMany({
@@ -9,15 +9,10 @@ export async function GET(request: NextRequest) {
         { firstName: 'asc' },
         { lastName: 'asc' }
       ],
-      select: {
-        studentId: true,
-        firstName: true,
-        lastName: true,
-        class: true,
-        status: true,
-        registrationDate: true,
-        createdAt: true,
-        updatedAt: true
+      include: {
+        guardians: true,
+        family: true,
+        scholarships: true
       }
     })
 

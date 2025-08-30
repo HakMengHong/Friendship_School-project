@@ -42,11 +42,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { useToast } from "@/hooks/use-toast"
 
 // PDF generation types
-import type { StudentData } from '@/lib/puppeteer-pdf-generator'
+import type { StudentRegistrationData } from '@/lib/pdf-generators/student-registration'
+import { ReportType } from '@/lib/pdf-generators/types'
 
 export default function RegisterStudentPage() {
   return (
@@ -73,6 +75,7 @@ function RegisterStudentContent() {
     const [isCompleted, setIsCompleted] = useState(false)
     const [showForm, setShowForm] = useState(true) // Show form by default
     const [isNewStudent, setIsNewStudent] = useState(true) // Set to true by default
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false) // PDF generation loading state
   const [students, setStudents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
@@ -161,15 +164,15 @@ function RegisterStudentContent() {
   // Function to convert grade number to Khmer label
   const getGradeLabel = (gradeNumber: string | number) => {
     const gradeMap: { [key: string]: string } = {
-      "1": "ថ្នាក់ទី១",
-      "2": "ថ្នាក់ទី២", 
-      "3": "ថ្នាក់ទី៣",
-      "4": "ថ្នាក់ទី៤",
-      "5": "ថ្នាក់ទី៥",
-      "6": "ថ្នាក់ទី៦",
-      "7": "ថ្នាក់ទី៧",
-      "8": "ថ្នាក់ទី៨",
-      "9": "ថ្នាក់ទី៩"
+      "1": "ថ្នាក់ទី ១",
+      "2": "ថ្នាក់ទី ២", 
+      "3": "ថ្នាក់ទី ៣",
+      "4": "ថ្នាក់ទី ៤",
+      "5": "ថ្នាក់ទី ៥",
+      "6": "ថ្នាក់ទី ៦",
+      "7": "ថ្នាក់ទី ៧",
+      "8": "ថ្នាក់ទី ៨",
+      "9": "ថ្នាក់ទី ៩"
     };
     return gradeMap[gradeNumber?.toString()] || gradeNumber?.toString() || "N/A";
   };
@@ -222,11 +225,33 @@ function RegisterStudentContent() {
       return;
     }
 
+    // Validate required fields before generating PDF
+    const requiredFields = ['lastName', 'firstName', 'studentId', 'class'];
+    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "កំហុស",
+        description: `សូមបំពេញព័ត៌មានដែលត្រូវការ: ${missingFields.join(', ')}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Set loading state
+    setIsGeneratingPDF(true);
+
     try {
       console.log('Generating PDF using utility function...');
       
-      // Convert formData to StudentData format
-      const studentData: StudentData = {
+      // Show loading toast
+      toast({
+        title: "កំពុងបោះពុម្ភ PDF",
+        description: "សូមរង់ចាំ...",
+      });
+      
+      // Convert formData to StudentRegistrationData format
+      const studentData: StudentRegistrationData = {
         lastName: formData.lastName,
         firstName: formData.firstName,
         gender: formData.gender,
@@ -252,17 +277,33 @@ function RegisterStudentContent() {
         familyInfo: formData.familyInfo
       };
       
-      // Generate PDF using Puppeteer API
+      // Generate PDF using the new PDF generator system
       const response = await fetch('/api/generate-pdf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(studentData),
+        body: JSON.stringify({
+          reportType: ReportType.STUDENT_REGISTRATION,
+          data: studentData,
+          options: {
+            format: 'A4',
+            orientation: 'portrait',
+            includeHeader: true,
+            includeFooter: true,
+            margin: {
+              top: '20mm',
+              right: '15mm',
+              bottom: '20mm',
+              left: '15mm'
+            }
+          }
+        }),
       });
       
       if (!response.ok) {
-        throw new Error(`PDF generation failed: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`PDF generation failed: ${response.statusText} - ${errorData.error || ''}`);
       }
       
       // Get the PDF blob and trigger download
@@ -270,16 +311,26 @@ function RegisterStudentContent() {
       const url = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `student-registration-${selectedStudent.studentId}.pdf`;
+      
+      // Create a safe filename for download with better formatting
+      const studentName = `${formData.lastName || ''} ${formData.firstName || ''}`.trim() || 'Student';
+      const safeStudentName = studentName.replace(/[^\x00-\x7F]/g, '').replace(/\s+/g, '-') || 'Student';
+      const classInfo = formData.class ? `-${formData.class.replace(/\s+/g, '')}` : '';
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const filename = `student-registration-${formData.studentId}${classInfo}-${safeStudentName}-${timestamp}.pdf`;
+      
+      link.download = filename;
+      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      // Show success message
+      // Show success message with file info
+      const fileSize = (pdfBlob.size / 1024).toFixed(1); // Convert to KB
       toast({
         title: "ជោគជ័យ",
-        description: "ទម្រង់ចុះឈ្មោះសិស្សត្រូវបានបោះពុម្ភជា PDF ដោយជោគជ័យ",
+        description: `ទម្រង់ចុះឈ្មោះសិស្សត្រូវបានបោះពុម្ភជា PDF ដោយជោគជ័យ (${fileSize} KB)`,
       });
       
     } catch (error) {
@@ -293,9 +344,12 @@ function RegisterStudentContent() {
       }
       toast({
         title: "កំហុស",
-        description: "មានបញ្ហាក្នុងការបោះពុម្ភ PDF",
+        description: `មានបញ្ហាក្នុងការបោះពុម្ភ PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
+    } finally {
+      // Reset loading state
+      setIsGeneratingPDF(false);
     }
   }
 
@@ -858,7 +912,7 @@ function RegisterStudentContent() {
                               {student.lastName} {student.firstName}
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                              ថ្នាក់ {getGradeLabel(student.class)} • ID: {student.studentId}
+                              {getGradeLabel(student.class)} • ID: {student.studentId}
                             </p>
                           </div>
                           {selectedStudent?.studentId === student.studentId && (
@@ -1871,6 +1925,36 @@ function RegisterStudentContent() {
                               </div>
                             </div>
 
+                            {/* PDF Generation Info */}
+                            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                              <div className="flex items-start space-x-3">
+                                <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                                    ព័ត៌មានដែលនឹងត្រូវបានបោះពុម្ភ
+                                  </h4>
+                                  <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                                    <div className="flex items-center space-x-2">
+                                      <CheckCircle className="h-3 w-3" />
+                                      <span>ព័ត៌មានផ្ទាល់ខ្លួនសិស្ស</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <CheckCircle className="h-3 w-3" />
+                                      <span>អាស័យដ្ឋាន និងទំនាក់ទំនង</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <CheckCircle className="h-3 w-3" />
+                                      <span>ព័ត៌មានអាណាព្យាបាល</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <CheckCircle className="h-3 w-3" />
+                                      <span>ព័ត៌មានគ្រួសារ និងជីវភាព</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
                             {/* Action Buttons */}
                             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                               <Button 
@@ -1903,15 +1987,38 @@ function RegisterStudentContent() {
                                 )}
                               </Button>
                               
-                              <Button 
-                                variant="outline" 
-                                className="flex-1 sm:flex-none"
-                                onClick={exportToPDF}
-                                disabled={!selectedStudent || selectedStudent.id === 'new'}
-                              >
-                                <Printer className="h-4 w-4 mr-2" />
-                                បោះពុម្ភ PDF
-                              </Button>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="outline" 
+                                      className={`flex-1 sm:flex-none ${
+                                        isGeneratingPDF 
+                                          ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 dark:from-blue-900/20 dark:to-purple-900/20 dark:border-blue-700' 
+                                          : ''
+                                      }`}
+                                      onClick={exportToPDF}
+                                      disabled={!selectedStudent || selectedStudent.id === 'new' || isGeneratingPDF}
+                                    >
+                                      {isGeneratingPDF ? (
+                                        <>
+                                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                          កំពុងបោះពុម្ភ...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Printer className="h-4 w-4 mr-2" />
+                                          បោះពុម្ភ PDF
+                                        </>
+                                      )}
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>បោះពុម្ភទម្រង់ចុះឈ្មោះសិស្សជា PDF</p>
+                                    <p className="text-xs text-gray-500 mt-1">រួមមានព័ត៌មានសិស្ស អាណាព្យាបាល និងគ្រួសារ</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             </div>
 
                             {/* Success Message */}
