@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from './prisma'
+import bcrypt from 'bcryptjs'
 
 export interface AuthenticatedUser {
   id: number
@@ -62,41 +61,57 @@ export function hasRole(user: AuthenticatedUser | null, requiredRole: 'admin' | 
   return false
 }
 
-// Middleware wrapper for API route protection
-export function withAuth(handler: Function, requiredRole: 'admin' | 'teacher' | 'both' = 'both') {
-  return async (request: NextRequest, ...args: any[]) => {
+export function withAuth(handler: (request: NextRequest, user: any) => Promise<NextResponse>) {
+  return async (request: NextRequest) => {
     try {
-      const user = await verifyAuth(request)
-      
-      if (!user) {
+      const userCookie = request.cookies.get('user')
+      if (!userCookie) {
         return NextResponse.json(
-          { error: 'Authentication required' },
+          { error: 'ត្រូវការការចូលប្រើ' },
           { status: 401 }
         )
       }
-      
-      if (!hasRole(user, requiredRole)) {
+
+      let user
+      try {
+        user = JSON.parse(decodeURIComponent(userCookie.value))
+      } catch {
         return NextResponse.json(
-          { error: 'Insufficient permissions' },
-          { status: 403 }
+          { error: 'ត្រូវការការចូលប្រើ' },
+          { status: 401 }
         )
       }
-      
-      // Add user to request context
-      const requestWithUser = {
-        ...request,
-        user
-      }
-      
-      return handler(requestWithUser, ...args)
+
+      return await handler(request, user)
     } catch (error) {
-      console.error('Auth middleware error:', error)
+      console.error('Auth error:', error)
       return NextResponse.json(
-        { error: 'Internal server error' },
+        { error: 'មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់' },
         { status: 500 }
       )
     }
   }
+}
+
+export function withRoleAuth(allowedRoles: string[], handler: (request: NextRequest, user: any) => Promise<NextResponse>) {
+  return withAuth(async (request: NextRequest, user: any) => {
+    if (!allowedRoles.includes(user.role)) {
+      return NextResponse.json(
+        { error: 'គ្មានការអនុញ្ញាត' },
+        { status: 403 }
+      )
+    }
+
+    return await handler(request, user)
+  })
+}
+
+export function withAdminAuth(handler: (request: NextRequest, user: any) => Promise<NextResponse>) {
+  return withRoleAuth(['admin'], handler)
+}
+
+export function withTeacherAuth(handler: (request: NextRequest, user: any) => Promise<NextResponse>) {
+  return withRoleAuth(['admin', 'teacher'], handler)
 }
 
 // Helper function to create protected API route

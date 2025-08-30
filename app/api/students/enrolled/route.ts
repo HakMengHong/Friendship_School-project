@@ -4,19 +4,15 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 // GET: Fetch enrolled students with filters
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const schoolYearId = searchParams.get('schoolYearId')
     const courseId = searchParams.get('courseId')
+    const schoolYearId = searchParams.get('schoolYearId')
     const semesterId = searchParams.get('semesterId')
     const searchTerm = searchParams.get('search')
 
-    let whereClause: any = {
-      enrollments: {
-        some: {} // Must have at least one enrollment
-      }
-    }
+    const whereClause: Record<string, unknown> = {}
 
     if (schoolYearId) {
       whereClause.enrollments = {

@@ -4,16 +4,15 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 // GET: Fetch grades with filters
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const studentId = searchParams.get('studentId')
     const courseId = searchParams.get('courseId')
+    const studentId = searchParams.get('studentId')
     const subjectId = searchParams.get('subjectId')
     const semesterId = searchParams.get('semesterId')
-    const schoolYearId = searchParams.get('schoolYearId')
 
-    let whereClause: any = {}
+    const whereClause: Record<string, unknown> = {}
 
     if (studentId) {
       whereClause.studentId = parseInt(studentId)
@@ -29,12 +28,6 @@ export async function GET(request: NextRequest) {
 
     if (semesterId) {
       whereClause.semesterId = parseInt(semesterId)
-    }
-
-    if (schoolYearId) {
-      whereClause.course = {
-        schoolYearId: parseInt(schoolYearId)
-      }
     }
 
     const grades = await prisma.grade.findMany({
@@ -106,26 +99,27 @@ export async function GET(request: NextRequest) {
 }
 
 // POST: Create new grade
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    console.log('🔍 API: Received grade creation request:', body)
+    const body: {
+      studentId: number
+      subjectId: number
+      courseId: number
+      semesterId: number
+      score: number
+      grade: number
+      remarks?: string
+      gradeComment?: string
+      userId?: number
+      gradeDate?: string
+    } = await request.json()
     
-    const {
-      studentId,
-      subjectId,
-      courseId,
-      semesterId,
-      grade,
-      gradeComment,
-      userId,
-      gradeDate
-    } = body
+    const { studentId, subjectId, courseId, semesterId, score, grade, remarks, gradeComment, userId, gradeDate } = body
 
     // Validate required fields
-    if (!studentId || !subjectId || !courseId || !semesterId || grade === undefined) {
+    if (!studentId || !subjectId || !courseId || !semesterId || score === undefined || grade === undefined) {
       return NextResponse.json(
-        { error: 'Missing required fields: studentId, subjectId, courseId, semesterId, grade' },
+        { error: 'Missing required fields: studentId, subjectId, courseId, semesterId, score, grade' },
         { status: 400 }
       )
     }
@@ -149,10 +143,10 @@ export async function POST(request: NextRequest) {
     // Check if grade already exists for this student, subject, course, semester, and gradeDate
     const existingGrade = await prisma.grade.findFirst({
       where: {
-        studentId: parseInt(studentId),
-        subjectId: parseInt(subjectId),
-        courseId: parseInt(courseId),
-        semesterId: parseInt(semesterId),
+        studentId: studentId,
+        subjectId: subjectId,
+        courseId: courseId,
+        semesterId: semesterId,
         gradeDate: gradeDate || `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
       }
     })
@@ -166,39 +160,39 @@ export async function POST(request: NextRequest) {
 
     // Generate grade code
     const student = await prisma.student.findUnique({
-      where: { studentId: parseInt(studentId) }
+      where: { studentId: studentId }
     })
     const subject = await prisma.subject.findUnique({
-      where: { subjectId: parseInt(subjectId) }
+      where: { subjectId: subjectId }
     })
     const course = await prisma.course.findUnique({
-      where: { courseId: parseInt(courseId) }
+      where: { courseId: courseId }
     })
     const semester = await prisma.semester.findUnique({
-      where: { semesterId: parseInt(semesterId) }
+      where: { semesterId: semesterId }
     })
 
     // Create new grade
     console.log('🔍 API: Creating grade with data:', {
-      studentId: parseInt(studentId),
-      subjectId: parseInt(subjectId),
-      courseId: parseInt(courseId),
-      semesterId: parseInt(semesterId),
-      grade: parseFloat(grade),
+      studentId: studentId,
+      subjectId: subjectId,
+      courseId: courseId,
+      semesterId: semesterId,
+      grade: grade,
       gradeComment: gradeComment || null,
-      userId: userId ? parseInt(userId) : null,
+      userId: userId || null,
       gradeDate: gradeDate || `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
     })
     
     const newGrade = await prisma.grade.create({
       data: {
-        studentId: parseInt(studentId),
-        subjectId: parseInt(subjectId),
-        courseId: parseInt(courseId),
-        semesterId: parseInt(semesterId),
-        grade: parseFloat(grade),
+        studentId: studentId,
+        subjectId: subjectId,
+        courseId: courseId,
+        semesterId: semesterId,
+        grade: grade,
         gradeComment: gradeComment || null,
-        userId: userId ? parseInt(userId) : null,
+        userId: userId || null,
         gradeDate: gradeDate || `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
       },
       include: {
@@ -265,7 +259,7 @@ export async function POST(request: NextRequest) {
     
     // Check for specific Prisma errors
     if (error && typeof error === 'object' && 'code' in error) {
-      const prismaError = error as any
+      const prismaError = error as { code: string }
       console.error('Prisma error code:', prismaError.code)
       if (prismaError.code === 'P2002') {
         errorMessage = 'Duplicate grade entry'
@@ -278,7 +272,7 @@ export async function POST(request: NextRequest) {
       { 
         error: errorMessage,
         details: error instanceof Error ? error.stack : 'Unknown error',
-        code: (error as any)?.code || 'UNKNOWN'
+        code: (error && typeof error === 'object' && 'code' in error) ? (error as { code: string }).code : 'UNKNOWN'
       },
       { status: 500 }
     )
@@ -286,16 +280,27 @@ export async function POST(request: NextRequest) {
 }
 
 // PUT: Update existing grade
-export async function PUT(request: NextRequest) {
+export async function PUT(request: Request) {
   try {
-    const body = await request.json()
+    const body: {
+      grade: number
+      gradeComment?: string
+      userId?: number
+      gradeDate?: string
+    } = await request.json()
+    console.log('🔍 API: Received grade update request:', body)
+    
     const {
-      gradeId,
       grade,
       gradeComment,
       userId,
       gradeDate
     } = body
+
+    // Get gradeId from URL path
+    const url = new URL(request.url)
+    const pathParts = url.pathname.split('/')
+    const gradeId = pathParts[pathParts.length - 1]
 
     if (!gradeId || grade === undefined) {
       return NextResponse.json(
@@ -314,9 +319,9 @@ export async function PUT(request: NextRequest) {
     const updatedGrade = await prisma.grade.update({
       where: { gradeId: parseInt(gradeId) },
       data: {
-        grade: parseFloat(grade),
+        grade: grade,
         gradeComment: gradeComment || null,
-        userId: userId ? parseInt(userId) : null,
+        userId: userId || null,
         gradeDate: gradeDate || undefined,
         lastEdit: new Date(),
         updatedAt: new Date()
