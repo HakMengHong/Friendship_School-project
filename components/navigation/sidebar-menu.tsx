@@ -239,19 +239,19 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       className={cn(
         "bg-gradient-to-b from-card via-card/95 to-card/90 backdrop-blur-xl border-r border-border/50 flex flex-col transition-all duration-500 ease-out rounded-r-3xl m-2 shadow-2xl sidebar",
         "before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-primary/10 before:rounded-r-3xl before:pointer-events-none",
-        isCollapsed ? "w-[120px]" : "w-[300px]",
+        isCollapsed ? "w-[120px]" : "w-[272px]",
         className,
       )}
     >
       {/* Header with logo and school name */}
       <div className="flex items-center p-6 relative border-b border-border/30 min-h-[100px]">
         <div className="flex items-center">
-          <div className="relative w-16 h-16 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-2xl flex items-center justify-center shadow-xl overflow-hidden group">
+          <div className="relative w-16 h-16 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-full flex items-center justify-center shadow-xl overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-white/25 to-transparent rounded-2xl"></div>
             <img 
               src="/logo.png" 
               alt="សាលាមិត្តភាព" 
-              className="w-12 h-12 object-contain relative z-10 group-hover:scale-110 transition-transform duration-300"
+              className="w-17 h-17 object-contain relative z-10 group-hover:scale-110 transition-transform duration-300"
               onError={(e) => {
                 // Fallback to icon if image fails to load
                 const target = e.target as HTMLImageElement;
@@ -269,7 +269,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
           </div>
            <div className={cn("ml-4 pr-16 transition-all duration-500 ease-out flex flex-col justify-center", isCollapsed ? "opacity-0 w-0 scale-95" : "opacity-100 scale-100")}>
              <h1 
-               className="text-2xl font-black font-khmer tracking-wide bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap" 
+               className="text-2xl font-black font-khmer tracking-wide bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap hover:text-primary transition-colors duration-300 cursor-pointer" 
                style={{ 
                  lineHeight: '1.6', 
                  fontFeatureSettings: '"kern" 1, "liga" 1',
@@ -281,7 +281,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
              >
                សាលាមិត្តភាព
              </h1>
-             <p className="text-base text-muted-foreground/80 whitespace-nowrap font-semibold mt-1">Friendship School</p>
+             <p className="text-base text-muted-foreground/80 whitespace-nowrap font-semibold mt-1 hover:text-primary transition-colors duration-300 cursor-pointer">Friendship School</p>
            </div>
         </div>
 
