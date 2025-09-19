@@ -3,214 +3,501 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RoleGuard } from "@/components/ui/role-guard"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
 import { 
   Download, 
-  Printer, 
-  FileText, 
   Calendar,
   BarChart3,
   TrendingUp,
   Award,
-  CheckCircle,
-  X
+  X,
+  FileText,
+  GraduationCap,
+  CalendarDays,
+  Users,
+  FileType,
+  School
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
+
+// Types
+interface SchoolYear {
+  schoolYearId: number
+  schoolYearCode: string
+}
+
+interface Course {
+  courseId: number
+  courseName: string
+  grade: string
+  section: string
+  schoolYear: {
+    schoolYearId: number
+    schoolYearCode: string
+  }
+}
+
+interface GradeDate {
+  month: string
+  year: string
+  displayText: string
+}
+
+interface ReportTypeConfig {
+  id: string
+  title: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+  color: string
+}
+
+// Constants
+const MONTH_NAMES = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 
+                     'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ']
+
+const REPORT_TYPES: ReportTypeConfig[] = [
+  {
+    id: "monthly",
+    title: "របាយការណ៍ប្រចាំខែ",
+    description: "របាយការណ៍ពិន្ទុសិស្សប្រចាំខែ",
+    icon: Calendar,
+    color: "bg-blue-500"
+  },
+  {
+    id: "semester", 
+    title: "របាយការណ៍ប្រចាំឆមាស",
+    description: "របាយការណ៍ពិន្ទុសិស្សប្រចាំឆមាស",
+    icon: BarChart3,
+    color: "bg-green-500"
+  },
+  {
+    id: "yearly",
+    title: "របាយការណ៍ប្រចាំឆ្នាំ", 
+    description: "របាយការណ៍ពិន្ទុសិស្សប្រចាំឆ្នាំ",
+    icon: TrendingUp,
+    color: "bg-purple-500"
+  }
+]
 
 export default function ScoreReportPage() {
   return (
     <RoleGuard allowedRoles={['admin', 'teacher']}>
-      <ScoreReportContent />
+      <div className="container mx-auto p-6 space-y-6">
+        <ScoreReportContent />
+      </div>
     </RoleGuard>
   )
 }
 
 function ScoreReportContent() {
+  const { toast } = useToast()
+  
+  // UI State
   const [showReportModal, setShowReportModal] = useState(false)
   const [reportType, setReportType] = useState("monthly")
   const [isGenerating, setIsGenerating] = useState(false)
-  const [reportData, setReportData] = useState({
-    academicYear: "",
-    month: "",
-    year: "",
-    semester: "",
-    class: "",
-    sortByRank: false,
-    format: "pdf",
-    includeDetails: true,
-    includeAllClasses: false
-  })
+  
+  // Data State
+  const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
+  const [gradeDates, setGradeDates] = useState<GradeDate[]>([])
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
+  const [isLoadingData, setIsLoadingData] = useState(true)
+  
+  // Form State
+  const [academicYear, setAcademicYear] = useState("")
+  const [month, setMonth] = useState("")
+  const [year, setYear] = useState("")
+  const [semester, setSemester] = useState("")
+  const [classFilter, setClassFilter] = useState("")
+  const [format, setFormat] = useState("pdf")
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
 
-  const generateReport = async (e: React.FormEvent) => {
+  // API Functions
+  const fetchSchoolYears = useCallback(async () => {
+    try {
+      console.log('Fetching school years...')
+      const response = await fetch('/api/school-years')
+      if (!response.ok) {
+        console.error('Failed to fetch school years:', response.status)
+        return
+      }
+      
+      const data = await response.json()
+      console.log('School years data:', data)
+      if (Array.isArray(data)) {
+        setSchoolYears(data)
+      }
+    } catch (error) {
+      console.error('Error fetching school years:', error)
+    }
+  }, [])
+
+  const fetchCourses = useCallback(async () => {
+    try {
+      console.log('Fetching courses...')
+      const response = await fetch('/api/courses')
+      if (!response.ok) {
+        console.error('Failed to fetch courses:', response.status)
+        return
+      }
+      
+      const data = await response.json()
+      console.log('Courses data:', data)
+      if (Array.isArray(data)) {
+        setCourses(data)
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error)
+    }
+  }, [])
+
+  const fetchGradeDates = useCallback(async () => {
+    try {
+      console.log('Fetching grade dates...')
+      const response = await fetch('/api/grades')
+      if (!response.ok) {
+        console.error('Failed to fetch grades:', response.status)
+        return
+      }
+      
+      const text = await response.text()
+      if (!text) {
+        console.log('No grade data received')
+        return
+      }
+      
+      const grades = JSON.parse(text)
+      console.log('Grades data:', grades)
+      if (!Array.isArray(grades)) {
+        console.log('Grades data is not an array')
+        return
+      }
+      
+      // Extract unique grade dates
+      const uniqueDates = new Set<string>()
+      grades.forEach((grade: any) => {
+        if (grade.gradeDate && typeof grade.gradeDate === 'string') {
+          uniqueDates.add(grade.gradeDate)
+        }
+      })
+      
+      console.log('Unique dates found:', Array.from(uniqueDates))
+      
+      // Convert MM/YY format to month/year objects
+      const dateArray: GradeDate[] = Array.from(uniqueDates)
+        .map(dateStr => {
+          const [month, year] = dateStr.split('/')
+          if (!month || !year) return null
+          
+          const monthName = MONTH_NAMES[parseInt(month) - 1] || month
+          const fullYear = `20${year}`
+          
+          return {
+            month: month,
+            year: fullYear,
+            displayText: monthName
+          }
+        })
+        .filter(Boolean) as GradeDate[]
+      
+      // Sort by year and month (newest first)
+      dateArray.sort((a, b) => {
+        if (a.year !== b.year) return parseInt(b.year) - parseInt(a.year)
+        return parseInt(b.month) - parseInt(a.month)
+      })
+      
+      console.log('Processed grade dates:', dateArray)
+      setGradeDates(dateArray)
+    } catch (error) {
+      console.error('Error fetching grade dates:', error)
+    }
+  }, [])
+
+  // Filter courses by academic year
+  const filterCoursesByAcademicYear = useCallback((academicYearCode: string) => {
+    const filtered = courses.filter(course => 
+      course.schoolYear.schoolYearCode === academicYearCode
+    )
+    // Sort courses numerically by grade
+    const sorted = filtered.sort((a, b) => {
+      const gradeA = parseInt(a.grade)
+      const gradeB = parseInt(b.grade)
+      return gradeA - gradeB
+    })
+    setFilteredCourses(sorted)
+  }, [courses])
+
+  // Check if a specific field has validation error
+  const hasFieldError = useCallback((fieldName: string) => {
+    return validationErrors.some(error => {
+      switch (fieldName) {
+        case 'academicYear':
+          return error.includes('ឆ្នាំសិក្សា')
+        case 'month':
+          return error.includes('ខែ')
+        case 'year':
+          return error.includes('ឆ្នាំ')
+        case 'semester':
+          return error.includes('ឆមាស')
+        case 'class':
+          return error.includes('ថ្នាក់')
+        default:
+          return false
+      }
+    })
+  }, [validationErrors])
+
+  // Form validation
+  const validateForm = useCallback(() => {
+    const errors = []
+    
+    if (!academicYear.trim()) {
+      errors.push('សូមបំពេញឆ្នាំសិក្សា')
+    }
+    
+    if (reportType === 'monthly') {
+      if (!month) errors.push('សូមជ្រើសរើសខែ')
+      if (!year.trim()) errors.push('សូមបំពេញឆ្នាំ')
+      if (!classFilter) errors.push('សូមជ្រើសរើសថ្នាក់')
+    }
+    
+    if (reportType === 'semester') {
+      if (!semester) errors.push('សូមជ្រើសរើសឆមាស')
+      if (!classFilter) errors.push('សូមជ្រើសរើសថ្នាក់')
+    }
+    
+    if (reportType === 'yearly' && !classFilter) {
+      errors.push('សូមជ្រើសរើសថ្នាក់')
+    }
+    
+    return errors
+  }, [academicYear, month, year, semester, classFilter, reportType])
+
+  // Generate report
+  const generateReport = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    const errors = validateForm()
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      toast({
+        title: "មានបញ្ហា",
+        description: errors.join(', '),
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Clear validation errors if form is valid
+    setValidationErrors([])
+    
     setIsGenerating(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    console.log("Generating score report:", { reportType, reportData })
-    setIsGenerating(false)
-    setShowReportModal(false)
-  }
+    try {
+      const requestData = {
+        reportType,
+        academicYear,
+        month,
+        year,
+        semester,
+        class: classFilter,
+        format
+      }
 
-  const reportTypes = [
-    {
-      id: "monthly",
-      title: "របាយការណ៍ប្រចាំខែ",
-      description: "របាយការណ៍ពិន្ទុសិស្សប្រចាំខែ",
-      icon: Calendar,
-      color: "bg-blue-500"
-    },
-    {
-      id: "semester", 
-      title: "របាយការណ៍ប្រចាំឆមាស",
-      description: "របាយការណ៍ពិន្ទុសិស្សប្រចាំឆមាស",
-      icon: BarChart3,
-      color: "bg-green-500"
-    },
-    {
-      id: "yearly",
-      title: "របាយការណ៍ប្រចាំឆ្នាំ", 
-      description: "របាយការណ៍ពិន្ទុសិស្សប្រចាំឆ្នាំ",
-      icon: TrendingUp,
-      color: "bg-purple-500"
-    }
-  ]
+      const response = await fetch('/api/pdf-generate/generate-grade-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      })
 
-  const recentReports = [
-    {
-      id: 1,
-      title: "របាយការណ៍ពិន្ទុខែមករា 2024",
-      type: "monthly",
-      date: "2024-01-31",
-      status: "completed",
-      format: "PDF"
-    },
-    {
-      id: 2,
-      title: "របាយការណ៍ពិន្ទុឆមាសទី១ 2023-2024",
-      type: "semester", 
-      date: "2024-02-15",
-      status: "completed",
-      format: "Excel"
-    },
-    {
-      id: 3,
-      title: "របាយការណ៍ពិន្ទុឆ្នាំ 2023-2024",
-      type: "yearly",
-      date: "2024-06-30", 
-      status: "pending",
-      format: "PDF"
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      // Download PDF
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `grade-report-${reportType}-${academicYear}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      toast({
+        title: "ជោគជ័យ",
+        description: "របាយការណ៍ត្រូវបានបង្កើតដោយជោគជ័យ",
+      })
+      
+    } catch (error) {
+      console.error('Error generating report:', error)
+      toast({
+        title: "មានបញ្ហា",
+        description: "មានបញ្ហាក្នុងការបង្កើតរបាយការណ៍។ សូមព្យាយាមម្តងទៀត។",
+        variant: "destructive"
+      })
+    } finally {
+      setIsGenerating(false)
+      setShowReportModal(false)
     }
-  ]
+  }, [reportType, academicYear, month, year, semester, classFilter, format, validateForm, toast])
+
+  // Memoized unique years for better performance
+  const uniqueYears = useMemo(() => 
+    Array.from(new Set(gradeDates.map(date => date.year)))
+      .sort((a, b) => parseInt(b) - parseInt(a)),
+    [gradeDates]
+  )
+
+  // Effects
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setIsLoadingData(true)
+      try {
+        await Promise.all([
+          fetchSchoolYears(),
+          fetchCourses(),
+          fetchGradeDates()
+        ])
+      } finally {
+        setIsLoadingData(false)
+      }
+    }
+    fetchAllData()
+  }, [fetchSchoolYears, fetchCourses, fetchGradeDates])
+
+  useEffect(() => {
+    if (academicYear && courses.length > 0) {
+      filterCoursesByAcademicYear(academicYear)
+    }
+  }, [academicYear, courses, filterCoursesByAcademicYear])
+
+  // Reset form when report type changes
+  useEffect(() => {
+    setMonth("")
+    setYear("")
+    setSemester("")
+    setClassFilter("")
+    setValidationErrors([])
+  }, [reportType])
+
+  // Clear validation errors when user starts interacting with form
+  const clearValidationErrors = useCallback(() => {
+    if (validationErrors.length > 0) {
+      setValidationErrors([])
+    }
+  }, [validationErrors])
 
   return (
     <div>
-
-
-      <Separator className="my-4" />   
-
-      {/* Recent Reports Section */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-4">របាយការណ៍ថ្មីៗ</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {recentReports.map((report) => (
-            <Card key={report.id} className="hover:shadow-lg transition-all duration-200 dark:bg-gray-800 dark:border-gray-700">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className={`p-2 rounded-lg ${
-                      report.type === 'monthly' ? 'bg-blue-100 dark:bg-blue-900' :
-                      report.type === 'semester' ? 'bg-green-100 dark:bg-green-900' :
-                      'bg-purple-100 dark:bg-purple-900'
-                    }`}>
-                      {report.type === 'monthly' ? <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" /> :
-                       report.type === 'semester' ? <BarChart3 className="h-4 w-4 text-green-600 dark:text-green-400" /> :
-                       <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
-                    </div>
-                    <div>
-                      <CardTitle className="text-sm font-semibold">{report.title}</CardTitle>
-                      <p className="text-xs text-muted-foreground">{report.format} • {report.date}</p>
-                    </div>
-                  </div>
-                  <Badge variant={report.status === 'completed' ? 'default' : 'secondary'}>
-                    {report.status === 'completed' ? 'បានបញ្ចប់' : 'កំពុងដំណើរការ'}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex space-x-2">
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Download className="mr-1 h-3 w-3" />
-                    ទាញយក
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Printer className="mr-1 h-3 w-3" />
-                    បោះពុម្ព
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      <Separator className="my-4" />
-
-      {/* Report Types Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {reportTypes.map((type) => (
-          <Card 
+      {/* Report Types Grid - Modern Card Style */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {REPORT_TYPES.map((type) => (
+          <div
             key={type.id}
-            className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
-              reportType === type.id ? 'ring-2 ring-primary' : ''
+            className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 cursor-pointer ${
+              reportType === type.id 
+                ? 'border-primary shadow-2xl scale-105' 
+                : 'border-border/50 hover:border-primary/30 hover:shadow-xl'
             }`}
             onClick={() => {
               setReportType(type.id)
               setShowReportModal(true)
             }}
           >
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-lg ${type.color} text-white`}>
-                  <type.icon className="h-6 w-6" />
+            {/* Background Gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${
+              reportType === type.id 
+                ? 'from-primary/5 via-primary/10 to-primary/5' 
+                : 'from-muted/20 via-muted/10 to-muted/20'
+            } group-hover:from-primary/10 group-hover:via-primary/15 group-hover:to-primary/10 transition-all duration-500`} />
+            
+            {/* Content */}
+            <div className="relative p-8">
+              {/* Icon with animated background */}
+              <div className="relative mb-6">
+                <div className={`w-16 h-16 mx-auto rounded-3xl ${type.color} flex items-center justify-center shadow-2xl group-hover:shadow-3xl transition-all duration-500 ${
+                  reportType === type.id ? 'scale-110 rotate-3' : 'group-hover:scale-110 group-hover:rotate-3'
+                }`}>
+                  <type.icon className="h-8 w-8 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground tracking-wide">{type.title}</h3>
-                  <p className="text-sm font-medium text-muted-foreground leading-relaxed">{type.description}</p>
+                
+                {/* Decorative elements */}
+                <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full ${type.color} opacity-20 group-hover:opacity-40 transition-opacity duration-500`} />
+                <div className={`absolute -bottom-1 -left-1 w-4 h-4 rounded-full ${type.color} opacity-30 group-hover:opacity-50 transition-opacity duration-500`} />
+              </div>
+
+              {/* Title and Description */}
+              <div className="text-center space-y-3">
+                <h3 className={`text-2xl font-bold transition-colors duration-500 ${
+                  reportType === type.id 
+                    ? 'text-primary' 
+                    : 'text-foreground group-hover:text-primary'
+                }`}>
+                  {type.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">
+                  {type.description}
+                </p>
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 flex justify-center">
+                <div className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-semibold transition-all duration-500 ${
+                  reportType === type.id
+                    ? 'bg-primary text-white shadow-lg'
+                    : 'bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-white group-hover:shadow-lg'
+                }`}>
+                  <span>បង្កើតរបាយការណ៍</span>
+                  <svg className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Selected indicator */}
+              {reportType === type.id && (
+                <div className="absolute top-4 right-4">
+                  <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                    <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Report Modal - Enhanced Modern Design */}
+      {/* Report Modal */}
       {showReportModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm animate-in fade-in duration-300">
-          <Card className="w-full max-w-lg shadow-2xl border-0 bg-gradient-to-br from-background to-muted/20 dark:from-gray-900 dark:to-gray-800">
+          <Card className="w-full max-w-lg shadow-2xl border-0 bg-gradient-to-br from-background to-muted/20">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="p-1 rounded-lg bg-primary/10">
                     <Award className="h-3 w-3 text-primary" />
                   </div>
-                  <div>
-                    <CardTitle className="text-xl font-bold tracking-wide text-center">
-                      បង្កើតរបាយការណ៍ពិន្ទុ
-                    </CardTitle>
-                  </div>
+                  <CardTitle className="text-xl font-bold tracking-wide text-center text-primary">
+                    បង្កើតរបាយការណ៍ពិន្ទុ
+                  </CardTitle>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowReportModal(false)}
-                  className="h-5 w-5 p-0 hover:bg-muted"
+                  onClick={() => {
+                    setShowReportModal(false)
+                    setValidationErrors([])
+                  }}
+                  className="h-5 w-5 p-0 hover:bg-muted hover:text-foreground text-muted-foreground transition-colors duration-200"
+                  aria-label="បិទ"
                 >
                   <X className="h-2.5 w-2.5" />
                 </Button>
@@ -219,130 +506,149 @@ function ScoreReportContent() {
             <CardContent className="p-3">
               <form onSubmit={generateReport} className="space-y-3">
                 {/* Report Type Selection */}
-                <div className="space-y-2">
+                <div className="space-y-4">
+                  
+                  {isLoadingData && (
+                    <div className="flex items-center justify-center space-x-2 py-4 text-sm text-muted-foreground">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      <span>កំពុងផ្ទុកទិន្នន័យ...</span>
+                    </div>
+                  )}
+                  
                   <Tabs value={reportType} onValueChange={setReportType} className="w-full">
                     <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-lg h-10">
                       <TabsTrigger 
-                        value="monthly" 
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 text-sm font-semibold"
+                        value="monthly"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-sm font-semibold"
                       >
-                        <Calendar className="mr-1 h-4 w-4" />
+                        <Calendar className="mr-1 h-4 w-4 text-primary" />
                         ប្រចាំខែ
                       </TabsTrigger>
                       <TabsTrigger 
                         value="semester"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 text-sm font-semibold"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-sm font-semibold"
                       >
-                        <BarChart3 className="mr-1 h-4 w-4" />
+                        <BarChart3 className="mr-1 h-4 w-4 text-primary" />
                         ប្រចាំឆមាស
                       </TabsTrigger>
                       <TabsTrigger 
                         value="yearly"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 text-sm font-semibold"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-sm font-semibold"
                       >
-                        <TrendingUp className="mr-1 h-4 w-4" />
+                        <TrendingUp className="mr-1 h-4 w-4 text-primary" />
                         ប្រចាំឆ្នាំ
                       </TabsTrigger>
                     </TabsList>
 
-                    <div className="mt-3">
-                      <TabsContent value="monthly" className="space-y-2 animate-in fade-in-50 duration-200">
-                        <div className="bg-muted/30 rounded-lg p-2 border border-border/50">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-1">
-                              <Label htmlFor="academicYear" className="text-sm font-semibold text-foreground">
-                                ឆ្នាំសិក្សា <span className="text-red-500 font-bold">*</span>
+                    <div className="mt-6">
+                      {/* Monthly Report Form */}
+                      <TabsContent value="monthly" className="space-y-4 animate-in fade-in-50 duration-200">
+                        {/* Form Header */}
+
+                        
+                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="academicYear" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
+                                <GraduationCap className="h-4 w-4" />
+                                <span>ឆ្នាំសិក្សា</span>
+                                <span className="text-red-500 font-bold">*</span>
                               </Label>
-                              <Input
-                                id="academicYear"
-                                value={reportData.academicYear}
-                                onChange={(e) => setReportData({...reportData, academicYear: e.target.value})}
-                                placeholder="ឧ. 2023-2024"
-                                className="h-9 text-sm font-medium border-border/50 focus:border-primary focus:ring-primary/20"
-                                required
-                              />
+                              <Select value={academicYear} onValueChange={(value) => {
+                                setAcademicYear(value)
+                                clearValidationErrors()
+                              }}>
+                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('academicYear') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {schoolYears.map((schoolYear) => (
+                                    <SelectItem key={schoolYear.schoolYearId} value={schoolYear.schoolYearCode}>
+                                      {schoolYear.schoolYearCode}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
-                            <div className="space-y-1">
-                              <Label htmlFor="month" className="text-sm font-semibold text-foreground">
-                                ខែ <span className="text-red-500 font-bold">*</span>
+                            <div className="space-y-2">
+                              <Label htmlFor="month" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('month') ? 'text-red-500' : 'text-primary'}`}>
+                                <CalendarDays className="h-4 w-4" />
+                                <span>ខែ</span>
+                                <span className="text-red-500 font-bold">*</span>
                               </Label>
-                              <Select value={reportData.month} onValueChange={(value) => setReportData({...reportData, month: value})}>
-                                <SelectTrigger className="h-9 text-sm border-border/50 focus:border-primary focus:ring-primary/20">
+                              <Select value={month} onValueChange={(value) => {
+                                setMonth(value)
+                                clearValidationErrors()
+                              }}>
+                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('month') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
                                   <SelectValue placeholder="ជ្រើសរើសខែ" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="1">មករា</SelectItem>
-                                  <SelectItem value="2">កុម្ភៈ</SelectItem>
-                                  <SelectItem value="3">មីនា</SelectItem>
-                                  <SelectItem value="4">មេសា</SelectItem>
-                                  <SelectItem value="5">ឧសភា</SelectItem>
-                                  <SelectItem value="6">មិថុនា</SelectItem>
-                                  <SelectItem value="7">កក្កដា</SelectItem>
-                                  <SelectItem value="8">សីហា</SelectItem>
-                                  <SelectItem value="9">កញ្ញា</SelectItem>
-                                  <SelectItem value="10">តុលា</SelectItem>
-                                  <SelectItem value="11">វិច្ឆិកា</SelectItem>
-                                  <SelectItem value="12">ធ្នូ</SelectItem>
+                                  {MONTH_NAMES.map((monthName, index) => (
+                                    <SelectItem key={index} value={(index + 1).toString().padStart(2, '0')}>
+                                      {monthName}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-1">
-                              <Label htmlFor="year" className="text-sm font-semibold text-foreground">
-                                ឆ្នាំ <span className="text-red-500 font-bold">*</span>
+                            <div className="space-y-2">
+                              <Label htmlFor="year" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('year') ? 'text-red-500' : 'text-primary'}`}>
+                                <Calendar className="h-4 w-4" />
+                                <span>ឆ្នាំ</span>
+                                <span className="text-red-500 font-bold">*</span>
                               </Label>
-                              <Input
-                                id="year"
-                                type="number"
-                                value={reportData.year}
-                                onChange={(e) => setReportData({...reportData, year: e.target.value})}
-                                placeholder="ឧ. 2024"
-                                className="h-9 text-sm font-medium border-border/50 focus:border-primary focus:ring-primary/20"
-                                required
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label htmlFor="class" className="text-sm font-semibold text-foreground">
-                                ថ្នាក់
-                              </Label>
-                              <Input
-                                id="class"
-                                value={reportData.class}
-                                onChange={(e) => setReportData({...reportData, class: e.target.value})}
-                                placeholder="ឧ. ថ្នាក់ទី១ក"
-                                className="h-9 text-sm font-medium border-border/50 focus:border-primary focus:ring-primary/20"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="semester" className="space-y-2 animate-in fade-in-50 duration-200">
-                        <div className="bg-muted/30 rounded-lg p-2 border border-border/50">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-1">
-                              <Label htmlFor="academicYearSemester" className="text-sm font-semibold text-foreground">
-                                ឆ្នាំសិក្សា <span className="text-red-500 font-bold">*</span>
-                              </Label>
-                              <Input
-                                id="academicYearSemester"
-                                value={reportData.academicYear}
-                                onChange={(e) => setReportData({...reportData, academicYear: e.target.value})}
-                                placeholder="ឧ. 2023-2024"
-                                className="h-9 text-sm font-medium border-border/50 focus:border-primary focus:ring-primary/20"
-                                required
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label htmlFor="semester" className="text-sm font-semibold text-foreground">
-                                ឆមាស <span className="text-red-500 font-bold">*</span>
-                              </Label>
-                              <Select value={reportData.semester} onValueChange={(value) => setReportData({...reportData, semester: value})}>
-                                <SelectTrigger className="h-9 text-sm border-border/50 focus:border-primary focus:ring-primary/20">
-                                  <SelectValue placeholder="ជ្រើសរើសឆមាស" />
+                              <Select value={year} onValueChange={(value) => {
+                                setYear(value)
+                                clearValidationErrors()
+                              }}>
+                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('year') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសឆ្នាំ" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="1">ឆមាសទី១</SelectItem>
-                                  <SelectItem value="2">ឆមាសទី២</SelectItem>
+                                  {uniqueYears.map((yearValue) => (
+                                    <SelectItem key={yearValue} value={yearValue}>
+                                      {yearValue}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="class" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
+                                <Users className="h-4 w-4" />
+                                <span>ថ្នាក់</span>
+                                <span className="text-red-500 font-bold">*</span>
+                              </Label>
+                              <Select value={classFilter} onValueChange={(value) => {
+                                setClassFilter(value)
+                                clearValidationErrors()
+                              }}>
+                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('class') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {filteredCourses.map((course) => (
+                                    <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                                      ថ្នាក់ទី {course.grade}{course.section}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -350,33 +656,152 @@ function ScoreReportContent() {
                         </div>
                       </TabsContent>
 
-                      <TabsContent value="yearly" className="space-y-2 animate-in fade-in-50 duration-200">
-                        <div className="bg-muted/30 rounded-lg p-2 border border-border/50">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-1">
-                              <Label htmlFor="academicYearYearly" className="text-sm font-semibold text-foreground">
-                                ឆ្នាំសិក្សា <span className="text-red-500 font-bold">*</span>
+                      {/* Semester Report Form */}
+                      <TabsContent value="semester" className="space-y-4 animate-in fade-in-50 duration-200">
+
+                        
+                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
+                          <div className="space-y-3">
+                            {/* First row: Academic Year and Semester */}
+                            <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="academicYearSemester" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
+                                <GraduationCap className="h-4 w-4" />
+                                <span>ឆ្នាំសិក្សា</span>
+                                <span className="text-red-500 font-bold">*</span>
                               </Label>
-                              <Input
-                                id="academicYearYearly"
-                                value={reportData.academicYear}
-                                onChange={(e) => setReportData({...reportData, academicYear: e.target.value})}
-                                placeholder="ឧ. 2023-2024"
-                                className="h-9 text-sm font-medium border-border/50 focus:border-primary focus:ring-primary/20"
-                                required
-                              />
+                              <Select value={academicYear} onValueChange={(value) => {
+                                setAcademicYear(value)
+                                clearValidationErrors()
+                              }}>
+                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('academicYear') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                                </SelectTrigger>
+                                  <SelectContent>
+                                    {schoolYears.map((schoolYear) => (
+                                      <SelectItem key={schoolYear.schoolYearId} value={schoolYear.schoolYearCode}>
+                                        {schoolYear.schoolYearCode}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="semester" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('semester') ? 'text-red-500' : 'text-primary'}`}>
+                                  <BarChart3 className="h-4 w-4" />
+                                  <span>ឆមាស</span>
+                                  <span className="text-red-500 font-bold">*</span>
+                                </Label>
+                                <Select value={semester} onValueChange={(value) => {
+                                  setSemester(value)
+                                  clearValidationErrors()
+                                }}>
+                                  <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                    hasFieldError('semester') 
+                                      ? 'border-red-500 focus:border-red-500' 
+                                      : 'border-border/50 focus:border-primary'
+                                  }`}>
+                                    <SelectValue placeholder="ជ្រើសរើសឆមាស" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="1">ឆមាសទី ១</SelectItem>
+                                    <SelectItem value="2">ឆមាសទី ២</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <Label htmlFor="classYearly" className="text-sm font-semibold text-foreground">
-                                ថ្នាក់
+                            {/* Second row: Class (full width) */}
+                            <div className="space-y-2">
+                              <Label htmlFor="classSemester" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
+                                <Users className="h-4 w-4" />
+                                <span>ថ្នាក់</span>
+                                <span className="text-red-500 font-bold">*</span>
                               </Label>
-                              <Input
-                                id="classYearly"
-                                value={reportData.class}
-                                onChange={(e) => setReportData({...reportData, class: e.target.value})}
-                                placeholder="ឧ. ថ្នាក់ទី១ក"
-                                className="h-9 text-sm font-medium border-border/50 focus:border-primary focus:ring-primary/20"
-                              />
+                              <Select value={classFilter} onValueChange={(value) => {
+                                setClassFilter(value)
+                                clearValidationErrors()
+                              }}>
+                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('class') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {filteredCourses.map((course) => (
+                                    <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                                      ថ្នាក់ទី {course.grade}{course.section}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* Yearly Report Form */}
+                      <TabsContent value="yearly" className="space-y-4 animate-in fade-in-50 duration-200">
+                        {/* Form Header */}
+                        
+                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="academicYearYearly" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
+                                <GraduationCap className="h-4 w-4" />
+                                <span>ឆ្នាំសិក្សា</span>
+                                <span className="text-red-500 font-bold">*</span>
+                              </Label>
+                              <Select value={academicYear} onValueChange={(value) => {
+                                setAcademicYear(value)
+                                clearValidationErrors()
+                              }}>
+                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('academicYear') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {schoolYears.map((schoolYear) => (
+                                    <SelectItem key={schoolYear.schoolYearId} value={schoolYear.schoolYearCode}>
+                                      {schoolYear.schoolYearCode}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="classYearly" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
+                                <Users className="h-4 w-4" />
+                                <span>ថ្នាក់</span>
+                                <span className="text-red-500 font-bold">*</span>
+                              </Label>
+                              <Select value={classFilter} onValueChange={(value) => {
+                                setClassFilter(value)
+                                clearValidationErrors()
+                              }}>
+                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('class') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {filteredCourses.map((course) => (
+                                    <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                                      ថ្នាក់ទី {course.grade}{course.section}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                         </div>
@@ -386,45 +811,51 @@ function ScoreReportContent() {
                 </div>
 
                 {/* Export Options */}
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Download className="h-4 w-4 text-primary" />
-                    <Label className="text-sm font-semibold text-foreground">ជម្រើសនាំចេញ</Label>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="format" className="text-sm font-semibold text-foreground">
-                      ទម្រង់ឯកសារ <span className="text-red-500 font-bold">*</span>
-                    </Label>
-                    <Select value={reportData.format} onValueChange={(value) => setReportData({...reportData, format: value})}>
-                      <SelectTrigger className="h-8 text-sm border-border/50 focus:border-primary focus:ring-primary/20">
+                <div className="space-y-4">
+                  {/* Export Header */}
+
+                  
+                   <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
+                    <div className="space-y-2">
+                      <Label htmlFor="format" className="flex items-center space-x-2 text-sm font-semibold text-primary">
+                        <FileType className="h-4 w-4" />
+                        <span>ទម្រង់ឯកសារ</span>
+                        <span className="text-red-500 font-bold">*</span>
+                      </Label>
+                    <Select value={format} onValueChange={setFormat}>
+                      <SelectTrigger className="h-10 text-sm border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="pdf">
                           <div className="flex items-center space-x-2">
-                            <FileText className="h-3 w-3" />
+                            <FileText className="h-3 w-3 text-primary" />
                             <span>PDF</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="excel">
                           <div className="flex items-center space-x-2">
-                            <BarChart3 className="h-3 w-3" />
+                            <BarChart3 className="h-3 w-3 text-primary" />
                             <span>Excel</span>
                           </div>
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    </div>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end space-x-2 pt-3 border-t border-border/50">
+                <div className="flex justify-end space-x-3 pt-4 border-t border-border/50 bg-gradient-to-r from-transparent via-muted/20 to-transparent -mx-6 px-6">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowReportModal(false)}
-                    className="h-9 px-4 text-sm font-semibold hover:bg-muted/50"
+                    onClick={() => {
+                      setShowReportModal(false)
+                      setValidationErrors([])
+                    }}
+                    className="h-10 px-6 text-sm font-semibold hover:bg-muted hover:text-foreground text-muted-foreground border-border/50 hover:border-border hover:scale-[1.02] transition-all duration-200"
                   >
                     បោះបង់
                   </Button>
@@ -432,16 +863,16 @@ function ScoreReportContent() {
                     type="submit"
                     size="sm"
                     disabled={isGenerating}
-                    className="h-9 px-4 text-sm font-bold bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="h-10 px-6 text-sm font-bold bg-primary hover:bg-primary/90 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     {isGenerating ? (
                       <>
-                        <div className="mr-1 h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        កំពុងបង្កើត...
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <span className="animate-pulse">កំពុងបង្កើត...</span>
                       </>
                     ) : (
                       <>
-                        <Download className="mr-1 h-3 w-3" />
+                        <Award className="mr-2 h-4 w-4" />
                         បង្កើតរបាយការណ៍
                       </>
                     )}

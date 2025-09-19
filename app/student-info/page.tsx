@@ -224,10 +224,10 @@ function StudentInfoContent() {
     
     // Apply year and class filters FIRST (this affects both dropdown and student list)
     if (filterByYearClass) {
-      if (selectedYear) {
+      if (selectedYear && selectedYear !== 'all') {
         result = result.filter(student => (student.schoolYear || '') === selectedYear);
       }
-      if (selectedClass) {
+      if (selectedClass && selectedClass !== 'all') {
         result = result.filter(student => (student.class || '') === selectedClass);
       }
     }

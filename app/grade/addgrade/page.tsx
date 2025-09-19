@@ -24,7 +24,8 @@ import {
   GraduationCap,
   CalendarDays,
   Hash,
-  TrendingUp
+  TrendingUp,
+  User as UserIcon
 } from "lucide-react"
 import {
   Table,
@@ -120,6 +121,7 @@ interface GradeInput {
   subjectId: number
   courseId: number
   semesterId: number
+  score: number
   grade: number
   gradeComment?: string
   userId?: number
@@ -137,6 +139,15 @@ export default function AddScorePage() {
 }
 
 function AddScoreContent() {
+  // Helper function to get current date
+  const getCurrentDate = () => {
+    const currentDate = new Date()
+    return {
+      month: String(currentDate.getMonth() + 1).padStart(2, '0'),
+      year: String(currentDate.getFullYear())
+    }
+  }
+
   // Filter states
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("")
   const [selectedSemester, setSelectedSemester] = useState<string>("")
@@ -152,6 +163,15 @@ function AddScoreContent() {
   const [comment, setComment] = useState("")
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [editingGrade, setEditingGrade] = useState<Grade | null>(null)
+  const [scoreError, setScoreError] = useState<string>("")
+  const [isValidScore, setIsValidScore] = useState<boolean>(true)
+  const [bulkMode, setBulkMode] = useState<boolean>(false)
+  const [bulkScores, setBulkScores] = useState<{[key: number]: {score: string, comment: string}}>({})
+  
+  // Grade list filter states - Initialize with "all" to show all grades by default
+  const [gradeListMonth, setGradeListMonth] = useState<string>("all")
+  const [gradeListYear, setGradeListYear] = useState<string>("all")
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState<boolean>(true)
 
   // Data states
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
@@ -178,12 +198,32 @@ function AddScoreContent() {
     { value: "12", label: "ធ្នូ" }
   ]
   
-  const gradeYears = [
-    { value: "2023", label: "2023" },
-    { value: "2024", label: "2024" },
-    { value: "2025", label: "2025" },
-    { value: "2026", label: "2026" }
-  ]
+  // Generate dynamic year options: 3 years before and 3 years after current year
+  // This automatically updates each year without needing to manually change the code
+  const getGradeYears = () => {
+    const currentYear = new Date().getFullYear()
+    const years = []
+    
+    // Add 3 years before current year
+    for (let i = 3; i >= 1; i--) {
+      const year = currentYear - i
+      years.push({ value: year.toString(), label: year.toString() })
+    }
+    
+    // Add current year
+    years.push({ value: currentYear.toString(), label: currentYear.toString() })
+    
+    // Add 3 years after current year
+    for (let i = 1; i <= 3; i++) {
+      const year = currentYear + i
+      years.push({ value: year.toString(), label: year.toString() })
+    }
+    
+    console.log('📅 Generated year options:', years.map(y => y.label).join(', '))
+    return years
+  }
+  
+  const gradeYears = getGradeYears()
 
   // Loading states
   const [loading, setLoading] = useState(true)
@@ -193,13 +233,275 @@ function AddScoreContent() {
 
   // Error states
   const [error, setError] = useState<string | null>(null)
-  
-  // Helper function to get current date
-  const getCurrentDate = () => {
-    const currentDate = new Date()
-    return {
-      month: String(currentDate.getMonth() + 1).padStart(2, '0'),
-      year: String(currentDate.getFullYear())
+
+  // Score validation and formatting
+  const validateScore = (value: string) => {
+    const numValue = parseFloat(value)
+    if (value === "") {
+      setScoreError("")
+      setIsValidScore(true)
+      return true
+    }
+    if (isNaN(numValue)) {
+      setScoreError("សូមបញ្ចូលលេខត្រឹមត្រូវ")
+      setIsValidScore(false)
+      return false
+    }
+    if (numValue < 0) {
+      setScoreError("ពិន្ទុមិនអាចតិចជាង 0")
+      setIsValidScore(false)
+      return false
+    }
+
+    // Get maximum score based on student's grade level
+    let maxScore = 100
+    if (selectedStudent) {
+      const gradeLevel = parseInt(getStudentGradeLevel(selectedStudent).toString())
+      if (gradeLevel >= 1 && gradeLevel <= 6) {
+        maxScore = 10
+      }
+    }
+
+    if (numValue > maxScore) {
+      setScoreError(`ពិន្ទុមិនអាចលើសជាង ${maxScore}`)
+      setIsValidScore(false)
+      return false
+    }
+    setScoreError("")
+    setIsValidScore(true)
+    return true
+  }
+
+  const getScoreGrade = (score: number) => {
+    // Get maximum score based on student's grade level
+    let maxScore = 100
+    if (selectedStudent) {
+      const gradeLevel = parseInt(getStudentGradeLevel(selectedStudent).toString())
+      if (gradeLevel >= 1 && gradeLevel <= 6) {
+        maxScore = 10
+      }
+    }
+
+    // Calculate grade based on the appropriate scale
+    if (maxScore === 10) {
+      // 10-point scale for grades 1-6
+      if (score >= 9) return { grade: "A", color: "text-green-600", bg: "bg-green-100" }
+      if (score >= 8) return { grade: "B", color: "text-blue-600", bg: "bg-blue-100" }
+      if (score >= 7) return { grade: "C", color: "text-yellow-600", bg: "bg-yellow-100" }
+      if (score >= 6) return { grade: "D", color: "text-orange-600", bg: "bg-orange-100" }
+      return { grade: "F", color: "text-red-600", bg: "bg-red-100" }
+    } else {
+      // 100-point scale for grades 7+
+      if (score >= 90) return { grade: "A", color: "text-green-600", bg: "bg-green-100" }
+      if (score >= 80) return { grade: "B", color: "text-blue-600", bg: "bg-blue-100" }
+      if (score >= 70) return { grade: "C", color: "text-yellow-600", bg: "bg-yellow-100" }
+      if (score >= 60) return { grade: "D", color: "text-orange-600", bg: "bg-orange-100" }
+      return { grade: "F", color: "text-red-600", bg: "bg-red-100" }
+    }
+  }
+
+  const handleScoreChange = (value: string) => {
+    setScore(value)
+    validateScore(value)
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (selectedStudent && selectedSubject && score && isValidScore) {
+        handleSubmit(e as any)
+      }
+    }
+  }
+
+  // Helper function to get student's grade level
+  const getStudentGradeLevel = (student: Student) => {
+    // Find the current course enrollment for the selected course
+    const currentEnrollment = student.enrollments.find(enrollment => 
+      enrollment.course.courseId.toString() === selectedCourse
+    )
+    
+    if (currentEnrollment && currentEnrollment.course) {
+      return currentEnrollment.course.grade
+    }
+    
+    // Fallback to student's class if no course enrollment found
+    return student.class
+  }
+
+  // Helper function to get maximum score for a student
+  const getMaxScore = (student: Student) => {
+    const gradeLevel = parseInt(getStudentGradeLevel(student).toString())
+    return (gradeLevel >= 1 && gradeLevel <= 6) ? 10 : 100
+  }
+
+  // Helper function to get formatted class display with section
+  const getFormattedClass = (student: Student) => {
+    // Find the current course enrollment for the selected course
+    const currentEnrollment = student.enrollments.find(enrollment => 
+      enrollment.course.courseId.toString() === selectedCourse
+    )
+    
+    if (currentEnrollment && currentEnrollment.course) {
+      const { grade, section } = currentEnrollment.course
+      return `ថ្នាក់ទី ${grade}${section}`
+    }
+    
+    // Fallback to student's class if no course enrollment found
+    return `ថ្នាក់ទី ${student.class}`
+  }
+
+  const handleBulkScoreChange = (studentId: number, score: string) => {
+    setBulkScores(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        score
+      }
+    }))
+  }
+
+  // Initialize bulk scores with existing grades for the selected subject
+  const initializeBulkScores = () => {
+    if (!selectedSubject || !selectedCourse || !selectedSemester) return
+
+    const newBulkScores: {[key: number]: {score: string, comment: string}} = {}
+    
+    filteredStudents.forEach(student => {
+      const existingGrade = grades.find(grade => 
+        grade.subjectId.toString() === selectedSubject &&
+        grade.studentId === student.studentId &&
+        grade.courseId.toString() === selectedCourse &&
+        grade.semesterId.toString() === selectedSemester
+      )
+      
+      if (existingGrade) {
+        newBulkScores[student.studentId] = {
+          score: existingGrade.grade.toString(),
+          comment: existingGrade.gradeComment || ""
+        }
+      }
+    })
+    
+    setBulkScores(newBulkScores)
+  }
+
+  const handleBulkCommentChange = (studentId: number, comment: string) => {
+    setBulkScores(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        comment
+      }
+    }))
+  }
+
+  const handleBulkSubmit = async () => {
+    if (!selectedSubject || !selectedCourse || !selectedSemester || !selectedMonth || !selectedGradeYear) {
+      toast({
+        title: "កំហុស",
+        description: "សូមបំពេញគ្រប់ផ្នែកដែលត្រូវការ",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const validScores = Object.entries(bulkScores).filter(([_, data]) => data.score && !isNaN(parseFloat(data.score)))
+    
+    if (validScores.length === 0) {
+      toast({
+        title: "កំហុស",
+        description: "សូមបញ្ចូលពិន្ទុយ៉ាងហោចណាស់មួយ",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      setError(null)
+
+      const formattedGradeDate = selectedMonth && selectedGradeYear 
+        ? `${selectedMonth}/${selectedGradeYear.slice(-2)}`
+        : `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
+
+      const promises = validScores.map(async ([studentId, data]) => {
+        const gradeData: GradeInput = {
+          studentId: parseInt(studentId),
+          subjectId: parseInt(selectedSubject),
+          courseId: parseInt(selectedCourse),
+          semesterId: parseInt(selectedSemester),
+          score: parseFloat(data.score),
+          grade: parseFloat(data.score),
+          gradeComment: data.comment || undefined,
+          userId: getCurrentUser()?.id,
+          month: selectedMonth || undefined,
+          gradeYear: selectedGradeYear || undefined,
+          gradeDate: formattedGradeDate
+        }
+
+        // Check if grade already exists
+        const existingGrade = grades.find(grade => 
+          grade.subjectId.toString() === selectedSubject &&
+          grade.studentId === parseInt(studentId) &&
+          grade.courseId.toString() === selectedCourse &&
+          grade.semesterId.toString() === selectedSemester
+        )
+
+        const response = await fetch('/api/grades', {
+          method: existingGrade ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(existingGrade ? {
+            gradeId: existingGrade.gradeId,
+            ...gradeData
+          } : gradeData)
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to create grade for student ${studentId}`)
+        }
+      })
+
+      await Promise.all(promises)
+
+      // Count how many were updates vs new
+      const updateCount = validScores.filter(([studentId, _]) => 
+        grades.find(grade => 
+          grade.subjectId.toString() === selectedSubject &&
+          grade.studentId === parseInt(studentId) &&
+          grade.courseId.toString() === selectedCourse &&
+          grade.semesterId.toString() === selectedSemester
+        )
+      ).length
+      const newCount = validScores.length - updateCount
+
+      toast({
+        title: "ជោគជ័យ",
+        description: `បាន${updateCount > 0 ? 'កែសម្រួល' : 'បញ្ចូល'}ពិន្ទុ ${validScores.length} ពិន្ទុដោយជោគជ័យ${updateCount > 0 && newCount > 0 ? ` (កែសម្រួល ${updateCount}, បញ្ចូលថ្មី ${newCount})` : ''}`,
+      })
+
+      // Reset bulk mode
+      setBulkMode(false)
+      setBulkScores({})
+      setSelectedSubject("")
+      
+      // Reset to current date
+      const { month, year } = getCurrentDate()
+      setSelectedMonth(month)
+      setSelectedGradeYear(year)
+      
+      fetchGrades()
+
+    } catch (error) {
+      console.error('Error submitting bulk grades:', error)
+      setError('មានបញ្ហាក្នុងការបញ្ចូលពិន្ទុ')
+      toast({
+        title: "កំហុស",
+        description: "មានបញ្ហាក្នុងការបញ្ចូលពិន្ទុ",
+        variant: "destructive"
+      })
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -286,6 +588,37 @@ function AddScoreContent() {
     }
   }, [selectedStudent, selectedSchoolYear, selectedCourse, selectedSemester, fetchGrades])
 
+  // Auto-filter grades when month or year filter changes
+  useEffect(() => {
+    if (grades.length > 0) {
+      console.log('🔍 Filter changed:', { gradeListMonth, gradeListYear })
+      // The filteredGrades will automatically update due to the filter logic
+    }
+  }, [gradeListMonth, gradeListYear, grades])
+
+  // Auto-sync Grade List Filters with main Combined Filter Row
+  useEffect(() => {
+    if (autoSyncEnabled) {
+      // Sync month filter
+      if (selectedMonth && selectedMonth !== '') {
+        setGradeListMonth(selectedMonth)
+      } else {
+        setGradeListMonth("all")
+      }
+    }
+  }, [selectedMonth, autoSyncEnabled])
+
+  useEffect(() => {
+    if (autoSyncEnabled) {
+      // Sync year filter
+      if (selectedGradeYear && selectedGradeYear !== '') {
+        setGradeListYear(selectedGradeYear)
+      } else {
+        setGradeListYear("all")
+      }
+    }
+  }, [selectedGradeYear, autoSyncEnabled])
+
   const fetchInitialData = async () => {
     try {
       setLoading(true)
@@ -319,7 +652,7 @@ function AddScoreContent() {
         totalCourses: courses.length,
         coursesList: courses.map(c => ({ 
           id: c.courseId, 
-          name: c.courseName, 
+          name: `ថ្នាក់ទី ${c.grade}${c.section}`, 
           grade: c.grade, 
           section: c.section,
           schoolYear: c.schoolYear?.schoolYearCode 
@@ -362,6 +695,16 @@ function AddScoreContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Validate score first
+    if (!validateScore(score)) {
+      toast({
+        title: "កំហុស",
+        description: scoreError || "សូមបញ្ចូលពិន្ទុត្រឹមត្រូវ",
+        variant: "destructive"
+      })
+      return
+    }
+    
     if (!selectedStudent || !selectedSubject || !score || !selectedCourse || !selectedSemester || !selectedMonth || !selectedGradeYear) {
       console.log('🔍 Validation failed:', {
         selectedStudent: !!selectedStudent,
@@ -394,6 +737,7 @@ function AddScoreContent() {
         subjectId: parseInt(selectedSubject),
         courseId: parseInt(selectedCourse),
         semesterId: parseInt(selectedSemester),
+        score: parseFloat(score),
         grade: parseFloat(score),
         gradeComment: comment || undefined,
         userId: getCurrentUser()?.id,
@@ -411,7 +755,7 @@ function AddScoreContent() {
         selectedMonth,
         selectedGradeYear,
         score,
-        currentTeacher: `${getCurrentUser()?.firstname} ${getCurrentUser()?.lastname}`,
+        currentTeacher: `${getCurrentUser()?.lastname} ${getCurrentUser()?.firstname}`,
         currentUserId: getCurrentUser()?.id
       })
       console.log('🔍 Formatted gradeDate:', formattedGradeDate)
@@ -465,6 +809,8 @@ function AddScoreContent() {
       setScore("")
       setComment("")
       setSelectedSubject("")
+      setScoreError("")
+      setIsValidScore(true)
       
       // Reset to current date instead of empty
       const { month, year } = getCurrentDate()
@@ -505,11 +851,50 @@ function AddScoreContent() {
     setScore("")
     setComment("")
     setSelectedSubject("")
+    setScoreError("")
+    setIsValidScore(true)
     
     // Reset to current date instead of empty
     const { month, year } = getCurrentDate()
     setSelectedMonth(month)
     setSelectedGradeYear(year)
+  }
+
+  // Check if subject already has a grade and auto-switch to edit mode
+  const checkExistingGrade = (subjectId: string) => {
+    if (!selectedStudent || !selectedCourse || !selectedSemester) return
+
+    const existingGrade = grades.find(grade => 
+      grade.subjectId.toString() === subjectId &&
+      grade.studentId === selectedStudent.studentId &&
+      grade.courseId.toString() === selectedCourse &&
+      grade.semesterId.toString() === selectedSemester
+    )
+
+    if (existingGrade) {
+      // Auto-switch to edit mode
+      setEditingGrade(existingGrade)
+      setScore(existingGrade.grade.toString())
+      setComment(existingGrade.gradeComment || "")
+      
+      // Parse gradeDate to populate month and year
+      if (existingGrade.gradeDate) {
+        const [month, year] = existingGrade.gradeDate.split('/')
+        setSelectedMonth(month)
+        setSelectedGradeYear(`20${year}`)
+      }
+      
+      toast({
+        title: "ពិន្ទុមានរួចហើយ",
+        description: `មុខវិជ្ជា ${existingGrade.subject.subjectName} មានពិន្ទុ ${existingGrade.grade} រួចហើយ។ អ្នកអាចកែសម្រួលបាន។`,
+        variant: "default"
+      })
+    } else {
+      // Clear edit mode for new grade
+      setEditingGrade(null)
+      setScore("")
+      setComment("")
+    }
   }
 
   const handleDelete = async (gradeId: number) => {
@@ -581,19 +966,47 @@ function AddScoreContent() {
     selectedSchoolYear,
     totalCourses: courses.length,
     filteredCount: filteredCourses.length,
-    filteredCourses: filteredCourses.map(c => ({ id: c.courseId, name: c.courseName, schoolYear: c.schoolYear?.schoolYearCode }))
+    filteredCourses: filteredCourses.map(c => ({ id: c.courseId, name: `ថ្នាក់ទី ${c.grade}${c.section}`, schoolYear: c.schoolYear?.schoolYearCode }))
   })
 
   // Filter students based on search term
   const filteredStudents = students.filter(student => {
     if (!searchTerm) return true
-    const fullName = `${student.firstName} ${student.lastName}`.toLowerCase()
+    const fullName = `${student.lastName} ${student.firstName}`.toLowerCase()
     return fullName.includes(searchTerm.toLowerCase())
   })
 
-  // Calculate stats
-  const totalGrades = grades.length
-  const totalPoints = grades.reduce((sum, grade) => sum + grade.grade, 0)
+  // Filter grades based on month and year
+  const filteredGrades = grades.filter(grade => {
+    // If both filters are "all", show all grades
+    if (gradeListMonth === 'all' && gradeListYear === 'all') return true
+    
+    const gradeDate = grade.gradeDate // Format: "MM/YY"
+    if (!gradeDate || typeof gradeDate !== 'string') return false
+    
+    const dateParts = gradeDate.split('/')
+    if (dateParts.length !== 2) return false
+    
+    const [month, year] = dateParts
+    
+    // Validate month and year format
+    if (!month || !year || month.length !== 2 || year.length !== 2) return false
+    
+    // Check month match
+    const monthMatch = gradeListMonth === 'all' || month === gradeListMonth
+    
+    // Check year match - compare last 2 digits of the selected year with grade year
+    const yearMatch = gradeListYear === 'all' || year === gradeListYear.slice(-2)
+    
+    return monthMatch && yearMatch
+  })
+
+  // Calculate stats based on filtered grades
+  const totalGrades = filteredGrades.length
+  const totalPoints = filteredGrades.reduce((sum, grade) => {
+    const gradeValue = typeof grade.grade === 'number' ? grade.grade : 0
+    return sum + gradeValue
+  }, 0)
   const averageScore = totalGrades > 0 ? (totalPoints / totalGrades).toFixed(2) : "0.00"
 
   if (loading) {
@@ -629,92 +1042,9 @@ function AddScoreContent() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl p-6">
+    <div>
       <div className="animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8 p-6">
-          {/* Modern Header Section */}
-          <div className="relative">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
-
-            <div className="text-center space-y-6 p-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
-                  បន្ថែមពិន្ទុសិស្ស
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                  ប្រព័ន្ធគ្រប់គ្រងការបញ្ចូល និងគ្រប់គ្រងពិន្ទុសិស្សតាមថ្នាក់រៀន និងមុខវិជ្ជា
-                </p>
-              </div>
-
-              {/* Enhanced Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                        <GraduationCap className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{schoolYears.length}</p>
-                        <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">ឆ្នាំសិក្សា</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                </div>
-
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
-                        <BookOpen className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{courses.length}</p>
-                        <p className="text-xs text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់រៀន</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                </div>
-
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
-                        <Users className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">{students.length}</p>
-                        <p className="text-xs text-green-500 dark:text-green-300 font-medium">សិស្សសរុប</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                </div>
-
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
-                        <TrendingUp className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{grades.length}</p>
-                        <p className="text-xs text-orange-500 dark:text-orange-300 font-medium">ពិន្ទុសរុប</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Enhanced Filter Bar */}
           <div className="relative">
@@ -738,95 +1068,130 @@ function AddScoreContent() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-6">
-                {/* Combined Filter Row - All filters in one line */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
-                    <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
-                      <SelectTrigger className="h-11 bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200">
-                        <SelectValue placeholder="ឆ្នាំសិក្សា" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {schoolYears.map((year) => (
-                          <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                            {year.schoolYearCode}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <CardContent className="p-2">
+                {/* Modern Filter Row - Enhanced Design */}
+                <div className="space-y-6">
 
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឆមាស</label>
-                    <Select value={selectedSemester} onValueChange={handleSemesterChange}>
-                      <SelectTrigger className="h-11 bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200">
-                        <SelectValue placeholder="ឆមាស" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {semesters.map((semester) => (
-                          <SelectItem key={semester.semesterId} value={semester.semesterId.toString()}>
-                            {semester.semester}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {/* Filter Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    {/* Academic Year */}
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                        <CalendarDays className="h-4 w-4 text-primary" />
+                        <span>ឆ្នាំសិក្សា</span>
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
+                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
+                          <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {schoolYears.map((year) => (
+                            <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
+                              {year.schoolYearCode}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ថ្នាក់</label>
-                    <Select value={selectedCourse} onValueChange={handleCourseChange}>
-                      <SelectTrigger className="h-11 bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200">
-                        <SelectValue placeholder="ថ្នាក់" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredCourses.map((course) => (
-                          <SelectItem key={course.courseId} value={course.courseId.toString()}>
-                            {course.courseName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                    {/* Semester */}
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        <span>ឆមាស</span>
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <Select value={selectedSemester} onValueChange={handleSemesterChange}>
+                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
+                          <SelectValue placeholder="ជ្រើសរើសឆមាស" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {semesters.map((semester) => (
+                            <SelectItem key={semester.semesterId} value={semester.semesterId.toString()}>
+                              {semester.semester}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ខែ</label>
-                    <Select value={selectedMonth} onValueChange={handleMonthChange}>
-                      <SelectTrigger className="h-11 bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200">
-                        <SelectValue placeholder="ខែ" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {months.map((month) => (
-                          <SelectItem key={month.value} value={month.value}>
-                            {month.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                    {/* Class */}
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                        <GraduationCap className="h-4 w-4 text-primary" />
+                        <span>ថ្នាក់</span>
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <Select value={selectedCourse} onValueChange={handleCourseChange}>
+                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
+                          <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {filteredCourses.map((course) => (
+                            <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                              ថ្នាក់ទី {course.grade}{course.section}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំពិន្ទុ</label>
-                    <Select value={selectedGradeYear} onValueChange={handleGradeYearChange}>
-                      <SelectTrigger className="h-11 bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200">
-                        <SelectValue placeholder="ឆ្នាំពិន្ទុ" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {gradeYears.map((year) => (
-                          <SelectItem key={year.value} value={year.value}>
-                            {year.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                    {/* Month */}
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                        <CalendarDays className="h-4 w-4 text-primary" />
+                        <span>ខែ</span>
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <Select value={selectedMonth} onValueChange={handleMonthChange}>
+                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
+                          <SelectValue placeholder="ជ្រើសរើសខែ" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {months.map((month) => (
+                            <SelectItem key={month.value} value={month.value}>
+                              {month.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ឈ្មេាះគ្រូ</label>
-                    <div className="h-11 px-3 py-2 bg-gradient-to-r from-gray-50 via-gray-50/95 to-gray-50/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border border-gray-200 dark:border-gray-600 rounded-md flex items-center">
-                      <span className="text-gray-900 dark:text-white font-medium">
-                        {getCurrentUser()?.firstname} {getCurrentUser()?.lastname}
-                      </span>
+                    {/* Grade Year */}
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                        <TrendingUp className="h-4 w-4 text-primary" />
+                        <span>ឆ្នាំពិន្ទុ</span>
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <Select value={selectedGradeYear} onValueChange={handleGradeYearChange}>
+                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
+                          <SelectValue placeholder="ជ្រើសរើសឆ្នាំ" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {gradeYears.map((year) => (
+                            <SelectItem key={year.value} value={year.value}>
+                              {year.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Teacher Info */}
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                        <UserIcon className="h-4 w-4 text-primary" />
+                        <span>ឈ្មោះគ្រូ</span>
+                      </label>
+                      <div className="h-12 px-4 py-3 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 border-2 border-primary/20 dark:border-primary/30 rounded-xl flex items-center justify-center">
+                        <div className="text-center">
+                          <span className="text-base font-semibold text-primary dark:text-primary-foreground block">
+                            {getCurrentUser()?.lastname} {getCurrentUser()?.firstname}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -834,201 +1199,362 @@ function AddScoreContent() {
             </Card>
           </div>
 
-          {/* Student List and Score Input */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-            {/* Enhanced Student List */}
-            <div className="xl:col-span-3">
-              <div className="relative">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 bg-gradient-to-br from-green-50/20 via-emerald-50/20 to-green-50/20 dark:from-green-950/10 dark:via-emerald-950/10 dark:to-green-950/10 rounded-3xl -z-10" />
-
-                <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-                  {/* Enhanced Header */}
-                  <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white p-6">
-                    <div className="absolute inset-0 bg-black/10" />
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12" />
-                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
-
-                    <div className="relative z-10 flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                          <Users className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                          <h2 className="text-2xl font-bold text-white">បញ្ជីឈ្មោះសិស្ស</h2>
-                          <div className="flex items-center space-x-3 mt-2">
-                            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                              {filteredStudents.length} នាក់
-                            </Badge>
-                            <div className="h-1 w-8 bg-white/30 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
+          {/* Main Content - Side by Side Layout */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Left Side: Student List */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {loadingStudents ? (
-                      <div className="text-center py-8">
-                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                        <p className="text-sm text-muted-foreground">កំពុងទាញយក...</p>
-                      </div>
-                    ) : filteredStudents.length > 0 ? (
-                      <div className="space-y-3 max-h-96 overflow-y-auto">
-                        {filteredStudents.map(student => (
-                          <div 
-                            key={student.studentId}
-                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                              selectedStudent?.studentId === student.studentId 
-                                ? 'bg-blue-50 border-blue-400 dark:bg-blue-900/20 dark:border-blue-500 shadow-md' 
-                                : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
-                            }`}
-                            onClick={() => setSelectedStudent(student)}
-                          >
-                            <div className="flex items-center space-x-4">
-                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                                {student.photo ? (
-                                  <img
-                                    src={student.photo}
-                                    alt={`${student.firstName} ${student.lastName}`}
-                                    className="w-12 h-12 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  student.firstName.charAt(0)
-                                )}
-                              </div>
-                              <div className="flex-1">
-                                <p className="font-semibold text-gray-900 dark:text-white">{student.firstName} {student.lastName}</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">ថ្នាក់ទី {student.class}</p>
-                              </div>
-                              <div className="text-right">
-                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                        <p>សូមបំពេញគ្រប់ផ្នែកដើម្បីមើលបញ្ជីសិស្ស</p>
+                    <div>
+                      <h2 className="text-lg font-semibold text-primary dark:text-white">បញ្ជីឈ្មោះសិស្ស</h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {filteredStudents.length} នាក់ • ជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Search and Mode Toggle */}
+                  <div className="flex items-center space-x-3">
+                    {students.length > 0 && (
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="ស្វែងរកសិស្ស..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-64 h-9 pl-9"
+                        />
+                        <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                    
+                    {students.length > 0 && !editingGrade && (
+                      <Button
+                        variant={bulkMode ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setBulkMode(!bulkMode)
+                          setBulkScores({})
+                          setSelectedStudent(null)
+                        }}
+                        className="h-9"
+                      >
+                        {bulkMode ? 'បញ្ចូលតែមួយ' : 'បញ្ចូលជាក្រុម'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-4">
+                {loadingStudents ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
+                    <p className="text-sm text-gray-500">កំពុងទាញយកសិស្ស...</p>
+                  </div>
+                ) : filteredStudents.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+                    {filteredStudents.map(student => (
+                      <div 
+                        key={student.studentId}
+                        className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
+                          selectedStudent?.studentId === student.studentId 
+                            ? 'bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-500 shadow-md' 
+                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 bg-gray-50 dark:bg-gray-800'
+                        }`}
+                        onClick={() => setSelectedStudent(student)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                            {student.photo ? (
+                              <img
+                                src={student.photo}
+                                alt={`${student.lastName} ${student.firstName}`}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              student.firstName.charAt(0)
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-primary dark:text-white truncate text-sm">
+                              {student.lastName} {student.firstName}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : searchTerm ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-gray-500 font-medium">មិនរកឃើញសិស្ស</p>
+                    <p className="text-sm text-gray-400">សូមស្វែងរកឈ្មោះផ្សេង</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-gray-500 font-medium">សូមបំពេញគ្រប់ផ្នែកដើម្បីមើលបញ្ជីសិស្ស</p>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Right Side Content - Score Input Form above Score List */}
-            <div className="xl:col-span-9 space-y-4">
-              {/* Enhanced Score Input Form */}
-              <div className="relative">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-50/20 via-red-50/20 to-orange-50/20 dark:from-orange-950/10 dark:via-red-950/10 dark:to-orange-950/10 rounded-3xl -z-10" />
+            {/* Right Side: Score Input */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <PlusIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-primary dark:text-white">
+                      {editingGrade ? 'កែសម្រួលពិន្ទុ' : bulkMode ? 'បញ្ចូលពិន្ទុជាក្រុម' : 'បញ្ចូលពិន្ទុ'}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {bulkMode ? 'បញ្ចូលពិន្ទុសម្រាប់សិស្សច្រើននាក់' : 'បញ្ចូលពិន្ទុសម្រាប់សិស្សម្នាក់'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-4">
+                    {bulkMode ? (
+                      <div className="space-y-4">
+                        {/* Subject Selection */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2 text-primary dark:text-gray-300">
+                            មុខវិជ្ជា <span className="text-red-500">*</span>
+                          </label>
+                          <Select value={selectedSubject} onValueChange={(value) => {
+                            setSelectedSubject(value)
+                            checkExistingGrade(value)
+                            // Initialize bulk scores with existing grades
+                            setTimeout(() => initializeBulkScores(), 100)
+                          }}>
+                            <SelectTrigger className="h-11">
+                              <SelectValue placeholder="ជ្រើសរើសមុខវិជ្ជា" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {subjects.map((subject) => (
+                                <SelectItem key={subject.subjectId} value={subject.subjectId.toString()}>
+                                  {subject.subjectName}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-                  {/* Enhanced Header */}
-                  <CardHeader className="relative overflow-hidden bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 text-white p-6">
-                    <div className="absolute inset-0 bg-black/10" />
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12" />
-                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
+                        {/* Bulk Score Input - Compact Table */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-medium text-primary dark:text-white">
+                              បញ្ចូលពិន្ទុ ({filteredStudents.length} នាក់)
+                            </h3>
+                            <div className="text-xs text-gray-500">
+                              បញ្ចូលពិន្ទុសម្រាប់សិស្សច្រើននាក់
+                            </div>
+                          </div>
+                          
+                          <div className="max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg">
+                            <div className="divide-y divide-gray-200 dark:divide-gray-600">
+                              {filteredStudents.map(student => (
+                                <div key={student.studentId} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                                      {student.photo ? (
+                                        <img
+                                          src={student.photo}
+                                          alt={`${student.lastName} ${student.firstName}`}
+                                          className="w-8 h-8 rounded-full object-cover"
+                                        />
+                                      ) : (
+                                        student.firstName.charAt(0)
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-primary dark:text-white text-sm truncate">
+                                        {student.lastName} {student.firstName}
+                                      </p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                      <Input
+                                        type="number"
+                                        placeholder="ពិន្ទុ"
+                                        value={bulkScores[student.studentId]?.score || ""}
+                                        onChange={(e) => handleBulkScoreChange(student.studentId, e.target.value)}
+                                        min="0"
+                                        max={getMaxScore(student)}
+                                        step="0.01"
+                                        className="w-24 h-9 text-center text-sm"
+                                      />
+                                      <Input
+                                        type="text"
+                                        placeholder="មតិ"
+                                        value={bulkScores[student.studentId]?.comment || ""}
+                                        onChange={(e) => handleBulkCommentChange(student.studentId, e.target.value)}
+                                        className="w-44 h-9 text-sm"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
 
-                    <div className="relative z-10 flex items-center space-x-3">
-                      <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                        <PlusIcon className="h-6 w-6 text-white" />
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setBulkMode(false)
+                              setBulkScores({})
+                              setSelectedSubject("")
+                            }}
+                            className="flex-1 h-10"
+                            disabled={submitting}
+                          >
+                            បោះបង់
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={handleBulkSubmit}
+                            className="flex-1 h-10 bg-green-600 hover:bg-green-700 text-white"
+                            disabled={submitting || !selectedSubject || Object.keys(bulkScores).length === 0}
+                          >
+                            {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                            បញ្ចូលពិន្ទុ
+                          </Button>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white">
-                          {editingGrade ? 'កែសម្រួលពិន្ទុ' : 'កន្លែងបញ្ចូលពិន្ទុ'}
-                        </h2>
-                        <div className="h-1 w-8 bg-white/30 rounded-full mt-2"></div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {selectedStudent ? (
-                      <form onSubmit={handleSubmit} className="space-y-2">
-                        {/* Student Info Display */}
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                    ) : selectedStudent ? (
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Selected Student Info */}
+                        <div className="bg-gradient-to-r p-4 from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 shadow-sm hover:shadow-md transition-all duration-200">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                               {selectedStudent.photo ? (
                                 <img
                                   src={selectedStudent.photo}
-                                  alt={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
-                                  className="w-16 h-16 rounded-full object-cover"
+                                  alt={`${selectedStudent.lastName} ${selectedStudent.firstName}`}
+                                  className="w-12 h-12 rounded-full object-cover"
                                 />
                               ) : (
                                 selectedStudent.firstName.charAt(0)
                               )}
                             </div>
-                            <div className="flex-1">
-                              <h3 className="font-bold text-lg text-gray-900 dark:text-white">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
-                              <p className="text-gray-600 dark:text-gray-400">ថ្នាក់ទី {selectedStudent.class}</p>
+                            <div>
+                              <h3 className="font-semibold text-primary dark:text-white">{selectedStudent.lastName} {selectedStudent.firstName}</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 pt-1 pb-1">{getFormattedClass(selectedStudent)}</p>
+                              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                ពិន្ទុអតិបរមា: {getMaxScore(selectedStudent)} ពិន្ទុ
+                              </p>
                             </div>
                           </div>
                         </div>
 
                         {/* Score Input Fields */}
-                        <div className="space-y-2">
-                          <div className="grid grid-cols-1 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">មុខវិជ្ជា</label>
-                              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                                <SelectTrigger className="h-14 text-base bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200">
-                                  <SelectValue placeholder="សូមជ្រើសរើស" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {subjects.map((subject) => (
-                                    <SelectItem key={subject.subjectId} value={subject.subjectId.toString()}>
-                                      {subject.subjectName}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center grid-cols-1 gap-4">
-                            <label className="text-lg font-medium text-gray-700 dark:text-gray-300">លេខពិន្ទុ:</label>
-                            <Input
-                              type="number"
-                              value={score}
-                              onChange={(e) => setScore(e.target.value)}
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              placeholder="សូមបញ្ចូល"
-                              className="h-16 text-xl flex text-center bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200"
-                            />
-                          </div>
-
+                        <div className="space-y-4 pt-4">
+                          {/* Subject Selection */}
                           <div>
-                            <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">មតិផ្សេងៗ</label>
+                            <label className="block text-sm font-medium mb-2 text-primary dark:text-gray-300">
+                              មុខវិជ្ជា <span className="text-red-500">*</span>
+                            </label>
+                            <Select value={selectedSubject} onValueChange={(value) => {
+                              setSelectedSubject(value)
+                              checkExistingGrade(value)
+                            }}>
+                              <SelectTrigger className="h-11">
+                                <SelectValue placeholder="ជ្រើសរើសមុខវិជ្ជា" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {subjects.map((subject) => (
+                                  <SelectItem key={subject.subjectId} value={subject.subjectId.toString()}>
+                                    {subject.subjectName}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Score Input */}
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-primary dark:text-gray-300">
+                              លេខពិន្ទុ <span className="text-red-500">*</span>
+                            </label>
+                            
+                            {/* Score Input with Grade Preview */}
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                value={score}
+                                onChange={(e) => handleScoreChange(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                min="0"
+                                max={selectedStudent ? getMaxScore(selectedStudent) : 100}
+                                step="0.01"
+                                placeholder={selectedStudent ? `បញ្ចូលពិន្ទុ (0-${getMaxScore(selectedStudent)})` : "បញ្ចូលពិន្ទុ (0-100)"}
+                                className={`h-12 text-lg text-center font-semibold ${
+                                  scoreError 
+                                    ? 'border-red-500 focus:border-red-500' 
+                                    : isValidScore && score 
+                                      ? 'border-green-500 focus:border-green-500' 
+                                      : ''
+                                }`}
+                              />
+                              
+                            </div>
+
+                            {/* Error Message */}
+                            {scoreError && (
+                              <div className="flex items-center space-x-2 text-red-600 text-sm">
+                                <AlertCircle className="h-4 w-4" />
+                                <span>{scoreError}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Comment Input */}
+                          <div>
+                            <label className="block text-sm font-medium mb-2 text-primary dark:text-gray-300">
+                              មតិផ្សេងៗ
+                              <span className="text-gray-400 text-xs ml-2">(ជម្រើស)</span>
+                            </label>
                             <Input
                               value={comment}
                               onChange={(e) => setComment(e.target.value)}
-                              placeholder="សូមបញ្ចូលមតិ"
-                              className="h-14 text-base bg-gradient-to-r from-background via-background/95 to-background/90 border-primary/20 focus:border-primary focus:ring-primary/20 hover:from-background/80 hover:via-background/85 hover:to-background/75 transition-all duration-200"
+                              placeholder="បញ្ចូលមតិឬយោបល់បន្ថែម"
+                              className="h-11"
                             />
                           </div>
                         </div>
 
-                        <div className="flex justify-end space-x-2 pt-1">
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 pt-2">
                           {editingGrade ? (
                             <>
                               <Button 
                                 type="button" 
                                 variant="outline" 
                                 onClick={handleCancelEdit}
-                                className="px-6 py-3 text-base"
+                                className="flex-1 h-10"
                                 disabled={submitting}
                               >
                                 បោះបង់
                               </Button>
                               <Button 
                                 type="submit" 
-                                className="px-5 py-3 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                                disabled={submitting}
+                                className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={submitting || !isValidScore || !selectedSubject || !score}
                               >
                                 {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                                 ធ្វើបច្ចុប្បន្នភាព
@@ -1043,17 +1569,19 @@ function AddScoreContent() {
                                   setSelectedSubject("")
                                   setScore("")
                                   setComment("")
+                                  setScoreError("")
+                                  setIsValidScore(true)
                                   setEditingGrade(null)
                                 }}
-                                className="px-8 py-3 text-base"
+                                className="flex-1 h-10"
                                 disabled={submitting}
                               >
                                 សម្អាត
                               </Button>
                               <Button 
                                 type="submit" 
-                                className="px-5 py-3 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                                disabled={submitting}
+                                className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={submitting || !isValidScore || !selectedSubject || !score}
                               >
                                 {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                                 បន្ថែមពិន្ទុ
@@ -1065,168 +1593,289 @@ function AddScoreContent() {
                     ) : (
                       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                         <PlusIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium mb-2">ជ្រើសរើសសិស្ស</p>
-                        <p className="text-sm">សូមជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ</p>
+                        <p className="text-lg font-medium mb-2">
+                          {bulkMode ? 'បញ្ចូលពិន្ទុជាក្រុម' : 'ជ្រើសរើសសិស្ស'}
+                        </p>
+                        <p className="text-sm">
+                          {bulkMode 
+                            ? 'សូមជ្រើសរើសមុខវិជ្ជាដើម្បីបញ្ចូលពិន្ទុសម្រាប់សិស្សទាំងអស់'
+                            : 'សូមជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ'
+                          }
+                        </p>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
               </div>
+            </div>
+          </div>
 
-              {/* Enhanced Score List */}
-              <div className="relative">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-pink-50/20 to-purple-50/20 dark:from-purple-950/10 dark:via-pink-950/10 dark:to-purple-950/10 rounded-3xl -z-10" />
-
-                <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-                  {/* Enhanced Header */}
-                  <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-6">
-                    <div className="absolute inset-0 bg-black/10" />
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12" />
-                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
-
-                    <div className="relative z-10 flex items-center justify-between">
+          {/* Bottom Section: Grade List - Full Width */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <Hash className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold text-primary dark:text-white">
+                        បញ្ជីពិន្ទុសិស្ស {selectedStudent?.lastName} {selectedStudent?.firstName || ''}
+                      </h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        សរុប {totalGrades} ពិន្ទុ • មធ្យមភាគ {averageScore}
+                        {gradeListMonth !== 'all' && gradeListYear !== 'all' && (
+                          <span className="ml-2 text-green-600 dark:text-green-400">
+                            (ខែ {gradeListMonth}/{gradeListYear.slice(-2)})
+                          </span>
+                        )}
+                        {gradeListMonth !== 'all' && gradeListYear === 'all' && (
+                          <span className="ml-2 text-blue-600 dark:text-blue-400">
+                            (ខែ {gradeListMonth})
+                          </span>
+                        )}
+                        {gradeListMonth === 'all' && gradeListYear !== 'all' && (
+                          <span className="ml-2 text-purple-600 dark:text-purple-400">
+                            (ឆ្នាំ {gradeListYear})
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Grade List Filters */}
+                  {selectedStudent && grades.length > 0 && (
+                    <div className="space-y-2">
+                      {/* Auto-sync explanation and toggle */}
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
+                          <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                          <span>តម្រងនេះនឹងសម្រួលដោយស្វ័យប្រវត្តិពីតម្រងខាងលើ</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <label className="text-xs text-gray-600 dark:text-gray-400">សម្រួលស្វ័យប្រវត្តិ:</label>
+                          <button
+                            onClick={() => setAutoSyncEnabled(!autoSyncEnabled)}
+                            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
+                              autoSyncEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                autoSyncEnabled ? 'translate-x-3.5' : 'translate-x-0.5'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                          <Hash className="h-6 w-6 text-white" />
+                      {/* Sync Status Indicator */}
+                      {autoSyncEnabled && ((selectedMonth && selectedMonth !== '') || (selectedGradeYear && selectedGradeYear !== '')) ? (
+                        <div className="flex items-center space-x-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-md">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                            តម្រងដោយស្វ័យប្រវត្តិ
+                          </span>
                         </div>
-                        <div>
-                          <h2 className="text-2xl font-bold text-white">បញ្ជីពិន្ទុសិស្ស {selectedStudent?.firstName} {selectedStudent?.lastName || ''}</h2>
-                          <div className="flex items-center space-x-3 mt-2">
-                            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                              សរុប: {grades.length} ពិន្ទុ
-                            </Badge>
-                            <div className="h-1 w-8 bg-white/30 rounded-full"></div>
-                          </div>
+                      ) : !autoSyncEnabled && (gradeListMonth !== 'all' || gradeListYear !== 'all') ? (
+                        <div className="flex items-center space-x-1 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-md">
+                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                          <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                            តម្រងដោយដៃ
+                          </span>
                         </div>
+                      ) : (gradeListMonth !== 'all' || gradeListYear !== 'all') ? (
+                        <div className="flex items-center space-x-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-md">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                            កំពុងតម្រង
+                          </span>
+                        </div>
+                      ) : null}
+                      <div className="flex items-center space-x-2">
+                        <label className="text-sm font-medium text-primary dark:text-gray-300">ខែ</label>
+                        <Select value={gradeListMonth} onValueChange={setGradeListMonth}>
+                          <SelectTrigger className="w-24 h-8">
+                            <SelectValue placeholder="ទាំងអស់" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">ទាំងអស់</SelectItem>
+                            {Array.from({ length: 12 }, (_, i) => {
+                              const month = String(i + 1).padStart(2, '0')
+                              const monthNames = [
+                                'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
+                                'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+                              ]
+                              return (
+                                <SelectItem key={month} value={month}>
+                                  {monthNames[i]}
+                                </SelectItem>
+                              )
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <label className="text-sm font-medium text-primary dark:text-gray-300">ឆ្នាំ</label>
+                        <Select value={gradeListYear} onValueChange={setGradeListYear}>
+                          <SelectTrigger className="w-30 h-8">
+                            <SelectValue placeholder="ទាំងអស់" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">ទាំងអស់</SelectItem>
+                            {gradeYears.map((year) => (
+                              <SelectItem key={year.value} value={year.value}>
+                                {year.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {((gradeListMonth && gradeListMonth !== 'all') || (gradeListYear && gradeListYear !== 'all')) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setGradeListMonth("all")
+                            setGradeListYear("all")
+                          }}
+                          className="h-8 px-3"
+                        >
+                          សម្អាត
+                        </Button>
+                      )}
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {selectedStudent ? (
-                      <>
-                        {loadingGrades ? (
-                          <div className="text-center py-8">
-                            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                            <p className="text-sm text-muted-foreground">កំពុងទាញយកពិន្ទុ...</p>
-                          </div>
-                        ) : grades.length > 0 ? (
-                          <>
-                            <div className="overflow-x-auto">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead className="font-semibold">មុខវិជ្ជា</TableHead>
-                                    <TableHead className="font-semibold">ចំនួនពិន្ទុ</TableHead>
-                                    <TableHead className="font-semibold">ខែ/ឆ្នាំ</TableHead>
-                                    <TableHead className="font-semibold">គ្រូ/អ្នកគ្រប់គ្រង</TableHead>
-                                    <TableHead className="font-semibold">មតិ</TableHead>
-                                    <TableHead className="font-semibold">សកម្មភាព</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {grades.map((grade) => (
-                                    <TableRow key={grade.gradeId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                      <TableCell className="font-medium">{grade.subject.subjectName}</TableCell>
-                                      <TableCell>
-                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                          grade.grade >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                                          grade.grade >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
-                                          grade.grade >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                                          'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                                        }`}>
-                                          {grade.grade}
-                                        </span>
-                                      </TableCell>
-                                      <TableCell>{grade.gradeDate}</TableCell>
-                                      <TableCell>
-                                        {grade.user ? (
-                                          <div className="flex items-center space-x-2">
-                                            <span className="text-sm font-medium">
-                                              {grade.user.firstname} {grade.user.lastname}
-                                            </span>
-                                            <span className={`text-xs px-2 py-1 rounded-full ${
-                                              grade.user.role === 'teacher' 
-                                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                                : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                                            }`}>
-                                              {grade.user.role === 'teacher' ? 'គ្រូ' : 'អ្នកគ្រប់គ្រង'}
-                                            </span>
-                                          </div>
-                                        ) : (
-                                          <span className="text-sm text-gray-500">មិនមាន</span>
-                                        )}
-                                      </TableCell>
-                                      <TableCell className="max-w-xs truncate">{grade.gradeComment || '-'}</TableCell>
-                                      <TableCell>
-                                        <div className="flex space-x-1">
-                                          <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            className="text-blue-600 border-blue-300"
-                                            onClick={() => handleEdit(grade)}
-                                          >
-                                            <Edit3 className="h-3 w-3 mr-1" />
-                                            កែ
-                                          </Button>
-                                          <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            className="text-red-600 border-red-300"
-                                            onClick={() => handleDelete(grade.gradeId)}
-                                          >
-                                            <Trash2 className="h-3 w-3 mr-1" />
-                                            លុប
-                                          </Button>
-                                        </div>
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </div>
-
-                            {/* Enhanced Stats Summary */}
-                            <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t">
-                              <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">ចំនួនពិន្ទុ</p>
-                                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalGrades}</p>
-                              </div>
-                              <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                                <p className="text-sm text-green-600 dark:text-green-400 font-medium">សរុបពិន្ទុ</p>
-                                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{totalPoints}</p>
-                              </div>
-                              <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                                <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">មធ្យមភាគ</p>
-                                <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{averageScore}</p>
-                              </div>
-                              <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                                <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">ថ្នាក់</p>
-                                <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">{selectedStudent.class}</p>
-                              </div>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                            <CheckCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                            <p className="text-lg font-medium mb-2">មិនមានពិន្ទុ</p>
-                            <p className="text-sm">សិស្សនេះមិនទាន់មានពិន្ទុនៅឡើយទេ</p>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                        <p className="text-lg font-medium mb-2">គ្មានពិន្ទុ</p>
-                        <p className="text-sm">សូមជ្រើសរើសសិស្សដើម្បីមើលពិន្ទុ</p>
+                  )}
+                </div>
+              </div>
+            
+            <div className="p-4">
+                {selectedStudent ? (
+                  <>
+                    {loadingGrades ? (
+                      <div className="text-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-purple-600" />
+                        <p className="text-sm text-gray-500">កំពុងទាញយកពិន្ទុ...</p>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    ) : filteredGrades.length > 0 ? (
+                      <>
+                        {/* Compact Grade List */}
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {filteredGrades.map((grade) => (
+                            <div key={grade.gradeId} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                              <div className="flex items-center space-x-4 flex-1">
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                  {grade.subject.subjectName.charAt(0)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-primary dark:text-white text-sm">
+                                    {grade.subject.subjectName}
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {grade.gradeDate} • {grade.user ? `${grade.user.lastname} ${grade.user.firstname}` : 'មិនមាន'}
+                                    {grade.gradeDate && (
+                                      <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-xs">
+                                        {grade.gradeDate}
+                                      </span>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center space-x-3">
+                                <div className="text-right">
+                                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                                    grade.grade >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                                    grade.grade >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
+                                    grade.grade >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                                    'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                                  }`}>
+                                    {grade.grade}
+                                  </span>
+                                </div>
+                                
+                                <div className="flex space-x-1">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 text-blue-600 border-blue-300 hover:bg-blue-50"
+                                    onClick={() => handleEdit(grade)}
+                                  >
+                                    <Edit3 className="h-3 w-3" />
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 text-red-600 border-red-300 hover:bg-red-50"
+                                    onClick={() => handleDelete(grade.gradeId)}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Stats Summary - Compact */}
+                        <div className="mt-6 grid grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">ចំនួនពិន្ទុ</p>
+                            <p className="text-lg font-bold text-primary dark:text-white">{totalGrades}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">សរុបពិន្ទុ</p>
+                            <p className="text-lg font-bold text-primary dark:text-white">{totalPoints}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">មធ្យមភាគ</p>
+                            <p className="text-lg font-bold text-primary dark:text-white">{averageScore}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">ថ្នាក់</p>
+                            <p className="text-lg font-bold text-primary dark:text-white">{selectedStudent ? getFormattedClass(selectedStudent) : '-'}</p>
+                          </div>
+                        </div>
+                        </>
+                      ) : grades.length > 0 ? (
+                        <div className="text-center py-8">
+                          <Hash className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                          <p className="text-gray-500 font-medium">មិនរកឃើញពិន្ទុ</p>
+                          <p className="text-sm text-gray-400">
+                            មិនមានពិន្ទុសម្រាប់ខែ និងឆ្នាំដែលបានជ្រើសរើស
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setGradeListMonth("all")
+                              setGradeListYear("all")
+                            }}
+                            className="mt-3"
+                          >
+                            មើលពិន្ទុទាំងអស់
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <CheckCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                          <p className="text-gray-500 font-medium">មិនមានពិន្ទុ</p>
+                          <p className="text-sm text-gray-400">សិស្សនេះមិនទាន់មានពិន្ទុនៅឡើយទេ</p>
+                        </div>
+                      )}
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Hash className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-gray-500 font-medium">គ្មានពិន្ទុ</p>
+                    <p className="text-sm text-gray-400">សូមជ្រើសរើសសិស្សដើម្បីមើលពិន្ទុ</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   )
-}
+} // End of AddScoreContent component

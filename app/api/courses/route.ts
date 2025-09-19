@@ -15,12 +15,18 @@ export async function GET(request: NextRequest) {
       },
       orderBy: [
         { schoolYear: { schoolYearCode: 'desc' } },
-        { grade: 'asc' },
         { section: 'asc' }
       ]
     })
 
-    return NextResponse.json(courses)
+    // Sort courses numerically by grade (1, 2, 3, ..., 12)
+    const sortedCourses = courses.sort((a, b) => {
+      const gradeA = parseInt(a.grade) || 0
+      const gradeB = parseInt(b.grade) || 0
+      return gradeA - gradeB
+    })
+
+    return NextResponse.json(sortedCourses)
   } catch (error) {
     console.error('Error fetching courses:', error)
     return NextResponse.json(

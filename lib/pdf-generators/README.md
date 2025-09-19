@@ -1,278 +1,165 @@
-# PDF Generators System
+# 📁 PDF Generators System
 
-This folder contains a comprehensive PDF generation system for the Friendship School Management System. The system is designed to be modular, extensible, and maintainable.
+A comprehensive, modular PDF generation system for the Friendship School Management System.
 
-## 📁 Folder Structure
+## 🏗️ **Directory Structure**
 
 ```
 lib/pdf-generators/
-├── index.ts                 # Main exports
-├── types.ts                 # Common types and interfaces
-├── utils.ts                 # Shared utility functions
-├── pdf-manager.ts           # Central PDF manager
-├── student-registration.ts  # Student registration form generator
-├── student-report-card.ts   # Student report card generator
-├── attendance-report.ts     # Attendance report generator (placeholder)
-├── grade-report.ts          # Grade report generator (placeholder)
-├── school-year-report.ts    # School year report generator (placeholder)
-├── financial-report.ts      # Financial report generator (placeholder)
-├── guardian-report.ts       # Guardian report generator (placeholder)
-├── family-report.ts         # Family report generator (placeholder)
-└── README.md               # This file
+├── 📁 core/                    # Core system files
+│   ├── types.ts                # Type definitions & interfaces
+│   ├── utils.ts                # Shared utilities & helpers
+│   └── pdf-manager.ts          # Central PDF manager
+├── 📁 reports/                 # All report generators
+│   ├── student-registration.ts # Student registration forms
+│   ├── student-report-card.ts  # Individual report cards
+│   ├── student-list-report.ts  # Class lists & rosters
+│   ├── attendance-report.ts    # Attendance tracking
+│   ├── gradebook-report.ts     # Gradebook management
+│   │   ├── grade-report-monthly.ts # Government-style monthly reports
+│   ├── grade-report-semester.ts# Semester-specific reports
+│   ├── grade-report-yearly.ts  # Annual summary reports
+│   └── grade-reports/          # Grade reports index
+│       └── index.ts
+├── 📁 id-cards/                # ID card generators
+│   ├── student-id-card.ts      # Front student ID cards
+│   ├── student-id-card-back.ts # Back student ID cards
+│   └── teacher-id-card.ts      # Teacher ID cards
+├── 📁 docs/                    # Documentation
+│   ├── README.md               # System documentation
+│   ├── GRADE_REPORTS_REFACTORING.md # Refactoring guide
+│   └── DIRECTORY_REVIEW.md     # Directory review
+└── index.ts                    # Main exports
 ```
 
-## 🚀 Quick Start
+## 🚀 **Quick Start**
 
 ### Basic Usage
 
 ```typescript
-import { generatePDF, ReportType } from '@/lib/pdf-generators/pdf-manager'
+import { generatePDF, ReportType } from '@/lib/pdf-generators'
 
 // Generate a student registration PDF
 const result = await generatePDF(ReportType.STUDENT_REGISTRATION, studentData)
 
-// Generate with custom options
-const result = await generatePDF(ReportType.STUDENT_REGISTRATION, studentData, {
-  format: 'A4',
-  orientation: 'portrait',
-  margins: {
-    top: '20mm',
-    right: '15mm',
-    bottom: '20mm',
-    left: '15mm'
-  }
-})
+// Generate a monthly grade report
+const result = await generatePDF(ReportType.GRADE_REPORT_MONTHLY, gradeData)
 ```
 
 ### Using the PDF Manager
 
 ```typescript
-import { pdfManager } from '@/lib/pdf-generators/pdf-manager'
+import { pdfManager } from '@/lib/pdf-generators/core/pdf-manager'
 
 // Get available report types
 const availableTypes = pdfManager.getAvailableReportTypes()
 
 // Get report metadata
 const metadata = pdfManager.getReportMetadata(ReportType.STUDENT_REGISTRATION)
-
-// Update configuration
-pdfManager.updateConfig({
-  outputDir: '/custom/path',
-  filenamePrefix: 'custom-prefix'
-})
 ```
 
-## 📋 Available Report Types
+## 📋 **Available Report Types**
 
-### ✅ Implemented
+### **Student Management**
+- **Student Registration** (`ReportType.STUDENT_REGISTRATION`)
+- **Student Report Card** (`ReportType.STUDENT_REPORT_CARD`)
+- **Student List Report** (`ReportType.STUDENT_LIST_REPORT`)
 
-1. **Student Registration** (`ReportType.STUDENT_REGISTRATION`)
-   - Complete student registration form
-   - Includes guardian and family information
-   - Professional layout with Khmer text support
+### **Grade Reports**
+- **Monthly Grade Report** (`ReportType.GRADE_REPORT_MONTHLY`)
+- **Semester Grade Report** (`ReportType.GRADE_REPORT_SEMESTER`)
+- **Yearly Grade Report** (`ReportType.GRADE_REPORT_YEARLY`)
 
-2. **Student Report Card** (`ReportType.STUDENT_REPORT_CARD`)
-   - Student grades and attendance
-   - Teacher and principal comments
-   - Class ranking information
+### **ID Cards**
+- **Student ID Card** (`ReportType.STUDENT_ID_CARD`)
+- **Student ID Card Back** (`ReportType.BULK_STUDENT_ID_CARD`)
+- **Teacher ID Card** (`ReportType.TEACHER_ID_CARD`)
 
-### 🔄 Placeholders (To Be Implemented)
+### **Academic Reports**
+- **Attendance Report** (`ReportType.ATTENDANCE_REPORT`)
+- **Gradebook Report** (`ReportType.GRADEBOOK_REPORT`)
 
-3. **Attendance Report** (`ReportType.ATTENDANCE_REPORT`)
-4. **Grade Report** (`ReportType.GRADE_REPORT`)
-5. **School Year Report** (`ReportType.SCHOOL_YEAR_REPORT`)
-6. **Financial Report** (`ReportType.FINANCIAL_REPORT`)
-7. **Guardian Report** (`ReportType.GUARDIAN_REPORT`)
-8. **Family Report** (`ReportType.FAMILY_REPORT`)
+## 🎨 **Key Features**
 
-## 🛠️ Adding New Report Types
+### **Specialized Grade Reports**
+- **Monthly**: Government-style A4 landscape formatting
+- **Semester**: Optimized for semester-specific data
+- **Yearly**: Annual summary and trend analysis
 
-### Step 1: Create the Generator File
+### **Khmer Language Support**
+- Full Unicode and font rendering
+- Khmer date formatting
+- Gender and relation conversions
+- Currency formatting
 
-Create a new file in the `lib/pdf-generators/` folder:
+### **Professional Quality**
+- Government-style formatting
+- School branding consistency
+- Type-safe interfaces
+- Error handling
+
+## 🔧 **Development**
+
+### **Adding New Report Types**
+
+1. Create the generator file in the appropriate folder
+2. Update the PDF manager imports
+3. Add the report type to the enum
+4. Update the main index.ts exports
+
+### **File Organization**
+
+- **Core files**: System-wide utilities and types
+- **Reports**: All report generators
+- **ID Cards**: ID card generators
+- **Docs**: Documentation and guides
+
+## 📚 **Documentation**
+
+- **System Overview**: [docs/README.md](docs/README.md)
+- **Grade Reports Refactoring**: [docs/GRADE_REPORTS_REFACTORING.md](docs/GRADE_REPORTS_REFACTORING.md)
+- **Directory Review**: [docs/DIRECTORY_REVIEW.md](docs/DIRECTORY_REVIEW.md)
+
+## 🎯 **Usage Examples**
+
+### **Generate Monthly Grade Report**
 
 ```typescript
-// lib/pdf-generators/your-report.ts
-import puppeteer from 'puppeteer'
-import { PDFResult, ReportOptions } from './types'
-import {
-  generateSafeFilename,
-  savePDFFile,
-  mergeReportOptions,
-  generateHTMLHeader,
-  generateHTMLFooter,
-  DEFAULT_CONFIG
-} from './utils'
+import { generatePDF, ReportType } from '@/lib/pdf-generators'
 
-// Define your data interface
-export interface YourReportData {
-  // Your data structure
+const monthlyData = {
+  academicYear: '2024-2025',
+  month: '08',
+  year: '2025',
+  class: '6A',
+  students: [...],
+  summary: {...}
 }
 
-// Generate HTML content
-export const generateYourReportHTML = (data: YourReportData): string => {
-  const html = generateHTMLHeader('Your Report Title') + `
-    // Your HTML content
-  ` + generateHTMLFooter()
-  
-  return html
-}
-
-// Generate PDF
-export const generateYourReportPDF = async (
-  data: YourReportData,
-  options?: Partial<ReportOptions>
-): Promise<PDFResult> => {
-  // Implementation similar to existing generators
-}
+const pdf = await generatePDF(ReportType.GRADE_REPORT_MONTHLY, monthlyData)
 ```
 
-### Step 2: Update the PDF Manager
-
-Add your report type to the PDF manager:
+### **Generate Student ID Cards**
 
 ```typescript
-// In pdf-manager.ts
-import { generateYourReportPDF, YourReportData } from './your-report'
+import { generateBulkStudentIDCardPDF } from '@/lib/pdf-generators'
 
-// Add to ReportData type
-export type ReportData = 
-  | { type: ReportType.STUDENT_REGISTRATION; data: StudentRegistrationData }
-  | { type: ReportType.YOUR_REPORT; data: YourReportData }
-
-// Add to ReportType enum (in types.ts)
-export enum ReportType {
-  // ... existing types
-  YOUR_REPORT = 'your-report'
+const idCardData = {
+  students: [...],
+  schoolInfo: {...}
 }
 
-// Add to switch statement in generatePDF method
-case ReportType.YOUR_REPORT:
-  return await generateYourReportPDF(data as YourReportData, options)
-
-// Add to getAvailableReportTypes method
-getAvailableReportTypes(): ReportType[] {
-  return [
-    // ... existing types
-    ReportType.YOUR_REPORT
-  ]
-}
-
-// Add metadata
-getReportMetadata(reportType: ReportType): ReportMetadata {
-  const metadataMap: Record<ReportType, ReportMetadata> = {
-    // ... existing metadata
-    [ReportType.YOUR_REPORT]: {
-      type: ReportType.YOUR_REPORT,
-      title: 'Your Report Title',
-      description: 'Description of your report',
-      version: '1.0.0',
-      author: 'Friendship School System',
-      generatedBy: 'PDF Generator',
-      dataSource: 'Your Data Source'
-    }
-  }
-  return metadataMap[reportType]
-}
+const pdf = await generateBulkStudentIDCardPDF(idCardData)
 ```
 
-## 🎨 Customization
+## 🔮 **Future Enhancements**
 
-### Report Options
+- [ ] Template system for custom reports
+- [ ] Batch processing capabilities
+- [ ] Caching layer for performance
+- [ ] API documentation generation
+- [ ] Unit test coverage
 
-```typescript
-interface ReportOptions {
-  format: 'A4' | 'Letter' | 'Legal'
-  orientation: 'portrait' | 'landscape'
-  margins: {
-    top: string
-    right: string
-    bottom: string
-    left: string
-  }
-  includeHeader: boolean
-  includeFooter: boolean
-  watermark?: string
-  password?: string
-}
-```
+---
 
-### Configuration
-
-```typescript
-interface PDFGeneratorConfig {
-  outputDir: string
-  filenamePrefix: string
-  includeTimestamp: boolean
-  compressPDF: boolean
-  quality: 'low' | 'medium' | 'high'
-  defaultOptions: ReportOptions
-}
-```
-
-## 🌐 API Usage
-
-### Generate PDF via API
-
-```javascript
-const response = await fetch('/api/generate-pdf', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    reportType: 'student-registration',
-    data: studentData,
-    options: {
-      format: 'A4',
-      orientation: 'portrait',
-      includeHeader: true,
-      includeFooter: true
-    }
-  }),
-})
-
-const pdfBlob = await response.blob()
-```
-
-## 🔧 Utilities
-
-### Available Utility Functions
-
-- `generateSafeFilename()` - Create safe filenames without Unicode characters
-- `savePDFFile()` - Save PDF buffer to file system
-- `getFileSize()` - Get human-readable file size
-- `mergeReportOptions()` - Merge custom options with defaults
-- `generateHTMLHeader()` - Generate HTML header with Khmer fonts
-- `generateHTMLFooter()` - Generate HTML footer
-- `getGradeLabel()` - Convert grade numbers to Khmer labels
-- `getGenderKhmer()` - Convert gender to Khmer text
-- `getRelationKhmer()` - Convert family relations to Khmer
-- `formatCurrencyKhmer()` - Format currency in Khmer
-- `formatDateKhmer()` - Format dates in Khmer
-
-## 🧪 Testing
-
-Run the test script to verify the system:
-
-```bash
-node scripts/test-new-pdf-system.js
-```
-
-## 📝 Notes
-
-- All PDFs are generated using Puppeteer for perfect Khmer font rendering
-- Files are saved to `public/pdf-exports/` by default
-- Filenames are automatically sanitized to remove Unicode characters
-- The system supports both portrait and landscape orientations
-- All reports include proper headers and footers with school branding
-
-## 🔮 Future Enhancements
-
-- [ ] Add more report types (attendance, grades, etc.)
-- [ ] Support for custom templates
-- [ ] Batch PDF generation
-- [ ] PDF compression options
-- [ ] Watermark support
-- [ ] Password protection
-- [ ] Email integration for automatic sending
+**The PDF Generators System is production-ready and provides a solid foundation for all school report generation needs.** 🚀

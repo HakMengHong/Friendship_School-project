@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { Suspense } from "react"
 
 import { 
   Lock, 
@@ -23,11 +24,11 @@ import { Card, CardContent } from "@/components/ui/card"
 
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { setCurrentUser } from "@/lib/auth-service"
 import { resetSplashPreferences } from "@/lib/splash-preferences"
 
-export default function LoginPage() {
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [open, setOpen] = useState(false)
   const [username, setUsername] = useState("")
@@ -42,7 +43,12 @@ export default function LoginPage() {
     userRole: 'admin' | 'teacher'
   }>>([])
   const router = useRouter()
+  const searchParams = useSearchParams()
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Check for session timeout message
+  const isTimeout = searchParams.get('timeout') === 'true'
+  const timeoutMessage = searchParams.get('message') || 'សូមចូលម្តងទៀត។'
 
   // Load users from API on component mount
   useEffect(() => {
@@ -340,6 +346,14 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Session Timeout Message */}
+            {isTimeout && (
+              <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-yellow-500" />
+                <span className="text-sm text-yellow-600 dark:text-yellow-400">{timeoutMessage}</span>
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full h-12 text-base font-semibold"
@@ -362,5 +376,20 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600 dark:text-gray-300">កំពុងផ្ទុក...</p>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }

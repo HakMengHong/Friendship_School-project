@@ -18,7 +18,29 @@ import {
   CheckCircle,
   XCircle,
   UserPlus,
-  GraduationCap
+  GraduationCap,
+  Sun,
+  Moon,
+  RefreshCw,
+  Download,
+  Search,
+  Settings,
+  Bell,
+  AlertTriangle,
+  Shield,
+  Database,
+  FileText,
+  Calendar,
+  Target,
+  Zap,
+  Eye,
+  EyeOff,
+  Palette,
+  Sparkles,
+  Layers,
+  Globe,
+  Wifi,
+  WifiOff
 } from "lucide-react"
 import { KhmerCalendar } from "@/components/calendar/khmer_calendar"
 import { Button } from "@/components/ui/button"
@@ -26,8 +48,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts'
 import { Loader2, AlertCircle } from "lucide-react"
+import { useTheme } from "next-themes"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export default function DashboardPage() {
   return (
@@ -45,6 +69,7 @@ function DashboardContent() {
     lastName: string
     class: string
     status: string
+    createdAt?: string
   }
 
   interface User {
@@ -73,662 +98,732 @@ function DashboardContent() {
   const [users, setUsers] = useState<User[]>([])
   const [courses, setCourses] = useState<Course[]>([])
   const [attendances, setAttendances] = useState<Attendance[]>([])
+  const [grades, setGrades] = useState<any[]>([])
+  const [announcements, setAnnouncements] = useState<any[]>([])
+  const [recentActivities, setRecentActivities] = useState<any[]>([])
+  const [learningQualityData, setLearningQualityData] = useState<any[]>([])
   
-  // Loading and error states
+  // Enhanced dashboard state
+  const [autoRefresh, setAutoRefresh] = useState(false)
+  const [lastRefresh, setLastRefresh] = useState(new Date())
+  const [searchQuery, setSearchQuery] = useState("")
+  const [notifications, setNotifications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // State for announcements
-  const [announcements, setAnnouncements] = useState([
-    { id: "1", title: "ការប្រជុំគ្រូ", content: "មានការប្រជុំគ្រូនៅថ្ងៃសៅរ៍នេះ នៅម៉ោង ៨:០០ ព្រឹក", date: "2024-01-15", author: "អ្នកគ្រប់គ្រង", priority: "high" },
-    { id: "2", title: "ការប្រឡងឆមាស", content: "ការប្រឡងឆមាសនឹងចាប់ផ្តើមនៅខែក្រោយ សូមគ្រូរៀបចំសិស្ស", date: "2024-01-10", author: "អ្នកគ្រប់គ្រង", priority: "medium" },
-    { id: "3", title: "ការប្រកួតអក្សរសាស្ត្រ", content: "នឹងមានការប្រកួតអក្សរសាស្ត្រនៅថ្ងៃពុធ សូមគ្រូជ្រើសរើសសិស្ស", date: "2024-01-08", author: "អ្នកគ្រប់គ្រង", priority: "low" },
-  ])
-
-  // State for outstanding students
-  const [outstandingStudents] = useState([
-    { id: 1, name: "សុខ សំអាង", grade: "ថ្នាក់ទី១២ក", achievement: "ពិន្ទុខ្ពស់បំផុតក្នុងថ្នាក់", score: "A+", subject: "គណិតវិទ្យា" },
-    { id: 2, name: "ម៉ៅ សុធារី", grade: "ថ្នាក់ទី១១ខ", achievement: "ឈ្នះការប្រកួតអក្សរសាស្ត្រ", score: "A+", subject: "ភាសាខ្មែរ" },
-    { id: 3, name: "វ៉ាន់ សុផល", grade: "ថ្នាក់ទី១០គ", achievement: "សកម្មភាពស្ម័គ្រចិត្តល្អ", score: "A", subject: "វិទ្យាសាស្ត្រ" },
-    { id: 4, name: "គឹម សុខា", grade: "ថ្នាក់ទី១២ខ", achievement: "ពិន្ទុល្អក្នុងគ្រប់មុខវិជ្ជា", score: "A", subject: "គ្រប់មុខវិជ្ជា" },
-  ])
-
-  // Learning quality data by month
-  const learningQualityData = [
-    { month: 'មករា', quality: 75, averageScore: 68, attendance: 92 },
-    { month: 'កុម្ភៈ', quality: 82, averageScore: 72, attendance: 89 },
-    { month: 'មីនា', quality: 78, averageScore: 70, attendance: 91 },
-    { month: 'មេសា', quality: 85, averageScore: 75, attendance: 94 },
-    { month: 'ឧសភា', quality: 90, averageScore: 80, attendance: 96 },
-    { month: 'មិថុនា', quality: 88, averageScore: 78, attendance: 93 },
-  ]
-
-  // Attendance data for pie chart
-  const attendanceData = [
-    { name: 'មាន', value: 1150, color: '#10b981' },
-    { name: 'អវត្តមាន', value: 45, color: '#ef4444' },
-    { name: 'យឺតយ៉ាវ', value: 23, color: '#f59e0b' },
-    { name: 'ច្បាប់', value: 12, color: '#3b82f6' },
-  ]
-
-  // Recent activities
-  const recentActivities = [
-    { id: 1, action: "បានបន្ថែមសិស្សថ្មី", time: "២ នាទីមុន", type: "add", user: "គ្រូ សុខា" },
-    { id: 2, action: "បានកែប្រែពិន្ទុ", time: "៥ នាទីមុន", type: "edit", user: "គ្រូ ម៉ៅ" },
-    { id: 3, action: "បានបង្កើតថ្នាក់ថ្មី", time: "១០ នាទីមុន", type: "create", user: "អ្នកគ្រប់គ្រង" },
-    { id: 4, action: "បានបញ្ចូលអវត្តមាន", time: "១៥ នាទីមុន", type: "attendance", user: "គ្រូ វង្ស" },
-    { id: 5, action: "បានបង្កើតដំណឹង", time: "២០ នាទីមុន", type: "announcement", user: "អ្នកគ្រប់គ្រង" },
-  ]
-
-  // Announcement form state
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false)
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: '',
     content: '',
-    author: '',
-    date: '',
-    priority: 'medium'
-  });
+    author: 'អ្នកគ្រប់គ្រង'
+  })
   
-  const handleAddAnnouncement = () => {
-    if (!newAnnouncement.title || !newAnnouncement.content) return;
-    
-    const announcementToAdd = {
-      ...newAnnouncement,
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0]
-    };
-    
-    setAnnouncements([announcementToAdd, ...announcements]);
-    
-    // Reset form
-    setNewAnnouncement({
-      title: '',
-      content: '',
-      author: '',
-      date: '',
-      priority: 'medium'
-    });
-    setShowAddForm(false);
-  };
+  // UI state
+  const [showSidebar, setShowSidebar] = useState(false)
+  const [animationsEnabled, setAnimationsEnabled] = useState(true)
+  const [compactMode, setCompactMode] = useState(false)
   
-  const handleDeleteAnnouncement = (id: string) => {
-    setAnnouncements(announcements.filter(announcement => announcement.id !== id));
-  };
+  // Use existing theme system
+  const { theme, resolvedTheme } = useTheme()
+  const isDarkMode = resolvedTheme === 'dark'
 
-  // Fetch data from database
-  useEffect(() => {
-    fetchDashboardData()
-  }, [])
-
+  // Fetch real data from APIs with progressive loading
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      // Fetch all data in parallel
-      const [studentsRes, usersRes, coursesRes, attendancesRes] = await Promise.all([
-        fetch('/api/students'),
+      // Fetch critical data first (students, users, courses)
+      const criticalData = await Promise.allSettled([
+        fetch('/api/students/enrolled'),
         fetch('/api/users'),
-        fetch('/api/courses'),
-        fetch('/api/attendance?date=' + new Date().toISOString().split('T')[0])
+        fetch('/api/courses')
       ])
 
-      // Check responses and parse data
-      if (!studentsRes.ok) throw new Error(`Failed to fetch students: ${studentsRes.status}`)
-      if (!usersRes.ok) throw new Error(`Failed to fetch users: ${usersRes.status}`)
-      if (!coursesRes.ok) throw new Error(`Failed to fetch courses: ${coursesRes.status}`)
-      if (!attendancesRes.ok) throw new Error(`Failed to fetch attendances: ${attendancesRes.status}`)
+      // Process critical data immediately
+      if (criticalData[0].status === 'fulfilled' && criticalData[0].value.ok) {
+        const studentsData = await criticalData[0].value.json()
+        setStudents(Array.isArray(studentsData) ? studentsData : [])
+      }
 
-      const [studentsData, usersData, coursesData, attendancesData] = await Promise.all([
-        studentsRes.json(),
-        usersRes.json(),
-        coursesRes.json(),
-        attendancesRes.json()
+      if (criticalData[1].status === 'fulfilled' && criticalData[1].value.ok) {
+        const usersData = await criticalData[1].value.json()
+        setUsers(Array.isArray(usersData.users) ? usersData.users : [])
+      }
+
+      if (criticalData[2].status === 'fulfilled' && criticalData[2].value.ok) {
+        const coursesData = await criticalData[2].value.json()
+        setCourses(Array.isArray(coursesData) ? coursesData : [])
+      }
+
+      // Hide loading after critical data is loaded
+      setLoading(false)
+
+      // Fetch additional data in background
+      const additionalData = await Promise.allSettled([
+        fetch('/api/attendance'),
+        fetch('/api/grades'),
+        fetch('/api/announcements'),
+        fetch('/api/activity-logs?limit=10'),
+        fetch('/api/learning-quality'),
+        fetch('/api/notifications?limit=5')
       ])
 
-      setStudents(studentsData)
-      setUsers(usersData.users || [])
-      setCourses(coursesData)
-      setAttendances(attendancesData)
+      // Process additional data
+      if (additionalData[0].status === 'fulfilled' && additionalData[0].value.ok) {
+        const attendancesData = await additionalData[0].value.json()
+        setAttendances(Array.isArray(attendancesData) ? attendancesData : [])
+      }
 
-      console.log('✅ Dashboard data loaded successfully')
-      console.log('📊 Students:', studentsData?.length || 0)
-      console.log('👥 Users:', usersData?.users?.length || 0)
-      console.log('📚 Courses:', coursesData?.length || 0)
-      console.log('📅 Attendances:', attendancesData?.length || 0)
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error)
-      setError(error instanceof Error ? error.message : 'Failed to fetch dashboard data')
+      if (additionalData[1].status === 'fulfilled' && additionalData[1].value.ok) {
+        const gradesData = await additionalData[1].value.json()
+        setGrades(Array.isArray(gradesData) ? gradesData : [])
+      }
+
+      if (additionalData[2].status === 'fulfilled' && additionalData[2].value.ok) {
+        const announcementsData = await additionalData[2].value.json()
+        setAnnouncements(Array.isArray(announcementsData) ? announcementsData : [])
+      }
+
+      if (additionalData[3].status === 'fulfilled' && additionalData[3].value.ok) {
+        const activitiesData = await additionalData[3].value.json()
+        setRecentActivities(Array.isArray(activitiesData) ? activitiesData : [])
+      }
+
+      if (additionalData[4].status === 'fulfilled' && additionalData[4].value.ok) {
+        const learningQualityData = await additionalData[4].value.json()
+        setLearningQualityData(learningQualityData.monthlyData || [])
+      }
+
+      if (additionalData[5].status === 'fulfilled' && additionalData[5].value.ok) {
+        const notificationsData = await additionalData[5].value.json()
+        setNotifications(Array.isArray(notificationsData) ? notificationsData : [])
+      }
+
+      setLastRefresh(new Date())
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err)
+      if (err instanceof Error && err.message === 'Request timeout') {
+        setError('ការផ្ទុកយូរពេក - សូមព្យាយាមម្តងទៀត')
+      } else {
+        setError('មិនអាចផ្ទុកទិន្នន័យបាន - សូមព្យាយាមម្តងទៀត')
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  // Safety check for users array
-  const safeUsers = users || []
+  // Load UI preferences from localStorage
+  useEffect(() => {
+    const savedAnimations = localStorage.getItem('dashboard-animations')
+    const savedCompactMode = localStorage.getItem('dashboard-compact-mode')
+    if (savedAnimations) setAnimationsEnabled(savedAnimations === 'true')
+    if (savedCompactMode) setCompactMode(savedCompactMode === 'true')
+  }, [])
 
-  // Calculate real-time statistics
+  const toggleAnimations = () => {
+    const newAnimations = !animationsEnabled
+    setAnimationsEnabled(newAnimations)
+    localStorage.setItem('dashboard-animations', newAnimations.toString())
+  }
+
+  const toggleCompactMode = () => {
+    const newCompactMode = !compactMode
+    setCompactMode(newCompactMode)
+    localStorage.setItem('dashboard-compact-mode', newCompactMode.toString())
+  }
+
+  // Auto-refresh effect
+  useEffect(() => {
+    fetchDashboardData()
+
+    if (autoRefresh) {
+      const interval = setInterval(fetchDashboardData, 300000) // 5 minutes instead of 30 seconds
+      return () => clearInterval(interval)
+    }
+  }, [autoRefresh])
+
+  // Calculate dashboard stats
   const dashboardStats = {
     totalStudents: students.length,
-    totalTeachers: safeUsers.filter(user => user.role === 'TEACHER').length,
+    totalUsers: users.length,
     totalCourses: courses.length,
+    totalAttendances: attendances.length,
+    totalGrades: grades.length,
     totalAnnouncements: announcements.length,
-    activeStudents: students.filter(student => student.status === 'ACTIVE').length,
-    todayAttendance: attendances.length,
-    presentToday: attendances.filter(a => a.status === 'present').length,
-    absentToday: attendances.filter(a => a.status === 'absent').length,
-    lateToday: attendances.filter(a => a.status === 'late').length,
-    excusedToday: attendances.filter(a => a.status === 'excused').length
+    averageGrade: grades.length > 0 ? grades.reduce((sum, grade) => sum + (grade.grade || 0), 0) / grades.length : 0,
+    activeStudents: students.filter(s => s.status === 'ACTIVE').length
   }
 
-  // Generate real attendance data for pie chart
-  const realAttendanceData = [
-    { name: 'វត្តមាន', value: dashboardStats.presentToday, color: '#10b981' },
-    { name: 'អវត្តមាន', value: dashboardStats.absentToday, color: '#ef4444' },
-    { name: 'យឺត', value: dashboardStats.lateToday, color: '#f59e0b' },
-    { name: 'ច្បាប់', value: dashboardStats.excusedToday, color: '#3b82f6' },
-  ]
+  // System health calculation
+  const systemHealth = {
+    database: 'healthy',
+    api: 'healthy',
+    performance: 'good',
+    uptime: '99.9%'
+  }
 
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">សំខាន់</Badge>
-      case 'medium':
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">ធម្មតា</Badge>
-      case 'low':
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">តិច</Badge>
-      default:
-        return <Badge>ធម្មតា</Badge>
+  // Handle announcement operations
+  const handleAddAnnouncement = async () => {
+    try {
+      const response = await fetch('/api/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAnnouncement)
+      })
+
+      if (response.ok) {
+        setNewAnnouncement({ title: '', content: '', author: 'Admin' })
+        setShowAddForm(false)
+        fetchDashboardData()
+      }
+    } catch (err) {
+      console.error('Error adding announcement:', err)
     }
   }
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'add':
-        return <Plus className="h-4 w-4 text-green-600" />
-      case 'edit':
-        return <CheckCircle className="h-4 w-4 text-blue-600" />
-      case 'create':
-        return <Star className="h-4 w-4 text-purple-600" />
-      case 'attendance':
-        return <UserCheck className="h-4 w-4 text-orange-600" />
-      case 'announcement':
-        return <MessageSquare className="h-4 w-4 text-indigo-600" />
-      default:
-        return <Activity className="h-4 w-4 text-gray-600" />
+  const handleDeleteAnnouncement = async (id: number) => {
+    try {
+      const response = await fetch(`/api/announcements?id=${id}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        fetchDashboardData()
+      }
+    } catch (err) {
+      console.error('Error deleting announcement:', err)
     }
   }
 
+  // Get activity icon
+  const getActivityIcon = (action: string) => {
+    switch (action.toLowerCase()) {
+      case 'login': return <UserCheck className="h-4 w-4" />
+      case 'logout': return <UserPlus className="h-4 w-4" />
+      case 'grade': return <Award className="h-4 w-4" />
+      case 'attendance': return <Clock className="h-4 w-4" />
+      default: return <Activity className="h-4 w-4" />
+    }
+  }
+
+  if (loading) {
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Error Display */}
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-red-500" />
-            <span className="text-red-700 font-medium">កំហុស:</span>
-            <span className="text-red-600">{error}</span>
-            <button
-              onClick={fetchDashboardData}
-              className="ml-auto px-3 py-1 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
-            >
-              ព្យាយាមម្តងទៀត
-            </button>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600 dark:text-gray-300">កំពុងផ្ទុក...</p>
         </div>
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <div className="text-center py-12">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-lg text-muted-foreground">កំពុងទាញយកទិន្នន័យផ្ទាំងគ្រប់គ្រង...</p>
         </div>
-      )}
+    )
+  }
 
-      {/* Dashboard Content - Only show when not loading */}
-      {!loading && (
-        <>
-          {/* No Data State */}
-          {students.length === 0 && safeUsers.length === 0 && (
-            <div className="text-center py-12">
-              <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">មិនមានទិន្នន័យ</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                សូមពិនិត្យការតភ្ជាប់ទៅមូលដ្ឋានទិន្នន័យ ឬព្យាយាមម្តងទៀត
-              </p>
-              <Button onClick={fetchDashboardData} variant="outline">
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">មានបញ្ហាក្នុងការផ្ទុក</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+          <Button onClick={fetchDashboardData} className="bg-blue-600 hover:bg-blue-700">
+            <RefreshCw className="h-4 w-4 mr-2" />
                 ព្យាយាមម្តងទៀត
               </Button>
             </div>
-          )}
-
-          {/* Dashboard Content */}
-          {students.length > 0 || safeUsers.length > 0 ? (
-            <>
-
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">សិស្សទាំងអស់</CardTitle>
-            <Users className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{dashboardStats.totalStudents}</div>
-            <p className="text-xs text-muted-foreground">សិស្សកំពុងសិក្សា</p>
-            <div className="flex items-center mt-2">
-              <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">{dashboardStats.activeStudents} សកម្ម</span>
             </div>
-          </CardContent>
-        </Card>
+    )
+  }
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">គ្រូទាំងអស់</CardTitle>
-            <BookOpen className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{dashboardStats.totalTeachers}</div>
-            <p className="text-xs text-muted-foreground">គ្រូបង្រៀនសកម្ម</p>
-            <div className="flex items-center mt-2">
-              <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">{dashboardStats.totalCourses} ថ្នាក់</span>
-            </div>
-          </CardContent>
-        </Card>
+  return (
+    <div>
+      <div className={`${animationsEnabled ? 'animate-fade-in' : ''}`}>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">សិស្សពូកែ</CardTitle>
-            <Award className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{dashboardStats.activeStudents}</div>
-            <p className="text-xs text-muted-foreground">សិស្សសកម្ម</p>
-            <div className="flex items-center mt-2">
-              <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">{dashboardStats.totalStudents} សរុប</span>
+        {/* Enhanced Quick Stats Summary */}
+        <div className=" py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                title: 'សិស្សសរុប',
+                value: dashboardStats.totalStudents,
+                icon: Users,
+                gradient: 'from-blue-500 via-blue-600 to-cyan-500',
+                bgGradient: 'from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30',
+                iconBg: 'bg-blue-100 dark:bg-blue-900/40',
+                iconColor: 'text-blue-600 dark:text-blue-400',
+              },
+              {
+                title: 'ថ្នាក់សិក្សា',
+                value: dashboardStats.totalCourses,
+                icon: BookOpen,
+                gradient: 'from-green-500 via-emerald-600 to-teal-500',
+                bgGradient: 'from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30',
+                iconBg: 'bg-green-100 dark:bg-green-900/40',
+                iconColor: 'text-green-600 dark:text-green-400',
+              },
+              {
+                title: 'ពិន្ទុ',
+                value: dashboardStats.totalGrades,
+                icon: Award,
+                gradient: 'from-yellow-500 via-orange-600 to-red-500',
+                bgGradient: 'from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30',
+                iconBg: 'bg-yellow-100 dark:bg-yellow-900/40',
+                iconColor: 'text-yellow-600 dark:text-yellow-400',
+              },
+              {
+                title: 'អ្នកប្រើប្រាស់',
+                value: dashboardStats.totalUsers,
+                icon: UserCheck,
+                gradient: 'from-purple-500 via-pink-600 to-rose-500',
+                bgGradient: 'from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30',
+                iconBg: 'bg-purple-100 dark:bg-purple-900/40',
+                iconColor: 'text-purple-600 dark:text-purple-400',
+              }
+            ].map((stat, index) => (
+              <div 
+                key={index} 
+                className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2"
+              >
+                <div 
+                  className={`absolute inset-0 bg-gradient-to-br ${stat.gradient}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} 
+                />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-lg`}>
+                      <stat.icon className="h-6 w-6 text-white" />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ដំណឹង</CardTitle>
-            <MessageSquare className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{dashboardStats.totalAnnouncements}</div>
-            <p className="text-xs text-muted-foreground">ដំណឹងសកម្ម</p>
-            <div className="flex items-center mt-2">
-              <Clock className="h-3 w-3 text-blue-500 mr-1" />
-              <span className="text-xs text-blue-500">ថ្ងៃនេះ: {dashboardStats.todayAttendance}</span>
+                    <div className="text-right">
+                      <p className={`text-3xl font-bold ${stat.iconColor}`}>
+                        {stat.value.toLocaleString('km-KH')}
+                      </p>
+                      <p className={`text-lg ${stat.iconColor} font-medium`}>
+                        {stat.title}
+                      </p>
             </div>
-          </CardContent>
-        </Card>
+            </div>
+                  <div className={`h-1 bg-gradient-to-r ${stat.gradient} rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
       </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Learning Quality Chart */}
-        <div className="lg:col-span-2">
-          <Card className="hover:shadow-lg transition-all duration-200">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-                <span className="text-lg">គុណភាពការសិក្សាតាមខែ</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={learningQualityData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                    <YAxis stroke="hsl(var(--muted-foreground))" />
-                    <Tooltip 
-                      formatter={(value, name) => {
-                        if (name === 'quality') return [`${value}%`, 'គុណភាព']
-                        if (name === 'averageScore') return [value, 'ពិន្ទុមធ្យម']
-                        if (name === 'attendance') return [`${value}%`, 'វត្តមាន']
-                        return [value, name]
-                      }}
-                      labelFormatter={(label) => `ខែ${label}`}
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                        color: 'hsl(var(--foreground))'
-                      }}
-                    />
-                    <Legend 
-                      formatter={(value) => {
-                        if (value === 'quality') return 'គុណភាព (%)'
-                        if (value === 'averageScore') return 'ពិន្ទុមធ្យម'
-                        if (value === 'attendance') return 'វត្តមាន (%)'
-                        return value
-                      }}
-                    />
-                    <Bar dataKey="quality" fill="#3b82f6" name="គុណភាព" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="averageScore" fill="#10b981" name="ពិន្ទុមធ្យម" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="attendance" fill="#f59e0b" name="វត្តមាន" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
               </div>
-            </CardContent>
-          </Card>
+            ))}
+          </div>
         </div>
 
-        {/* Attendance Pie Chart */}
-        <div className="lg:col-span-1">
-          <Card className="hover:shadow-lg transition-all duration-200">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <UserCheck className="h-5 w-5 text-green-600" />
-                <span className="text-lg">វត្តមានថ្ងៃនេះ</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={realAttendanceData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
+        {/* Weather Widget & Notifications */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+
+          {/* Enhanced Notifications Panel */}
+          <div className="relative">
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-red-50/20 to-pink-50/30 dark:from-orange-950/20 dark:via-red-950/20 dark:to-pink-950/20 rounded-3xl -z-10" 
+            />
+            
+            <Card className="backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80">
+              <CardHeader className="p-6 bg-gradient-to-r from-orange-500 via-red-600 to-pink-600 text-white rounded-t-xl">
+                <CardTitle className="text-white flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Bell className="h-5 w-5" />
+                    <span className="text-white">ការជូនដំណឹង</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-white/20 text-white">
+                      {notifications.length}
+                    </Badge>
+                    <Button
+                      onClick={() => fetchDashboardData()}
+                      size="sm"
+                      variant="ghost"
+                      className="text-white hover:bg-white/20"
                     >
-                      {realAttendanceData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+              </CardTitle>
+            </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification, index) => (
+                      <div 
+                        key={index} 
+                        className="group flex items-start space-x-3 p-4 rounded-lg transition-all duration-200 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 hover:shadow-md"
+                      >
+                        <div className="flex-shrink-0">
+                          <div className={`w-3 h-3 rounded-full mt-1 ${
+                            notification.type === 'warning' 
+                              ? 'bg-yellow-500 animate-pulse' 
+                              : 'bg-blue-500'
+                          }`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {notification.message}
+                              </p>
+                              {notification.details && (
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                  {notification.details}
+                                </p>
+                              )}
+                              <div className="flex items-center space-x-3 mt-2">
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  {notification.time}
+                                </span>
+                                {notification.author && (
+                                  <span className="text-xs text-blue-600 dark:text-blue-400">
+                                    ដោយ: {notification.author}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <Badge 
+                              variant="secondary" 
+                              className={`text-xs ${
+                                notification.type === 'warning' 
+                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' 
+                                  : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                              }`}
+                            >
+                              {notification.type === 'warning' ? 'សំខាន់' : 'ព័ត៌មាន'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                      <p className="text-sm">មិនមានការជូនដំណឹង</p>
+                      <p className="text-xs mt-1">ការជូនដំណឹងថ្មីៗនឹងបង្ហាញនៅទីនេះ</p>
+                    </div>
+                  )}
               </div>
             </CardContent>
           </Card>
         </div>
+
+          <div className="relative">
+          <div 
+            className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-rose-50/30 dark:from-purple-950/20 dark:via-pink-950/20 dark:to-rose-950/20 rounded-3xl -z-10" 
+          />
+          
+          <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 ${
+            isDarkMode 
+              ? 'bg-slate-800/80 hover:bg-slate-700/80' 
+              : 'bg-white/80 hover:bg-white/90'
+          }`}>
+            <CardHeader className="p-6 bg-gradient-to-r from-purple-500 via-pink-600 to-rose-600 text-white rounded-t-xl">
+              <CardTitle className="text-white flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Activity className="h-5 w-5" />
+                  <span className="text-white">សកម្មភាពថ្មីៗ</span>
       </div>
-
-      {/* Khmer Calendar and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Khmer Calendar */}
-        <div className="lg:col-span-1">
-          <KhmerCalendar compact={true} />
+                <div className="flex items-center space-x-2">
+                  <Badge className="bg-white/20 text-white">
+                    {recentActivities.length}
+                  </Badge>
+                  <Button
+                    onClick={() => fetchDashboardData()}
+                    size="sm"
+                    variant="ghost"
+                    className="text-white hover:bg-white/20"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
         </div>
-
-        {/* Recent Activity */}
-        <div className="lg:col-span-2">
-          <Card className="hover:shadow-lg transition-all duration-200">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="h-5 w-5 text-orange-600" />
-                <span className="text-lg">សកម្មភាពថ្មីៗ</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <div className="flex-shrink-0">
-                      {getActivityIcon(activity.type)}
+            <CardContent className="p-6">
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {recentActivities.length > 0 ? (
+                  recentActivities.map((activity, index) => (
+                    <div 
+                      key={index} 
+                      className="group flex items-start space-x-4 p-4 rounded-lg transition-all duration-200 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-600 hover:shadow-md"
+                    >
+                      <div className={`flex-shrink-0 p-2 rounded-full transition-all duration-200 ${
+                        animationsEnabled ? 'group-hover:scale-110' : ''
+                      } ${
+                        activity.type === 'add' ? 'bg-green-100 dark:bg-green-900/30' :
+                        activity.type === 'edit' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                        activity.type === 'attendance' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                        activity.type === 'announcement' ? 'bg-purple-100 dark:bg-purple-900/30' :
+                        'bg-gray-100 dark:bg-gray-700'
+                      }`}>
+                        {getActivityIcon(activity.action)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                              {activity.user}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {activity.action}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {activity.user} • {activity.time}
-                      </p>
+                            {activity.details && (
+                              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 line-clamp-2">
+                                {activity.details}
+                              </p>
+                            )}
+                            <div className="flex items-center space-x-3 mt-2">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {activity.time}
+                              </span>
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs ${
+                                  activity.type === 'add' ? 'border-green-300 text-green-700 dark:border-green-700 dark:text-green-300' :
+                                  activity.type === 'edit' ? 'border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-300' :
+                                  activity.type === 'attendance' ? 'border-yellow-300 text-yellow-700 dark:border-yellow-700 dark:text-yellow-300' :
+                                  activity.type === 'announcement' ? 'border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-300' :
+                                  'border-gray-300 text-gray-700 dark:border-gray-700 dark:text-gray-300'
+                                }`}
+                              >
+                                {activity.type === 'add' ? 'បន្ថែម' :
+                                 activity.type === 'edit' ? 'កែប្រែ' :
+                                 activity.type === 'attendance' ? 'វត្តមាន' :
+                                 activity.type === 'announcement' ? 'ប្រកាស' :
+                                 'ផ្សេងៗ'}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Activity className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                    <p className="text-sm">មិនមានសកម្មភាព</p>
+                    <p className="text-xs mt-1">សកម្មភាពថ្មីៗនឹងបង្ហាញនៅទីនេះ</p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
             </div>
 
-      {/* Quick Actions Navigation */}
-      <Card className="hover:shadow-lg transition-all duration-200">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Activity className="h-5 w-5 text-blue-500" />
-            <span>សកម្មភាពរហ័ស</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                          <a href="/dashboard/academic-management" className="block">
-              <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <BookOpen className="h-6 w-6 text-blue-500" />
-                    <div>
-                      <h3 className="font-semibold">ការគ្រប់គ្រងវិញ្ញាបនបត្រ</h3>
-                      <p className="text-sm text-gray-600">គ្រប់គ្រងថ្នាក់ និងមុខវិជ្ជា</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </a>
-            
-                          <a href="/dashboard/add-student-class" className="block">
-              <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <UserPlus className="h-6 w-6 text-green-500" />
-                    <div>
-                      <h3 className="font-semibold">បន្ថែមសិស្សទៅក្នុងថ្នាក់</h3>
-                      <p className="text-sm text-gray-600">ជ្រើសរើសសិស្ស និងថ្នាក់</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </a>
-            
-                          <a href="/dashboard/users" className="block">
-              <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <Users className="h-6 w-6 text-purple-500" />
-                    <div>
-                      <h3 className="font-semibold">គ្រប់គ្រងអ្នកប្រើប្រាស់</h3>
-                      <p className="text-sm text-gray-600">គ្រូ និងបុគ្គលិក</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </a>
-            
-                          <a href="/student-info" className="block">
-              <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <GraduationCap className="h-6 w-6 text-orange-500" />
-                    <div>
-                      <h3 className="font-semibold">ព័ត៌មានសិស្ស</h3>
-                      <p className="text-sm text-gray-600">មើល និងកែប្រែព័ត៌មាន</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </a>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Charts Section */}
 
-      {/* Announcements */}
-      <Card className="hover:shadow-lg transition-all duration-200">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center space-x-2">
-            <MessageSquare className="h-5 w-5 text-blue-600" />
-            <span className="text-lg">ដំណឹងសំខាន់ៗ</span>
-          </CardTitle>
+          {/* Learning Quality Chart */}
+          <div className="relative mb-8">
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 rounded-3xl -z-10" 
+            />
+            
+            <Card className="backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80">
+              <CardHeader className="p-6 bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 text-white rounded-t-xl">
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="text-white">គុណភាពការសិក្សា</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {learningQualityData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={learningQualityData}>
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        stroke="#e5e7eb" 
+                        className="dark:stroke-gray-700"
+                      />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fill: '#6b7280' }}
+                        className="dark:fill-gray-400"
+                      />
+                      <YAxis 
+                        tick={{ fill: '#6b7280' }}
+                        className="dark:fill-gray-400"
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                          color: 'hsl(var(--card-foreground))'
+                        }}
+                      />
+                      <Legend />
+                      <Bar 
+                        dataKey="quality" 
+                        fill="#3b82f6" 
+                        className="dark:fill-blue-400"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                    <p>មិនមានទិន្នន័យ</p>
+                  </div>
+                )}
+                </CardContent>
+              </Card>
+          </div>
+
+
+        {/* Recent Activity */}
+        
+
+        {/* Announcements Section */}
+        <div className="relative mb-8">
+          <div 
+            className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-blue-50/20 to-cyan-50/30 dark:from-indigo-950/20 dark:via-blue-950/20 dark:to-cyan-950/20 rounded-3xl -z-10" 
+          />
+          
+          <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 ${
+            isDarkMode 
+              ? 'bg-slate-800/80 hover:bg-slate-700/80' 
+              : 'bg-white/80 hover:bg-white/90'
+          }`}>
+            <CardHeader className="p-6 bg-gradient-to-r from-indigo-500 via-blue-600 to-cyan-600 text-white rounded-t-xl">
+              <CardTitle className="text-white flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <MessageSquare className="h-5 w-5" />
+                  <span className="text-white">ការប្រកាស</span>
+                </div>
           <Button 
+                  onClick={() => setShowAddForm(!showAddForm)}
             size="sm" 
-            onClick={() => setShowAddForm(!showAddForm)} 
-            className="flex items-center gap-2"
-            variant="gradient"
-          >
-            {showAddForm ? (
-              <>
-                <XCircle className="h-4 w-4" />
-                បោះបង់
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4" />
-                បន្ថែមដំណឹង
-              </>
-            )}
+                  className="bg-white/20 hover:bg-white/30 text-white transition-all duration-200"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  បន្ថែម
           </Button>
+              </CardTitle>
         </CardHeader>
-        <CardContent>
-          {/* Add Announcement Form */}
+            <CardContent className="p-6">
           {showAddForm && (
-            <div className="mb-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
+                <div className="mb-6 p-4 rounded-lg transition-colors bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700/70">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                    <span className="text-primary">បន្ថែមការប្រកាសថ្មី</span> 
+                  </h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ចំណងជើង*</label>
                     <Input
+                      placeholder="ចំណងជើង"
                       value={newAnnouncement.title}
-                      onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
-                      placeholder="បញ្ចូលចំណងជើងដំណឹង"
-                      className="h-12"
+                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
+                      className="transition-colors bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">អ្នកនិពន្ធ</label>
-                    <Input
-                      value={newAnnouncement.author}
-                      onChange={(e) => setNewAnnouncement({...newAnnouncement, author: e.target.value})}
-                      placeholder="អ្នកផ្សព្វផ្សាយ"
-                      className="h-12"
+                    <Textarea
+                      placeholder="មាតិកា"
+                      value={newAnnouncement.content}
+                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
+                      className="transition-colors bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400"
+                      rows={3}
                     />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ខ្លឹមសារ*</label>
-                  <Textarea
-                    value={newAnnouncement.content}
-                    onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
-                    placeholder="បញ្ចូលខ្លឹមសារដំណឹង"
-                    rows={3}
-                    className="resize-none"
-                  />
-                </div>
-                <div className="flex justify-end space-x-3">
+                    <div className="flex space-x-2">
+                      <Button 
+                        onClick={handleAddAnnouncement} 
+                        className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200"
+                      >
+                        រក្សាទុក
+                      </Button>
                   <Button 
-                    variant="outline" 
                     onClick={() => {
-                      setShowAddForm(false);
-                      setNewAnnouncement({
-                        title: '',
-                        content: '',
-                        author: '',
-                        date: '',
-                        priority: 'medium'
-                      });
-                    }}
-                    className="border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+                          setShowAddForm(false)
+                          setNewAnnouncement({ title: '', content: '', author: 'Admin' })
+                        }}
+                        variant="outline"
+                        className="transition-all duration-200 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                   >
                     បោះបង់
-                  </Button>
-                  <Button 
-                    onClick={handleAddAnnouncement}
-                    variant="gradientGreen"
-                  >
-                    បន្ថែមដំណឹង
                   </Button>
                 </div>
               </div>
             </div>
           )}
     
-          {/* Announcements List */}
           <div className="space-y-4">
             {announcements.length > 0 ? (
               announcements.map((announcement) => (
-                <div key={announcement.id} className="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
-                  <div className="flex justify-between items-start gap-4">
+                    <div 
+                      key={announcement.id} 
+                      className="p-4 rounded-lg transition-colors duration-200 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-600"
+                    >
+                      <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
                           {announcement.title}
-                        </h3>
-                        {getPriorityBadge(announcement.priority)}
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          </h4>
+                          <p className="text-sm mb-2 text-gray-600 dark:text-gray-400">
                         {announcement.content}
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span>📅 {announcement.date}</span>
-                        {announcement.author && <span>👤 {announcement.author}</span>}
+                          <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>ដោយ: {announcement.author}</span>
+                            <span>{new Date(announcement.createdAt).toLocaleDateString('km-KH')}</span>
                       </div>
                     </div>
-                    <button 
+                        <Button
                       onClick={() => handleDeleteAnnouncement(announcement.id)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                      aria-label="លុបដំណឹង"
+                          variant="ghost"
+                          size="sm"
+                          className="transition-all duration-200 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
                     >
                       <TrashIcon className="h-4 w-4" />
-                    </button>
+                        </Button>
                   </div>
                 </div>
               ))
             ) : (
               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>មិនមានដំណឹងសំខាន់ៗ</p>
+                    <p>មិនមានការប្រកាស</p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+        </div>
 
-      {/* Outstanding Students */}
-      <Card className="hover:shadow-lg transition-all duration-200">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Star className="h-5 w-5 text-yellow-500" />
-            <span className="text-lg">សិស្សពូកែ</span>
+        {/* Top Students */}
+        <div className="relative">
+          <div 
+            className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-orange-50/20 to-red-50/30 dark:from-yellow-950/20 dark:via-orange-950/20 dark:to-red-950/20 rounded-3xl -z-10" 
+          />
+          
+          <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 ${
+            isDarkMode 
+              ? 'bg-slate-800/80 hover:bg-slate-700/80' 
+              : 'bg-white/80 hover:bg-white/90'
+          }`}>
+            <CardHeader className="p-6 bg-gradient-to-r from-yellow-500 via-orange-600 to-red-600 text-white rounded-t-xl">
+              <CardTitle className="text-white flex items-center space-x-2">
+                <Star className="h-5 w-5" />
+                <span>សិស្សពូកែ</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+            <CardContent className="p-6">
           {students.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {students.slice(0, 4).map((student) => (
-                <div key={student.studentId} className="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
+                    <div 
+                      key={student.studentId} 
+                      className="border-2 rounded-lg p-4 transition-all duration-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
                       {student.firstName.charAt(0)}
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 dark:text-white">
-                        {student.firstName} {student.lastName}
+                          {student.lastName} {student.firstName}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {student.class}
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{student.class}</p>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">សិស្សសកម្ម</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          សិស្សសកម្ម
+                        </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">ថ្នាក់ {student.class}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            ថ្នាក់ {student.class}
+                          </span>
                       <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
                         {student.status === 'ACTIVE' ? 'សកម្ម' : 'អសកម្ម'}
                       </Badge>
@@ -739,16 +834,14 @@ function DashboardContent() {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <Users className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
               <p>មិនមានសិស្ស</p>
             </div>
           )}
         </CardContent>
       </Card>
-            </>
-          ) : null}
-        </>
-      )}
+        </div>
+      </div>
     </div>
   )
 }

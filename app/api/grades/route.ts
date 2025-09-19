@@ -1,33 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient()
-
-// GET: Fetch grades with filters
-export async function GET(request: Request) {
+// GET: Fetch grades
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const courseId = searchParams.get('courseId')
-    const studentId = searchParams.get('studentId')
-    const subjectId = searchParams.get('subjectId')
-    const semesterId = searchParams.get('semesterId')
+    const { searchParams } = new URL(request.url);
+    const today = searchParams.get('today');
+    const limit = searchParams.get('limit');
 
-    const whereClause: Record<string, unknown> = {}
-
-    if (studentId) {
-      whereClause.studentId = parseInt(studentId)
-    }
-
-    if (courseId) {
-      whereClause.courseId = parseInt(courseId)
-    }
-
-    if (subjectId) {
-      whereClause.subjectId = parseInt(subjectId)
-    }
-
-    if (semesterId) {
-      whereClause.semesterId = parseInt(semesterId)
+    let whereClause = {};
+    
+    if (today === 'true') {
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      
+      whereClause = {
+        createdAt: {
+          gte: todayStart,
+          lt: todayEnd
+        }
+      };
     }
 
     const grades = await prisma.grade.findMany({
@@ -35,378 +28,6 @@ export async function GET(request: Request) {
       include: {
         student: {
           select: {
-            studentId: true,
-            firstName: true,
-            lastName: true,
-            photo: true,
-            class: true,
-            gender: true
-          }
-        },
-        subject: {
-          select: {
-            subjectId: true,
-            subjectName: true
-          }
-        },
-        course: {
-          select: {
-            courseId: true,
-            courseName: true,
-            grade: true,
-            section: true,
-            schoolYear: {
-              select: {
-                schoolYearId: true,
-                schoolYearCode: true
-              }
-            }
-          }
-        },
-        semester: {
-          select: {
-            semesterId: true,
-            semester: true,
-            semesterCode: true
-          }
-        },
-        user: {
-          select: {
-            userId: true,
-            firstname: true,
-            lastname: true,
-            role: true
-          }
-        }
-      },
-      orderBy: [
-        { course: { schoolYear: { schoolYearCode: 'desc' } } },
-        { course: { grade: 'asc' } },
-        { course: { section: 'asc' } },
-        { student: { firstName: 'asc' } },
-        { subject: { subjectName: 'asc' } }
-      ]
-    })
-
-    return NextResponse.json(grades)
-  } catch (error) {
-    console.error('Error fetching grades:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch grades' },
-      { status: 500 }
-    )
-  }
-}
-
-// POST: Create new grade
-export async function POST(request: Request) {
-  try {
-    const body: {
-      studentId: number
-      subjectId: number
-      courseId: number
-      semesterId: number
-      score: number
-      grade: number
-      remarks?: string
-      gradeComment?: string
-      userId?: number
-      gradeDate?: string
-    } = await request.json()
-    
-    const { studentId, subjectId, courseId, semesterId, score, grade, remarks, gradeComment, userId, gradeDate } = body
-
-    // Validate required fields
-    if (!studentId || !subjectId || !courseId || !semesterId || score === undefined || grade === undefined) {
-      return NextResponse.json(
-        { error: 'Missing required fields: studentId, subjectId, courseId, semesterId, score, grade' },
-        { status: 400 }
-      )
-    }
-
-    // Validate gradeDate format (should be "MM/YY")
-    if (gradeDate && !/^\d{2}\/\d{2}$/.test(gradeDate)) {
-      return NextResponse.json(
-        { error: 'Invalid gradeDate format. Expected format: MM/YY (e.g., "12/25")' },
-        { status: 400 }
-      )
-    }
-
-    // Validate grade range
-    if (grade < 0 || grade > 100) {
-      return NextResponse.json(
-        { error: 'Grade must be between 0 and 100' },
-        { status: 400 }
-      )
-    }
-
-    // Check if grade already exists for this student, subject, course, semester, and gradeDate
-    const existingGrade = await prisma.grade.findFirst({
-      where: {
-        studentId: studentId,
-        subjectId: subjectId,
-        courseId: courseId,
-        semesterId: semesterId,
-        gradeDate: gradeDate || `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
-      }
-    })
-
-    if (existingGrade) {
-      return NextResponse.json(
-        { error: 'Grade already exists for this student, subject, course, semester, and date combination' },
-        { status: 409 }
-      )
-    }
-
-    // Generate grade code
-    const student = await prisma.student.findUnique({
-      where: { studentId: studentId }
-    })
-    const subject = await prisma.subject.findUnique({
-      where: { subjectId: subjectId }
-    })
-    const course = await prisma.course.findUnique({
-      where: { courseId: courseId }
-    })
-    const semester = await prisma.semester.findUnique({
-      where: { semesterId: semesterId }
-    })
-
-    // Create new grade
-    console.log('🔍 API: Creating grade with data:', {
-      studentId: studentId,
-      subjectId: subjectId,
-      courseId: courseId,
-      semesterId: semesterId,
-      grade: grade,
-      gradeComment: gradeComment || null,
-      userId: userId || null,
-      gradeDate: gradeDate || `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
-    })
-    
-    const newGrade = await prisma.grade.create({
-      data: {
-        studentId: studentId,
-        subjectId: subjectId,
-        courseId: courseId,
-        semesterId: semesterId,
-        grade: grade,
-        gradeComment: gradeComment || null,
-        userId: userId || null,
-        gradeDate: gradeDate || `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
-      },
-      include: {
-        student: {
-          select: {
-            studentId: true,
-            firstName: true,
-            lastName: true,
-            photo: true,
-            class: true,
-            gender: true
-          }
-        },
-        subject: {
-          select: {
-            subjectId: true,
-            subjectName: true
-          }
-        },
-        course: {
-          select: {
-            courseId: true,
-            courseName: true,
-            grade: true,
-            section: true,
-            schoolYear: {
-              select: {
-                schoolYearId: true,
-                schoolYearCode: true
-              }
-            }
-          }
-        },
-        semester: {
-          select: {
-            semesterId: true,
-            semester: true,
-            semesterCode: true
-          }
-        },
-        user: {
-          select: {
-            userId: true,
-            firstname: true,
-            lastname: true,
-            role: true
-          }
-        }
-      }
-    })
-
-    return NextResponse.json({
-      message: 'Grade created successfully',
-      grade: newGrade
-    }, { status: 201 })
-  } catch (error) {
-    console.error('Error creating grade:', error)
-    
-    // Provide more detailed error information
-    let errorMessage = 'Failed to create grade'
-    if (error instanceof Error) {
-      errorMessage = error.message
-    }
-    
-    // Check for specific Prisma errors
-    if (error && typeof error === 'object' && 'code' in error) {
-      const prismaError = error as { code: string }
-      console.error('Prisma error code:', prismaError.code)
-      if (prismaError.code === 'P2002') {
-        errorMessage = 'Duplicate grade entry'
-      } else if (prismaError.code === 'P2003') {
-        errorMessage = 'Foreign key constraint failed'
-      }
-    }
-    
-    return NextResponse.json(
-      { 
-        error: errorMessage,
-        details: error instanceof Error ? error.stack : 'Unknown error',
-        code: (error && typeof error === 'object' && 'code' in error) ? (error as { code: string }).code : 'UNKNOWN'
-      },
-      { status: 500 }
-    )
-  }
-}
-
-// PUT: Update existing grade
-export async function PUT(request: Request) {
-  try {
-    const body: {
-      grade: number
-      gradeComment?: string
-      userId?: number
-      gradeDate?: string
-    } = await request.json()
-    console.log('🔍 API: Received grade update request:', body)
-    
-    const {
-      grade,
-      gradeComment,
-      userId,
-      gradeDate
-    } = body
-
-    // Get gradeId from URL path
-    const url = new URL(request.url)
-    const pathParts = url.pathname.split('/')
-    const gradeId = pathParts[pathParts.length - 1]
-
-    if (!gradeId || grade === undefined) {
-      return NextResponse.json(
-        { error: 'Missing required fields: gradeId, grade' },
-        { status: 400 }
-      )
-    }
-
-    if (grade < 0 || grade > 100) {
-      return NextResponse.json(
-        { error: 'Grade must be between 0 and 100' },
-        { status: 400 }
-      )
-    }
-
-    const updatedGrade = await prisma.grade.update({
-      where: { gradeId: parseInt(gradeId) },
-      data: {
-        grade: grade,
-        gradeComment: gradeComment || null,
-        userId: userId || null,
-        gradeDate: gradeDate || undefined,
-        lastEdit: new Date(),
-        updatedAt: new Date()
-      },
-      include: {
-        student: {
-          select: {
-            studentId: true,
-            firstName: true,
-            lastName: true,
-            photo: true,
-            class: true,
-            gender: true
-          }
-        },
-        subject: {
-          select: {
-            subjectId: true,
-            subjectName: true
-          }
-        },
-        course: {
-          select: {
-            courseId: true,
-            courseName: true,
-            grade: true,
-            section: true,
-            schoolYear: {
-              select: {
-                schoolYearId: true,
-                schoolYearCode: true
-              }
-            }
-          }
-        },
-        semester: {
-          select: {
-            semesterId: true,
-            semester: true,
-            semesterCode: true
-          }
-        },
-        user: {
-          select: {
-            userId: true,
-            firstname: true,
-            lastname: true,
-            role: true
-          }
-        }
-      }
-    })
-
-    return NextResponse.json({
-      message: 'Grade updated successfully',
-      grade: updatedGrade
-    })
-  } catch (error) {
-    console.error('Error updating grade:', error)
-    return NextResponse.json(
-      { error: 'Failed to update grade' },
-      { status: 500 }
-    )
-  }
-}
-
-// DELETE: Delete grade
-export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const gradeId = searchParams.get('gradeId')
-
-    if (!gradeId) {
-      return NextResponse.json(
-        { error: 'Grade ID is required' },
-        { status: 400 }
-      )
-    }
-
-    const deletedGrade = await prisma.grade.delete({
-      where: { gradeId: parseInt(gradeId) },
-      include: {
-        student: {
-          select: {
-            studentId: true,
             firstName: true,
             lastName: true
           }
@@ -415,19 +36,50 @@ export async function DELETE(request: NextRequest) {
           select: {
             subjectName: true
           }
+        },
+        course: {
+          select: {
+            courseName: true
+          }
         }
-      }
-    })
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit ? parseInt(limit) : undefined
+    });
 
-    return NextResponse.json({
-      message: 'Grade deleted successfully',
-      deletedGrade
-    })
+    return NextResponse.json(grades);
   } catch (error) {
-    console.error('Error deleting grade:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete grade' },
-      { status: 500 }
-    )
+    console.error('Error fetching grades:', error);
+    return NextResponse.json({ error: 'Failed to fetch grades' }, { status: 500 });
+  }
+}
+
+// POST: Create a new grade
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { studentId, subjectId, semesterId, gradeDate, grade, gradeComment } = body;
+
+    if (!studentId || !subjectId || !semesterId || !gradeDate || grade === undefined) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const newGrade = await prisma.grade.create({
+      data: {
+        studentId,
+        subjectId,
+        semesterId,
+        gradeDate,
+        grade,
+        gradeComment
+      }
+    });
+
+    return NextResponse.json(newGrade, { status: 201 });
+  } catch (error) {
+    console.error('Error creating grade:', error);
+    return NextResponse.json({ error: 'Failed to create grade' }, { status: 500 });
   }
 }

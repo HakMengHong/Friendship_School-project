@@ -47,8 +47,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useToast } from "@/hooks/use-toast"
 
 // PDF generation types
-import type { StudentRegistrationData } from '@/lib/pdf-generators/student-registration'
-import { ReportType } from '@/lib/pdf-generators/types'
+import type { StudentRegistrationData } from '@/lib/pdf-generators/reports/student-registration'
+import { ReportType } from '@/lib/pdf-generators/core/types'
 
 export default function RegisterStudentPage() {
   return (
@@ -278,7 +278,7 @@ function RegisterStudentContent() {
       };
       
       // Generate PDF using the new PDF generator system
-      const response = await fetch('/api/generate-pdf', {
+      const response = await fetch('/api/pdf-generate/generate-pdf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -858,7 +858,7 @@ function RegisterStudentContent() {
                     <UserPlus className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg text-gray-900 dark:text-white">បញ្ជីសិស្ស</CardTitle>
+                    <CardTitle className="text-lg text-primary dark:text-white">បញ្ជីសិស្ស</CardTitle>
                     <CardDescription className="text-gray-600 dark:text-gray-400">ជ្រើសរើសសិស្សដើម្បីចុះឈ្មោះ</CardDescription>
                   </div>
                 </div>
@@ -925,7 +925,7 @@ function RegisterStudentContent() {
                 ) : (
                   <div className=" py-12">
                     <User className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                       {studentName ? 'រកមិនឃើញសិស្ស' : 'គ្មានសិស្ស'}
                     </p>
                   </div>
@@ -968,8 +968,8 @@ function RegisterStudentContent() {
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>ព័ត៌មានផ្ទាល់ខ្លួន</span>
+                            <User className="h-5 w-5 text-primary dark:text-blue-400" />
+                            <span className="text-primary dark:text-white"  >ព័ត៌មានផ្ទាល់ខ្លួន</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -1039,46 +1039,49 @@ function RegisterStudentContent() {
                               <Label htmlFor="dob" className="text-sm font-medium">
                                 ថ្ងៃខែឆ្នាំកំណើត <span className="text-red-500">*</span>
                               </Label>
-                              <Input 
-                                type="date" 
-                                id="dob" 
-                                value={formData.dob} 
-                                onChange={(e) => {
-                                  const dob = e.target.value;
-                                  console.log('Date input changed:', dob);
-                                  setFormData({...formData, dob: dob});
-                                  
-                                  // Auto-calculate detailed age if DOB is provided
-                                  if (dob) {
-                                    const birthDate = new Date(dob);
-                                    const today = new Date();
+                              <div className="relative">
+                                <Input 
+                                  type="date" 
+                                  id="dob" 
+                                  value={formData.dob} 
+                                  onChange={(e) => {
+                                    const dob = e.target.value;
+                                    console.log('Date input changed:', dob);
+                                    setFormData({...formData, dob: dob});
                                     
-                                    // Calculate years, months, and days
-                                    let years = today.getFullYear() - birthDate.getFullYear();
-                                    let months = today.getMonth() - birthDate.getMonth();
-                                    let days = today.getDate() - birthDate.getDate();
-                                    
-                                    // Adjust for negative months/days
-                                    if (days < 0) {
-                                      months--;
-                                      const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, birthDate.getDate());
-                                      days = Math.floor((today.getTime() - lastMonth.getTime()) / (1000 * 60 * 60 * 24));
+                                    // Auto-calculate detailed age if DOB is provided
+                                    if (dob) {
+                                      const birthDate = new Date(dob);
+                                      const today = new Date();
+                                      
+                                      // Calculate years, months, and days
+                                      let years = today.getFullYear() - birthDate.getFullYear();
+                                      let months = today.getMonth() - birthDate.getMonth();
+                                      let days = today.getDate() - birthDate.getDate();
+                                      
+                                      // Adjust for negative months/days
+                                      if (days < 0) {
+                                        months--;
+                                        const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, birthDate.getDate());
+                                        days = Math.floor((today.getTime() - lastMonth.getTime()) / (1000 * 60 * 60 * 24));
+                                      }
+                                      
+                                      if (months < 0) {
+                                        years--;
+                                        months += 12;
+                                      }
+                                      
+                                      // Format as "Xឆ្នាំ Yខែ Zថ្ងៃ"
+                                      const ageString = `${years} ឆ្នាំ ${months} ខែ ${days} ថ្ងៃ`;
+                                      console.log('Age calculated:', ageString);
+                                      setFormData(prev => ({...prev, age: ageString}));
                                     }
-                                    
-                                    if (months < 0) {
-                                      years--;
-                                      months += 12;
-                                    }
-                                    
-                                    // Format as "Xឆ្នាំ Yខែ Zថ្ងៃ"
-                                    const ageString = `${years} ឆ្នាំ ${months} ខែ ${days} ថ្ងៃ`;
-                                    console.log('Age calculated:', ageString);
-                                    setFormData(prev => ({...prev, age: ageString}));
-                                  }
-                                }}
-                                className="h-12  cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors bg-background text-foreground border-input [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-2 [&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:transform [&::-webkit-calendar-picker-indicator]:-translate-y-1/2 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                                max={new Date().toISOString().split('T')[0]}
-                              />
+                                  }}
+                                  className="h-12 pr-10 cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors bg-background text-foreground border-input [&::-webkit-calendar-picker-indicator]:opacity-0"
+                                  max={new Date().toISOString().split('T')[0]}
+                                />
+                                <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                              </div>
                             </div>
                           </div>
 
@@ -1157,8 +1160,8 @@ function RegisterStudentContent() {
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>អាសយដ្ឋាន និង ទំនាក់ទំនង</span>
+                            <MapPin className="h-5 w-5 text-primary dark:text-blue-400" />
+                            <span className="text-primary dark:text-white" >អាសយដ្ឋាន និង ទំនាក់ទំនង</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -1258,9 +1261,9 @@ function RegisterStudentContent() {
                           <CardHeader>
                             <div className="flex justify-between items-center">
                               <CardTitle className="flex items-center space-x-2">
-                                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                <Users className="h-5 w-5 text-primary dark:text-blue-400" />
                                 <span>
-                                  ព័ត៌មានអាណាព្យាបាល {guardianForms.length > 1 ? formIndex + 1 : ''}
+                                  <span className="text-primary dark:text-white" >ព័ត៌មានអាណាព្យាបាល {guardianForms.length > 1 ? formIndex + 1 : ''}</span>
                                 </span>
                               </CardTitle>
                               {formIndex > 0 && (
@@ -1555,8 +1558,8 @@ function RegisterStudentContent() {
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <Home className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>ព័ត៌មានពីស្ថានភាពគ្រួសារសិស្ស</span>
+                            <Home className="h-5 w-5 text-primary dark:text-blue-400" />
+                            <span className="text-primary dark:text-white" >ព័ត៌មានពីស្ថានភាពគ្រួសារសិស្ស</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -1774,12 +1777,12 @@ function RegisterStudentContent() {
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>ព័ត៌មានសិក្សាសម្រាប់សិស្សថ្មី</span>
+                            <BookOpen className="h-5 w-5 text-primary dark:text-blue-400" />
+                            <span className="text-primary dark:text-white" >ព័ត៌មានសិក្សាសម្រាប់សិស្សថ្មី</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {/* Previous School */}
                             <div className="space-y-2">
                               <Label htmlFor="school" className="text-sm font-medium">សាលារៀនមុន</Label>
@@ -1811,7 +1814,7 @@ function RegisterStudentContent() {
                                 checked={formData.vaccinated || false}
                                 onCheckedChange={(checked) => setFormData({...formData, vaccinated: checked as boolean})}
                               />
-                              <Label htmlFor="vaccinated" className="text-sm font-medium  cursor-pointer">
+                              <Label htmlFor="vaccinated" className="text-center text-sm font-medium  cursor-pointer">
                                 សិស្សទទួលបានវ៉ាក់សាំងគ្រប់គ្រាន់ហើយនៅ?
                               </Label>
                             </div>
@@ -1826,8 +1829,8 @@ function RegisterStudentContent() {
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>តម្រូវការពីសាលា</span>
+                            <FileText className="h-5 w-5 text-primary dark:text-blue-400" />
+                            <span className="text-primary dark:text-white" >តម្រូវការពីសាលា</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -1875,8 +1878,8 @@ function RegisterStudentContent() {
                       <Card className="hover:shadow-lg transition-all duration-200">
                         <CardHeader>
                           <CardTitle className="flex items-center space-x-2">
-                            <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span>កាលបរិច្ឆេទចុះឈ្មោះ</span>
+                            <Calendar className="h-5 w-5 text-primary dark:text-blue-400" />
+                            <span className="text-primary dark:text-white" >កាលបរិច្ឆេទចុះឈ្មោះ</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -1902,7 +1905,7 @@ function RegisterStudentContent() {
                                         </SelectItem>
                                       ))
                                     ) : (
-                                      <SelectItem value="" disabled>
+                                      <SelectItem value="loading" disabled>
                                         កំពុងទាញយកឆ្នាំសិក្សា...
                                       </SelectItem>
                                     )}
@@ -1915,20 +1918,23 @@ function RegisterStudentContent() {
                                 <Label htmlFor="registration-date" className="text-sm font-medium">
                                   ថ្ងៃខែឆ្នាំចុះឈ្មោះចូលរៀន
                                 </Label>
-                                <Input
-                                  id="registration-date"
-                                  type="date"
-                                  className="h-12 "
-                                  disabled
-                                  value={new Date().toISOString().split('T')[0]}
-                                />
+                                <div className="relative">
+                                  <Input
+                                    id="registration-date"
+                                    type="date"
+                                    className="h-12 pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0"
+                                    disabled
+                                    value={new Date().toISOString().split('T')[0]}
+                                  />
+                                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                </div>
                               </div>
                             </div>
 
                             {/* PDF Generation Info */}
                             <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                               <div className="flex items-start space-x-3">
-                                <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                                <FileText className="h-5 w-5 text-primary dark:text-blue-400 mt-0.5 flex-shrink-0" />
                                 <div className="flex-1">
                                   <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
                                     ព័ត៌មានដែលនឹងត្រូវបានបោះពុម្ភ

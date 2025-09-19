@@ -127,67 +127,71 @@ function GradeContent() {
     <div className="space-y-6 p-6">
 
 
-      {/* Top Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ពិន្ទុមធ្យម</CardTitle>
-            <BarChart2 className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">85.2</div>
-            <p className="text-xs text-muted-foreground">ពិន្ទុមធ្យមទូទៅ</p>
-            <div className="flex items-center mt-2">
-              <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">+5.3% ពីខែមុន</span>
+      {/* Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                <GraduationCap className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">3</p>
+                <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">ឆ្នាំសិក្សា</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+        </div>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ការកែលម្អ</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">+5.3%</div>
-            <p className="text-xs text-muted-foreground">ពីខែមុន</p>
-            <div className="flex items-center mt-2">
-              <ArrowUp className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">កំពុងកើនឡើង</span>
+        <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">12</p>
+                <p className="text-xs text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់រៀន</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+        </div>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">សិស្សល្អបំផុត</CardTitle>
-            <Award className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold text-purple-600">សុខ ចន្ទា</div>
-            <p className="text-xs text-muted-foreground">ពិន្ទុ: 98.5</p>
-            <div className="flex items-center mt-2">
-              <Star className="h-3 w-3 text-yellow-500 mr-1" />
-              <span className="text-xs text-yellow-500">ថ្នាក់ទី១</span>
+        <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400">245</p>
+                <p className="text-xs text-green-500 dark:text-green-300 font-medium">សិស្សសរុប</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+        </div>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ចំណាត់ថ្នាក់</CardTitle>
-            <Medal className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">#3</div>
-            <p className="text-xs text-muted-foreground">ក្នុងចំណោមសិស្ស 45 នាក់</p>
-            <div className="flex items-center mt-2">
-              <CheckCircle className="h-3 w-3 text-green-500 mr-1" />
-              <span className="text-xs text-green-500">ល្អណាស់</span>
+        <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">1,250</p>
+                <p className="text-xs text-orange-500 dark:text-orange-300 font-medium">ពិន្ទុសរុប</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="h-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+        </div>
       </div>
 
       {/* Subject Performance Row */}

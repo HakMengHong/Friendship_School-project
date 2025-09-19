@@ -48,6 +48,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
           { id: "admin-academic", label: "ការគ្រប់គ្រងថ្នាក់", href: "/dashboard/academic-management" },
           { id: "admin-add-student-class", label: "បន្ថែមសិស្សទៅក្នុងថ្នាក់", href: "/dashboard/add-student-class" },
           { id: "admin-view-student-class", label: "មើលថ្នាក់រៀន", href: "/dashboard/view-student-class" },
+          { id: "admin-id-cards", label: "ប័ណ្ណសម្គាល់", href: "/dashboard/id-cards" },
         ],
       },
       // Admin Attendance

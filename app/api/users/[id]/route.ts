@@ -7,10 +7,11 @@ const prisma = new PrismaClient()
 // PUT - Update user
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = parseInt(params.id)
+    const { id } = await params
+    const userId = parseInt(id)
     const body: {
       username?: string
       firstname?: string
@@ -131,10 +132,11 @@ export async function PUT(
 // DELETE - Delete user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = parseInt(params.id)
+    const { id } = await params
+    const userId = parseInt(id)
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({

@@ -14,7 +14,7 @@ const khmerLastNames = [
 ];
 
 const classes = ['ថ្នាក់ទី 1', 'ថ្នាក់ទី 2', 'ថ្នាក់ទី 3', 'ថ្នាក់ទី 4', 'ថ្នាក់ទី 5', 'ថ្នាក់ទី 6', 'ថ្នាក់ទី 7', 'ថ្នាក់ទី 8', 'ថ្នាក់ទី 9', 'ថ្នាក់ទី 10', 'ថ្នាក់ទី 11', 'ថ្នាក់ទី 12'];
-const genders = ['ប្រុស', 'ស្រី'];
+const genders = ['male', 'female'];
 
 async function createSchoolYearAndStudents() {
   console.log('🏫 Creating School Year and Students');

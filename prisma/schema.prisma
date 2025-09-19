@@ -8,27 +8,29 @@ datasource db {
 }
 
 model User {
-  userId       Int           @id @default(autoincrement())
-  username     String        @unique
-  password     String
-  lastname     String
-  firstname    String
-  phonenumber1 String?
-  phonenumber2 String?
-  role         String        @default("teacher")
-  avatar       String?
-  photo        String?
-  position     String?
-  status       String        @default("active")
-  lastLogin    DateTime?
-  failedLoginAttempts Int    @default(0)
-  lastFailedLogin      DateTime?
-  accountLockedUntil   DateTime?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  activityLogs ActivityLog[] @relation("ActivityLogUser")
-  grades       Grade[]
-  courses      Course[]      @relation("ClassTeacher")
+  userId              Int           @id @default(autoincrement())
+  username            String        @unique
+  password            String
+  lastname            String
+  firstname           String
+  phonenumber1        String?
+  phonenumber2        String?
+  role                String        @default("teacher")
+  avatar              String?
+  photo               String?
+  position            String?
+  status              String        @default("active")
+  lastLogin           DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  accountLockedUntil  DateTime?
+  failedLoginAttempts Int           @default(0)
+  lastFailedLogin     DateTime?
+  activityLogs        ActivityLog[] @relation("ActivityLogUser")
+  coursesAsTeacher1   Course[]      @relation("CourseTeacher1")
+  coursesAsTeacher2   Course[]      @relation("CourseTeacher2")
+  coursesAsTeacher3   Course[]      @relation("CourseTeacher3")
+  grades              Grade[]
 }
 
 model Student {
@@ -134,9 +136,11 @@ model Course {
   updatedAt    DateTime     @updatedAt
   attendances  Attendance[]
   schoolYear   SchoolYear   @relation(fields: [schoolYearId], references: [schoolYearId])
+  teacher1     User?        @relation("CourseTeacher1", fields: [teacherId1], references: [userId])
+  teacher2     User?        @relation("CourseTeacher2", fields: [teacherId2], references: [userId])
+  teacher3     User?        @relation("CourseTeacher3", fields: [teacherId3], references: [userId])
   enrollments  Enrollment[]
   grades       Grade[]
-  teachers     User[]       @relation("ClassTeacher")
 }
 
 model Subject {
@@ -149,17 +153,17 @@ model Subject {
 
 model Grade {
   gradeId      Int       @id @default(autoincrement())
+  courseId     Int
   studentId    Int
   subjectId    Int
   semesterId   Int
   gradeDate    String
   grade        Float
   gradeComment String?
+  userId       Int?
   lastEdit     DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  courseId     Int
-  userId       Int?
   course       Course    @relation(fields: [courseId], references: [courseId])
   semester     Semester  @relation(fields: [semesterId], references: [semesterId])
   student      Student   @relation(fields: [studentId], references: [studentId])
@@ -184,6 +188,7 @@ model SchoolYear {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   courses        Course[]
+  attendances    Attendance[]
 }
 
 model Semester {
@@ -193,6 +198,7 @@ model Semester {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   grades       Grade[]
+  attendances  Attendance[]
 }
 
 model Attendance {
@@ -208,6 +214,10 @@ model Attendance {
   courseId       Int
   course         Course            @relation(fields: [courseId], references: [courseId])
   student        Student           @relation(fields: [studentId], references: [studentId])
+  semesterId     Int?
+  semester       Semester?         @relation(fields: [semesterId], references: [semesterId])
+  schoolYearId   Int?
+  schoolYear     SchoolYear?       @relation(fields: [schoolYearId], references: [schoolYearId])
 }
 
 model ActivityLog {

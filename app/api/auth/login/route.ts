@@ -108,8 +108,9 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Return user data (without password)
-    const userData = {
+    // Return user data (without password) with session timestamps
+    const now = Date.now()
+    const sessionData = {
       id: user.userId,
       username: user.username,
       firstname: user.firstname,
@@ -122,9 +123,25 @@ export async function POST(request: NextRequest) {
       lastLogin: user.lastLogin,
       photo: user.photo,
       status: user.status,
+      // Auto-logout session management
+      sessionStart: now,
+      expiresAt: now + (30 * 60 * 1000), // 30 minutes from now
+      lastActivity: now
     }
 
-    return NextResponse.json({ user: userData })
+    // Create response with user data
+    const response = NextResponse.json({ user: sessionData })
+    
+    // Set secure cookie with 30-minute expiration
+    response.cookies.set('user', encodeURIComponent(JSON.stringify(sessionData)), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 60, // 30 minutes in seconds
+      path: '/'
+    })
+
+    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(

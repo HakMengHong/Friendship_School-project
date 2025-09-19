@@ -27,8 +27,18 @@ export async function GET(request: Request) {
       return NextResponse.json(attendance)
     }
 
+    // If no date provided, return all attendance data (for getting unique dates)
     if (!date) {
-      return NextResponse.json({ error: 'Date is required' }, { status: 400 })
+      const attendances = await prisma.attendance.findMany({
+        select: {
+          attendanceDate: true
+        },
+        distinct: ['attendanceDate'],
+        orderBy: {
+          attendanceDate: 'desc'
+        }
+      })
+      return NextResponse.json(attendances)
     }
 
     // Build where clause
@@ -80,8 +90,9 @@ export async function POST(request: Request) {
       status: string
       reason?: string
       recordedBy?: string
+      semesterId?: number
     } = await request.json()
-    const { studentId, courseId, attendanceDate, session, status, reason, recordedBy } = body
+    const { studentId, courseId, attendanceDate, session, status, reason, recordedBy, semesterId } = body
 
     // Validate required fields
     if (!studentId || !courseId || !attendanceDate || !session || !status) {
@@ -108,6 +119,23 @@ export async function POST(request: Request) {
       )
     }
 
+    // Determine semesterId if not provided (based on attendanceDate)
+    let resolvedSemesterId: number | null = null
+    try {
+      if (semesterId) {
+        resolvedSemesterId = semesterId
+      } else if (attendanceDate) {
+        const dateObj = new Date(attendanceDate)
+        const month = dateObj.getMonth() + 1
+        // Map months: Sep-Dec -> S1, Jan-Jun -> S2 (typical academic calendar)
+        const semesterCode = (month >= 9 || month <= 12) && month >= 9 ? 'S1' : 'S2'
+        const semester = await prisma.semester.findFirst({ where: { semesterCode } })
+        resolvedSemesterId = semester ? semester.semesterId : null
+      }
+    } catch (e) {
+      resolvedSemesterId = null
+    }
+
     // Create new attendance record
     const attendance = await prisma.attendance.create({
       data: {
@@ -117,7 +145,8 @@ export async function POST(request: Request) {
         session: session,
         status: status,
         reason: reason || null,
-        recordedBy: recordedBy || null
+        recordedBy: recordedBy || null,
+        semesterId: resolvedSemesterId || undefined
       },
       include: {
         student: true,
@@ -148,8 +177,9 @@ export async function PUT(request: Request) {
       status: string
       reason?: string
       recordedBy?: string
+      semesterId?: number
     } = await request.json()
-    const { studentId, courseId, attendanceDate, session, status, reason, recordedBy } = body
+    const { studentId, courseId, attendanceDate, session, status, reason, recordedBy, semesterId } = body
 
     if (!attendanceId) {
       return NextResponse.json(
@@ -178,6 +208,22 @@ export async function PUT(request: Request) {
       )
     }
 
+    // Determine semesterId if not provided (based on attendanceDate)
+    let resolvedSemesterId: number | null = null
+    try {
+      if (semesterId) {
+        resolvedSemesterId = semesterId
+      } else if (attendanceDate) {
+        const dateObj = new Date(attendanceDate)
+        const month = dateObj.getMonth() + 1
+        const semesterCode = (month >= 9 || month <= 12) && month >= 9 ? 'S1' : 'S2'
+        const semester = await prisma.semester.findFirst({ where: { semesterCode } })
+        resolvedSemesterId = semester ? semester.semesterId : null
+      }
+    } catch (e) {
+      resolvedSemesterId = null
+    }
+
     // Update attendance record
     const attendance = await prisma.attendance.update({
       where: { attendanceId: parseInt(attendanceId) },
@@ -188,7 +234,8 @@ export async function PUT(request: Request) {
         session: session,
         status: status,
         reason: reason || null,
-        recordedBy: recordedBy || null
+        recordedBy: recordedBy || null,
+        semesterId: resolvedSemesterId || undefined
       },
       include: {
         student: true,

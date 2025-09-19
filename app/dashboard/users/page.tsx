@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -24,11 +25,10 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, User as UserIcon, Users, Shield, UserCheck, Search, Eye, EyeOff, Upload, X, ToggleLeft, Info, Sparkles, BarChart3, Activity } from "lucide-react";
+import { Plus, Edit, Trash2, User as UserIcon, Users, Shield, UserCheck, Search, Eye, EyeOff, Upload, X, ToggleLeft, Info, Sparkles, BarChart3, Activity, BookOpen, Camera, Phone, AtSign, Mail, Lock, Save, Check, ChevronDown, ClipboardList } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
-import { UsersForm, UserFormData } from "./usersform";
-import UsersTable, { User as UsersTableUser } from "./userstable";
+// Removed separate component imports - now consolidated
 interface User {
   userid: number;
   username: string;
@@ -49,24 +49,25 @@ interface User {
   accountLockedUntil?: string;
 }
 
-interface FormData {
-  username: string;
+// Form data interface
+export interface UserFormData {
   firstname: string;
   lastname: string;
   phonenumber1: string;
-  phonenumber2?: string;
+  phonenumber2: string; // Changed from optional to required with empty string default
   role: string;
   position: string;
   photo: string;
-  status: string; // "active", "inactive", "suspended"
   password: string;
   verifyPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
   photoFile?: File;
   photoPreview?: string;
 }
 
-const emptyFormData: FormData = {
-  username: "",
+// Constants for form options
+const emptyFormData: UserFormData = {
   firstname: "",
   lastname: "",
   phonenumber1: "",
@@ -74,12 +75,32 @@ const emptyFormData: FormData = {
   role: "teacher",
   position: "",
   photo: "",
-  status: "active",
   password: "",
   verifyPassword: "",
+  newPassword: "",
+  confirmNewPassword: "",
   photoFile: undefined,
   photoPreview: "",
 };
+
+const roleOptions = [
+  { value: "teacher", label: "គ្រូបង្រៀន", icon: "📚", color: "text-blue-600" },
+  { value: "admin", label: "អ្នកគ្រប់គ្រង", icon: "🛡️", color: "text-purple-600" },
+];
+
+const positionOptions = [
+  "គ្រូបន្ទុកថ្នាក់ទី ១",
+  "គ្រូបន្ទុកថ្នាក់ទី ២",
+  "គ្រូបន្ទុកថ្នាក់ទី ៣",
+  "គ្រូបន្ទុកថ្នាក់ទី ៤",
+  "គ្រូបន្ទុកថ្នាក់ទី ៥",
+  "គ្រូបន្ទុកថ្នាក់ទី ៦",
+  "គ្រូបន្ទុកថ្នាក់ទី ៧",
+  "គ្រូបន្ទុកថ្នាក់ទី ៨",
+  "គ្រូបន្ទុកថ្នាក់ទី ៩",
+  "នាយិកា",
+  "នាយក",
+];
 
 export default function AdminUsersPage() {
   return (
@@ -103,6 +124,18 @@ function AdminUsersContent() {
   const [skipLockoutLoading, setSkipLockoutLoading] = useState<number | null>(null);
   const { toast } = useToast();
   const [optimisticStatus, setOptimisticStatus] = useState<{ userid: number; status: string } | null>(null);
+  
+  // Form state variables
+  const [formData, setFormData] = useState<UserFormData>(emptyFormData);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showVerifyPassword, setShowVerifyPassword] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Fetch users
   const fetchUsers = async () => {
@@ -162,6 +195,196 @@ function AdminUsersContent() {
       setFormLoading(false);
     }
   };
+
+  // Form input handler
+  const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    
+    if (name === "password" || name === "verifyPassword") {
+      setPasswordError(null);
+    }
+  };
+
+  // File upload handler
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({ 
+        title: "បរាជ័យ", 
+        description: "សូមជ្រើសរើសឯកសាររូបភាពប៉ុណ្ណោះ", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ 
+        title: "បរាជ័យ", 
+        description: "ទំហំឯកសារត្រូវតែតិចជាង 5MB", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    const previewUrl = URL.createObjectURL(file);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok || !data.filename) {
+        throw new Error(data.error || "Upload failed");
+      }
+      
+      setFormData((prev) => ({
+        ...prev,
+        photoFile: file,
+        photoPreview: previewUrl,
+        photo: data.filename,
+      }));
+      
+      toast({ 
+        title: "ជោគជ័យ", 
+        description: "រូបភាពត្រូវបានផ្ទុកឡើង", 
+      });
+    } catch (err) {
+      toast({ 
+        title: "បរាជ័យ", 
+        description: "មិនអាចផ្ទុករូបភាពបានទេ", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Form validation
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!formData.lastname) errors.push("នាមត្រកូលគឺចាំបាច់");
+    if (!formData.firstname) errors.push("នាមខ្លួនគឺចាំបាច់");
+    if (!editUser && !formData.password) errors.push("ពាក្យសម្ងាត់គឺចាំបាច់");
+    if (formData.password && formData.password !== formData.verifyPassword) {
+      errors.push("ពាក្យសម្ងាត់មិនត្រូវគ្នា");
+    }
+    
+    // Password change validation for edit mode
+    if (editUser && showChangePassword) {
+      if (!formData.newPassword) errors.push("ពាក្យសម្ងាត់ថ្មីគឺចាំបាច់");
+      if (formData.newPassword && formData.newPassword.length < 6) {
+        errors.push("ពាក្យសម្ងាត់ថ្មីត្រូវតែមានយ៉ាងហោចណាស់ 6 តួអក្សរ");
+      }
+      if (formData.newPassword && formData.newPassword !== formData.confirmNewPassword) {
+        errors.push("ពាក្យសម្ងាត់ថ្មីមិនត្រូវគ្នា");
+      }
+    }
+    
+    return errors;
+  };
+
+  // Handle form submission
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setFormError(errors[0]);
+      return;
+    }
+    
+    setFormError(null);
+    setPasswordError(null);
+    
+    const isEdit = !!editUser;
+    const username = `${formData.lastname.toLowerCase()}${formData.firstname.toLowerCase()}`.replace(/\s+/g, "");
+    const avatar = formData.firstname ? formData.firstname.charAt(0).toUpperCase() : "U";
+    
+    let submitData: any = {
+      ...formData,
+      username,
+      avatar,
+      status: "active", // Always set to active by default
+    };
+    
+    if (isEdit && !formData.password) {
+      const { password, verifyPassword, ...rest } = submitData;
+      submitData = rest;
+    }
+    
+    // Handle password change for edit mode
+    if (isEdit && showChangePassword) {
+      submitData.newPassword = formData.newPassword;
+      // Remove the old password fields
+      const { password, verifyPassword, newPassword, confirmNewPassword, ...rest } = submitData;
+      submitData = { ...rest, newPassword };
+    }
+
+    setSubmitMessage(null);
+    const ok = await handleUserFormSubmit(submitData, isEdit);
+    if (ok) {
+      setSubmitMessage({ type: "success", text: isEdit ? "កែប្រែជោគជ័យ" : "បន្ថែមជោគជ័យ" });
+      // Close after a short delay so the user can read the message
+      setTimeout(() => {
+        setSubmitMessage(null);
+        setFormDialogOpen(false);
+      }, 1200);
+    } else {
+      setSubmitMessage({ type: "error", text: isEdit ? "កែប្រែមិនជោគជ័យ" : "បន្ថែមមិនជោគជ័យ" });
+    }
+  };
+
+  // Reset form when dialog opens/closes
+  useEffect(() => {
+    if (editUser) {
+      let photoPreview = "";
+      if (editUser.photo) {
+        photoPreview =
+          editUser.photo.startsWith("http") || editUser.photo.startsWith("/")
+            ? editUser.photo
+            : `/uploads/${editUser.photo}`;
+      }
+      const { username, status, ...userDataWithoutUsernameAndStatus } = editUser;
+      setFormData({
+        ...emptyFormData,
+        ...userDataWithoutUsernameAndStatus,
+        // Ensure all string fields are not null to prevent React warnings
+        phonenumber1: userDataWithoutUsernameAndStatus.phonenumber1 || "",
+        phonenumber2: userDataWithoutUsernameAndStatus.phonenumber2 || "",
+        position: userDataWithoutUsernameAndStatus.position || "",
+        photo: userDataWithoutUsernameAndStatus.photo || "",
+        password: "",
+        verifyPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+        photoPreview,
+        photoFile: undefined,
+      });
+    } else {
+      setFormData(emptyFormData);
+    }
+    setFormError(null);
+    setPasswordError(null);
+    setShowPassword(false);
+    setShowVerifyPassword(false);
+    setShowChangePassword(false);
+    setShowNewPassword(false);
+    setShowConfirmNewPassword(false);
+  }, [editUser, formDialogOpen]);
 
   // Delete user
   const handleDelete = async (userid: number) => {
@@ -397,7 +620,7 @@ function AdminUsersContent() {
   console.log('🔍 Teacher users:', teacherUsers);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 p-6">
+    <div>
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
         <div className="text-center space-y-6 p-8">
@@ -535,38 +758,590 @@ function AdminUsersContent() {
           </div>
         </CardHeader>
 
-          <CardContent className="p-8">
-          <UsersTable
-            users={filteredUsers}
-            loading={loading}
-            statusLoading={statusLoading}
-            skipLockoutLoading={skipLockoutLoading}
-            onEdit={openDialog}
-            onViewDetails={handleViewDetails}
-            onDelete={(id) => setDeleteId(id)}
-            onSkipLockout={handleSkipLockout}
-            onResetAttempts={handleResetAttempts}
-            search={search}
-            setSearch={setSearch}
-          />
-        </CardContent>
-      </Card>
+          <CardContent className="pt-6">
+            {/* Users Table Component - Inline */}
+            <div className="overflow-x-auto rounded-xl border border-border/50 bg-card shadow-sm">
+              <Table>
+                <TableCaption className="text-sm text-muted-foreground mb-4">
+                  បញ្ជីអ្នកប្រើប្រាស់ទាំងអស់ ({filteredUsers.length} នាក់)
+                </TableCaption>
+                <TableHeader>
+                  <TableRow className="border-b border-border/50 bg-muted/30">
+                    <TableHead className="text-base font-semibold text-primary py-4 px-6 text-center">ឈ្មោះ</TableHead>
+                    <TableHead className="text-base font-semibold text-primary py-4 px-6 text-center">លេខទូរស័ព្ទ</TableHead>
+                    <TableHead className="text-base font-semibold text-primary py-4 px-6 text-center">តួនាទី</TableHead>
+                    <TableHead className="text-base font-semibold text-primary py-4 px-6 text-center">មុខតំណែង</TableHead>
+                    <TableHead className="text-base font-semibold text-primary py-4 px-6 text-center">ស្ថានភាព</TableHead>
+                    <TableHead className="text-base font-semibold text-primary py-4 px-6 text-center">ចូលចុងក្រោយ</TableHead>
+                    <TableHead className="text-base font-semibold text-primary py-4 px-6 text-center">សកម្មភាព</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+                          <p className="text-sm text-muted-foreground">កំពុងផ្ទុក...</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredUsers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
+                            <Users className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">មិនមានអ្នកប្រើប្រាស់</p>
+                            <p className="text-xs text-muted-foreground mt-1">ចាប់ផ្តើមបន្ថែមអ្នកប្រើថ្មី</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <TableRow key={user.userid} className="hover:bg-muted/30 transition-colors duration-200 border-b border-border/30">
+                        <TableCell className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            {user.photo ? (
+                              <img
+                                src={user.photo.startsWith('http') || user.photo.startsWith('blob:') || user.photo.startsWith('/') ? user.photo : `/uploads/${user.photo}`}
+                                alt={user.firstname}
+                                className="w-10 h-10 rounded-full object-cover border-2 border-border shadow-sm"
+                                onError={e => (e.currentTarget.src = "/placeholder-user.jpg")}
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                                {user.firstname?.charAt(0) || "U"}
+                              </div>
+                            )}
+                            <div>
+                              <div className="font-medium text-primary">{user.lastname} {user.firstname}</div>
+                              <div className="text-xs text-muted-foreground">@{user.username}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 px-6">
+                          <div className="text-sm">
+                            <div className="font-medium text-foreground">{user.phonenumber1 || "-"}</div>
+                            {user.phonenumber2 && <div className="text-xs text-muted-foreground mt-1">{user.phonenumber2}</div>}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 px-6 text-center">
+                          <Badge className={`text-xs font-medium px-2 py-1 ${user.role === "admin" ? "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400" : "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"}`}>
+                            {user.role === "admin" ? "អ្នកគ្រប់គ្រង" : "គ្រូបង្រៀន"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-4 px-6">
+                          <div className="text-sm text-muted-foreground text-center">{user.position || "-"}</div>
+                        </TableCell>
+                        <TableCell className="py-4 px-6">
+                          <Badge className={`text-xs font-medium px-2 py-1 ${user.status === "active" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}`}>
+                            {user.status === "active" ? "ដំណើរការ" : "បិទដំណើរការ"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-4 px-6">
+                          <div className="text-xs text-muted-foreground">
+                            {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "-"}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 px-6">
+                          <div className="flex gap-2 justify-center">
+                            <Button
+                              size="icon"
+                              variant="soft"
+                              onClick={() => openDialog(user)}
+                              className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                              aria-label="កែប្រែ"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => handleViewDetails(user)}
+                              className="h-8 w-8 hover:bg-blue-500/10 hover:text-blue-600 transition-colors"
+                              aria-label="មើលព័ត៌មានលម្អិត"
+                            >
+                              <Info className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              onClick={() => setDeleteId(user.userid)}
+                              className="h-8 w-8 hover:bg-red-500/10 hover:text-red-600 transition-colors"
+                              aria-label="លុប"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Enhanced Add/Edit Dialog */}
-      <UsersForm
-        open={formDialogOpen}
-        onClose={() => setFormDialogOpen(false)}
-        onSubmit={handleUserFormSubmit}
-        loading={formLoading}
-        editUser={editUser}
-      />
+      {/* Enhanced Add/Edit Dialog - Inline */}
+      <Dialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
+        <DialogContent className="max-w-4xl w-full bg-gradient-to-br from-background to-muted/20 rounded-2xl shadow-2xl border-0 p-0">
+          <Card className="w-full bg-transparent border-0 shadow-none">
+            <CardHeader className="pb-3 border-b border-border/50 bg-background/80 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <UserIcon className="h-6 text-primary" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-primary text-xl font-bold tracking-wide">
+                      {editUser ? "កែប្រែអ្នកប្រើ" : "បន្ថែមអ្នកប្រើថ្មី"}
+                    </DialogTitle>
+                    <DialogDescription className="text-muted-foreground text-sm mt-1">
+                      {editUser ? "កែប្រែព័ត៌មានអ្នកប្រើ" : "បំពេញព័ត៌មានដើម្បីបន្ថែមអ្នកប្រើថ្មី"}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 max-h-[70vh] overflow-y-auto scrollbar">
+              <form onSubmit={handleFormSubmit} className="space-y-4">
+                {/* Profile Picture & Personal Information - Side by Side */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Profile Section */}
+                  <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Camera className="h-4 w-4 text-primary" />
+                      <h3 className="text-sm font-semibold text-primary">
+                        រូបភាពប្រវត្តិ
+                      </h3>
+                    </div>
+                    
+                    <div className="flex flex-col items-center gap-3">
+                      {/* Avatar Preview */}
+                      <div className="relative">
+                        {formData.photoPreview ? (
+                          <div className="relative">
+                            <img
+                              src={formData.photoPreview}
+                              alt="Profile"
+                              className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, photoFile: undefined, photoPreview: "", photo: "" }))}
+                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 rounded-full p-1.5 shadow-lg transition-colors"
+                              aria-label="លុបរូបភាព"
+                            >
+                              <Trash2 className="w-4 h-4 text-white" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                            {formData.firstname ? formData.firstname.charAt(0).toUpperCase() : "U"}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Upload Controls */}
+                      <div className="w-full text-center">
+                        <label htmlFor="photo-upload" className="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg cursor-pointer transition-colors text-sm font-medium">
+                          <Upload className="w-4 h-4 mr-2" />
+                          <span>ជ្រើសរើសរូបភាព</span>
+                          <input
+                            id="photo-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                          អនុញ្ញាត JPG, PNG, GIF • អតិបរមា 5MB
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Personal Information */}
+                  <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <UserIcon className="h-4 w-4 text-primary" />
+                      <h3 className="text-sm font-semibold text-primary">
+                        ព័ត៌មានផ្ទាល់ខ្លួន
+                      </h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {/* Last Name */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="lastname" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <UserIcon className="w-3.5 h-3.5 text-primary" />
+                          នាមត្រកូល <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="lastname"
+                          name="lastname"
+                          value={formData.lastname}
+                          onChange={handleFormInput}
+                          placeholder="បញ្ចូលនាមត្រកូល"
+                          className="h-9 text-sm"
+                          required
+                        />
+                      </div>
+
+                      {/* First Name */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="firstname" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <UserIcon className="w-3.5 h-3.5 text-primary" />
+                          នាមខ្លួន <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="firstname"
+                          name="firstname"
+                          value={formData.firstname}
+                          onChange={handleFormInput}
+                          placeholder="បញ្ចូលនាមខ្លួន"
+                          className="h-9 text-sm"
+                          required
+                        />
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Information & Role & Position - Side by Side */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Contact Information */}
+                  <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Phone className="h-4 w-4 text-primary" />
+                      <h3 className="text-sm font-semibold text-primary">
+                        ព័ត៌មានទំនាក់ទំនង
+                      </h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {/* Phone 1 */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phonenumber1" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-primary" />
+                          លេខទូរស័ព្ទ <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="phonenumber1"
+                          name="phonenumber1"
+                          value={formData.phonenumber1}
+                          onChange={handleFormInput}
+                          placeholder="បញ្ចូលលេខទូរស័ព្ទ"
+                          className="h-10 text-sm"
+                          required
+                        />
+                      </div>
+
+                      {/* Phone 2 */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phonenumber2" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-primary" />
+                          លេខទូរស័ព្ទទី២
+                        </Label>
+                        <Input
+                          id="phonenumber2"
+                          name="phonenumber2"
+                          value={formData.phonenumber2}
+                          onChange={handleFormInput}
+                          placeholder="បញ្ចូលលេខទូរស័ព្ទទី២"
+                          className="h-10 text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Role & Position */}
+                  <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Shield className="h-4 w-4 text-primary" />
+                      <h3 className="text-sm font-semibold text-primary">
+                        តួនាទី និង មុខតំណែង
+                      </h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {/* Role */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="role" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Shield className="w-3.5 h-3.5 text-primary" />
+                          តួនាទី <span className="text-red-500">*</span>
+                        </Label>
+                        <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}>
+                          <SelectTrigger className="h-10">
+                            <SelectValue placeholder="ជ្រើសរើសតួនាទី" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {roleOptions.map((role) => (
+                              <SelectItem key={role.value} value={role.value}>
+                                <div className="flex items-center gap-2">
+                                  <span className={role.color}>{role.icon}</span>
+                                  {role.label}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Position */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="position" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <ClipboardList className="w-3.5 h-3.5 text-primary" />
+                          មុខតំណែង
+                        </Label>
+                        <Select value={formData.position} onValueChange={(value) => setFormData(prev => ({ ...prev, position: value }))}>
+                          <SelectTrigger className="h-10">
+                            <SelectValue placeholder="ជ្រើសរើសមុខតំណែង" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {positionOptions.map((position) => (
+                              <SelectItem key={position} value={position}>
+                                {position}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Password Section */}
+                {!editUser ? (
+                  <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Lock className="h-4 w-4 text-primary" />
+                      <h3 className="text-sm font-semibold text-primary">
+                        ពាក្យសម្ងាត់
+                      </h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Password */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="password" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 text-primary" />
+                          ពាក្យសម្ងាត់ <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            value={formData.password}
+                            onChange={handleFormInput}
+                            placeholder="បញ្ចូលពាក្យសម្ងាត់"
+                            className="h-10 pr-10"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Verify Password */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="verifyPassword" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 text-primary" />
+                          បញ្ជាក់ពាក្យសម្ងាត់ <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="verifyPassword"
+                            name="verifyPassword"
+                            type={showVerifyPassword ? "text" : "password"}
+                            value={formData.verifyPassword}
+                            onChange={handleFormInput}
+                            placeholder="បញ្ចូលពាក្យសម្ងាត់ម្តងទៀត"
+                            className="h-10 pr-10"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowVerifyPassword(!showVerifyPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showVerifyPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Change Password Section for Edit Mode */
+                  <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-2">
+                        <Lock className="h-4 w-4 text-primary" />
+                        <h3 className="text-sm font-semibold text-primary">
+                          ផ្លាស់ប្តូរពាក្យសម្ងាត់
+                        </h3>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowChangePassword(!showChangePassword)}
+                        className="text-xs"
+                      >
+                        {showChangePassword ? "លាក់" : "បង្ហាញ"}
+                      </Button>
+                    </div>
+                    
+                    {showChangePassword && (
+                      <div className="space-y-4">
+                        {/* Info Note */}
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                          <div className="flex items-start space-x-2">
+                            <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                            <div className="text-sm text-blue-700 dark:text-blue-300">
+                              <p className="font-medium">ព័ត៌មាន:</p>
+                              <p>អ្នកអាចផ្លាស់ប្តូរពាក្យសម្ងាត់ដោយបញ្ចូលតែពាក្យសម្ងាត់ថ្មី។</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* New Password */}
+                        <div className="space-y-1.5">
+                          <Label htmlFor="newPassword" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                            <Lock className="w-3.5 h-3.5 text-primary" />
+                            ពាក្យសម្ងាត់ថ្មី <span className="text-red-500">*</span>
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id="newPassword"
+                              name="newPassword"
+                              type={showNewPassword ? "text" : "password"}
+                              value={formData.newPassword}
+                              onChange={handleFormInput}
+                              placeholder="បញ្ចូលពាក្យសម្ងាត់ថ្មី"
+                              className="h-10 pr-10"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                              {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Confirm New Password */}
+                        <div className="space-y-1.5">
+                          <Label htmlFor="confirmNewPassword" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                            <Lock className="w-3.5 h-3.5 text-primary" />
+                            បញ្ជាក់ពាក្យសម្ងាត់ថ្មី <span className="text-red-500">*</span>
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id="confirmNewPassword"
+                              name="confirmNewPassword"
+                              type={showConfirmNewPassword ? "text" : "password"}
+                              value={formData.confirmNewPassword}
+                              onChange={handleFormInput}
+                              placeholder="បញ្ចូលពាក្យសម្ងាត់ថ្មីម្តងទៀត"
+                              className="h-10 pr-10"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                              {showConfirmNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+
+                {/* Error Message */}
+                {formError && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <p className="text-sm text-red-700 dark:text-red-300">{formError}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Success Message */}
+                {submitMessage && (
+                  <div className={`${submitMessage.type === "success" ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"} border rounded-lg p-4`}>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 ${submitMessage.type === "success" ? "bg-green-500" : "bg-red-500"} rounded-full`}></div>
+                      <p className={`text-sm ${submitMessage.type === "success" ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"}`}>
+                        {submitMessage.text}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-3 pt-4 border-t border-border/50">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setFormDialogOpen(false)}
+                    className="h-9 px-5 text-sm font-medium"
+                    disabled={formLoading}
+                  >
+                    បោះបង់
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="h-9 px-5 text-sm font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                    disabled={formLoading}
+                  >
+                    {formLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>កំពុងរក្សាទុក...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <Save className="w-4 h-4" />
+                        <span>{editUser ? "កែប្រែ" : "បន្ថែម"}</span>
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </DialogContent>
+      </Dialog>
 
       {/* Enhanced Delete Confirmation Dialog */}
       <Dialog open={!!deleteId} onOpenChange={open => { if (!open) setDeleteId(null); }}>
         <DialogContent className="max-w-md w-full bg-gradient-to-br from-background to-muted/20 rounded-2xl shadow-2xl border-0 p-0">
           <Card className="w-full bg-transparent border-0 shadow-none">
-            <CardHeader className="pb-4 border-b border-border/50 bg-background/80 rounded-t-2xl">
+            <CardHeader className="pb-3 border-b border-border/50 bg-background/80 rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
@@ -583,7 +1358,7 @@ function AdminUsersContent() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-6 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/30">
               <div className="space-y-4">
                 <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-800 rounded-lg">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
@@ -604,7 +1379,7 @@ function AdminUsersContent() {
                   </DialogClose>
                   <Button
                     variant="destructive"
-                    loading={deleteLoading}
+        loading={deleteLoading}
                     onClick={() => deleteId && handleDelete(deleteId)}
                     className="h-10 px-6 text-sm font-bold bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-200"
                   >
@@ -621,14 +1396,14 @@ function AdminUsersContent() {
       <Dialog open={!!viewDetailsUser} onOpenChange={open => { if (!open) setViewDetailsUser(null); }}>
         <DialogContent className="max-w-2xl w-full bg-gradient-to-br from-background to-muted/20 rounded-2xl shadow-2xl border-0 p-0">
           <Card className="w-full bg-transparent border-0 shadow-none">
-            <CardHeader className="pb-4 border-b border-border/50 bg-background/80 rounded-t-2xl">
+            <CardHeader className="pb-3 border-b border-border/50 bg-background/80 rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                     <Info className="h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <DialogTitle className="text-xl font-bold tracking-wide">
+                    <DialogTitle className="text-primary text-xl font-bold tracking-wide">
                       ព័ត៌មានលម្អិតអ្នកប្រើ
                     </DialogTitle>
                     <DialogDescription className="text-sm text-muted-foreground mt-1">
@@ -638,7 +1413,7 @@ function AdminUsersContent() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-6 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/30">
               {viewDetailsUser && (
                 <div className="space-y-6">
                   {/* User Avatar and Basic Info */}
@@ -656,7 +1431,7 @@ function AdminUsersContent() {
                       </div>
                     )}
                     <div>
-                      <h3 className="text-lg font-bold">{viewDetailsUser.lastname} {viewDetailsUser.firstname}</h3>
+                      <h3 className="text-lg font-bold text-primary">{viewDetailsUser.lastname} {viewDetailsUser.firstname}</h3>
                       <p className="text-sm text-muted-foreground">@{viewDetailsUser.username}</p>
                       <Badge className={`mt-1 ${viewDetailsUser.status === "active" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}`}>
                         {viewDetailsUser.status === "active" ? "ដំណើរការ" : "បិទដំណើរការ"}
@@ -666,7 +1441,7 @@ function AdminUsersContent() {
                   
                   {/* Status Toggle */}
                   <div className="flex items-center gap-3 mt-2 mb-4">
-                    <label htmlFor="status-toggle-details" className="text-sm font-semibold flex items-center gap-2">
+                    <label htmlFor="status-toggle-details" className="text-sm font-medium text-foreground flex items-center gap-1.5">
                       ស្ថានភាព:
                     </label>
                     <button
@@ -706,35 +1481,35 @@ function AdminUsersContent() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div>
-                        <label className="text-sm font-semibold text-muted-foreground">តួនាទី</label>
+                        <label className="text-sm font-semibold text-primary">តួនាទី</label>
                         <p className="text-sm font-medium">{viewDetailsUser.role === "admin" ? "អ្នកគ្រប់គ្រង" : "គ្រូបង្រៀន"}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-muted-foreground">មុខតំណែង</label>
+                        <label className="text-sm font-semibold text-primary">មុខតំណែង</label>
                         <p className="text-sm font-medium">{viewDetailsUser.position || "-"}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-muted-foreground">លេខទូរស័ព្ទ ១</label>
+                        <label className="text-sm font-semibold text-primary">លេខទូរស័ព្ទ ១</label>
                         <p className="text-sm font-medium">{viewDetailsUser.phonenumber1 || "-"}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-muted-foreground">លេខទូរស័ព្ទ ២</label>
+                        <label className="text-sm font-semibold text-primary">លេខទូរស័ព្ទ ២</label>
                         <p className="text-sm font-medium">{viewDetailsUser.phonenumber2 || "-"}</p>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-sm font-semibold text-muted-foreground">ចូលចុងក្រោយ</label>
+                        <label className="text-sm font-semibold text-primary">ចូលចុងក្រោយ</label>
                         <p className="text-sm font-medium">
                           {viewDetailsUser.lastLogin ? new Date(viewDetailsUser.lastLogin).toLocaleString() : "មិនទាន់ចូល"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-muted-foreground">បង្កើតនៅថ្ងៃ</label>
+                        <label className="text-sm font-semibold text-primary">បង្កើតនៅថ្ងៃ</label>
                         <p className="text-sm font-medium">{new Date(viewDetailsUser.createdAt).toLocaleDateString()}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-muted-foreground">កែប្រែចុងក្រោយ</label>
+                        <label className="text-sm font-semibold text-primary">កែប្រែចុងក្រោយ</label>
                         <p className="text-sm font-medium">{new Date(viewDetailsUser.updatedAt).toLocaleDateString()}</p>
                       </div>
                     </div>
@@ -743,7 +1518,7 @@ function AdminUsersContent() {
                   <div className="flex justify-end space-x-3 pt-4 border-t border-border/50">
                     <DialogClose asChild>
                       <Button variant="outline" className="h-10 px-6 text-sm font-semibold">
-                        បិទ
+                        បោះបង់
                       </Button>
                     </DialogClose>
                     <Button
@@ -765,4 +1540,4 @@ function AdminUsersContent() {
       </Dialog>
     </div>
   );
-} 
+}

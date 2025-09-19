@@ -34,6 +34,8 @@ import {
   Sparkles
 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
@@ -138,6 +140,50 @@ function AcademicManagementContent() {
     subjectName?: string
   }>({})
 
+  // Confirmation dialog states
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteItemType, setDeleteItemType] = useState<'year' | 'subject' | 'course' | null>(null)
+  const [deleteItemId, setDeleteItemId] = useState<number | null>(null)
+  const [deleteItemName, setDeleteItemName] = useState<string>('')
+  
+  // Bulk creation confirmation dialogs
+  const [bulkCreateConfirmOpen, setBulkCreateConfirmOpen] = useState(false)
+  const [existingCoursesWarningOpen, setExistingCoursesWarningOpen] = useState(false)
+  const [existingCoursesList, setExistingCoursesList] = useState<string[]>([])
+  const [coursesToCreate, setCoursesToCreate] = useState<any[]>([])
+  
+  // Single course creation confirmation dialogs
+  const [singleCreateConfirmOpen, setSingleCreateConfirmOpen] = useState(false)
+  const [singleCourseData, setSingleCourseData] = useState<any>(null)
+  
+  // Duplicate course warning dialog
+  const [duplicateCourseWarningOpen, setDuplicateCourseWarningOpen] = useState(false)
+  const [duplicateCourseData, setDuplicateCourseData] = useState<any>(null)
+  
+  // Duplicate school year warning dialog
+  const [duplicateSchoolYearWarningOpen, setDuplicateSchoolYearWarningOpen] = useState(false)
+  const [duplicateSchoolYearData, setDuplicateSchoolYearData] = useState<any>(null)
+  
+  // Duplicate subject warning dialog
+  const [duplicateSubjectWarningOpen, setDuplicateSubjectWarningOpen] = useState(false)
+  const [duplicateSubjectData, setDuplicateSubjectData] = useState<any>(null)
+  
+  
+  // Subject editing state
+  const [editingSubject, setEditingSubject] = useState<Subject | null>(null)
+  const [editSubjectName, setEditSubjectName] = useState('')
+  
+  // Course editing state (using existing editingCourse from line 102)
+  const [editCourse, setEditCourse] = useState({
+    schoolYearId: '',
+    grade: '',
+    section: '',
+    courseName: '',
+    teacherId1: undefined as number | undefined,
+    teacherId2: undefined as number | undefined,
+    teacherId3: undefined as number | undefined
+  })
+
   // Memoized filtered data
   const filteredCourses = useMemo(() => {
     let filtered = courses
@@ -155,6 +201,13 @@ function AcademicManagementContent() {
         course.grade?.toString().includes(searchTerm)
       )
     }
+    
+    // Sort courses numerically by grade (1, 2, 3, ..., 12)
+    filtered = filtered.sort((a, b) => {
+      const gradeA = parseInt(a.grade) || 0
+      const gradeB = parseInt(b.grade) || 0
+      return gradeA - gradeB
+    })
     
     return filtered
   }, [courses, selectedSchoolYear, searchTerm])
@@ -243,6 +296,21 @@ function AcademicManagementContent() {
       return
     }
 
+    // Check for duplicate school year before making API call
+    const trimmedYear = newYear.schoolYearCode.trim()
+    const existingYear = schoolYears.find(year => 
+      year.schoolYearCode.toLowerCase() === trimmedYear.toLowerCase()
+    )
+    
+    if (existingYear) {
+      // Show duplicate school year warning popup
+      setDuplicateSchoolYearData({
+        schoolYearCode: trimmedYear
+      })
+      setDuplicateSchoolYearWarningOpen(true)
+      return
+    }
+
     try {
       setSubmitting(true)
       setErrors({})
@@ -263,15 +331,35 @@ function AcademicManagementContent() {
           description: `បានបន្ថែមឆ្នាំសិក្សា ${addedYear.schoolYearCode}`,
         })
       } else {
-        throw new Error('Failed to add school year')
+        // Try to get the specific error message from the API response
+        let errorMessage = 'Failed to add school year'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch (parseError) {
+          // If we can't parse the error response, use a generic message
+          errorMessage = response.status === 409 ? 'ឆ្នាំសិក្សានេះមានរួចហើយ' : 'Failed to add school year'
+        }
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('Error adding school year:', error)
-      toast({
-        title: "កំហុសក្នុងការបន្ថែមឆ្នាំសិក្សា",
-        description: "សូមព្យាយាមម្តងទៀត",
-        variant: "destructive",
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      
+      // Check if it's a duplicate error
+      if (errorMessage.includes('ឆ្នាំសិក្សានេះមានរួចហើយ') || errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already exists')) {
+        toast({
+          title: "ឆ្នាំសិក្សាមានរួចហើយ",
+          description: `ឆ្នាំសិក្សា ${newYear.schoolYearCode} មានរួចហើយក្នុងប្រព័ន្ធ`,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "កំហុសក្នុងការបន្ថែមឆ្នាំសិក្សា",
+          description: errorMessage,
+          variant: "destructive",
+        })
+      }
     } finally {
       setSubmitting(false)
     }
@@ -287,11 +375,26 @@ function AcademicManagementContent() {
       return
     }
 
+    // Check for duplicate subject before making API call
+    const trimmedSubject = newSubject.subjectName.trim()
+    const existingSubject = subjects.find(subject => 
+      subject.subjectName.toLowerCase() === trimmedSubject.toLowerCase()
+    )
+    
+    if (existingSubject) {
+      // Show duplicate subject warning popup
+      setDuplicateSubjectData({
+        subjectName: trimmedSubject
+      })
+      setDuplicateSubjectWarningOpen(true)
+      return
+    }
+
     try {
       setSubmitting(true)
       setErrors({})
 
-              const response = await fetch('/api/subjects', {
+      const response = await fetch('/api/subjects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -309,18 +412,133 @@ function AcademicManagementContent() {
           description: `បានបន្ថែមមុខវិជ្ជា ${addedSubject.subjectName}`,
         })
       } else {
-        throw new Error('Failed to add subject')
+        // Try to get the specific error message from the API response
+        let errorMessage = 'Failed to add subject'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch (parseError) {
+          // If we can't parse the error response, use a generic message
+          errorMessage = response.status === 409 ? 'មុខវិជ្ជានេះមានរួចហើយ' : 'Failed to add subject'
+        }
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('Error adding subject:', error)
-      toast({
-        title: "កំហុសក្នុងការបន្ថែមមុខវិជ្ជា",
-        description: "សូមព្យាយាមម្តងទៀត",
-        variant: "destructive",
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      
+      // Check if it's a duplicate error
+      if (errorMessage.includes('មុខវិជ្ជានេះមានរួចហើយ') || errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already exists')) {
+        toast({
+          title: "មុខវិជ្ជាមានរួចហើយ",
+          description: `មុខវិជ្ជា ${trimmedSubject} មានរួចហើយក្នុងប្រព័ន្ធ`,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "កំហុសក្នុងការបន្ថែមមុខវិជ្ជា",
+          description: errorMessage,
+          variant: "destructive",
+        })
+      }
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // Edit subject
+  const handleEditSubject = async () => {
+    if (!editingSubject || !editSubjectName.trim()) {
+      toast({
+        title: "ព័ត៌មានមិនគ្រប់គ្រាន់",
+        description: "សូមបំពេញឈ្មោះមុខវិជ្ជា",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Check for duplicate subject name (excluding current subject)
+    const trimmedSubject = editSubjectName.trim()
+    const existingSubject = subjects.find(subject => 
+      subject.subjectId !== editingSubject.subjectId &&
+      subject.subjectName.toLowerCase() === trimmedSubject.toLowerCase()
+    )
+    
+    if (existingSubject) {
+      toast({
+        title: "មុខវិជ្ជាមានរួចហើយ",
+        description: `មុខវិជ្ជា ${trimmedSubject} មានរួចហើយក្នុងប្រព័ន្ធ`,
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setSubmitting(true)
+
+      const response = await fetch(`/api/subjects/${editingSubject.subjectId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subjectName: trimmedSubject
+        })
+      })
+
+      if (response.ok) {
+        const updatedSubject = await response.json()
+        setSubjects(prev => prev.map(subject => 
+          subject.subjectId === editingSubject.subjectId ? updatedSubject : subject
+        ))
+        setEditingSubject(null)
+        setEditSubjectName('')
+        toast({
+          title: "បានកែប្រែមុខវិជ្ជាដោយជោគជ័យ",
+          description: `បានកែប្រែមុខវិជ្ជាជា ${updatedSubject.subjectName}`,
+        })
+      } else {
+        // Try to get the specific error message from the API response
+        let errorMessage = 'Failed to update subject'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch (parseError) {
+          errorMessage = response.status === 409 ? 'មុខវិជ្ជានេះមានរួចហើយ' : 'Failed to update subject'
+        }
+        throw new Error(errorMessage)
+      }
+    } catch (error) {
+      console.error('Error updating subject:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      
+      // Check if it's a duplicate error
+      if (errorMessage.includes('មុខវិជ្ជានេះមានរួចហើយ') || errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already exists')) {
+        toast({
+          title: "មុខវិជ្ជាមានរួចហើយ",
+          description: `មុខវិជ្ជា ${trimmedSubject} មានរួចហើយក្នុងប្រព័ន្ធ`,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "កំហុសក្នុងការកែប្រែមុខវិជ្ជា",
+          description: errorMessage,
+          variant: "destructive",
+        })
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // Start editing subject
+  const startEditSubject = (subject: Subject) => {
+    setEditingSubject(subject)
+    setEditSubjectName(subject.subjectName)
+  }
+
+  // Cancel editing subject
+  const cancelEditSubject = () => {
+    setEditingSubject(null)
+    setEditSubjectName('')
   }
 
   // Add new course
@@ -335,18 +553,47 @@ function AcademicManagementContent() {
       return
     }
 
+    // Check if course already exists
+    const existingCourse = courses.find(c => 
+      c.grade === newCourse.grade && 
+      c.section === newCourse.section.trim() && 
+      c.schoolYearId === parseInt(newCourse.schoolYearId)
+    )
+    
+
+    if (existingCourse) {
+      // Show duplicate course warning popup
+      setDuplicateCourseData({
+        grade: newCourse.grade,
+        section: newCourse.section.trim(),
+        schoolYear: schoolYears.find(sy => sy.schoolYearId === parseInt(newCourse.schoolYearId))?.schoolYearCode || 'Unknown'
+      })
+      setDuplicateCourseWarningOpen(true)
+      return
+    }
+
+    // Store course data and show confirmation dialog
+    setSingleCourseData({
+      ...newCourse,
+      section: newCourse.section.trim(),
+      courseName: newCourse.courseName.trim() || `ថ្នាក់ទី ${newCourse.grade}`
+    })
+    setSingleCreateConfirmOpen(true)
+  }
+
+  // Confirm single course creation
+  const handleConfirmSingleCreate = async () => {
+    if (!singleCourseData) return
+
     try {
       setSubmitting(true)
+      setSingleCreateConfirmOpen(false)
       setErrors({})
 
-              const response = await fetch('/api/courses', {
+      const response = await fetch('/api/courses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...newCourse,
-          section: newCourse.section.trim(),
-          courseName: newCourse.courseName.trim() || `ថ្នាក់ទី ${newCourse.grade}`
-        })
+        body: JSON.stringify(singleCourseData)
       })
 
       if (response.ok) {
@@ -359,15 +606,34 @@ function AcademicManagementContent() {
           description: `បានបន្ថែមថ្នាក់រៀន ${addedCourse.courseName || `ថ្នាក់ទី ${addedCourse.grade} ${addedCourse.section}`}`,
         })
       } else {
-        throw new Error('Failed to add course')
+        // Try to get the specific error message from the API response
+        let errorMessage = 'Failed to add course'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch (parseError) {
+          errorMessage = response.status === 409 ? 'ថ្នាក់រៀននេះមានរួចហើយ' : 'Failed to add course'
+        }
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('Error adding course:', error)
-      toast({
-        title: "កំហុសក្នុងការបន្ថែមថ្នាក់រៀន",
-        description: "សូមព្យាយាមម្តងទៀត",
-        variant: "destructive",
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      
+      // Check if it's a duplicate error
+      if (errorMessage.includes('ថ្នាក់រៀននេះមានរួចហើយ') || errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already exists')) {
+        toast({
+          title: "ថ្នាក់រៀនមានរួចហើយ",
+          description: `ថ្នាក់ទី ${singleCourseData.grade} ផ្នែក ${singleCourseData.section} មានរួចហើយសម្រាប់ឆ្នាំសិក្សានេះ`,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "កំហុសក្នុងការបន្ថែមថ្នាក់រៀន",
+          description: errorMessage,
+          variant: "destructive",
+        })
+      }
     } finally {
       setSubmitting(false)
     }
@@ -387,11 +653,28 @@ function AcademicManagementContent() {
       return
     }
 
+    // Check for duplicate course (excluding current course)
+    const existingCourse = courses.find(c => 
+      c.courseId !== editingCourse.courseId &&
+      c.grade === editingCourse.grade && 
+      c.section === editingCourse.section?.trim() && 
+      c.schoolYearId === editingCourse.schoolYearId
+    )
+
+    if (existingCourse) {
+      toast({
+        title: "ថ្នាក់រៀនមានរួចហើយ",
+        description: `ថ្នាក់ទី ${editingCourse.grade} ផ្នែក ${editingCourse.section?.trim()} មានរួចហើយសម្រាប់ឆ្នាំសិក្សានេះ`,
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       setSubmitting(true)
       setErrors({})
 
-              const response = await fetch(`/api/courses/${editingCourse.courseId}`, {
+      const response = await fetch(`/api/courses/${editingCourse.courseId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -412,15 +695,34 @@ function AcademicManagementContent() {
           description: `បានធ្វើបច្ចុប្បន្នភាពថ្នាក់រៀន ${updatedCourse.courseName || `ថ្នាក់ទី ${updatedCourse.grade} ${updatedCourse.section}`}`,
         })
       } else {
-        throw new Error('Failed to update course')
+        // Try to get the specific error message from the API response
+        let errorMessage = 'Failed to update course'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } catch (parseError) {
+          errorMessage = response.status === 409 ? 'ថ្នាក់រៀននេះមានរួចហើយ' : 'Failed to update course'
+        }
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('Error updating course:', error)
-      toast({
-        title: "កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាពថ្នាក់រៀន",
-        description: "សូមព្យាយាមម្តងទៀត",
-        variant: "destructive",
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      
+      // Check if it's a duplicate error
+      if (errorMessage.includes('ថ្នាក់រៀននេះមានរួចហើយ') || errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already exists')) {
+        toast({
+          title: "ថ្នាក់រៀនមានរួចហើយ",
+          description: `ថ្នាក់ទី ${editingCourse.grade} ផ្នែក ${editingCourse.section?.trim()} មានរួចហើយសម្រាប់ឆ្នាំសិក្សានេះ`,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាពថ្នាក់រៀន",
+          description: errorMessage,
+          variant: "destructive",
+        })
+      }
     } finally {
       setSubmitting(false)
     }
@@ -429,103 +731,134 @@ function AcademicManagementContent() {
   // Start editing course
   const startEditCourse = (course: Course) => {
     setEditingCourse(course)
+    setEditCourse({
+      schoolYearId: course.schoolYearId.toString(),
+      grade: course.grade,
+      section: course.section,
+      courseName: course.courseName,
+      teacherId1: course.teacherId1 || undefined,
+      teacherId2: course.teacherId2 || undefined,
+      teacherId3: course.teacherId3 || undefined
+    })
     setErrors({})
   }
 
   // Cancel editing course
   const cancelEditCourse = () => {
     setEditingCourse(null)
-    setErrors({})
+    setEditCourse({
+      schoolYearId: '',
+      grade: '',
+      section: '',
+      courseName: '',
+      teacherId1: undefined,
+      teacherId2: undefined,
+      teacherId3: undefined
+    })
   }
 
   // Delete functions
   const handleDeleteYear = async (id: number) => {
-    if (!confirm('តើអ្នកប្រាកដជាចង់លុបឆ្នាំសិក្សានេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។')) return
-
-    try {
-      setSubmitting(true)
-              const response = await fetch(`/api/school-years/${id}`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        setSchoolYears(prev => prev.filter(year => year.schoolYearId !== id))
-        toast({
-          title: "បានលុបឆ្នាំសិក្សាដោយជោគជ័យ",
-          description: "ឆ្នាំសិក្សាត្រូវបានលុបចេញពីប្រព័ន្ធ",
-        })
-      } else {
-        throw new Error('Failed to delete school year')
-      }
-    } catch (error) {
-      console.error('Error deleting school year:', error)
-      toast({
-        title: "កំហុសក្នុងការលុបឆ្នាំសិក្សា",
-        description: "សូមព្យាយាមម្តងទៀត",
-        variant: "destructive",
-      })
-    } finally {
-      setSubmitting(false)
-    }
+    const year = schoolYears.find(y => y.schoolYearId === id)
+    setDeleteItemType('year')
+    setDeleteItemId(id)
+    setDeleteItemName(year?.schoolYearCode || 'ឆ្នាំសិក្សានេះ')
+    setDeleteConfirmOpen(true)
   }
 
   const handleDeleteSubject = async (id: number) => {
-    if (!confirm('តើអ្នកប្រាកដជាចង់លុបមុខវិជ្ជានេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។')) return
-
-    try {
-      setSubmitting(true)
-              const response = await fetch(`/api/subjects/${id}`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        setSubjects(prev => prev.filter(subject => subject.subjectId !== id))
-        toast({
-          title: "បានលុបមុខវិជ្ជាដោយជោគជ័យ",
-          description: "មុខវិជ្ជាត្រូវបានលុបចេញពីប្រព័ន្ធ",
-        })
-      } else {
-        throw new Error('Failed to delete subject')
-      }
-    } catch (error) {
-      console.error('Error deleting subject:', error)
-      toast({
-        title: "កំហុសក្នុងការលុបមុខវិជ្ជា",
-        description: "សូមព្យាយាមម្តងទៀត",
-        variant: "destructive",
-      })
-    } finally {
-      setSubmitting(false)
-    }
+    const subject = subjects.find(s => s.subjectId === id)
+    setDeleteItemType('subject')
+    setDeleteItemId(id)
+    setDeleteItemName(subject?.subjectName || 'មុខវិជ្ជានេះ')
+    setDeleteConfirmOpen(true)
   }
 
   const handleDeleteCourse = async (id: number) => {
-    if (!confirm('តើអ្នកប្រាកដជាចង់លុបថ្នាក់រៀននេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។')) return
+    const course = courses.find(c => c.courseId === id)
+    setDeleteItemType('course')
+    setDeleteItemId(id)
+    setDeleteItemName(course?.courseName || `ថ្នាក់ទី ${course?.grade}${course?.section}` || 'ថ្នាក់រៀននេះ')
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteItemId || !deleteItemType) return
 
     try {
       setSubmitting(true)
-              const response = await fetch(`/api/courses/${id}`, {
-        method: 'DELETE'
-      })
+      let response: Response
+      let successMessage = ''
+      let errorMessage = ''
+
+      switch (deleteItemType) {
+        case 'year':
+          response = await fetch(`/api/school-years/${deleteItemId}`, {
+            method: 'DELETE',
+          })
+          successMessage = "បានលុបឆ្នាំសិក្សាដោយជោគជ័យ"
+          errorMessage = "កំហុសក្នុងការលុបឆ្នាំសិក្សា"
+          break
+        case 'subject':
+          response = await fetch(`/api/subjects/${deleteItemId}`, {
+            method: 'DELETE',
+          })
+          successMessage = "បានលុបមុខវិជ្ជាដោយជោគជ័យ"
+          errorMessage = "កំហុសក្នុងការលុបមុខវិជ្ជា"
+          break
+        case 'course':
+          response = await fetch(`/api/courses/${deleteItemId}`, {
+            method: 'DELETE',
+          })
+          successMessage = "បានលុបថ្នាក់រៀនដោយជោគជ័យ"
+          errorMessage = "កំហុសក្នុងការលុបថ្នាក់រៀន"
+          break
+        default:
+          return
+      }
 
       if (response.ok) {
-        setCourses(prev => prev.filter(course => course.courseId !== id))
+        // Update the appropriate state based on item type
+        switch (deleteItemType) {
+          case 'year':
+            setSchoolYears(prev => prev.filter(year => year.schoolYearId !== deleteItemId))
+            break
+          case 'subject':
+            setSubjects(prev => prev.filter(subject => subject.subjectId !== deleteItemId))
+            break
+          case 'course':
+            setCourses(prev => prev.filter(course => course.courseId !== deleteItemId))
+            break
+        }
+        
         toast({
-          title: "បានលុបថ្នាក់រៀនដោយជោគជ័យ",
-          description: "ថ្នាក់រៀនត្រូវបានលុបចេញពីប្រព័ន្ធ",
+          title: successMessage,
+          description: `${deleteItemName} ត្រូវបានលុបចេញពីប្រព័ន្ធ`,
         })
       } else {
-        throw new Error('Failed to delete course')
+        const errorData = await response.json()
+        toast({
+          title: errorMessage,
+          description: errorData.error || "សូមព្យាយាមម្តងទៀត",
+          variant: "destructive",
+        })
       }
     } catch (error) {
-      console.error('Error deleting course:', error)
+      console.error(`Error deleting ${deleteItemType}:`, error)
+      const errorMessage = deleteItemType === 'year' ? "កំហុសក្នុងការលុបឆ្នាំសិក្សា" : 
+                          deleteItemType === 'subject' ? "កំហុសក្នុងការលុបមុខវិជ្ជា" : 
+                          "កំហុសក្នុងការលុបថ្នាក់រៀន"
       toast({
-        title: "កំហុសក្នុងការលុបថ្នាក់រៀន",
+        title: errorMessage,
         description: "សូមព្យាយាមម្តងទៀត",
         variant: "destructive",
       })
     } finally {
       setSubmitting(false)
+      setDeleteConfirmOpen(false)
+      setDeleteItemType(null)
+      setDeleteItemId(null)
+      setDeleteItemName('')
     }
   }
 
@@ -539,14 +872,29 @@ function AcademicManagementContent() {
       return
     }
 
-    if (!confirm(`តើអ្នកប្រាកដជាចង់បង្កើតថ្នាក់ទី 1-12 ផ្នែក ${newCourse.section} សម្រាប់ឆ្នាំសិក្សានេះមែនទេ?`)) {
+    if (gradeRange.startGrade > gradeRange.endGrade) {
+      toast({
+        title: "កំហុសក្នុងការជ្រើសរើសថ្នាក់",
+        description: "ថ្នាក់ចាប់ផ្តើមមិនអាចធំជាងថ្នាក់បញ្ចប់បានទេ",
+        variant: "destructive",
+      })
       return
     }
 
-    try {
-      setSubmitting(true)
-      const coursesToCreate = []
-      for (let grade = 1; grade <= 12; grade++) {
+    // Check for existing courses first
+    const existingCourses = []
+    const coursesToCreate = []
+    
+    for (let grade = gradeRange.startGrade; grade <= gradeRange.endGrade; grade++) {
+      const existingCourse = courses.find(c => 
+        c.grade === grade.toString() && 
+        c.section === newCourse.section.trim() && 
+        c.schoolYearId === parseInt(newCourse.schoolYearId)
+      )
+      
+      if (existingCourse) {
+        existingCourses.push(`ថ្នាក់ទី ${grade}${newCourse.section.trim()}`)
+      } else {
         coursesToCreate.push({
           schoolYearId: parseInt(newCourse.schoolYearId),
           grade: grade.toString(),
@@ -557,32 +905,87 @@ function AcademicManagementContent() {
           teacherId3: newCourse.teacherId3
         })
       }
+    }
+
+    if (coursesToCreate.length === 0) {
+      toast({
+        title: "ថ្នាក់ទាំងអស់មានរួចហើយ",
+        description: "ថ្នាក់ទី " + gradeRange.startGrade + "-" + gradeRange.endGrade + " ផ្នែក " + newCourse.section + " មានរួចហើយទាំងអស់",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Store data for confirmation dialogs
+    setCoursesToCreate(coursesToCreate)
+    setExistingCoursesList(existingCourses)
+
+    // Show appropriate dialog
+    if (existingCourses.length > 0) {
+      setExistingCoursesWarningOpen(true)
+    } else {
+      setBulkCreateConfirmOpen(true)
+    }
+  }
+
+  const handleConfirmBulkCreate = async () => {
+    try {
+      setSubmitting(true)
+      setBulkCreateConfirmOpen(false)
+      setExistingCoursesWarningOpen(false)
 
       // Create courses one by one
       const createdCourses: Course[] = []
+      const failedCourses: string[] = []
+      
       for (const courseData of coursesToCreate) {
-        const response = await fetch('/api/courses', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(courseData)
-        })
+        try {
+          const response = await fetch('/api/courses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(courseData)
+          })
 
-        if (response.ok) {
-          const createdCourse = await response.json()
-          createdCourses.push(createdCourse)
+          if (response.ok) {
+            const createdCourse = await response.json()
+            createdCourses.push(createdCourse)
+          } else {
+            const errorData = await response.json()
+            failedCourses.push(`${courseData.courseName}${courseData.section}: ${errorData.message || 'Unknown error'}`)
+          }
+        } catch (error) {
+          failedCourses.push(`${courseData.courseName}${courseData.section}: Network error`)
         }
       }
 
+      // Show results
       if (createdCourses.length > 0) {
         // Add new courses to state
         setCourses(prev => [...createdCourses, ...prev])
         
         // Clear form
         setNewCourse({ schoolYearId: '', grade: '', section: '', courseName: '', teacherId1: undefined, teacherId2: undefined, teacherId3: undefined })
+        setGradeRange({ startGrade: 1, endGrade: 12 })
+        
+        let message = `បានបង្កើតថ្នាក់រៀន ${createdCourses.length} ថ្នាក់ដោយជោគជ័យ!`
+        
+        if (existingCoursesList.length > 0) {
+          message += `\nថ្នាក់ ${existingCoursesList.length} ថ្នាក់មានរួចហើយ។`
+        }
+        
+        if (failedCourses.length > 0) {
+          message += `\nថ្នាក់ ${failedCourses.length} ថ្នាក់បង្កើតមិនបាន។`
+        }
         
         toast({
           title: "បានបង្កើតថ្នាក់រៀនដោយជោគជ័យ",
-          description: `បានបង្កើតថ្នាក់រៀន ${createdCourses.length} ថ្នាក់ដោយជោគជ័យ!`,
+          description: message,
+        })
+      } else {
+        toast({
+          title: "មិនអាចបង្កើតថ្នាក់រៀនបាន",
+          description: "មិនអាចបង្កើតថ្នាក់រៀនណាមួយបានទេ",
+          variant: "destructive",
         })
       }
     } catch (error) {
@@ -599,7 +1002,7 @@ function AcademicManagementContent() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-6 p-6">
+      <div className="max-w-7xl mx-auto space-y-4 p-4">
         <div className="flex items-center justify-between">
           <Skeleton className="h-10 w-80" />
           <Skeleton className="h-6 w-32" />
@@ -654,11 +1057,11 @@ function AcademicManagementContent() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 p-6">
+    <div>
       <div className="relative">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
-        <div className="text-center space-y-4 p-4">
+        <div className="text-center space-y-6 p-8">
           {/* Enhanced Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* School Years Card */}
@@ -679,7 +1082,7 @@ function AcademicManagementContent() {
             </div>
 
             {/* Courses Card */}
-            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -696,7 +1099,7 @@ function AcademicManagementContent() {
             </div>
 
             {/* Subjects Card */}
-            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -713,7 +1116,7 @@ function AcademicManagementContent() {
             </div>
 
             {/* Teachers Card */}
-            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
@@ -737,7 +1140,7 @@ function AcademicManagementContent() {
       {/* Error Display */}
       {errors.fetch && (
         <Card className="border-red-200 bg-red-50 dark:bg-red-950/20 shadow-lg">
-          <CardContent className="pt-6">
+          <CardContent className="p-4">
             <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
               <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg">
                 <AlertCircle className="h-5 w-5" />
@@ -749,19 +1152,19 @@ function AcademicManagementContent() {
       )}
 
       {/* School Years Section */}
-      <div className="relative">
+      <div className="relative mb-6">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/20 to-blue-50/20 dark:from-blue-950/10 dark:via-indigo-950/10 dark:to-blue-950/10 rounded-3xl -z-10" />
         
         <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
           {/* Enhanced Header */}
-          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-8">
+          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-6">
             <div className="absolute inset-0 bg-black/10" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
             
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
                   <Calendar className="h-8 w-8 text-white" />
                 </div>
@@ -789,12 +1192,12 @@ function AcademicManagementContent() {
             </div>
           </CardHeader>
 
-          <CardContent className="p-8">
+          <CardContent className="p-6">
             {/* Enhanced Form */}
             {showYearForm && (
-              <div className="mb-8 overflow-hidden border-2 border-dashed border-blue-300/50 rounded-2xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/30 shadow-inner backdrop-blur-sm">
-                <div className="p-8">
-                  <div className="flex items-center space-x-4 mb-6">
+              <div className="mb-6 overflow-hidden border-2 border-dashed border-blue-300/50 rounded-2xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/30 shadow-inner backdrop-blur-sm">
+                <div className="p-6">
+                  <div className="flex items-center space-x-3 mb-3">
                     <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg">
                       <Plus className="h-6 w-6 text-white" />
                     </div>
@@ -806,7 +1209,7 @@ function AcademicManagementContent() {
                     </div>
                   </div>
                   
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div>
                       <label className="block text-lg font-semibold mb-3 text-blue-700 dark:text-blue-300 flex items-center gap-3">
                         <Calendar className="h-5 w-5" />
@@ -827,7 +1230,7 @@ function AcademicManagementContent() {
                       />
                       {errors.year && (
                         <div className="mt-3 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl">
-                          <p className="text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                          <p className="text-red-600 dark:text-red-400 text-base flex items-center gap-2">
                             <AlertCircle className="h-4 w-4" />
                             {errors.year}
                           </p>
@@ -836,7 +1239,7 @@ function AcademicManagementContent() {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-blue-200 dark:border-blue-800">
+                  <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-blue-200 dark:border-blue-800">
                     <Button 
                       variant="outline" 
                       onClick={() => {
@@ -869,26 +1272,26 @@ function AcademicManagementContent() {
             {/* Enhanced Empty State */}
             {schoolYears.length === 0 ? (
               <div className="text-center py-16">
-                <div className="relative mx-auto w-24 h-24 mb-6">
+                <div className="relative mx-auto w-24 h-24 mb-3">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full animate-pulse" />
                   <div className="absolute inset-2 bg-gradient-to-br from-blue-200 to-indigo-200 dark:from-blue-800/30 dark:to-indigo-800/30 rounded-full" />
                   <Calendar className="absolute inset-0 m-auto h-12 w-12 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">គ្មានឆ្នាំសិក្សាទេ</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">ចុចប៊ូតុង &quot;បន្ថែមឆ្នាំ&quot; ដើម្បីចាប់ផ្តើម</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-3">ចុចប៊ូតុង &quot;បន្ថែមឆ្នាំ&quot; ដើម្បីចាប់ផ្តើម</p>
                 <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full mx-auto"></div>
               </div>
             ) : (
               /* Enhanced Year Cards Grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {schoolYears.map((year) => (
-                  <div key={year.schoolYearId} className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+                  <div key={year.schoolYearId} className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
                     {/* Hover Background Effect */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     
                     {/* Card Content */}
                     <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
                             <Calendar className="h-5 w-5 text-white" />
@@ -928,19 +1331,19 @@ function AcademicManagementContent() {
       </div>
 
       {/* Courses Section */}
-      <div className="relative">
+      <div className="relative mb-6">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-pink-50/20 to-purple-50/20 dark:from-purple-950/10 dark:via-pink-950/10 dark:to-purple-950/10 rounded-3xl -z-10" />
         
         <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
           {/* Enhanced Header */}
-          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-8">
+          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-6">
             <div className="absolute inset-0 bg-black/10" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
             
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
                   <School className="h-8 w-8 text-white" />
                 </div>
@@ -980,11 +1383,11 @@ function AcademicManagementContent() {
               </div>
             </div>
           </CardHeader>
-                  <CardContent className="p-8">
+                  <CardContent className="p-6">
             
             {showCourseForm && (
-            <div className="mb-6 border-2 border-dashed border-purple-300 rounded-xl p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/30 shadow-inner">
-              <div className="flex items-center space-x-3 mb-4">
+            <div className="mb-3 border-2 border-dashed border-purple-300 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/30 shadow-inner">
+              <div className="flex items-center space-x-3 mb-3">
                 <div className="p-2 bg-purple-500 rounded-lg">
                   <Plus className="h-5 w-5 text-white" />
                 </div>
@@ -992,7 +1395,7 @@ function AcademicManagementContent() {
                   បន្ថែមថ្នាក់រៀនថ្មី
                 </h3>
               </div>
-              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-sm">
+              <div className="mb-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-sm">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-blue-500 rounded-lg">
                     <Sparkles className="h-4 w-4 text-white" />
@@ -1187,8 +1590,8 @@ function AcademicManagementContent() {
 
           {/* Multiple Course Creation Form */}
           {showMultipleCourseForm && (
-            <div className="mb-6 border-2 border-dashed border-green-300 rounded-xl p-6 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/30 shadow-inner">
-              <div className="flex items-center space-x-3 mb-4">
+            <div className="mb-3 border-2 border-dashed border-green-300 rounded-xl p-4 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/30 shadow-inner">
+              <div className="flex items-center space-x-3 mb-3">
                 <div className="p-2 bg-green-500 rounded-lg">
                   <Plus className="h-5 w-5 text-white" />
                 </div>
@@ -1197,7 +1600,7 @@ function AcademicManagementContent() {
                 </h3>
               </div>
               
-              <div className="mb-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl shadow-sm">
+              <div className="mb-3 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl shadow-sm">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-emerald-500 rounded-lg">
                     <Sparkles className="h-4 w-4 text-white" />
@@ -1208,7 +1611,7 @@ function AcademicManagementContent() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
@@ -1305,7 +1708,7 @@ function AcademicManagementContent() {
                 </div>
               </div>
               
-              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
+              <div className="mb-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
                 <div className="text-center">
                   <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">
                     ថ្នាក់ដែលនឹងត្រូវបង្កើត
@@ -1333,7 +1736,7 @@ function AcademicManagementContent() {
               
               {/* Validation Message */}
               {gradeRange.startGrade > gradeRange.endGrade && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="mb-3 p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg">
                   <div className="flex items-center space-x-2">
                     <AlertCircle className="h-4 w-4 text-red-500" />
                     <p className="text-sm text-red-700 dark:text-red-300">
@@ -1375,12 +1778,12 @@ function AcademicManagementContent() {
 
           {/* Edit Course Form */}
           {editingCourse && (
-            <div className="mb-6 border-2 border-dashed border-orange-300 rounded-lg p-6 bg-orange-50 dark:bg-orange-950/20">
-              <h3 className="text-lg font-semibold mb-4 text-orange-700 dark:text-orange-300 flex items-center gap-2">
+            <div className="mb-3 border-2 border-dashed border-orange-300 rounded-lg p-4 bg-orange-50 dark:bg-orange-950/20">
+              <h3 className="text-lg font-semibold mb-3 text-orange-700 dark:text-orange-300 flex items-center gap-2">
                 <Edit className="h-5 w-5" />
                 កែប្រែថ្នាក់រៀន: ថ្នាក់ទី {editingCourse.grade} {editingCourse.section}
               </h3>
-              <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+              <div className="mb-3 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
                 <p className="text-sm text-orange-700 dark:text-orange-300">
                   💡 <strong>ចំណាំ:</strong> ឈ្មោះថ្នាក់នឹងត្រូវបានបង្កើតដោយស្វ័យប្រវត្តិពីថ្នាក់ និងផ្នែកដែលអ្នកជ្រើសរើស។
                 </p>
@@ -1539,23 +1942,23 @@ function AcademicManagementContent() {
           )}
 
           {/* Modern Search and Filter Section */}
-          <div className="mb-6 p-6 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm">
+          <div className="mb-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
               {/* Search Bar */}
               <div className="flex-1 max-w-md">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <Input
                     placeholder="ស្វែងរកថ្នាក់រៀន..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-12 text-base border-purple-200 focus:border-purple-500 focus:ring-purple-200 dark:border-purple-800 dark:focus:border-purple-400"
+                    className="pl-10 h-12 text-base border-gray-200 focus:border-gray-500 focus:ring-gray-200 dark:border-purple-800 dark:focus:border-purple-400"
                   />
                 </div>
               </div>
               
               {/* Filters */}
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
                   <Filter className="h-4 w-4 text-purple-600" />
                   <span className="text-sm font-medium text-purple-700 dark:text-purple-300">ច្រោះ:</span>
@@ -1617,14 +2020,14 @@ function AcademicManagementContent() {
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                   {searchTerm || selectedSchoolYear !== 'all' 
                     ? 'គ្មានថ្នាក់រៀនដែលត្រូវនឹងលក្ខណៈសម្បត្តិទេ'
                     : 'គ្មានថ្នាក់រៀនទេ'
                   }
                 </h3>
                 
-                <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                <p className="text-base text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
                   {searchTerm || selectedSchoolYear !== 'all' 
                     ? 'សូមព្យាយាមជ្រើសរើសលក្ខណៈសម្បត្តិផ្សេង ឬលុបការស្វែងរកចេញ'
                     : 'ចុចប៊ូតុង "បន្ថែមថ្នាក់" ដើម្បីចាប់ផ្តើមបង្កើតថ្នាក់រៀនថ្មី'
@@ -1683,10 +2086,10 @@ function AcademicManagementContent() {
                     <School className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-purple-900 dark:text-purple-100">
+                    <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-100">
                       ថ្នាក់រៀន
                     </h3>
-                    <p className="text-sm text-purple-600 dark:text-purple-400">
+                    <p className="text-base text-purple-600 dark:text-purple-400">
                       សរុប {filteredCourses.length} ថ្នាក់
                     </p>
                   </div>
@@ -1695,13 +2098,13 @@ function AcademicManagementContent() {
                   <div className="flex items-center space-x-3">
                     {/* View Mode Toggle */}
                     <div className="text-right">
-                      <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">បង្ហាញជា</p>
+                      <p className="text-sm text-purple-600 dark:text-purple-400 mb-1">បង្ហាញជា</p>
                       <div className="flex items-center space-x-1">
                         <Button
                           variant={viewMode === 'grid' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewMode('grid')}
-                          className="h-8 px-3 text-xs bg-purple-500 hover:bg-purple-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                          className="h-8 px-3 text-sm bg-purple-500 hover:bg-purple-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
                         >
                           <Grid3X3 className="h-3 w-3 mr-1" />
                           ក្រឡា
@@ -1710,7 +2113,7 @@ function AcademicManagementContent() {
                           variant={viewMode === 'table' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewMode('table')}
-                          className="h-8 px-3 text-xs bg-purple-500 hover:bg-purple-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                          className="h-8 px-3 text-sm bg-purple-500 hover:bg-purple-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
                         >
                           <List className="h-3 w-3 mr-1" />
                           បញ្ជី
@@ -1737,25 +2140,25 @@ function AcademicManagementContent() {
                       </div>
 
                       {/* Course Header */}
-                      <div className="relative z-10 mb-4 pr-20">
+                      <div className="relative z-10 mb-3 pr-20">
                         <div className="flex items-center space-x-2 mb-2">
                           <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg">
                             <GraduationCap className="h-4 w-4 text-white" />
                           </div>
-                          <h4 className="font-bold text-gray-900 dark:text-white text-lg leading-tight">
+                          <h4 className="font-bold text-gray-900 dark:text-white text-xl leading-tight">
                             {course.courseName || `ថ្នាក់ទី ${course.grade} ${course.section}`}
                           </h4>
                         </div>
                       </div>
 
                       {/* Course Details */}
-                      <div className="relative z-10 space-y-3 mb-4">
+                      <div className="relative z-10 space-y-3 mb-3">
                         <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <span className="text-gray-600 dark:text-gray-400 text-sm flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-400 text-base flex items-center gap-2">
                             <UserCheck className="h-3 w-3" />
                             គ្រូទី១:
                           </span>
-                          <span className="text-gray-800 dark:text-gray-200 font-medium text-sm">
+                          <span className="text-gray-800 dark:text-gray-200 font-medium text-base">
                             {(() => {
                               const teacher = safeTeachers.find(t => t.userid === course.teacherId1)
                               if (!teacher) return <span className="text-gray-400">គ្មានគ្រូ</span>
@@ -1769,11 +2172,11 @@ function AcademicManagementContent() {
                         </div>
                         
                         <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <span className="text-gray-600 dark:text-gray-400 text-sm flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-400 text-base flex items-center gap-2">
                             <UserCheck className="h-3 w-3" />
                             គ្រូទី២:
                           </span>
-                          <span className="text-gray-800 dark:text-gray-200 font-medium text-sm">
+                          <span className="text-gray-800 dark:text-gray-200 font-medium text-base">
                             {(() => {
                               const teacher = safeTeachers.find(t => t.userid === course.teacherId2)
                               if (!teacher) return <span className="text-gray-400">គ្មានគ្រូ</span>
@@ -1787,11 +2190,11 @@ function AcademicManagementContent() {
                         </div>
                         
                         <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <span className="text-gray-600 dark:text-gray-400 text-sm flex items-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-400 text-base flex items-center gap-2">
                             <UserCheck className="h-3 w-3" />
                             គ្រូទី៣:
                           </span>
-                          <span className="text-gray-800 dark:text-gray-200 font-medium text-sm">
+                          <span className="text-gray-800 dark:text-gray-200 font-medium text-base">
                             {(() => {
                               const teacher = safeTeachers.find(t => t.userid === course.teacherId3)
                               if (!teacher) return <span className="text-gray-400">គ្មានគ្រូ</span>
@@ -1983,19 +2386,19 @@ function AcademicManagementContent() {
         </Card>
       </div>
       {/* Subjects Section */}
-      <div className="relative">
+      <div className="relative mb-6">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-green-50/20 via-emerald-50/20 to-green-50/20 dark:from-green-950/10 dark:via-emerald-950/10 dark:to-green-950/10 rounded-3xl -z-10" />
         
         <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
           {/* Enhanced Header */}
-          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white p-8">
+          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white p-6">
             <div className="absolute inset-0 bg-black/10" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
             
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
                   <BookOpen className="h-8 w-8 text-white" />
                 </div>
@@ -2022,14 +2425,14 @@ function AcademicManagementContent() {
               </Button>
             </div>
           </CardHeader>
-                  <CardContent className="p-8">
+                  <CardContent className="p-6">
             {/* Modern Search and Filter Section for Subjects */}
-          <div className="mb-6 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border border-green-200 dark:border-green-800 shadow-sm">
+          <div className="mb-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border border-green-200 dark:border-green-800 shadow-sm">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
               {/* Search Bar */}
               <div className="flex-1 max-w-md">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-400 dark:text-green-500" />
                   <Input
                     placeholder="ស្វែងរកមុខវិជ្ជា..."
                     value={searchTerm}
@@ -2040,7 +2443,7 @@ function AcademicManagementContent() {
               </div>
               
               {/* Results Summary */}
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <div className="text-right">
                   <p className="text-sm text-green-700 dark:text-green-300">
                     បានរកឃើញ <strong>{filteredSubjects.length}</strong> មុខវិជ្ជា
@@ -2061,8 +2464,8 @@ function AcademicManagementContent() {
           </div>
 
           {showSubjectForm && (
-            <div className="mb-6 border-2 border-dashed border-green-300 rounded-xl p-6 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/30 shadow-inner">
-              <div className="flex items-center space-x-3 mb-4">
+            <div className="mb-3 border-2 border-dashed border-green-300 rounded-xl p-4 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/30 shadow-inner">
+              <div className="flex items-center space-x-3 mb-3">
                 <div className="p-2 bg-green-500 rounded-lg">
                   <Plus className="h-5 w-5 text-white" />
                 </div>
@@ -2122,10 +2525,63 @@ function AcademicManagementContent() {
             </div>
           )}
 
+          {/* Edit Subject Form */}
+          {editingSubject && (
+            <div className="mb-3 border-2 border-dashed border-blue-300 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/30 shadow-inner">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="p-2 bg-blue-500 rounded-lg">
+                  <Edit className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+                  កែប្រែមុខវិជ្ជា
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    ឈ្មោះមុខវិជ្ជា
+                  </label>
+                  <Input
+                    value={editSubjectName}
+                    onChange={(e) => setEditSubjectName(e.target.value)}
+                    placeholder="បញ្ចូលឈ្មោះមុខវិជ្ជា"
+                    className="h-12 border-blue-200 focus:border-blue-500 dark:border-blue-700 dark:focus:border-blue-400"
+                  />
+                  {errors.subjectName && (
+                    <p className="text-red-500 text-sm mt-1">{errors.subjectName}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={cancelEditSubject}
+                  className="px-6 py-2 border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  បោះបង់
+                </Button>
+                <Button
+                  onClick={handleEditSubject}
+                  disabled={submitting}
+                  className="px-6 py-2 bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  {submitting ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-2" />
+                  )}
+                  កែប្រែមុខវិជ្ជា
+                </Button>
+              </div>
+            </div>
+          )}
+
           {filteredSubjects.length === 0 ? (
             <div className="text-center py-16 px-6">
               <div className="max-w-md mx-auto">
-                <div className="relative mb-6">
+                <div className="relative mb-3">
                   <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-full flex items-center justify-center">
                     <BookOpen className="h-12 w-12 text-green-600 dark:text-green-400" />
                   </div>
@@ -2138,13 +2594,13 @@ function AcademicManagementContent() {
                   គ្មានមុខវិជ្ជាទេ
                 </h3>
                 
-                <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
                   ចុចប៊ូតុង &quot;បន្ថែមមុខវិជ្ជា&quot; ដើម្បីចាប់ផ្តើមបង្កើតមុខវិជ្ជាថ្មី
                 </p>
                 
                 <Button
                   onClick={() => setShowSubjectForm(true)}
-                  className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   <Plus className="h-4 w-4" />
                   បន្ថែមមុខវិជ្ជាថ្មី
@@ -2160,10 +2616,10 @@ function AcademicManagementContent() {
                     <BookOpenCheck className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
+                    <h3 className="text-2xl font-bold text-green-900 dark:text-green-100">
                       មុខវិជ្ជា
                     </h3>
-                    <p className="text-sm text-green-600 dark:text-green-400">
+                    <p className="text-base text-green-600 dark:text-green-400">
                       សរុប {filteredSubjects.length} មុខវិជ្ជា
                     </p>
                   </div>
@@ -2213,7 +2669,7 @@ function AcademicManagementContent() {
                       </div>
 
                       {/* Subject Header */}
-                      <div className="relative z-10 mb-4 pr-20">
+                      <div className="relative z-10 mb-3 pr-20">
                         <div className="flex items-center space-x-2 mb-3">
                           <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
                             <BookOpenCheck className="h-5 w-5 text-white" />
@@ -2225,7 +2681,7 @@ function AcademicManagementContent() {
                       </div>
 
                       {/* Subject Details */}
-                      <div className="relative z-10 space-y-3 mb-4">
+                      <div className="relative z-10 space-y-3 mb-3">
                         <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg border border-green-200 dark:border-green-800">
                           <div className="flex items-center justify-between">
                             <span className="text-green-700 dark:text-green-300 text-sm font-medium">
@@ -2250,6 +2706,15 @@ function AcademicManagementContent() {
 
                       {/* Action Buttons */}
                       <div className="absolute bottom-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => startEditSubject(subject)}
+                          className="h-8 w-8 p-0 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/20 shadow-lg"
+                          disabled={submitting}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -2317,16 +2782,28 @@ function AcademicManagementContent() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteSubject(subject.subjectId)}
-                                className="text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-950/20"
-                                disabled={submitting}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                លុប
-                              </Button>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => startEditSubject(subject)}
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                                  disabled={submitting}
+                                >
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  កែប្រែ
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteSubject(subject.subjectId)}
+                                  className="text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                  disabled={submitting}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  លុប
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -2340,6 +2817,237 @@ function AcademicManagementContent() {
         </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              តើអ្នកយល់ព្រមលុបមែនទេ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              អ្នកកំពុងព្យាយាមលុប <span className="font-semibold text-red-600">{deleteItemName}</span>។ 
+              សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel 
+              onClick={() => setDeleteConfirmOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              បោះបង់
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={submitting}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? (
+                <div className="flex items-center">
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  កំពុងលុប...
+                </div>
+              ) : (
+                'លុប'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Create Confirmation Dialog */}
+      <AlertDialog open={bulkCreateConfirmOpen} onOpenChange={setBulkCreateConfirmOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              បញ្ជាក់ការបង្កើតថ្នាក់រៀន
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              តើអ្នកប្រាកដជាចង់បង្កើតថ្នាក់ទី {gradeRange.startGrade}-{gradeRange.endGrade} ផ្នែក {newCourse.section} សម្រាប់ឆ្នាំសិក្សានេះមែនទេ?
+              <br /><br />
+              <span className="font-semibold text-blue-600">ថ្នាក់ដែលនឹងត្រូវបង្កើត: {coursesToCreate.length} ថ្នាក់</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel 
+              onClick={() => setBulkCreateConfirmOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              បោះបង់
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmBulkCreate}
+              disabled={submitting}
+              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? (
+                <div className="flex items-center">
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  កំពុងបង្កើត...
+                </div>
+              ) : (
+                'បង្កើតថ្នាក់រៀន'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Existing Courses Warning Dialog */}
+      <AlertDialog open={existingCoursesWarningOpen} onOpenChange={setExistingCoursesWarningOpen}>
+        <AlertDialogContent className="max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-orange-900 dark:text-orange-100">
+              ថ្នាក់រៀនមានរួចហើយ
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              <span>ថ្នាក់ខាងក្រោមមានរួចហើយ:</span>
+              <br /><br />
+              <span className="inline-block bg-orange-50 dark:bg-orange-950/30 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
+                {existingCoursesList.map((course, index) => (
+                  <span key={index} className="block text-sm font-medium text-orange-800 dark:text-orange-200">
+                    • {course}
+                  </span>
+                ))}
+              </span>
+              <br /><br />
+              <span>តើអ្នកចង់បន្តបង្កើតថ្នាក់ដែលនៅសល់ ({coursesToCreate.length} ថ្នាក់) មែនទេ?</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel 
+              onClick={() => setExistingCoursesWarningOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              បោះបង់
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmBulkCreate}
+              disabled={submitting}
+              className="px-4 py-2 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? (
+                <div className="flex items-center">
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  កំពុងបង្កើត...
+                </div>
+              ) : (
+                'បន្តបង្កើត'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Single Course Creation Confirmation Dialog */}
+      <AlertDialog open={singleCreateConfirmOpen} onOpenChange={setSingleCreateConfirmOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              បញ្ជាក់ការបង្កើតថ្នាក់រៀន
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              តើអ្នកប្រាកដជាចង់បង្កើតថ្នាក់ទី {singleCourseData?.grade} ផ្នែក {singleCourseData?.section} សម្រាប់ឆ្នាំសិក្សានេះមែនទេ?
+              <br /><br />
+              <span className="font-semibold text-blue-600">ឈ្មោះថ្នាក់: {singleCourseData?.courseName || `ថ្នាក់ទី ${singleCourseData?.grade} ${singleCourseData?.section}`}</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel 
+              onClick={() => setSingleCreateConfirmOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              បោះបង់
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmSingleCreate}
+              disabled={submitting}
+              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? (
+                <div className="flex items-center">
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  កំពុងបង្កើត...
+                </div>
+              ) : (
+                'បង្កើតថ្នាក់រៀន'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Duplicate Course Warning Dialog */}
+      <AlertDialog open={duplicateCourseWarningOpen} onOpenChange={setDuplicateCourseWarningOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-red-600 dark:text-red-400">
+              ថ្នាក់រៀនមានរួចហើយ
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              <span>ថ្នាក់ទី {duplicateCourseData?.grade} ផ្នែក {duplicateCourseData?.section} មានរួចហើយសម្រាប់ឆ្នាំសិក្សា {duplicateCourseData?.schoolYear}។</span>
+              <br /><br />
+              <span className="font-semibold text-orange-600">សូមជ្រើសរើសថ្នាក់ ឬផ្នែកផ្សេងទៀត។</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setDuplicateCourseWarningOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              យល់ព្រម
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Duplicate School Year Warning Dialog */}
+      <AlertDialog open={duplicateSchoolYearWarningOpen} onOpenChange={setDuplicateSchoolYearWarningOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-red-600 dark:text-red-400">
+              ឆ្នាំសិក្សាមានរួចហើយ
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              <span>ឆ្នាំសិក្សា {duplicateSchoolYearData?.schoolYearCode} មានរួចហើយក្នុងប្រព័ន្ធ។</span>
+              <br /><br />
+              <span className="font-semibold text-orange-600">សូមជ្រើសរើសឆ្នាំសិក្សាផ្សេងទៀត។</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setDuplicateSchoolYearWarningOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              យល់ព្រម
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Duplicate Subject Warning Dialog */}
+      <AlertDialog open={duplicateSubjectWarningOpen} onOpenChange={setDuplicateSubjectWarningOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-red-600 dark:text-red-400">
+              មុខវិជ្ជាមានរួចហើយ
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              <span>មុខវិជ្ជា {duplicateSubjectData?.subjectName} មានរួចហើយក្នុងប្រព័ន្ធ។</span>
+              <br /><br />
+              <span className="font-semibold text-orange-600">សូមជ្រើសរើសឈ្មោះមុខវិជ្ជាផ្សេងទៀត។</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setDuplicateSubjectWarningOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              យល់ព្រម
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

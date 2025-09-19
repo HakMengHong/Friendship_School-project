@@ -9,11 +9,15 @@
     "start": "next start",
     "db:seed": "tsx prisma/seed.ts",
     "clean:courses": "node scripts/clean-courses.js",
-    "clean:courses:advanced": "node scripts/clean-courses-advanced.js"
+    "clean:courses:advanced": "node scripts/clean-courses-advanced.js",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:reset": "docker-compose down -v && docker-compose up -d"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
-    "@prisma/client": "^6.15.0",
+    "@prisma/client": "^6.16.2",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
@@ -59,7 +63,7 @@
     "lucide-react": "^0.454.0",
     "next": "^15.5.2",
     "next-themes": "^0.4.4",
-    "node-fetch": "^3.3.2",
+    "node-fetch": "^2.7.0",
     "puppeteer": "^24.16.2",
     "react": "^18.0.0",
     "react-chartjs-2": "^5.2.0",
@@ -82,7 +86,7 @@
     "eslint": "^9.31.0",
     "eslint-config-next": "^15.5.2",
     "postcss": "^8.5",
-    "prisma": "^6.15.0",
+    "prisma": "^6.16.2",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.20.3",
     "typescript": "^5"

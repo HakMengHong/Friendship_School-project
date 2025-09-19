@@ -4,12 +4,36 @@ A comprehensive school management system built with Next.js, React, TypeScript, 
 
 ## 🚀 **Quick Start**
 
-### **Prerequisites**
-- Node.js 18+
-- PostgreSQL database
-- Git
+### **Option 1: Docker Setup (Recommended)**
+```bash
+# Clone the repository
+git clone <repository-url>
+cd Friendship_School-project
 
-### **Installation**
+# Start PostgreSQL and pgAdmin with Docker
+docker-compose up -d
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+# Create .env file with:
+# DATABASE_URL="postgresql://postgres:password123@localhost:5432/postgres"
+# NEXTAUTH_SECRET="your-secret-key-here"
+# NEXTAUTH_URL="http://localhost:3000"
+
+# Generate Prisma client and run migrations
+npx prisma generate
+npx prisma migrate dev
+
+# Add initial users
+node scripts/add-teachers.js
+
+# Start development server
+npm run dev
+```
+
+### **Option 2: Manual PostgreSQL Setup**
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -29,6 +53,11 @@ npx prisma migrate dev
 npm run dev
 ```
 
+### **Prerequisites**
+- Node.js 18+
+- Docker Desktop (for Docker setup) OR PostgreSQL database
+- Git
+
 ### **Database Setup**
 ```bash
 # Generate Prisma client
@@ -40,6 +69,13 @@ node scripts/add-teachers.js
 # Check database connectivity
 node scripts/check-database.js
 ```
+
+### **🐳 Docker Services**
+- **PostgreSQL**: localhost:5432 (postgres/password123)
+- **pgAdmin4**: http://localhost:8080 (admin@admin.com/admin123)
+- **Application**: http://localhost:3000
+
+> 📖 **Detailed Docker Setup**: See [DOCKER_SETUP.md](./DOCKER_SETUP.md) for complete instructions
 
 ## 🏗️ **Technology Stack**
 

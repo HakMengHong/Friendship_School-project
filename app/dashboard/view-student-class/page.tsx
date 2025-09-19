@@ -261,7 +261,7 @@ function ViewStudentClassContent() {
   const getCourseName = (courseId: number) => {
     const course = courses.find(c => c.courseId === courseId)
     if (!course) return 'មិនដឹង'
-    return course.courseName || `ថ្នាក់ទី ${course.grade}${course.section}`
+    return `ថ្នាក់ទី ${course.grade}${course.section}`
   }
 
   // Get selected course details
@@ -345,78 +345,9 @@ function ViewStudentClassContent() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl p-6">
+    <div>
       <div className="animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-8 p-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
-            <div className="text-center space-y-6 p-8">
-              {/* Enhanced Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                {/* Total Students Card */}
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                        <Users className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{students.length}</p>
-                        <p className="text-lg text-blue-500 dark:text-blue-300 font-medium">សិស្សសរុប</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </div>
-
-                {/* Total Courses Card */}
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
-                        <BookOpen className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{courses.length}</p>
-                        <p className="text-lg text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់សរុប</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </div>
-
-                {/* Total School Years Card */}
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
-                        <GraduationCap className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">{schoolYears.length}</p>
-                        <p className="text-lg text-green-500 dark:text-green-300 font-medium">ឆ្នាំសិក្សា</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Loading State */}
-          {dataLoading && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center space-x-3">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span className="text-blue-800 font-medium">
-                កំពុងទាញយកទិន្នន័យ...
-              </span>
-            </div>
-          )}
-
+        <div>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Left Column - Filters and Course Selection */}
             <div className="lg:col-span-1 space-y-6">
@@ -426,9 +357,9 @@ function ViewStudentClassContent() {
                   {/* Background Pattern */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/20 to-blue-50/20 dark:from-blue-950/10 dark:via-indigo-950/10 dark:to-blue-950/10 rounded-3xl -z-10" />
                   
-                  <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
+                  <Card className="relative overflow-hidden border border-white/20 dark:border-gray-700/50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500">
                     {/* Enhanced Header */}
-                    <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-6">
+                    <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-2">
                       <div className="absolute inset-0 bg-black/10" />
                       <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12" />
                       <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
@@ -438,16 +369,16 @@ function ViewStudentClassContent() {
                           <Filter className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                          <h2 className="text-xl font-bold text-white">ការច្រោះ</h2>
+                          <h2 className="text-xl font-bold text-white">ការជ្រើសរើស</h2>
                           <div className="h-1 w-8 bg-white/30 rounded-full mt-2"></div>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-6 space-y-4">
+                    <CardContent className="p-1 space-y-4">
                       <div>
                         <Label htmlFor="schoolYear" className="text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</Label>
                         <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
-                          <SelectTrigger className="h-11 mt-2">
+                          <SelectTrigger className="h-11 mt-2 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200">
                             <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                           </SelectTrigger>
                           <SelectContent>
@@ -463,14 +394,14 @@ function ViewStudentClassContent() {
                       <div>
                         <Label htmlFor="course" className="text-sm font-medium text-gray-700 dark:text-gray-300">ថ្នាក់រៀន</Label>
                         <Select value={selectedCourse} onValueChange={handleCourseChange}>
-                          <SelectTrigger className="h-11 mt-2">
+                          <SelectTrigger className="h-11 mt-2 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200">
                             <SelectValue placeholder="ជ្រើសរើសថ្នាក់រៀន" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">ទាំងអស់</SelectItem>
                             {filteredCourses.map((course) => (
                               <SelectItem key={course.courseId} value={course.courseId.toString()}>
-                                {course.courseName || `ថ្នាក់ទី ${course.grade}${course.section}`}
+                                ថ្នាក់ទី {course.grade}{course.section}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -480,27 +411,27 @@ function ViewStudentClassContent() {
                       <div>
                         <Label htmlFor="search" className="text-sm font-medium text-gray-700 dark:text-gray-300">ស្វែងរកសិស្ស</Label>
                         <div className="relative mt-2">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                           <Input
                             id="search"
                             placeholder="ឈ្មោះសិស្ស..."
                             value={searchTerm}
                             onChange={(e) => handleStudentSearch(e.target.value)}
-                            className="pl-10 h-11"
+                            className="pl-10 h-11 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200"
                           />
                         </div>
                       </div>
 
                       {/* Auto-show indicator */}
                       {shouldShowStudents && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                          <div className="flex items-center space-x-2 text-green-800">
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 rounded-lg p-3">
+                          <div className="flex items-center space-x-2 text-green-800 dark:text-green-300">
                             <Users className="h-4 w-4" />
                             <span className="text-sm font-medium">
                               សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ
                             </span>
                           </div>
-                          <p className="text-xs text-green-600 mt-1">
+                          <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                             បានជ្រើសរើសឆ្នាំសិក្សា និងថ្នាក់រៀនរួចហើយ
                           </p>
                         </div>
@@ -515,7 +446,7 @@ function ViewStudentClassContent() {
                             onClick={clearAllFilters}
                             className="text-sm"
                           >
-                            លុបការច្រោះទាំងអស់
+                            លុបការជ្រើសរើសទាំងអស់
                           </Button>
                         </div>
                       )}
@@ -530,9 +461,9 @@ function ViewStudentClassContent() {
                   {/* Background Pattern */}
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-pink-50/20 to-purple-50/20 dark:from-purple-950/10 dark:via-pink-950/10 dark:to-purple-950/10 rounded-3xl -z-10" />
                   
-                  <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
+                  <Card className="relative overflow-hidden border border-white/20 dark:border-gray-700/50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500">
                     {/* Enhanced Header */}
-                    <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-6">
+                    <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-2">
                       <div className="absolute inset-0 bg-black/10" />
                       <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10" />
                       <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/5 rounded-full translate-y-6 -translate-x-6" />
@@ -547,28 +478,21 @@ function ViewStudentClassContent() {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-6 space-y-3">
+                    <CardContent className="p-2 space-y-3">
                       <div className="space-y-2">
+                        
                         <div className="text-sm">
-                          <span className="font-medium text-gray-700 dark:text-gray-300">ឈ្មោះថ្នាក់:</span>
-                          <div className="text-gray-600 dark:text-gray-400 mt-1">
-                            {getSelectedCourseDetails()?.courseName || 'មិនដឹង'}
-                          </div>
-                        </div>
-                        <div className="text-sm">
-                          <span className="font-medium text-gray-700 dark:text-gray-300">ថ្នាក់:</span>
+          
                           <div className="text-gray-600 dark:text-gray-400 mt-1">
                             ថ្នាក់ទី {getSelectedCourseDetails()?.grade}{getSelectedCourseDetails()?.section}
                           </div>
                         </div>
                         <div className="text-sm">
-                          <span className="font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា:</span>
-                          <div className="text-gray-600 dark:text-gray-400 mt-1">
-                            {getSelectedCourseDetails()?.schoolYear.schoolYearCode}
-                          </div>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា {getSelectedCourseDetails()?.schoolYear.schoolYearCode}</span>
+
                         </div>
                         <div className="text-sm">
-                          <span className="font-medium text-gray-700 dark:text-gray-300">អ្នកគ្រូ:</span>
+                          <span className="font-medium text-gray-700 dark:text-gray-300">គ្រូគ្រប់គ្រង់ថ្នាក់</span>
                           <div className="text-gray-600 dark:text-gray-400 space-y-1 mt-1">
                             {getSelectedCourseDetails()?.teacherId1 && (
                               <div>• {getTeacherName(getSelectedCourseDetails()?.teacherId1)}</div>
@@ -599,7 +523,7 @@ function ViewStudentClassContent() {
                 
                 <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
                   {/* Enhanced Header */}
-                  <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white p-6">
+                  <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white p-2">
                     <div className="absolute inset-0 bg-black/10" />
                     <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -translate-y-8 translate-x-8" />
                     <div className="absolute bottom-0 left-0 w-10 h-10 bg-white/5 rounded-full translate-y-5 -translate-x-5" />
@@ -614,7 +538,7 @@ function ViewStudentClassContent() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-6 space-y-3">
+                  <CardContent className="p-2 space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-700 dark:text-gray-300">ថ្នាក់រៀនសរុប:</span>
                       <span className="font-medium text-gray-900 dark:text-white">{filteredCourses.length}</span>
@@ -691,27 +615,40 @@ function ViewStudentClassContent() {
                     {/* Only show students when both filters are selected */}
                     {!shouldShowStudents ? (
                       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                        <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium mb-2">សូមជ្រើសរើសថ្នាក់រៀន និងឆ្នាំសិក្សា</p>
-                        <p className="text-sm">
+                        <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-full flex items-center justify-center">
+                          <Users className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <p className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-300">សូមជ្រើសរើសថ្នាក់រៀន និងឆ្នាំសិក្សា</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
                           សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ នៅពេលអ្នកជ្រើសរើសឆ្នាំសិក្សា និងថ្នាក់រៀន
                         </p>
-                        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                          <p className="text-sm text-blue-800 dark:text-blue-200">
-                            <strong>ជំហាន:</strong>
+                        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50 shadow-sm">
+                          <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                            ជំហាន:
                           </p>
-                          <ol className="text-sm text-blue-700 dark:text-blue-300 mt-2 space-y-1 text-left max-w-xs mx-auto">
-                            <li>1. ជ្រើសរើសឆ្នាំសិក្សា</li>
-                            <li>2. ជ្រើសរើសថ្នាក់រៀន</li>
-                            <li>3. សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ</li>
+                          <ol className="text-sm text-blue-700 dark:text-blue-300 mt-3 space-y-2 text-left max-w-xs mx-auto">
+                            <li className="flex items-center space-x-2">
+                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-xs font-semibold">1</span>
+                              <span>ជ្រើសរើសឆ្នាំសិក្សា</span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-xs font-semibold">2</span>
+                              <span>ជ្រើសរើសថ្នាក់រៀន</span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-xs font-semibold">3</span>
+                              <span>សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ</span>
+                            </li>
                           </ol>
                         </div>
                       </div>
                     ) : filteredStudentsBySearch.length === 0 ? (
                       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                        <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium mb-2">មិនមានសិស្ស</p>
-                        <p className="text-sm">
+                        <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-full flex items-center justify-center">
+                          <Users className="h-10 w-10 text-gray-400 dark:text-gray-500" />
+                        </div>
+                        <p className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-300">មិនមានសិស្ស</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
                           {searchTerm 
                             ? 'មិនរកឃើញសិស្សដែលត្រូវនឹងការស្វែងរក'
                             : 'មិនមានសិស្សដែលបានចុះឈ្មោះក្នុងថ្នាក់នេះ'
@@ -719,24 +656,24 @@ function ViewStudentClassContent() {
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                      <div className="space-y-3 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
                         {filteredStudentsBySearch.map((enrollment) => {
                           const student = enrollment.student
                           return (
                             <div
                               key={enrollment.enrollmentId}
-                              className="group flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-300 hover:shadow-md"
+                              className="group flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-300 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800/50"
                             >
                               <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm">
                                   {student.photo ? (
                                     <img 
                                       src={student.photo} 
                                       alt={`${student.firstName} ${student.lastName}`}
-                                      className="w-12 h-12 rounded-full object-cover"
+                                      className="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-gray-700"
                                     />
                                   ) : (
-                                    <span className="text-lg font-medium text-blue-600 dark:text-blue-300">
+                                    <span className="text-lg font-semibold text-blue-600 dark:text-blue-300">
                                       {student.firstName.charAt(0)}{student.lastName.charAt(0)}
                                     </span>
                                   )}
@@ -752,7 +689,7 @@ function ViewStudentClassContent() {
                                 </div>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                                <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800/50 shadow-sm">
                                   <UserCheck className="h-3 w-3 mr-1" />
                                   បានចុះឈ្មោះ
                                 </Badge>
@@ -760,7 +697,7 @@ function ViewStudentClassContent() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleRemoveStudent(enrollment)}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-all duration-300"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800/50 hover:border-red-300 dark:hover:border-red-700 transition-all duration-300 shadow-sm"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   ដកចេញ
@@ -781,8 +718,8 @@ function ViewStudentClassContent() {
 
       {/* Remove Student Confirmation Dialog */}
       {showRemoveConfirm && removingStudent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
                 <AlertTriangle className="h-5 w-5 text-red-600" />
@@ -797,7 +734,7 @@ function ViewStudentClassContent() {
               </div>
             </div>
             
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 mb-4 border border-gray-200 dark:border-gray-600">
               <div className="font-medium text-gray-900 dark:text-white">
                 {removingStudent.student.firstName} {removingStudent.student.lastName}
               </div>
@@ -813,7 +750,7 @@ function ViewStudentClassContent() {
                   setShowRemoveConfirm(false)
                   setRemovingStudent(null)
                 }}
-                className="flex-1"
+                className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
                 disabled={loading}
               >
                 បោះបង់
@@ -821,7 +758,7 @@ function ViewStudentClassContent() {
               <Button
                 variant="destructive"
                 onClick={() => removeStudentFromCourse(removingStudent)}
-                className="flex-1"
+                className="flex-1 bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700 transition-all duration-200 shadow-sm"
                 disabled={loading}
               >
                 {loading ? (

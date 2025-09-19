@@ -25,10 +25,13 @@ export async function GET(request: NextRequest) {
       lastLogin: user.lastLogin,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      status: user.status
+      status: user.status,
+      failedLoginAttempts: user.failedLoginAttempts,
+      lastFailedLogin: user.lastFailedLogin,
+      accountLockedUntil: user.accountLockedUntil
     }))
 
-    return NextResponse.json({ users: transformedUsers }) // Wrap in users object
+    return NextResponse.json({ users: transformedUsers }) // Return wrapped in users object
   } catch (error) {
     console.error('Error fetching users:', error)
     return NextResponse.json(

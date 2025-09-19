@@ -9,6 +9,16 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { 
   UserPlus, 
   Users, 
   BookOpen, 
@@ -16,7 +26,8 @@ import {
   Plus,
   ArrowLeft,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -88,6 +99,10 @@ function AddStudentClassContent() {
     dropDate?: string
   }[]>([])
   const [enrollmentsLoading, setEnrollmentsLoading] = useState(false)
+  
+  // Confirmation dialog state
+  const [addStudentsConfirmOpen, setAddStudentsConfirmOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   // Fetch all data function
   const fetchAllData = async () => {
@@ -252,17 +267,17 @@ function AddStudentClassContent() {
       return
     }
 
-    // Confirm action
-    const confirmed = window.confirm(
-      `តើអ្នកប្រាកដជាចង់បន្ថែមសិស្ស ${selectedStudents.length} នាក់ទៅក្នុងថ្នាក់ ${getSelectedCourseName()} ឬទេ?`
-    )
-    
-    if (!confirmed) return
+    // Show confirmation dialog
+    setAddStudentsConfirmOpen(true)
+  }
 
-    setLoading(true)
+  const handleConfirmAddStudents = async () => {
+    setSubmitting(true)
+    setAddStudentsConfirmOpen(false)
+    
     try {
       // Make API call to create enrollments
-              const response = await fetch('/api/enrollments', {
+      const response = await fetch('/api/enrollments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -296,7 +311,7 @@ function AddStudentClassContent() {
       console.error('Error adding students to class:', error)
       toast.error('មានបញ្ហាក្នុងការបន្ថែមសិស្សទៅក្នុងថ្នាក់')
     } finally {
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
@@ -376,72 +391,8 @@ function AddStudentClassContent() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl p-6">
-      <div className="animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-8 p-6">
-          {/* Modern Header Section */}
-          <div className="relative">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
-            
-            <div className="text-center space-y-6 p-8">
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                        <Users className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{students.length}</p>
-                        <p className="text-lg text-blue-500 dark:text-blue-300 font-medium">សិស្សសរុប</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </div>
-                
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
-                        <BookOpen className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{courses.length}</p>
-                        <p className="text-lg text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់សរុប</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </div>
-                
-                <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
-                        <GraduationCap className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">{schoolYears.length}</p>
-                        <p className="text-lg text-green-500 dark:text-green-300 font-medium">ឆ្នាំសិក្សា</p>
-                      </div>
-                    </div>
-                    <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </div>
-              </div>
-              
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div>
+  
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
@@ -482,16 +433,6 @@ function AddStudentClassContent() {
         </div>
       )}
 
-      {/* Loading State */}
-      {dataLoading && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center space-x-3">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-          <span className="text-blue-800 font-medium">
-            កំពុងទាញយកទិន្នន័យ...
-          </span>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Student Selection */}
         <div className="lg:col-span-2 space-y-6">
@@ -523,10 +464,10 @@ function AddStudentClassContent() {
                 </div>
               </CardHeader>
               
-              <CardContent className="p-8 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <CardContent className="p-2 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <Label htmlFor="schoolYear">ឆ្នាំសិក្សា</Label>
+                  <Label htmlFor="schoolYear" className="text-sm font-medium text-primary font-semibold">ឆ្នាំសិក្សា</Label>
                   <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
                     <SelectTrigger>
                       <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
@@ -541,7 +482,7 @@ function AddStudentClassContent() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="class">ថ្នាក់</Label>
+                  <Label htmlFor="class" className="text-sm font-medium text-primary font-semibold">ថ្នាក់</Label>
                   <Select value={selectedClass} onValueChange={setSelectedClass}>
                     <SelectTrigger>
                       <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
@@ -557,7 +498,7 @@ function AddStudentClassContent() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="search">ស្វែងរកសិស្ស</Label>
+                  <Label htmlFor="search" className="text-sm font-medium text-primary font-semibold">ស្វែងរកសិស្ស</Label>
                   <div className="relative">
                     <Input
                       id="search"
@@ -577,20 +518,21 @@ function AddStudentClassContent() {
                     )}
                   </div>
                 </div>
+              
+                {/* Clear Filters Button */}
+                {(selectedSchoolYear || (selectedClass && selectedClass !== 'all') || searchTerm) && (
+                  <div className="flex justify-end mt-5">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearAllFilters}
+                      className="text-sm"
+                    >
+                      លុបការច្រោះទាំងអស់
+                    </Button>
+                  </div>
+                )}
               </div>
-              {/* Clear Filters Button */}
-              {(selectedSchoolYear || (selectedClass && selectedClass !== 'all') || searchTerm) && (
-                <div className="flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearAllFilters}
-                    className="text-sm"
-                  >
-                    លុបការច្រោះទាំងអស់
-                  </Button>
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>
@@ -726,14 +668,14 @@ function AddStudentClassContent() {
           {/* Class Selection */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <BookOpen className="h-5 w-5" />
+              <CardTitle className="flex text-primary items-center space-x-2">
+                <BookOpen className="h-5 w-5 text-primary" />
                 <span>ជ្រើសរើសថ្នាក់ដើម្បីបញ្ចូលសិស្ស</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="course">ថ្នាក់</Label>
+                <Label htmlFor="course" className="text-sm font-medium text-primary font-semibold">ថ្នាក់</Label>
                 <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                   <SelectTrigger>
                     <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
@@ -764,8 +706,8 @@ function AddStudentClassContent() {
           {/* Student Selection */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
+              <CardTitle className="flex items-center space-x-2 text-primary">
+                <Users className="h-5 w-5 text-primary" />
                 <span>សិស្សដែលបានជ្រើសរើស ({selectedStudents.length})</span>
               </CardTitle>
             </CardHeader>
@@ -836,8 +778,8 @@ function AddStudentClassContent() {
           {/* Actions */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <GraduationCap className="h-5 w-5" />
+              <CardTitle className="flex items-center space-x-2 text-primary">
+                <GraduationCap className="h-5 w-5 text-primary" />
                 <span>សកម្មភាព</span>
               </CardTitle>
             </CardHeader>
@@ -847,18 +789,18 @@ function AddStudentClassContent() {
                   សិស្សដែលបានជ្រើសរើស: <span className="font-medium">{selectedStudents.length}</span>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  ថ្នាក់: <span className="font-medium">{selectedCourse ? getSelectedCourseName() : 'មិនទាន់ជ្រើសរើស'}</span>
+                  <span className="font-medium">{selectedCourse ? getSelectedCourseName() : 'មិនទាន់ជ្រើសរើស'}</span>
                 </div>
               </div>
               
               <Button
                 onClick={handleAddStudentsToClass}
-                disabled={selectedStudents.length === 0 || !selectedCourse || loading}
+                disabled={selectedStudents.length === 0 || !selectedCourse || submitting}
                 className="w-full bg-green-600 hover:bg-green-700"
               >
-                {loading ? (
+                {submitting ? (
                   <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
                     <span>កំពុងបន្ថែម...</span>
                   </div>
                 ) : (
@@ -874,7 +816,7 @@ function AddStudentClassContent() {
           {/* Summary */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">សង្ខេប</CardTitle>
+              <CardTitle className="text-lg text-primary font-semibold">សង្ខេប</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between">
@@ -1046,6 +988,51 @@ function AddStudentClassContent() {
           </div>
         </div>
       )}
+
+      {/* Add Students Confirmation Dialog */}
+      <AlertDialog open={addStudentsConfirmOpen} onOpenChange={setAddStudentsConfirmOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              បញ្ជាក់ការបន្ថែមសិស្ស
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              <span>តើអ្នកប្រាកដជាចង់បន្ថែមសិស្ស {selectedStudents.length} នាក់ទៅក្នុងថ្នាក់ {getSelectedCourseName()} ឬទេ?</span>
+              <br /><br />
+              <span className="font-semibold text-blue-600">សិស្សដែលជ្រើសរើស:</span>
+              <br />
+              <span className="text-sm">
+                {selectedStudents.map((studentId, index) => {
+                  const student = students.find(s => s.studentId === studentId)
+                  return student ? `${student.firstName} ${student.lastName}` : ''
+                }).filter(name => name).join(', ')}
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel 
+              onClick={() => setAddStudentsConfirmOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              បោះបង់
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmAddStudents}
+              disabled={submitting}
+              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? (
+                <div className="flex items-center">
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  កំពុងបន្ថែម...
+                </div>
+              ) : (
+                'បន្ថែមសិស្សទៅក្នុងថ្នាក់'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

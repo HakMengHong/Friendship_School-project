@@ -19,8 +19,8 @@ const khmerNames = {
   ]
 };
 
-const classes = ['ថ្នាក់ទី 1', 'ថ្នាក់ទី 2', 'ថ្នាក់ទី 3', 'ថ្នាក់ទី 4', 'ថ្នាក់ទី 5'];
-const genders = ['ប្រុស', 'ស្រី'];
+const classes = ['1', '2', '3', '4', '5'];
+const genders = ['male', 'female'];
 const villages = ['ភូមិថ្មី', 'ភូមិចាស់', 'ភូមិកណ្តាល', 'ភូមិខាងកើត', 'ភូមិខាងលិច'];
 const districts = ['ភ្នំពេញ', 'កំពង់ចាម', 'សៀមរាប', 'បាត់ដំបង', 'កំពង់ឆ្នាំង'];
 const provinces = ['ភ្នំពេញ', 'កំពង់ចាម', 'សៀមរាប', 'បាត់ដំបង', 'កំពង់ឆ្នាំង'];
@@ -68,7 +68,7 @@ async function addSingleStudent() {
 
     // Generate random student data
     const gender = getRandomElement(genders);
-    const nameData = getRandomElement(khmerNames[gender === 'ប្រុស' ? 'male' : 'female']);
+    const nameData = getRandomElement(khmerNames[gender]);
     const studentData = {
       firstName: nameData.firstName,
       lastName: nameData.lastName,

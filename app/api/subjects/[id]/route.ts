@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
 
 // GET specific subject
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id: idString } = await params
+    const id = parseInt(idString)
     
     const subject = await prisma.subject.findUnique({
       where: { subjectId: id }
@@ -35,10 +34,11 @@ export async function GET(
 // PUT update subject
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id: idString } = await params
+    const id = parseInt(idString)
     const body = await request.json()
     const { subjectName } = body
 
@@ -69,10 +69,31 @@ export async function PUT(
 // DELETE subject
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id: idString } = await params
+    const id = parseInt(idString)
+
+    // Validate ID
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Invalid subject ID' },
+        { status: 400 }
+      )
+    }
+
+    // Check if subject exists
+    const existingSubject = await prisma.subject.findUnique({
+      where: { subjectId: id }
+    })
+
+    if (!existingSubject) {
+      return NextResponse.json(
+        { error: 'Subject not found' },
+        { status: 404 }
+      )
+    }
 
     // Check if there are grades using this subject
     const gradesCount = await prisma.grade.count({

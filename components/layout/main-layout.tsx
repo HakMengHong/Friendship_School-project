@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react"
 import { SidebarMenu } from "@/components/navigation/sidebar-menu"
 import { TopBar } from "@/components/navigation/top-bar"
+import { AutoLogoutTimer } from "@/components/AutoLogoutTimer"
 import { getCurrentUser, User } from "@/lib/auth-service"
 
 interface MainLayoutProps {
@@ -40,6 +41,18 @@ export function MainLayout({ children }: MainLayoutProps) {
           </div>
         </div>
       </div>
+
+      {/* Auto-logout timer - only show for authenticated users */}
+      {user && (
+        <AutoLogoutTimer 
+          timeoutMinutes={30}
+          warningMinutes={5}
+          onLogout={() => {
+            // Clear user state on logout
+            setUser(null)
+          }}
+        />
+      )}
     </div>
   )
 }

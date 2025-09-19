@@ -33,7 +33,7 @@ export const StudentFilterPanel = ({
   classes,
   clearFilters,
 }: StudentFilterPanelProps) => {
-  const hasActiveFilters = selectedSchoolYear || selectedClass || selectedStatus || searchTerm;
+  const hasActiveFilters = (selectedSchoolYear && selectedSchoolYear !== 'all') || (selectedClass && selectedClass !== 'all') || (selectedStatus && selectedStatus !== 'all') || searchTerm;
 
   return (
     <Card className="mb-6">
@@ -65,7 +65,7 @@ export const StudentFilterPanel = ({
                 <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា (Select school year)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">ទាំងអស់ (All)</SelectItem>
+                <SelectItem value="all">ទាំងអស់ (All)</SelectItem>
                 {schoolYears.map((year) => (
                   <SelectItem key={year.schoolYearId} value={year.schoolYearCode}>
                     {year.schoolYearCode}
@@ -83,7 +83,7 @@ export const StudentFilterPanel = ({
                 <SelectValue placeholder="ជ្រើសរើសថ្នាក់ (Select class)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">ទាំងអស់ (All)</SelectItem>
+                <SelectItem value="all">ទាំងអស់ (All)</SelectItem>
                 {classes.map((class_) => (
                   <SelectItem key={class_} value={class_}>
                     {class_}
@@ -101,7 +101,7 @@ export const StudentFilterPanel = ({
                 <SelectValue placeholder="ជ្រើសរើសស្ថានភាព (Select status)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">ទាំងអស់ (All)</SelectItem>
+                <SelectItem value="all">ទាំងអស់ (All)</SelectItem>
                 <SelectItem value="active">សកម្ម (Active)</SelectItem>
                 <SelectItem value="inactive">អសកម្ម (Inactive)</SelectItem>
                 <SelectItem value="graduated">បញ្ចប់ការសិក្សា (Graduated)</SelectItem>
