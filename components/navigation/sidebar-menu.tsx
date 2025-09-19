@@ -362,7 +362,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                     
                     {!isCollapsed && (
                       <div className="flex items-center justify-between w-full ml-3">
-                        <span className="truncate">{item.label}</span>
+                        <span className="truncate group-hover:text-primary transition-colors duration-300">{item.label}</span>
                         <div className="flex items-center gap-2">
                           {item.badge && (
                             <span className={cn(
@@ -412,7 +412,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                               : "text-muted-foreground group-hover:text-primary/80"
                           )} />
                         )}
-                        <span className="truncate">{subItem.label}</span>
+                        <span className="truncate group-hover:text-primary transition-colors duration-300">{subItem.label}</span>
                         {isActive(subItem.href) && (
                           <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                         )}
