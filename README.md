@@ -178,18 +178,6 @@ NEXTAUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
-#### **For Server Deployment:**
-```env
-# Change NEXTAUTH_URL to your server IP or domain
-DATABASE_URL="postgresql://username:password@your-server-ip:5432/database_name"
-NEXTAUTH_SECRET="your-secret-key"
-NEXTAUTH_URL="http://YOUR_SERVER_IP:3000"
-# or with domain name
-NEXTAUTH_URL="https://yourdomain.com"
-```
-
-> 📖 **Detailed Deployment Guide**: See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete server setup instructions
-
 ## 🧪 **Testing**
 
 ### **Security Testing**
