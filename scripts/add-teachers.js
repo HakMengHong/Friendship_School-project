@@ -4,33 +4,24 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function addTeachers() {
-  console.log('👥 Adding Teachers to Database');
-  console.log('==============================\n');
+  console.log('👥 Adding Admin User to Database');
+  console.log('==================================\n');
 
   try {
-    // Sample teachers data
+    // Admin user data
     const teachers = [
       {
-        username: 'ហាក់ម៉េងហុង',
-        firstname: 'ហាក់',
-        lastname: 'ម៉េងហុង',
+        username: 'admin',
+        firstname: 'Admin',
+        lastname: 'User',
         role: 'admin',
-        position: 'នាយក',
+        position: 'System Administrator',
         phonenumber1: '012345678',
-        status: 'active'
-      },
-      {
-        username: 'ហេងសុនី',
-        firstname: 'ហេង',
-        lastname: 'សុនី',
-        role: 'teacher',
-        position: 'គ្រូបង្រៀនថ្នាក់ទី១',
-        phonenumber1: '012345679',
         status: 'active'
       }
     ];
 
-    console.log('📝 Adding teachers...\n');
+    console.log('📝 Adding admin user...\n');
 
     for (const teacher of teachers) {
       try {
@@ -40,14 +31,14 @@ async function addTeachers() {
         });
 
         if (existingTeacher) {
-          console.log(`⚠️  Teacher ${teacher.firstname} ${teacher.lastname} already exists`);
+          console.log(`⚠️  Admin user ${teacher.firstname} ${teacher.lastname} already exists`);
           continue;
         }
 
         // Hash password (default password: 'password')
         const hashedPassword = await bcrypt.hash('password', 10);
 
-        // Create teacher
+        // Create admin user
         const newTeacher = await prisma.user.create({
           data: {
             username: teacher.username,
@@ -62,26 +53,29 @@ async function addTeachers() {
           }
         });
 
-        console.log(`✅ Added teacher: ${teacher.firstname} ${teacher.lastname} (ID: ${newTeacher.userId})`);
+        console.log(`✅ Added admin user: ${teacher.firstname} ${teacher.lastname} (ID: ${newTeacher.userId})`);
       } catch (error) {
-        console.error(`❌ Error adding teacher ${teacher.firstname} ${teacher.lastname}:`, error.message);
+        console.error(`❌ Error adding admin user ${teacher.firstname} ${teacher.lastname}:`, error.message);
       }
     }
 
     // Show final count
+    const adminCount = await prisma.user.count({ where: { role: 'admin' } });
     const teacherCount = await prisma.user.count({ where: { role: 'teacher' } });
     const totalUsers = await prisma.user.count();
     
     console.log('\n📊 Final Database Status:');
     console.log('---------------------------');
     console.log(`Total Users: ${totalUsers}`);
+    console.log(`Admin Users: ${adminCount}`);
     console.log(`Teachers: ${teacherCount}`);
 
-    if (teacherCount > 0) {
-      console.log('\n🎉 Teachers added successfully!');
-      console.log('Default password for all teachers: password');
+    if (adminCount > 0) {
+      console.log('\n🎉 Admin user added successfully!');
+      console.log('Username: admin');
+      console.log('Password: password');
     } else {
-      console.log('\n⚠️  No teachers were added. Check the errors above.');
+      console.log('\n⚠️  No admin user was added. Check the errors above.');
     }
 
   } catch (error) {
