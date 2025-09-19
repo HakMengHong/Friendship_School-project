@@ -330,8 +330,8 @@ function AbsenceContent() {
          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
            <div className="flex items-center gap-2">
              <AlertCircle className="h-5 w-5 text-red-500" />
-             <span className="text-red-700 font-medium">កំហុស:</span>
-             <span className="text-red-600">{error}</span>
+             <span className="text-base text-red-700 font-medium">កំហុស:</span>
+             <span className="text-base text-red-600">{error}</span>
              <button
                onClick={() => setError(null)}
                className="ml-auto text-red-500 hover:text-red-700"
@@ -348,7 +348,7 @@ function AbsenceContent() {
        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
          <CardHeader>
            <div className="flex items-center justify-between">
-             <CardTitle className="text-lg flex items-center gap-2">
+             <CardTitle className="text-xl flex items-center gap-2">
                <BarChart3 className="h-5 w-5 text-blue-500" />
                ផ្ទាំងគ្រប់គ្រងវត្តមាន
              </CardTitle>
@@ -360,13 +360,13 @@ function AbsenceContent() {
                    setSelectedStatus('')
                    setSearchTerm('')
                  }}
-                 className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                 className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                >
                  កំណត់ឡើងវិញ
                </button>
                <button
                  onClick={fetchAttendances}
-                 className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                 className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
                >
                  ធ្វើបច្ចុប្បន្នភាព
                </button>
@@ -377,13 +377,13 @@ function AbsenceContent() {
            {loading ? (
              <div className="text-center py-8">
                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-               <p className="text-sm text-muted-foreground">កំពុងទាញយក...</p>
+               <p className="text-base text-muted-foreground">កំពុងទាញយក...</p>
              </div>
            ) : schoolYears.length === 0 || courses.length === 0 ? (
              <div className="text-center py-8">
                <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-               <p className="text-red-600 font-medium">មិនអាចទាញយកទិន្នន័យបានទេ</p>
-               <p className="text-sm text-muted-foreground mt-2">
+               <p className="text-base text-red-600 font-medium">មិនអាចទាញយកទិន្នន័យបានទេ</p>
+               <p className="text-base text-muted-foreground mt-2">
                  សូមពិនិត្យការតភ្ជាប់ទៅមូលដ្ឋានទិន្នន័យ ឬព្យាយាមម្តងទៀត
                </p>
                <button
@@ -396,7 +396,7 @@ function AbsenceContent() {
            ) : (
            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
              <div>
-               <label className="text-sm font-medium mb-2 block">ឆ្នាំសិក្សា</label>
+               <label className="text-base font-medium mb-2 block">ឆ្នាំសិក្សា</label>
                <select 
                  value={selectedSchoolYear} 
                  onChange={(e) => setSelectedSchoolYear(e.target.value)}
@@ -411,7 +411,7 @@ function AbsenceContent() {
                </select>
              </div>
              <div>
-               <label className="text-sm font-medium mb-2 block">ថ្នាក់</label>
+               <label className="text-base font-medium mb-2 block">ថ្នាក់</label>
                <select 
                  value={selectedCourse} 
                  onChange={(e) => setSelectedCourse(e.target.value)}
@@ -426,7 +426,7 @@ function AbsenceContent() {
                </select>
              </div>
              <div>
-               <label className="text-sm font-medium mb-2 block">កាលបរិច្ឆេទ</label>
+               <label className="text-base font-medium mb-2 block">កាលបរិច្ឆេទ</label>
                <input 
                  type="date" 
                  value={selectedDate} 
@@ -435,7 +435,7 @@ function AbsenceContent() {
                />
              </div>
              <div>
-               <label className="text-sm font-medium mb-2 block">ស្ថានភាព</label>
+               <label className="text-base font-medium mb-2 block">ស្ថានភាព</label>
                <select 
                  value={selectedStatus} 
                  onChange={(e) => setSelectedStatus(e.target.value)}
@@ -448,7 +448,7 @@ function AbsenceContent() {
                </select>
              </div>
              <div>
-               <label className="text-sm font-medium mb-2 block">ស្វែងរក</label>
+               <label className="text-base font-medium mb-2 block">ស្វែងរក</label>
                <input 
                  type="text" 
                  placeholder="ស្វែងរកសិស្ស..."
@@ -466,13 +466,13 @@ function AbsenceContent() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">អវត្តមាន(ឥតច្បាប់)</CardTitle>
+              <CardTitle className="text-base font-medium">អវត្តមាន(ឥតច្បាប់)</CardTitle>
               <AlertCircle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{statistics.totalAbsent} នាក់</div>
-              <p className="text-xs text-muted-foreground">ត្រូវដោះស្រាយភ្លាមៗ</p>
-              <div className="mt-2 text-xs text-red-600">
+              <div className="text-3xl font-bold text-red-600">{statistics.totalAbsent} នាក់</div>
+              <p className="text-sm text-muted-foreground">ត្រូវដោះស្រាយភ្លាមៗ</p>
+              <div className="mt-2 text-sm text-red-600">
                 {statistics.totalAbsent > 0 ? `⚠️ ត្រូវការការអភិវឌ្ឍន៍` : '✅ គ្រប់គ្រងបានល្អ'}
               </div>
             </CardContent>
@@ -480,13 +480,13 @@ function AbsenceContent() {
 
           <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">យឺត</CardTitle>
+              <CardTitle className="text-base font-medium">យឺត</CardTitle>
               <Clock className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{statistics.totalLate} នាក់</div>
-              <p className="text-xs text-muted-foreground">ត្រូវការការអភិវឌ្ឍន៍</p>
-              <div className="mt-2 text-xs text-yellow-600">
+              <div className="text-3xl font-bold text-yellow-600">{statistics.totalLate} នាក់</div>
+              <p className="text-sm text-muted-foreground">ត្រូវការការអភិវឌ្ឍន៍</p>
+              <div className="mt-2 text-sm text-yellow-600">
                 {statistics.totalLate > 0 ? `⏰ ត្រូវការការអភិវឌ្ឍន៍` : '✅ គ្រប់គ្រងបានល្អ'}
               </div>
             </CardContent>
@@ -494,13 +494,13 @@ function AbsenceContent() {
 
           <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">អវត្តមាន(មានច្បាប់)</CardTitle>
+              <CardTitle className="text-base font-medium">អវត្តមាន(មានច្បាប់)</CardTitle>
               <UserCheck className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{statistics.totalExcused} នាក់</div>
-              <p className="text-xs text-muted-foreground">អវត្តមានច្បាប់</p>
-              <div className="mt-2 text-xs text-green-600">
+              <div className="text-3xl font-bold text-green-600">{statistics.totalExcused} នាក់</div>
+              <p className="text-sm text-muted-foreground">អវត្តមានច្បាប់</p>
+              <div className="mt-2 text-sm text-green-600">
                 ✅ គ្រប់គ្រងបានល្អ
               </div>
             </CardContent>
@@ -508,13 +508,13 @@ function AbsenceContent() {
 
           <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">សរុបកត់ត្រា</CardTitle>
+              <CardTitle className="text-base font-medium">សរុបកត់ត្រា</CardTitle>
               <Users className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{attendances.length} នាក់</div>
-              <p className="text-xs text-muted-foreground">កត់ត្រាវត្តមាន</p>
-              <div className="mt-2 text-xs text-blue-600">
+              <div className="text-3xl font-bold text-blue-600">{attendances.length} នាក់</div>
+              <p className="text-sm text-muted-foreground">កត់ត្រាវត្តមាន</p>
+              <div className="mt-2 text-sm text-blue-600">
                 📊 ទិន្នន័យពេញលេញ
               </div>
             </CardContent>
@@ -526,17 +526,17 @@ function AbsenceContent() {
          {/* Attendance Pattern Analysis */}
          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-             <CardTitle className="text-sm font-medium flex items-center gap-2">
+             <CardTitle className="text-base font-medium flex items-center gap-2">
                <BarChart3 className="h-4 w-4 text-purple-500" />
                ការវិភាគគំរូវត្តមាន
              </CardTitle>
-             <div className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded">
+             <div className="text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded">
                ប្រចាំសប្តាហ៍
              </div>
            </CardHeader>
            <CardContent>
              <Bar data={weeklyAbsenceData} options={chartOptions} />
-             <div className="mt-3 text-xs text-muted-foreground text-center">
+             <div className="mt-3 text-sm text-muted-foreground text-center">
                ការវិភាគគំរូវត្តមានប្រចាំសប្ងៃដើម្បីដឹងថ្ងៃណាមានអវត្តមានច្រើន
              </div>
            </CardContent>
@@ -545,11 +545,11 @@ function AbsenceContent() {
          {/* Monthly Trend Analysis */}
          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-             <CardTitle className="text-sm font-medium flex items-center gap-2">
+             <CardTitle className="text-base font-medium flex items-center gap-2">
                <Calendar className="h-4 w-4 text-blue-500" />
                ការវិភាគអវត្តមានប្រចាំខែ
              </CardTitle>
-             <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+             <div className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
                ប្រចាំខែ
              </div>
            </CardHeader>
@@ -570,7 +570,7 @@ function AbsenceContent() {
                  }
                }} 
              />
-             <div className="mt-3 text-xs text-muted-foreground text-center">
+             <div className="mt-3 text-sm text-muted-foreground text-center">
                ការវិភាគអវត្តមានប្រចាំខែដើម្បីដឹងថាខែណាមានបញ្ហាច្រើន
              </div>
            </CardContent>
@@ -583,20 +583,20 @@ function AbsenceContent() {
            <div className="flex items-center justify-between">
              <div className="flex items-center space-x-2">
                <Users className="h-5 w-5 text-green-600" />
-               <CardTitle className="text-lg">ផ្ទាំងគ្រប់គ្រងសិស្ស</CardTitle>
+               <CardTitle className="text-xl">ផ្ទាំងគ្រប់គ្រងសិស្ស</CardTitle>
              </div>
              <div className="flex items-center gap-4">
-               <div className="text-sm text-gray-500">
+               <div className="text-base text-gray-500">
                  សរុប: {filteredAttendances.length} នាក់
                </div>
                <div className="flex items-center gap-2">
-                 <div className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                 <div className="text-sm bg-red-100 text-red-700 px-2 py-1 rounded">
                    អវត្តមាន: {statistics.totalAbsent}
                  </div>
-                 <div className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
+                 <div className="text-sm bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
                    យឺត: {statistics.totalLate}
                  </div>
-                 <div className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                 <div className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">
                    ច្បាប់: {statistics.totalExcused}
                  </div>
                </div>
@@ -607,20 +607,20 @@ function AbsenceContent() {
            {loadingAttendances ? (
              <div className="text-center py-8">
                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-               <p className="text-sm text-muted-foreground">កំពុងទាញយក...</p>
+               <p className="text-base text-muted-foreground">កំពុងទាញយក...</p>
              </div>
            ) : filteredAttendances.length > 0 ? (
              <div className="overflow-x-auto">
                <Table>
                  <TableHeader>
                    <TableRow>
-                     <TableHead className="font-semibold">ឈ្មោះសិស្ស</TableHead>
-                     <TableHead className="font-semibold">ថ្នាក់</TableHead>
-                     <TableHead className="font-semibold">ស្ថានភាព</TableHead>
-                     <TableHead className="font-semibold">វេន</TableHead>
-                     <TableHead className="font-semibold">កាលបរិច្ឆេទ</TableHead>
-                     <TableHead className="font-semibold">មូលហេតុ</TableHead>
-                     <TableHead className="font-semibold">ការអនុវត្ត</TableHead>
+                     <TableHead className="text-base font-semibold">ឈ្មោះសិស្ស</TableHead>
+                     <TableHead className="text-base font-semibold">ថ្នាក់</TableHead>
+                     <TableHead className="text-base font-semibold">ស្ថានភាព</TableHead>
+                     <TableHead className="text-base font-semibold">វេន</TableHead>
+                     <TableHead className="text-base font-semibold">កាលបរិច្ឆេទ</TableHead>
+                     <TableHead className="text-base font-semibold">មូលហេតុ</TableHead>
+                     <TableHead className="text-base font-semibold">ការអនុវត្ត</TableHead>
                    </TableRow>
                  </TableHeader>
                  <TableBody>
@@ -628,14 +628,14 @@ function AbsenceContent() {
                      <TableRow key={attendance.attendanceId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                        <TableCell className="font-medium">
                          <div>
-                           <div className="font-semibold">{attendance.student.firstName} {attendance.student.lastName}</div>
-                           <div className="text-xs text-gray-500">ID: {attendance.student.studentId}</div>
+                           <div className="text-lg font-semibold">{attendance.student.firstName} {attendance.student.lastName}</div>
+                           <div className="text-sm text-gray-500">ID: {attendance.student.studentId}</div>
                          </div>
                        </TableCell>
                        <TableCell>
                          <div>
-                           <div className="font-medium">{attendance.course.courseName}</div>
-                           <div className="text-xs text-gray-500">{attendance.course.grade} {attendance.course.section}</div>
+                           <div className="text-base font-medium">{attendance.course.courseName}</div>
+                           <div className="text-sm text-gray-500">{attendance.course.grade} {attendance.course.section}</div>
                          </div>
                        </TableCell>
                        <TableCell>
@@ -645,31 +645,31 @@ function AbsenceContent() {
                          </div>
                        </TableCell>
                        <TableCell>
-                         <Badge variant="outline" className="text-xs">
+                         <Badge variant="outline" className="text-sm">
                            {attendance.session === 'AM' ? 'ព្រឹក' : attendance.session === 'PM' ? 'រសៀល' : 'ពេញមួយថ្ងៃ'}
                          </Badge>
                        </TableCell>
                        <TableCell>
                          <div>
                            <div>{attendance.attendanceDate}</div>
-                           <div className="text-xs text-gray-500">
+                           <div className="text-sm text-gray-500">
                              {attendance.recordedBy ? `ដោយ: ${attendance.recordedBy}` : 'មិនមានអ្នកកត់ត្រា'}
                            </div>
                          </div>
                        </TableCell>
                        <TableCell>
                          {attendance.reason ? (
-                           <span className="text-sm text-gray-600 dark:text-gray-400">{attendance.reason}</span>
+                           <span className="text-base text-gray-600 dark:text-gray-400">{attendance.reason}</span>
                          ) : (
-                           <span className="text-sm text-gray-400">-</span>
+                           <span className="text-base text-gray-400">-</span>
                          )}
                        </TableCell>
                        <TableCell>
                          <div className="flex items-center gap-2">
-                           <button className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
+                           <button className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
                              កែប្រែ
                            </button>
-                           <button className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200">
+                           <button className="text-sm bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200">
                              លុប
                            </button>
                          </div>
@@ -682,10 +682,10 @@ function AbsenceContent() {
            ) : (
              <div className="text-center py-8">
                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-               <p className="text-gray-500 dark:text-gray-400">
+               <p className="text-base text-gray-500 dark:text-gray-400">
                  {searchTerm ? "រកមិនឃើញសិស្ស" : "មិនមានកត់ត្រាវត្តមាននៅថ្ងៃនេះទេ"}
                </p>
-               <p className="text-sm text-muted-foreground mt-2">
+               <p className="text-base text-muted-foreground mt-2">
                  សូមជ្រើសរើសកាលបរិច្ឆេទ ឬថ្នាក់ដើម្បីមើលកត់ត្រាវត្តមាន
                </p>
              </div>
@@ -696,7 +696,7 @@ function AbsenceContent() {
        {/* Admin Insights & Summary */}
        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-indigo-500">
          <CardHeader>
-           <CardTitle className="text-lg flex items-center gap-2">
+           <CardTitle className="text-xl flex items-center gap-2">
              <BarChart3 className="h-5 w-5 text-indigo-500" />
              ការវិភាគ និងអនុសាសន៍សម្រាប់អ្នកគ្រប់គ្រង
            </CardTitle>
@@ -704,8 +704,8 @@ function AbsenceContent() {
          <CardContent>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
              <div className="space-y-3">
-               <h4 className="font-semibold text-indigo-700">📊 ស្ថានភាពបច្ចុប្បន្ន</h4>
-               <div className="space-y-2 text-sm">
+               <h4 className="text-lg font-semibold text-indigo-700">📊 ស្ថានភាពបច្ចុប្បន្ន</h4>
+               <div className="space-y-2 text-base">
                  <div className="flex justify-between">
                    <span>អវត្តមានឥតច្បាប់:</span>
                    <span className={`font-semibold ${statistics.totalAbsent > 0 ? 'text-red-600' : 'text-green-600'}`}>
@@ -726,8 +726,8 @@ function AbsenceContent() {
              </div>
 
              <div className="space-y-3">
-               <h4 className="font-semibold text-indigo-700">🎯 សកម្មភាពដែលត្រូវធ្វើ</h4>
-               <div className="space-y-2 text-sm">
+               <h4 className="text-lg font-semibold text-indigo-700">🎯 សកម្មភាពដែលត្រូវធ្វើ</h4>
+               <div className="space-y-2 text-base">
                  {statistics.totalAbsent > 0 && (
                    <div className="p-2 bg-red-50 border-l-4 border-red-400 rounded">
                      <p className="text-red-700">• ត្រូវដោះស្រាយអវត្តមានឥតច្បាប់ {statistics.totalAbsent} នាក់</p>
@@ -747,8 +747,8 @@ function AbsenceContent() {
              </div>
 
              <div className="space-y-3">
-               <h4 className="font-semibold text-indigo-700">💡 អនុសាសន៍</h4>
-               <div className="space-y-2 text-sm">
+               <h4 className="text-lg font-semibold text-indigo-700">💡 អនុសាសន៍</h4>
+               <div className="space-y-2 text-base">
                  <div className="p-2 bg-blue-50 border-l-4 border-blue-400 rounded">
                    <p className="text-blue-700">• តាមដានអវត្តមានឥតច្បាប់ជាប្រចាំ</p>
                  </div>
