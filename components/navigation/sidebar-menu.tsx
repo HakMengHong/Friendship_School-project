@@ -239,19 +239,19 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       className={cn(
         "bg-gradient-to-b from-card via-card/95 to-card/90 backdrop-blur-xl border-r border-border/50 flex flex-col transition-all duration-500 ease-out rounded-r-3xl m-2 shadow-2xl sidebar",
         "before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-primary/10 before:rounded-r-3xl before:pointer-events-none",
-        isCollapsed ? "w-[100px]" : "w-[280px]",
+        isCollapsed ? "w-[120px]" : "w-[300px]",
         className,
       )}
     >
       {/* Header with logo and school name */}
       <div className="flex items-center p-6 relative border-b border-border/30">
         <div className="flex items-center">
-          <div className="relative w-14 h-14 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-2xl flex items-center justify-center shadow-xl overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
+          <div className="relative w-20 h-20 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/25 to-transparent rounded-3xl"></div>
             <img 
               src="/logo.png" 
               alt="សាលាមិត្តភាព" 
-              className="w-9 h-9 object-contain relative z-10 group-hover:scale-110 transition-transform duration-300"
+              className="w-12 h-12 object-contain relative z-10 group-hover:scale-110 transition-transform duration-300"
               onError={(e) => {
                 // Fallback to icon if image fails to load
                 const target = e.target as HTMLImageElement;
@@ -260,16 +260,18 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                 if (fallback) fallback.classList.remove('hidden');
               }}
             />
-            <GraduationCap className="w-8 h-8 text-white fallback-icon hidden relative z-10" />
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-              <Sparkles className="w-2.5 h-2.5 text-white" />
+            <GraduationCap className="w-10 h-10 text-white fallback-icon hidden relative z-10" />
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+              <Sparkles className="w-3 h-3 text-white" />
             </div>
+            {/* Animated ring */}
+            <div className="absolute inset-0 rounded-3xl border-2 border-white/20 group-hover:border-white/40 transition-colors duration-300"></div>
           </div>
-          <div className={cn("ml-5 transition-all duration-500 ease-out", isCollapsed ? "opacity-0 w-0 scale-95" : "opacity-100 scale-100")}>
-            <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap">
+          <div className={cn("ml-6 transition-all duration-500 ease-out", isCollapsed ? "opacity-0 w-0 scale-95" : "opacity-100 scale-100")}>
+            <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap">
               សាលាមិត្តភាព
             </h1>
-            <p className="text-sm text-muted-foreground/80 whitespace-nowrap font-medium">Friendship School</p>
+            <p className="text-base text-muted-foreground/80 whitespace-nowrap font-semibold">Friendship School</p>
           </div>
         </div>
 
@@ -277,27 +279,42 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         <button
           onClick={toggleSidebar}
           onKeyDown={handleKeyDown}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 bg-gradient-to-br from-card via-card/95 to-card/80 backdrop-blur-xl rounded-2xl p-2.5 border border-border/60 shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 z-20 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-card group"
+          className="absolute -right-4 top-1/2 -translate-y-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 backdrop-blur-2xl rounded-3xl p-3.5 border border-primary/20 shadow-2xl hover:shadow-primary/25 hover:scale-110 active:scale-95 transition-all duration-300 z-20 focus:outline-none focus:ring-4 focus:ring-primary/30 focus:ring-offset-2 focus:ring-offset-card group"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={isCollapsed ? "Click to expand sidebar (Ctrl+B)" : "Click to collapse sidebar (Ctrl+B)"}
           tabIndex={0}
         >
           <div className="relative">
-            {isCollapsed ? (
-              <Menu 
-                size={18} 
-                strokeWidth={2.5} 
-                className="text-primary group-hover:text-primary/80 group-active:text-primary/60 transition-all duration-200" 
-              />
-            ) : (
-              <ChevronLeft 
-                size={18} 
-                strokeWidth={2.5} 
-                className="text-primary group-hover:text-primary/80 group-active:text-primary/60 transition-all duration-200" 
-              />
-            )}
+            {/* Background glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            {/* Icon container */}
+            <div className="relative z-10 p-1">
+              {isCollapsed ? (
+                <Menu 
+                  size={22} 
+                  strokeWidth={2.5} 
+                  className="text-primary group-hover:text-primary/90 group-active:text-primary/70 transition-all duration-200 drop-shadow-sm" 
+                />
+              ) : (
+                <ChevronLeft 
+                  size={22} 
+                  strokeWidth={2.5} 
+                  className="text-primary group-hover:text-primary/90 group-active:text-primary/70 transition-all duration-200 drop-shadow-sm" 
+                />
+              )}
+            </div>
+            
+            {/* Animated border */}
+            <div className="absolute inset-0 rounded-3xl border-2 border-primary/30 group-hover:border-primary/50 transition-colors duration-300"></div>
+            
             {/* Ripple effect */}
-            <div className="absolute inset-0 rounded-2xl bg-primary/10 scale-0 group-active:scale-100 transition-transform duration-200"></div>
+            <div className="absolute inset-0 rounded-3xl bg-primary/20 scale-0 group-active:scale-100 transition-transform duration-200"></div>
+            
+            {/* Pulse animation for collapsed state */}
+            {isCollapsed && (
+              <div className="absolute inset-0 rounded-3xl border-2 border-primary/40 animate-pulse"></div>
+            )}
           </div>
         </button>
       </div>
