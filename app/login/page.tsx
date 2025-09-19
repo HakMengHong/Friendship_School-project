@@ -222,10 +222,10 @@ function LoginForm() {
           {/* Heading */}
           <div className="text-center space-y-4 mb-8">
             <div className="space-y-2">
-              <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
+              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-2">
                 កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">
+              <p className="text-gray-600 dark:text-gray-300 text-base">
                 សូមបញ្ចូលឈ្មោះនិងលេខកូដសម្ងាត់
               </p>
             </div>
@@ -235,7 +235,7 @@ function LoginForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Username Input with Dropdown */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent dark:text-gray-200 flex items-center gap-2">
+              <label className="text-base font-semibold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent dark:text-gray-200 flex items-center gap-2">
                 <User className="w-4 h-4 text-primary" />
                 ឈ្មោះគ្រូ
               </label>
@@ -284,9 +284,9 @@ function LoginForm() {
                             {user.avatar}
                           </div>
                           <div className="flex-1">
-                            <div className="font-medium text-gray-900 dark:text-white">{user.name}</div>
+                            <div className="font-medium text-gray-900 dark:text-white text-base">{user.name}</div>
                             <div className="flex items-center gap-2">
-                            <div className="text-xs text-gray-500 dark:text-gray-400 hidden">{user.role}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 hidden">{user.role}</div>
                               {user.userRole === 'admin' && (
                                 <Crown className="w-3 h-3 text-yellow-500 hidden" />
                               )}
@@ -298,7 +298,7 @@ function LoginForm() {
                         </div>
                       ))
                     ) : (
-                      <div className="px-4 py-3 text-gray-500 dark:text-gray-400 text-center">
+                      <div className="px-4 py-3 text-gray-500 dark:text-gray-400 text-center text-base">
                         រកមិនឃើញឈ្មោះ
                       </div>
                     )}
@@ -309,7 +309,7 @@ function LoginForm() {
 
             {/* Password */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent dark:text-gray-200 flex items-center gap-2">
+              <label className="text-base font-semibold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent dark:text-gray-200 flex items-center gap-2">
                 <Lock className="w-4 h-4 text-primary" />
                 លេខកូដសម្ងាត់
               </label>
@@ -342,7 +342,7 @@ function LoginForm() {
             {loginError && (
               <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <AlertCircle className="w-4 h-4 text-red-500" />
-                <span className="text-sm text-red-600 dark:text-red-400">{loginError}</span>
+                <span className="text-base text-red-600 dark:text-red-400">{loginError}</span>
               </div>
             )}
 
@@ -350,7 +350,7 @@ function LoginForm() {
             {isTimeout && (
               <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                 <AlertCircle className="w-4 h-4 text-yellow-500" />
-                <span className="text-sm text-yellow-600 dark:text-yellow-400">{timeoutMessage}</span>
+                <span className="text-base text-yellow-600 dark:text-yellow-400">{timeoutMessage}</span>
               </div>
             )}
 
@@ -385,7 +385,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600 dark:text-gray-300">កំពុងផ្ទុក...</p>
+          <p className="text-gray-600 dark:text-gray-300 text-base">កំពុងផ្ទុក...</p>
         </div>
       </div>
     }>
