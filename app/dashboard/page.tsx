@@ -311,7 +311,7 @@ function DashboardContent() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600 dark:text-gray-300">កំពុងផ្ទុក...</p>
+          <p className="text-base text-gray-600 dark:text-gray-300">កំពុងផ្ទុក...</p>
         </div>
         </div>
     )
@@ -322,8 +322,8 @@ function DashboardContent() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">មានបញ្ហាក្នុងការផ្ទុក</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">មានបញ្ហាក្នុងការផ្ទុក</h2>
+          <p className="text-base text-gray-600 dark:text-gray-300 mb-4">{error}</p>
           <Button onClick={fetchDashboardData} className="bg-blue-600 hover:bg-blue-700">
             <RefreshCw className="h-4 w-4 mr-2" />
                 ព្យាយាមម្តងទៀត
@@ -391,10 +391,10 @@ function DashboardContent() {
                       <stat.icon className="h-6 w-6 text-white" />
             </div>
                     <div className="text-right">
-                      <p className={`text-3xl font-bold ${stat.iconColor}`}>
+                      <p className={`text-4xl font-bold ${stat.iconColor}`}>
                         {stat.value.toLocaleString('km-KH')}
                       </p>
-                      <p className={`text-lg ${stat.iconColor} font-medium`}>
+                      <p className={`text-xl ${stat.iconColor} font-medium`}>
                         {stat.title}
                       </p>
             </div>
@@ -420,7 +420,7 @@ function DashboardContent() {
                 <CardTitle className="text-white flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Bell className="h-5 w-5" />
-                    <span className="text-white">ការជូនដំណឹង</span>
+                    <span className="text-xl text-white">ការជូនដំណឹង</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge className="bg-white/20 text-white">
@@ -455,20 +455,20 @@ function DashboardContent() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              <p className="text-base font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                 {notification.message}
                               </p>
                               {notification.details && (
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                                   {notification.details}
                                 </p>
                               )}
                               <div className="flex items-center space-x-3 mt-2">
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
                                   {notification.time}
                                 </span>
                                 {notification.author && (
-                                  <span className="text-xs text-blue-600 dark:text-blue-400">
+                                  <span className="text-sm text-blue-600 dark:text-blue-400">
                                     ដោយ: {notification.author}
                                   </span>
                                 )}
@@ -476,7 +476,7 @@ function DashboardContent() {
                             </div>
                             <Badge 
                               variant="secondary" 
-                              className={`text-xs ${
+                              className={`text-sm ${
                                 notification.type === 'warning' 
                                   ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' 
                                   : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
@@ -491,8 +491,8 @@ function DashboardContent() {
                   ) : (
                     <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                       <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                      <p className="text-sm">មិនមានការជូនដំណឹង</p>
-                      <p className="text-xs mt-1">ការជូនដំណឹងថ្មីៗនឹងបង្ហាញនៅទីនេះ</p>
+                      <p className="text-base">មិនមានការជូនដំណឹង</p>
+                      <p className="text-sm mt-1">ការជូនដំណឹងថ្មីៗនឹងបង្ហាញនៅទីនេះ</p>
                     </div>
                   )}
               </div>
@@ -514,7 +514,7 @@ function DashboardContent() {
               <CardTitle className="text-white flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Activity className="h-5 w-5" />
-                  <span className="text-white">សកម្មភាពថ្មីៗ</span>
+                  <span className="text-xl text-white">សកម្មភាពថ្មីៗ</span>
       </div>
                 <div className="flex items-center space-x-2">
                   <Badge className="bg-white/20 text-white">
@@ -553,24 +553,24 @@ function DashboardContent() {
                     <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                            <p className="text-base font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                               {activity.user}
                             </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {activity.action}
                       </p>
                             {activity.details && (
-                              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 line-clamp-2">
+                              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1 line-clamp-2">
                                 {activity.details}
                               </p>
                             )}
                             <div className="flex items-center space-x-3 mt-2">
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
                                 {activity.time}
                               </span>
                               <Badge 
                                 variant="outline" 
-                                className={`text-xs ${
+                                className={`text-sm ${
                                   activity.type === 'add' ? 'border-green-300 text-green-700 dark:border-green-700 dark:text-green-300' :
                                   activity.type === 'edit' ? 'border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-300' :
                                   activity.type === 'attendance' ? 'border-yellow-300 text-yellow-700 dark:border-yellow-700 dark:text-yellow-300' :
@@ -593,8 +593,8 @@ function DashboardContent() {
                 ) : (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     <Activity className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                    <p className="text-sm">មិនមានសកម្មភាព</p>
-                    <p className="text-xs mt-1">សកម្មភាពថ្មីៗនឹងបង្ហាញនៅទីនេះ</p>
+                    <p className="text-base">មិនមានសកម្មភាព</p>
+                    <p className="text-sm mt-1">សកម្មភាពថ្មីៗនឹងបង្ហាញនៅទីនេះ</p>
                   </div>
                 )}
               </div>
@@ -615,7 +615,7 @@ function DashboardContent() {
               <CardHeader className="p-6 bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 text-white rounded-t-xl">
                 <CardTitle className="text-white flex items-center space-x-2">
                   <TrendingUp className="h-5 w-5" />
-                  <span className="text-white">គុណភាពការសិក្សា</span>
+                  <span className="text-xl text-white">គុណភាពការសិក្សា</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
@@ -656,7 +656,7 @@ function DashboardContent() {
                 ) : (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     <BarChart3 className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                    <p>មិនមានទិន្នន័យ</p>
+                    <p className="text-base">មិនមានទិន្នន័យ</p>
                   </div>
                 )}
                 </CardContent>
@@ -682,7 +682,7 @@ function DashboardContent() {
               <CardTitle className="text-white flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <MessageSquare className="h-5 w-5" />
-                  <span className="text-white">ការប្រកាស</span>
+                  <span className="text-xl text-white">ការប្រកាស</span>
                 </div>
           <Button 
                   onClick={() => setShowAddForm(!showAddForm)}
@@ -697,7 +697,7 @@ function DashboardContent() {
             <CardContent className="p-6">
           {showAddForm && (
                 <div className="mb-6 p-4 rounded-lg transition-colors bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700/70">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
                     <span className="text-primary">បន្ថែមការប្រកាសថ្មី</span> 
                   </h3>
               <div className="space-y-4">
@@ -745,13 +745,13 @@ function DashboardContent() {
                     >
                       <div className="flex items-start justify-between">
                     <div className="flex-1">
-                          <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
+                          <h4 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
                           {announcement.title}
                           </h4>
-                          <p className="text-sm mb-2 text-gray-600 dark:text-gray-400">
+                          <p className="text-base mb-2 text-gray-600 dark:text-gray-400">
                         {announcement.content}
                       </p>
-                          <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                             <span>ដោយ: {announcement.author}</span>
                             <span>{new Date(announcement.createdAt).toLocaleDateString('km-KH')}</span>
                       </div>
@@ -770,7 +770,7 @@ function DashboardContent() {
             ) : (
               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>មិនមានការប្រកាស</p>
+                    <p className="text-base">មិនមានការប្រកាស</p>
               </div>
             )}
           </div>
@@ -792,7 +792,7 @@ function DashboardContent() {
             <CardHeader className="p-6 bg-gradient-to-r from-yellow-500 via-orange-600 to-red-600 text-white rounded-t-xl">
               <CardTitle className="text-white flex items-center space-x-2">
                 <Star className="h-5 w-5" />
-                <span>សិស្សពូកែ</span>
+                <span className="text-xl">សិស្សពូកែ</span>
           </CardTitle>
         </CardHeader>
             <CardContent className="p-6">
@@ -808,20 +808,20 @@ function DashboardContent() {
                       {student.firstName.charAt(0)}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                           {student.lastName} {student.firstName}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-base text-gray-500 dark:text-gray-400">
                             {student.class}
                       </p>
                     </div>
                   </div>
                   <div className="space-y-2">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-base text-gray-600 dark:text-gray-400">
                           សិស្សសកម្ម
                         </p>
                     <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
                             ថ្នាក់ {student.class}
                           </span>
                       <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
@@ -835,7 +835,7 @@ function DashboardContent() {
           ) : (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <Users className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-              <p>មិនមានសិស្ស</p>
+              <p className="text-base">មិនមានសិស្ស</p>
             </div>
           )}
         </CardContent>

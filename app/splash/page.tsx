@@ -81,11 +81,11 @@ export default function SplashScreen() {
 
         {/* Text content */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white/90 animate-fade-in">
+          <h1 className="text-5xl font-extrabold tracking-tight text-white/90 animate-fade-in">
             សួស្តី!
           </h1>
-          <p className="text-white/90 text-xl font-medium">សូមស្វាគមន៍មកកាន់</p>
-          <p className="text-white/70 text-lg">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</p>
+          <p className="text-white/90 text-2xl font-medium">សូមស្វាគមន៍មកកាន់</p>
+          <p className="text-white/70 text-xl">កម្មវិធីគ្រប់គ្រង់ពិន្ទុសិស្ស</p>
         </div>
 
         {/* Progress bar */}
@@ -97,16 +97,16 @@ export default function SplashScreen() {
         </div>
 
         {/* Loading text */}
-        <p className="text-white/80 text-sm animate-pulse">កំពុងផ្ទុក... {progress}%</p>
+        <p className="text-white/80 text-base animate-pulse">កំពុងផ្ទុក... {progress}%</p>
       </div>
 
       {/* Skip button with improved styling */}
       <button
         onClick={handleSkipSplash}
-        className="absolute bottom-8 right-8 text-white/70 hover:text-white text-sm underline transition-colors hover:scale-105 transform flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/20"
+        className="absolute bottom-8 right-8 text-white/70 hover:text-white text-base underline transition-colors hover:scale-105 transform flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/20"
       >
         រំលង
-        <span className="text-xs opacity-70">(ជ្រើសរើសដើម្បីរំលងក្នុងពេលក្រោយ)</span>
+        <span className="text-sm opacity-70">(ជ្រើសរើសដើម្បីរំលងក្នុងពេលក្រោយ)</span>
       </button>
     </div>
   )
