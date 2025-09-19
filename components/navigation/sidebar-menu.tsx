@@ -244,14 +244,14 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
       )}
     >
       {/* Header with logo and school name */}
-      <div className="flex items-center p-6 relative border-b border-border/30">
+      <div className="flex items-center p-6 relative border-b border-border/30 min-h-[120px]">
         <div className="flex items-center">
           <div className="relative w-20 h-20 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-white/25 to-transparent rounded-3xl"></div>
             <img 
               src="/logo.png" 
               alt="សាលាមិត្តភាព" 
-              className="w-12 h-12 object-contain relative z-10 group-hover:scale-110 transition-transform duration-300"
+              className="w-16 h-16 object-contain relative z-10 group-hover:scale-110 transition-transform duration-300"
               onError={(e) => {
                 // Fallback to icon if image fails to load
                 const target = e.target as HTMLImageElement;
@@ -267,12 +267,22 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
             {/* Animated ring */}
             <div className="absolute inset-0 rounded-3xl border-2 border-white/20 group-hover:border-white/40 transition-colors duration-300"></div>
           </div>
-          <div className={cn("ml-6 transition-all duration-500 ease-out", isCollapsed ? "opacity-0 w-0 scale-95" : "opacity-100 scale-100")}>
-            <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap">
-              សាលាមិត្តភាព
-            </h1>
-            <p className="text-base text-muted-foreground/80 whitespace-nowrap font-semibold">Friendship School</p>
-          </div>
+           <div className={cn("ml-6 transition-all duration-500 ease-out flex flex-col justify-center", isCollapsed ? "opacity-0 w-0 scale-95" : "opacity-100 scale-100")}>
+             <h1 
+               className="text-3xl font-black font-khmer tracking-wide bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap" 
+               style={{ 
+                 lineHeight: '1.6', 
+                 fontFeatureSettings: '"kern" 1, "liga" 1',
+                 textRendering: 'optimizeLegibility',
+                 WebkitFontSmoothing: 'antialiased',
+                 MozOsxFontSmoothing: 'grayscale',
+                 letterSpacing: '0.02em'
+               }}
+             >
+               សាលាមិត្តភាព
+             </h1>
+             <p className="text-base text-muted-foreground/80 whitespace-nowrap font-semibold mt-1">Friendship School</p>
+           </div>
         </div>
 
         {/* Collapse button */}
