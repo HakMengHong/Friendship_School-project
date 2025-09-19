@@ -79,7 +79,7 @@ function UnauthorizedContent() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-destructive mx-auto"></div>
-          <p className="text-muted-foreground">កំពុងផ្ទុក...</p>
+          <p className="text-base text-muted-foreground">កំពុងផ្ទុក...</p>
         </div>
       </div>
     )
@@ -115,10 +115,10 @@ function UnauthorizedContent() {
               <Shield className="w-8 h-8 text-destructive" />
             </div>
             <div>
-              <CardTitle id="unauthorized-title" className="text-2xl font-bold text-foreground mb-2">
+              <CardTitle id="unauthorized-title" className="text-3xl font-bold text-foreground mb-2">
                 គ្មានការអនុញ្ញាត
               </CardTitle>
-              <CardDescription id="unauthorized-description" className="text-muted-foreground">
+              <CardDescription id="unauthorized-description" className="text-base text-muted-foreground">
                 អ្នកមិនមានការអនុញ្ញាតចូលទៅកាន់ទំព័រនេះទេ
               </CardDescription>
             </div>
@@ -128,9 +128,9 @@ function UnauthorizedContent() {
           <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4">
             <div className="flex items-start space-x-3">
               <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-foreground">
-                <p className="font-medium mb-1">ការចូលប្រើត្រូវបានហាមឃាត់</p>
-                <p className="text-muted-foreground">
+              <div className="text-base text-foreground">
+                <p className="text-lg font-medium mb-1">ការចូលប្រើត្រូវបានហាមឃាត់</p>
+                <p className="text-base text-muted-foreground">
                   ទំព័រនេះត្រូវការការអនុញ្ញាតពិសេសដែលអ្នកមិនមាន។ 
                   សូមទាក់ទងអ្នកគ្រប់គ្រងប្រព័ន្ធប្រសិនបើអ្នកគិតថានេះជាកំហុស។
                 </p>
@@ -140,10 +140,10 @@ function UnauthorizedContent() {
 
           {user && (
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <div className="text-sm text-foreground">
-                <p className="font-medium mb-1">ព័ត៌មានអ្នកប្រើប្រាស់:</p>
-                <p className="text-muted-foreground">ឈ្មោះ: {user.firstname} {user.lastname}</p>
-                <p className="text-muted-foreground">តួនាទី: {user.role === 'admin' ? 'អ្នកគ្រប់គ្រង' : 'គ្រូ'}</p>
+              <div className="text-base text-foreground">
+                <p className="text-lg font-medium mb-1">ព័ត៌មានអ្នកប្រើប្រាស់:</p>
+                <p className="text-base text-muted-foreground">ឈ្មោះ: {user.firstname} {user.lastname}</p>
+                <p className="text-base text-muted-foreground">តួនាទី: {user.role === 'admin' ? 'អ្នកគ្រប់គ្រង' : 'គ្រូ'}</p>
               </div>
             </div>
           )}
@@ -185,7 +185,7 @@ export default function UnauthorizedPage() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-destructive mx-auto"></div>
-          <p className="text-muted-foreground">កំពុងផ្ទុក...</p>
+          <p className="text-base text-muted-foreground">កំពុងផ្ទុក...</p>
         </div>
       </div>
     }>

@@ -137,8 +137,8 @@ function GradeContent() {
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <div className="text-right">
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">3</p>
-                <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">ឆ្នាំសិក្សា</p>
+                <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">3</p>
+                <p className="text-sm text-blue-500 dark:text-blue-300 font-medium">ឆ្នាំសិក្សា</p>
               </div>
             </div>
             <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -153,8 +153,8 @@ function GradeContent() {
                 <BookOpen className="h-6 w-6 text-white" />
               </div>
               <div className="text-right">
-                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">12</p>
-                <p className="text-xs text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់រៀន</p>
+                <p className="text-4xl font-bold text-purple-600 dark:text-purple-400">12</p>
+                <p className="text-sm text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់រៀន</p>
               </div>
             </div>
             <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -169,8 +169,8 @@ function GradeContent() {
                 <Users className="h-6 w-6 text-white" />
               </div>
               <div className="text-right">
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400">245</p>
-                <p className="text-xs text-green-500 dark:text-green-300 font-medium">សិស្សសរុប</p>
+                <p className="text-4xl font-bold text-green-600 dark:text-green-400">245</p>
+                <p className="text-sm text-green-500 dark:text-green-300 font-medium">សិស្សសរុប</p>
               </div>
             </div>
             <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -185,8 +185,8 @@ function GradeContent() {
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div className="text-right">
-                <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">1,250</p>
-                <p className="text-xs text-orange-500 dark:text-orange-300 font-medium">ពិន្ទុសរុប</p>
+                <p className="text-4xl font-bold text-orange-600 dark:text-orange-400">1,250</p>
+                <p className="text-sm text-orange-500 dark:text-orange-300 font-medium">ពិន្ទុសរុប</p>
               </div>
             </div>
             <div className="h-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -198,7 +198,7 @@ function GradeContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 hover:shadow-lg transition-all duration-200">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="text-xl flex items-center space-x-2">
               <BookOpen className="h-5 w-5 text-blue-600" />
               <span>ពិន្ទុតាមមុខវិជ្ជា</span>
             </CardTitle>
@@ -207,7 +207,7 @@ function GradeContent() {
             <div className="h-64 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
               <div className="text-center">
                 <BarChart2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-500 dark:text-gray-400">Bar Chart Placeholder</p>
+                <p className="text-base text-gray-500 dark:text-gray-400">Bar Chart Placeholder</p>
               </div>
             </div>
           </CardContent>
@@ -215,7 +215,7 @@ function GradeContent() {
 
         <Card className="hover:shadow-lg transition-all duration-200">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="text-xl flex items-center space-x-2">
               <Target className="h-5 w-5 text-green-600" />
               <span>ការបែងចែកពិន្ទុ</span>
             </CardTitle>
@@ -224,7 +224,7 @@ function GradeContent() {
             <div className="h-64 flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
               <div className="text-center">
                 <Target className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-500 dark:text-gray-400">Pie Chart Placeholder</p>
+                <p className="text-base text-gray-500 dark:text-gray-400">Pie Chart Placeholder</p>
               </div>
             </div>
           </CardContent>
@@ -234,7 +234,7 @@ function GradeContent() {
       {/* Goals Tracking */}
       <Card className="hover:shadow-lg transition-all duration-200">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="text-xl flex items-center space-x-2">
             <Target className="h-5 w-5 text-blue-600" />
             <span>ការតាមដានគោលដៅ</span>
           </CardTitle>
@@ -243,8 +243,8 @@ function GradeContent() {
           <div className="space-y-6">
             <div>
               <div className="flex justify-between mb-2">
-                <span className="font-medium">គោលដៅពិន្ទុមធ្យម</span>
-                <span className="font-semibold text-blue-600">85.2/90</span>
+                <span className="text-base font-medium">គោលដៅពិន្ទុមធ្យម</span>
+                <span className="text-lg font-semibold text-blue-600">85.2/90</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                 <div 
@@ -254,13 +254,13 @@ function GradeContent() {
               </div>
               <div className="flex items-center mt-1">
                 <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                <span className="text-xs text-green-500">+2.1% ពីខែមុន</span>
+                <span className="text-sm text-green-500">+2.1% ពីខែមុន</span>
               </div>
             </div>
             <div>
               <div className="flex justify-between mb-2">
-                <span className="font-medium">គោលដៅភាសាអង់គ្លេស</span>
-                <span className="font-semibold text-green-600">88/95</span>
+                <span className="text-base font-medium">គោលដៅភាសាអង់គ្លេស</span>
+                <span className="text-lg font-semibold text-green-600">88/95</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                 <div 
@@ -270,13 +270,13 @@ function GradeContent() {
               </div>
               <div className="flex items-center mt-1">
                 <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                <span className="text-xs text-green-500">+1.8% ពីខែមុន</span>
+                <span className="text-sm text-green-500">+1.8% ពីខែមុន</span>
               </div>
             </div>
             <div>
               <div className="flex justify-between mb-2">
-                <span className="font-medium">គោលដៅគណិតវិទ្យា</span>
-                <span className="font-semibold text-purple-600">92/95</span>
+                <span className="text-base font-medium">គោលដៅគណិតវិទ្យា</span>
+                <span className="text-lg font-semibold text-purple-600">92/95</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                 <div 
@@ -286,7 +286,7 @@ function GradeContent() {
               </div>
               <div className="flex items-center mt-1">
                 <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                <span className="text-xs text-green-500">+3.2% ពីខែមុន</span>
+                <span className="text-sm text-green-500">+3.2% ពីខែមុន</span>
               </div>
             </div>
           </div>
@@ -298,7 +298,7 @@ function GradeContent() {
         <Card className="lg:col-span-2 hover:shadow-lg transition-all duration-200">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="text-xl flex items-center space-x-2">
                 <Calendar className="h-5 w-5 text-blue-600" />
                 <span>ពិន្ទុថ្មីៗ</span>
               </CardTitle>
@@ -318,27 +318,27 @@ function GradeContent() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>មុខវិជ្ជា</TableHead>
-                  <TableHead>ពិន្ទុ</TableHead>
-                  <TableHead>គ្រូបង្រៀន</TableHead>
-                  <TableHead>កាលបរិច្ឆេទ</TableHead>
-                  <TableHead>ស្ថានភាព</TableHead>
-                  <TableHead>ដំណើរការ</TableHead>
+                  <TableHead className="text-base">មុខវិជ្ជា</TableHead>
+                  <TableHead className="text-base">ពិន្ទុ</TableHead>
+                  <TableHead className="text-base">គ្រូបង្រៀន</TableHead>
+                  <TableHead className="text-base">កាលបរិច្ឆេទ</TableHead>
+                  <TableHead className="text-base">ស្ថានភាព</TableHead>
+                  <TableHead className="text-base">ដំណើរការ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredGrades.map((item) => (
                   <TableRow key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <TableCell className="font-medium">{item.subject}</TableCell>
+                    <TableCell className="text-base font-medium">{item.subject}</TableCell>
                     <TableCell>
-                      <span className={`font-bold ${getGradeColor(item.grade)}`}>
+                      <span className={`text-lg font-bold ${getGradeColor(item.grade)}`}>
                         {item.grade}
                       </span>
                     </TableCell>
-                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                    <TableCell className="text-base text-gray-600 dark:text-gray-400">
                       {item.teacher}
                     </TableCell>
-                    <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                    <TableCell className="text-base text-gray-600 dark:text-gray-400">
                       {item.date}
                     </TableCell>
                     <TableCell>
