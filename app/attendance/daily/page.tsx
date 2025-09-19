@@ -874,7 +874,7 @@ function DailyAttendanceContent() {
                     <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                       {statistics.totalPresent} នាក់
                     </p>
-                    <p className="text-xs text-green-500 dark:text-green-300 font-medium">
+                    <p className="text-sm text-green-500 dark:text-green-300 font-medium">
                       សរុបវត្តមាន
                     </p>
                   </div>
@@ -907,7 +907,7 @@ function DailyAttendanceContent() {
                     <p className="text-3xl font-bold text-red-600 dark:text-red-400">
                       {statistics.totalAbsent} នាក់
                     </p>
-                    <p className="text-xs text-red-500 dark:text-red-300 font-medium">
+                    <p className="text-sm text-red-500 dark:text-red-300 font-medium">
                       សរុបអវត្តមាន
                     </p>
                   </div>
@@ -1033,7 +1033,7 @@ function DailyAttendanceContent() {
                                       <div className="font-medium text-gray-900 dark:text-white text-base">
                                         {student.firstName} {student.lastName}
                                       </div>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                                      <div className="text-sm text-gray-500 dark:text-gray-400">
                                         ថ្នាក់ទី {student.class}
                                       </div>
                                     </div>
@@ -1046,7 +1046,7 @@ function DailyAttendanceContent() {
                                   >
                                     {getStatusBadge(getAttendanceStatus(student.studentId, "AM"))}
                                     {amAttendance?.reason && (
-                                      <span className="text-xs text-gray-500 dark:text-gray-400 max-w-20 truncate">
+                                      <span className="text-sm text-gray-500 dark:text-gray-400 max-w-20 truncate">
                                         {amAttendance.reason}
                                       </span>
                                     )}
@@ -1059,7 +1059,7 @@ function DailyAttendanceContent() {
                                   >
                                     {getStatusBadge(getAttendanceStatus(student.studentId, "PM"))}
                                     {pmAttendance?.reason && (
-                                      <span className="text-xs text-gray-500 dark:text-gray-400 max-w-20 truncate">
+                                      <span className="text-sm text-gray-500 dark:text-gray-400 max-w-20 truncate">
                                         {pmAttendance.reason}
                                       </span>
                                     )}

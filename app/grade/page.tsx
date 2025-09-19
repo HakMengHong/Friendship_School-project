@@ -351,7 +351,7 @@ function GradeContent() {
                         ) : (
                           <ArrowDown className="h-3 w-3 text-red-500 mr-1" />
                         )}
-                        <span className={`text-xs ${item.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+                        <span className={`text-sm ${item.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
                           {item.trend}
                         </span>
                       </div>
@@ -379,7 +379,7 @@ function GradeContent() {
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-blue-600">82.5</p>
-                  <p className="text-xs text-gray-500">ពិន្ទុ</p>
+                  <p className="text-sm text-gray-500">ពិន្ទុ</p>
                 </div>
               </div>
               <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -389,13 +389,13 @@ function GradeContent() {
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-green-600">85.2</p>
-                  <p className="text-xs text-green-500">+2.7</p>
+                  <p className="text-sm text-green-500">+2.7</p>
                 </div>
               </div>
               <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                 <p className="text-sm font-medium">ការកែលម្អសរុប</p>
                 <p className="text-2xl font-bold text-purple-600">+3.3%</p>
-                <p className="text-xs text-gray-500">ពីពាក់កណ្តាលឆ្នាំទី១</p>
+                <p className="text-sm text-gray-500">ពីពាក់កណ្តាលឆ្នាំទី១</p>
               </div>
             </div>
           </CardContent>

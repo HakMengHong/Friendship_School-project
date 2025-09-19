@@ -1285,7 +1285,7 @@ function AddScoreContent() {
                             <p className="font-medium text-primary dark:text-white truncate text-base">
                               {student.lastName} {student.firstName}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
                           </div>
                         </div>
                       </div>
@@ -1357,7 +1357,7 @@ function AddScoreContent() {
                             <h3 className="font-medium text-primary dark:text-white">
                               បញ្ចូលពិន្ទុ ({filteredStudents.length} នាក់)
                             </h3>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-sm text-gray-500">
                               បញ្ចូលពិន្ទុសម្រាប់សិស្សច្រើននាក់
                             </div>
                           </div>
@@ -1367,7 +1367,7 @@ function AddScoreContent() {
                               {filteredStudents.map(student => (
                                 <div key={student.studentId} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
                                   <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                                       {student.photo ? (
                                         <img
                                           src={student.photo}
@@ -1382,7 +1382,7 @@ function AddScoreContent() {
                                       <p className="font-medium text-primary dark:text-white text-base truncate">
                                         {student.lastName} {student.firstName}
                                       </p>
-                                      <p className="text-xs text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
+                                      <p className="text-sm text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
                                     </div>
                                     <div className="flex items-center space-x-3">
                                       <Input
@@ -1455,7 +1455,7 @@ function AddScoreContent() {
                             <div>
                               <h3 className="font-semibold text-primary dark:text-white">{selectedStudent.lastName} {selectedStudent.firstName}</h3>
                               <p className="text-base text-gray-600 dark:text-gray-400 pt-1 pb-1">{getFormattedClass(selectedStudent)}</p>
-                              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                              <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
                                 ពិន្ទុអតិបរមា: {getMaxScore(selectedStudent)} ពិន្ទុ
                               </p>
                             </div>
@@ -1527,7 +1527,7 @@ function AddScoreContent() {
                           <div>
                             <label className="block text-base font-medium mb-2 text-primary dark:text-gray-300">
                               មតិផ្សេងៗ
-                              <span className="text-gray-400 text-xs ml-2">(ជម្រើស)</span>
+                              <span className="text-gray-400 text-sm ml-2">(ជម្រើស)</span>
                             </label>
                             <Input
                               value={comment}
@@ -1646,12 +1646,12 @@ function AddScoreContent() {
                     <div className="space-y-2">
                       {/* Auto-sync explanation and toggle */}
                       <div className="flex items-center justify-between">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-1">
                           <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                           <span>តម្រងនេះនឹងសម្រួលដោយស្វ័យប្រវត្តិពីតម្រងខាងលើ</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <label className="text-xs text-gray-600 dark:text-gray-400">សម្រួលស្វ័យប្រវត្តិ:</label>
+                          <label className="text-sm text-gray-600 dark:text-gray-400">សម្រួលស្វ័យប្រវត្តិ:</label>
                           <button
                             onClick={() => setAutoSyncEnabled(!autoSyncEnabled)}
                             className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
@@ -1671,21 +1671,21 @@ function AddScoreContent() {
                       {autoSyncEnabled && ((selectedMonth && selectedMonth !== '') || (selectedGradeYear && selectedGradeYear !== '')) ? (
                         <div className="flex items-center space-x-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-md">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                          <span className="text-sm text-green-600 dark:text-green-400 font-medium">
                             តម្រងដោយស្វ័យប្រវត្តិ
                           </span>
                         </div>
                       ) : !autoSyncEnabled && (gradeListMonth !== 'all' || gradeListYear !== 'all') ? (
                         <div className="flex items-center space-x-1 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-md">
                           <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                          <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                          <span className="text-sm text-orange-600 dark:text-orange-400 font-medium">
                             តម្រងដោយដៃ
                           </span>
                         </div>
                       ) : (gradeListMonth !== 'all' || gradeListYear !== 'all') ? (
                         <div className="flex items-center space-x-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-md">
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                          <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
                             កំពុងតម្រង
                           </span>
                         </div>
@@ -1772,10 +1772,10 @@ function AddScoreContent() {
                                   <p className="font-medium text-primary dark:text-white text-base">
                                     {grade.subject.subjectName}
                                   </p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
                                     {grade.gradeDate} • {grade.user ? `${grade.user.lastname} ${grade.user.firstname}` : 'មិនមាន'}
                                     {grade.gradeDate && (
-                                      <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-xs">
+                                      <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-sm">
                                         {grade.gradeDate}
                                       </span>
                                     )}
@@ -1821,19 +1821,19 @@ function AddScoreContent() {
                         {/* Stats Summary - Compact */}
                         <div className="mt-6 grid grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div className="text-center">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">ចំនួនពិន្ទុ</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">ចំនួនពិន្ទុ</p>
                             <p className="text-lg font-bold text-primary dark:text-white">{totalGrades}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">សរុបពិន្ទុ</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">សរុបពិន្ទុ</p>
                             <p className="text-lg font-bold text-primary dark:text-white">{totalPoints}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">មធ្យមភាគ</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">មធ្យមភាគ</p>
                             <p className="text-lg font-bold text-primary dark:text-white">{averageScore}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">ថ្នាក់</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">ថ្នាក់</p>
                             <p className="text-lg font-bold text-primary dark:text-white">{selectedStudent ? getFormattedClass(selectedStudent) : '-'}</p>
                           </div>
                         </div>
