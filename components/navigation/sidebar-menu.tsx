@@ -51,7 +51,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         subItems: [
           { id: "admin-users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/dashboard/users", icon: Shield },
           { id: "admin-academic", label: "ការគ្រប់គ្រងថ្នាក់", href: "/dashboard/academic-management", icon: BookOpen },
-          { id: "admin-add-student-class", label: "បន្ថែមសិស្សទៅក្នុងថ្នាក់", href: "/dashboard/add-student-class", icon: UserPlus },
+          { id: "admin-add-student-class", label: "បន្ថែមសិស្សក្នុងថ្នាក់", href: "/dashboard/add-student-class", icon: UserPlus },
           { id: "admin-view-student-class", label: "មើលថ្នាក់រៀន", href: "/dashboard/view-student-class", icon: BookOpen },
           { id: "admin-id-cards", label: "ប័ណ្ណសម្គាល់", href: "/dashboard/id-cards", icon: UserIcon },
         ],
@@ -269,7 +269,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
           </div>
            <div className={cn("ml-4 pr-16 transition-all duration-500 ease-out flex flex-col justify-center", isCollapsed ? "opacity-0 w-0 scale-95" : "opacity-100 scale-100")}>
              <h1 
-               className="text-2xl font-black font-khmer tracking-wide bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap hover:text-primary transition-colors duration-300 cursor-pointer" 
+               className="text-2xl font-black font-khmer tracking-wide bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap transition-colors duration-300 cursor-pointer" 
                style={{ 
                  lineHeight: '1.6', 
                  fontFeatureSettings: '"kern" 1, "liga" 1',
@@ -281,7 +281,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
              >
                សាលាមិត្តភាព
              </h1>
-             <p className="text-base text-muted-foreground/80 whitespace-nowrap font-semibold mt-1 hover:text-primary transition-colors duration-300 cursor-pointer">Friendship School</p>
+             <p className="text-base text-muted-foreground/80 whitespace-nowrap font-semibold mt-1 transition-colors duration-300 cursor-pointer">Friendship School</p>
            </div>
         </div>
 
@@ -362,7 +362,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                     
                     {!isCollapsed && (
                       <div className="flex items-center justify-between w-full ml-3">
-                        <span className="truncate group-hover:text-primary transition-colors duration-300">{item.label}</span>
+                        <span className="truncate group-hover:text-gray-700 transition-colors duration-300">{item.label}</span>
                         <div className="flex items-center gap-2">
                           {item.badge && (
                             <span className={cn(
@@ -412,7 +412,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                               : "text-muted-foreground group-hover:text-primary/80"
                           )} />
                         )}
-                        <span className="truncate group-hover:text-primary transition-colors duration-300">{subItem.label}</span>
+                        <span className="truncate group-hover:text-gray-700 transition-colors duration-300">{subItem.label}</span>
                         {isActive(subItem.href) && (
                           <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                         )}
