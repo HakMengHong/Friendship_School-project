@@ -161,6 +161,14 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
     }
   }, [isCollapsed])
 
+  // Keyboard navigation for collapse button
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      toggleSidebar()
+    }
+  }, [toggleSidebar])
+
   const toggleDropdown = useCallback((itemId: string) => {
     if (isCollapsed) return
     setOpenDropdowns((prev) => 
@@ -213,6 +221,19 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
     })
   }, [pathname, menuItems, openDropdowns, isActive, hasActiveSubItem])
 
+  // Global keyboard shortcut for sidebar toggle (Ctrl/Cmd + B)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+        e.preventDefault()
+        toggleSidebar()
+      }
+    }
+
+    document.addEventListener('keydown', handleGlobalKeyDown)
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown)
+  }, [toggleSidebar])
+
   return (
     <div
       className={cn(
@@ -255,14 +276,29 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         {/* Collapse button */}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-4 top-6 bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-2xl p-2.5 border border-border/50 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 z-10 focus:outline-none focus:ring-2 focus:ring-primary/30 group"
+          onKeyDown={handleKeyDown}
+          className="absolute -right-3 top-1/2 -translate-y-1/2 bg-gradient-to-br from-card via-card/95 to-card/80 backdrop-blur-xl rounded-2xl p-2.5 border border-border/60 shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 z-20 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-card group"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={isCollapsed ? "Click to expand sidebar (Ctrl+B)" : "Click to collapse sidebar (Ctrl+B)"}
+          tabIndex={0}
         >
-          {isCollapsed ? (
-            <Menu size={20} strokeWidth={2.5} className="text-primary group-hover:text-primary/80 transition-colors" />
-          ) : (
-            <ChevronLeft size={20} strokeWidth={2.5} className="text-primary group-hover:text-primary/80 transition-colors" />
-          )}
+          <div className="relative">
+            {isCollapsed ? (
+              <Menu 
+                size={18} 
+                strokeWidth={2.5} 
+                className="text-primary group-hover:text-primary/80 group-active:text-primary/60 transition-all duration-200" 
+              />
+            ) : (
+              <ChevronLeft 
+                size={18} 
+                strokeWidth={2.5} 
+                className="text-primary group-hover:text-primary/80 group-active:text-primary/60 transition-all duration-200" 
+              />
+            )}
+            {/* Ripple effect */}
+            <div className="absolute inset-0 rounded-2xl bg-primary/10 scale-0 group-active:scale-100 transition-transform duration-200"></div>
+          </div>
         </button>
       </div>
 
