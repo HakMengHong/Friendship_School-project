@@ -889,7 +889,7 @@ function RegisterStudentContent() {
                 {loading ? (
                   <div className=" py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">កំពុងផ្ទុក...</p>
+                    <p className="text-base text-gray-500 dark:text-gray-400">កំពុងផ្ទុក...</p>
                   </div>
                 ) : filteredStudents.length > 0 ? (
                   <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -904,14 +904,14 @@ function RegisterStudentContent() {
                         }`}
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-base font-medium">
                             {student.firstName?.charAt(0) || ''}{student.lastName?.charAt(0) || ''}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-900 dark:text-white truncate">
                               {student.lastName} {student.firstName}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-base text-gray-500 dark:text-gray-400">
                               {getGradeLabel(student.class)} • ID: {student.studentId}
                             </p>
                           </div>
@@ -925,7 +925,7 @@ function RegisterStudentContent() {
                 ) : (
                   <div className=" py-12">
                     <User className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                    <p className="text-base text-gray-500 dark:text-gray-400 text-center">
                       {studentName ? 'រកមិនឃើញសិស្ស' : 'គ្មានសិស្ស'}
                     </p>
                   </div>
@@ -974,7 +974,7 @@ function RegisterStudentContent() {
                         </CardHeader>
                         <CardContent>
                           <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                            <p className="text-base text-blue-700 dark:text-blue-300">
                               <span className="text-red-500">*</span> បង្ហាញព័ត៌មានដែលត្រូវការ (Required fields)
                             </p>
                           </div>
@@ -983,7 +983,7 @@ function RegisterStudentContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* Last Name */}
                             <div className="space-y-2">
-                              <Label htmlFor="last-name" className="text-sm font-medium">
+                              <Label htmlFor="last-name" className="text-base font-medium">
                                 នាមត្រកូល <span className="text-red-500">*</span>
                               </Label>
                               <Input 
@@ -1000,7 +1000,7 @@ function RegisterStudentContent() {
 
                             {/* First Name */}
                             <div className="space-y-2">
-                              <Label htmlFor="first-name" className="text-sm font-medium">
+                              <Label htmlFor="first-name" className="text-base font-medium">
                                 នាមខ្លួន <span className="text-red-500">*</span>
                               </Label>
                               <Input 
@@ -1017,7 +1017,7 @@ function RegisterStudentContent() {
 
                             {/* Gender */}
                             <div className="space-y-2">
-                              <Label htmlFor="gender" className="text-sm font-medium">
+                              <Label htmlFor="gender" className="text-base font-medium">
                                 ភេទ <span className="text-red-500">*</span>
                               </Label>
                               <Select
@@ -1036,7 +1036,7 @@ function RegisterStudentContent() {
 
                             {/* Date of Birth */}
                             <div className="space-y-2">
-                              <Label htmlFor="dob" className="text-sm font-medium">
+                              <Label htmlFor="dob" className="text-base font-medium">
                                 ថ្ងៃខែឆ្នាំកំណើត <span className="text-red-500">*</span>
                               </Label>
                               <div className="relative">
@@ -1089,7 +1089,7 @@ function RegisterStudentContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* Age */}
                             <div className="space-y-2">
-                              <Label htmlFor="age" className="text-sm font-medium">អាយុ</Label>
+                              <Label htmlFor="age" className="text-base font-medium">អាយុ</Label>
                               <Input 
                                 id="age" 
                                 value={formData.age || ""}
@@ -1101,7 +1101,7 @@ function RegisterStudentContent() {
 
                             {/* Class */}
                             <div className="space-y-2">
-                              <Label htmlFor="class" className="text-sm font-medium">
+                              <Label htmlFor="class" className="text-base font-medium">
                                 ចូលរៀនថ្នាក់ទី <span className="text-red-500">*</span>
                               </Label>
                               <Select
@@ -1140,14 +1140,14 @@ function RegisterStudentContent() {
                                 checked={formData.registerToStudy}
                                 onCheckedChange={(checked) => setFormData({...formData, registerToStudy: checked as boolean})}
                               />
-                              <Label htmlFor="register-to-study" className="text-sm font-medium ">
+                              <Label htmlFor="register-to-study" className="text-base font-medium ">
                                 ចុះឈ្មោះចូលរៀន?
                               </Label>
                             </div>
                             
                             {/* Student ID */}
                             <div className="space-y-2">
-                              <Label className="text-sm font-medium">លេខសំគាល់សិស្ស (ID)</Label>
+                              <Label className="text-base font-medium">លេខសំគាល់សិស្ស (ID)</Label>
                               <div className="h-12 flex items-center justify-center font-bold bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                                 {isNewStudent ? formData.studentId || "NEW" : selectedStudent?.studentId || "N/A"}
                               </div>
@@ -1169,7 +1169,7 @@ function RegisterStudentContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* House Number */}
                             <div className="space-y-2">
-                              <Label htmlFor="student-house-number" className="text-sm font-medium">ផ្ទះលេខ</Label>
+                              <Label htmlFor="student-house-number" className="text-base font-medium">ផ្ទះលេខ</Label>
                               <Input 
                                 id="student-house-number" 
                                 placeholder="ផ្ទះលេខ" 
@@ -1181,7 +1181,7 @@ function RegisterStudentContent() {
 
                             {/* Village */}
                             <div className="space-y-2">
-                              <Label htmlFor="student-village" className="text-sm font-medium">ភូមិ/សង្កាត់</Label>
+                              <Label htmlFor="student-village" className="text-base font-medium">ភូមិ/សង្កាត់</Label>
                               <Input 
                                 id="student-village" 
                                 placeholder="ភូមិ/សង្កាត់" 
@@ -1193,7 +1193,7 @@ function RegisterStudentContent() {
 
                             {/* District */}
                             <div className="space-y-2">
-                              <Label htmlFor="student-district" className="text-sm font-medium">ស្រុក/ខណ្ឌ</Label>
+                              <Label htmlFor="student-district" className="text-base font-medium">ស្រុក/ខណ្ឌ</Label>
                               <Input 
                                 id="student-district" 
                                 placeholder="ស្រុក/ខណ្ឌ" 
@@ -1205,7 +1205,7 @@ function RegisterStudentContent() {
 
                             {/* Province */}
                             <div className="space-y-2">
-                              <Label htmlFor="student-province" className="text-sm font-medium">ខេត្ត/ក្រុង</Label>
+                              <Label htmlFor="student-province" className="text-base font-medium">ខេត្ត/ក្រុង</Label>
                               <Input 
                                 id="student-province" 
                                 placeholder="ខេត្ត/ក្រុង" 
@@ -1220,7 +1220,7 @@ function RegisterStudentContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {/* Birth District */}
                             <div className="space-y-2 lg:col-span-2">
-                              <Label htmlFor="student-birth-district" className="text-sm font-medium">ស្រុកកំណើត</Label>
+                              <Label htmlFor="student-birth-district" className="text-base font-medium">ស្រុកកំណើត</Label>
                               <Input 
                                 id="student-birth-district" 
                                 placeholder="ស្រុកកំណើត" 
@@ -1232,7 +1232,7 @@ function RegisterStudentContent() {
 
                             {/* Phone */}
                             <div className="space-y-2">
-                              <Label htmlFor="phone" className="text-sm font-medium">លេខទូរស័ព្ទទំនាក់ទំនងគោល</Label>
+                              <Label htmlFor="phone" className="text-base font-medium">លេខទូរស័ព្ទទំនាក់ទំនងគោល</Label>
                               <Input 
                                 id="phone" 
                                 type="tel"
@@ -1284,7 +1284,7 @@ function RegisterStudentContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                               {/* Family's Name */}
                               <div className="space-y-2">
-                                <Label htmlFor={`family-first-name-${formIndex}`} className="text-sm font-medium">នាមត្រកូល</Label>
+                                <Label htmlFor={`family-first-name-${formIndex}`} className="text-base font-medium">នាមត្រកូល</Label>
                                 <Input 
                                   id={`family-first-name-${formIndex}`} 
                                   placeholder="នាមត្រកូល" 
@@ -1299,7 +1299,7 @@ function RegisterStudentContent() {
                               </div>
                               
                               <div className="space-y-2">
-                                <Label htmlFor={`family-last-name-${formIndex}`} className="text-sm font-medium">នាមខ្លួន</Label>
+                                <Label htmlFor={`family-last-name-${formIndex}`} className="text-base font-medium">នាមខ្លួន</Label>
                                 <Input 
                                   id={`family-last-name-${formIndex}`} 
                                   placeholder="នាមខ្លួន" 
@@ -1315,7 +1315,7 @@ function RegisterStudentContent() {
 
                               {/* Guardian Relation */}
                               <div className="space-y-2">
-                                <Label htmlFor={`guardian-relation-${formIndex}`} className="text-sm font-medium">ត្រូវជា</Label>
+                                <Label htmlFor={`guardian-relation-${formIndex}`} className="text-base font-medium">ត្រូវជា</Label>
                                 <Select
                                   value={formData.guardians[formIndex]?.relation || ''}
                                   onValueChange={(value) => {
@@ -1337,7 +1337,7 @@ function RegisterStudentContent() {
 
                               {/* Contact Info */}
                               <div className="space-y-2">
-                                <Label htmlFor={`phone-${formIndex}`} className="text-sm font-medium">លេខទូរស័ព្ទ</Label>
+                                <Label htmlFor={`phone-${formIndex}`} className="text-base font-medium">លេខទូរស័ព្ទ</Label>
                                 <Input 
                                   id={`phone-${formIndex}`} 
                                   type="tel"
@@ -1362,7 +1362,7 @@ function RegisterStudentContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                               {/* Occupation */}
                               <div className="space-y-2">
-                                <Label htmlFor={`occupation-${formIndex}`} className="text-sm font-medium">មុខរបរ</Label>
+                                <Label htmlFor={`occupation-${formIndex}`} className="text-base font-medium">មុខរបរ</Label>
                                 <Input 
                                   id={`occupation-${formIndex}`} 
                                   placeholder="មុខរបរ" 
@@ -1377,7 +1377,7 @@ function RegisterStudentContent() {
                               </div>
                               
                               <div className="space-y-2">
-                                <Label htmlFor={`income-${formIndex}`} className="text-sm font-medium">ប្រាក់ចំណូល</Label>
+                                <Label htmlFor={`income-${formIndex}`} className="text-base font-medium">ប្រាក់ចំណូល</Label>
                                 <div className="relative">
                                   <Input 
                                     id={`income-${formIndex}`} 
@@ -1394,14 +1394,14 @@ function RegisterStudentContent() {
                                     }}
                                   />
                                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <span className="text-gray-500 text-sm">រៀល</span>
+                                    <span className="text-gray-500 text-base">រៀល</span>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Children Info */}
                               <div className="space-y-2">
-                                <Label htmlFor={`children-count-${formIndex}`} className="text-sm font-medium">ចំនួនកូនក្នុងបន្ទុក</Label>
+                                <Label htmlFor={`children-count-${formIndex}`} className="text-base font-medium">ចំនួនកូនក្នុងបន្ទុក</Label>
                                 <div className="relative">
                                   <Input 
                                     id={`children-count-${formIndex}`} 
@@ -1421,7 +1421,7 @@ function RegisterStudentContent() {
                                     }}
                                   />
                                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <span className="text-gray-500 text-sm">នាក់</span>
+                                    <span className="text-gray-500 text-base">នាក់</span>
                                   </div>
                                 </div>
                               </div>
@@ -1437,7 +1437,7 @@ function RegisterStudentContent() {
                                     setFormData({ ...formData, guardians: newGuardians });
                                   }}
                                 />
-                                <Label htmlFor={`believe-jesus-${formIndex}`} className="text-sm font-medium ">ជឿព្រះយ៉េស៊ូ?</Label>
+                                <Label htmlFor={`believe-jesus-${formIndex}`} className="text-base font-medium ">ជឿព្រះយ៉េស៊ូ?</Label>
                               </div>
                             </div>
 
@@ -1445,7 +1445,7 @@ function RegisterStudentContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                               {/* House Number */}
                               <div className="space-y-2">
-                                <Label htmlFor={`house-number-${formIndex}`} className="text-sm font-medium">ផ្ទះលេខ</Label>
+                                <Label htmlFor={`house-number-${formIndex}`} className="text-base font-medium">ផ្ទះលេខ</Label>
                                 <Input 
                                   id={`house-number-${formIndex}`} 
                                   placeholder="ផ្ទះលេខ" 
@@ -1460,7 +1460,7 @@ function RegisterStudentContent() {
                               </div>
                               
                               <div className="space-y-2">
-                                <Label htmlFor={`village-${formIndex}`} className="text-sm font-medium">ភូមិ/សង្កាត់</Label>
+                                <Label htmlFor={`village-${formIndex}`} className="text-base font-medium">ភូមិ/សង្កាត់</Label>
                                 <Input 
                                   id={`village-${formIndex}`} 
                                   placeholder="ភូមិ/សង្កាត់" 
@@ -1475,7 +1475,7 @@ function RegisterStudentContent() {
                               </div>
                               
                               <div className="space-y-2">
-                                <Label htmlFor={`district-${formIndex}`} className="text-sm font-medium">ស្រុក/ខណ្ឌ</Label>
+                                <Label htmlFor={`district-${formIndex}`} className="text-base font-medium">ស្រុក/ខណ្ឌ</Label>
                                 <Input 
                                   id={`district-${formIndex}`} 
                                   placeholder="ស្រុក/ខណ្ឌ" 
@@ -1490,7 +1490,7 @@ function RegisterStudentContent() {
                               </div>
                               
                               <div className="space-y-2">
-                                <Label htmlFor={`province-${formIndex}`} className="text-sm font-medium">ខេត្ត/ក្រុង</Label>
+                                <Label htmlFor={`province-${formIndex}`} className="text-base font-medium">ខេត្ត/ក្រុង</Label>
                                 <Input 
                                   id={`province-${formIndex}`} 
                                   placeholder="ខេត្ត/ក្រុង" 
@@ -1508,7 +1508,7 @@ function RegisterStudentContent() {
                             {/* Birth District & Church - Row 4 */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                               <div className="space-y-2">
-                                <Label htmlFor={`birth-district-${formIndex}`} className="text-sm font-medium">ស្រុកកំណើត</Label>
+                                <Label htmlFor={`birth-district-${formIndex}`} className="text-base font-medium">ស្រុកកំណើត</Label>
                                 <Input 
                                   id={`birth-district-${formIndex}`} 
                                   placeholder="ស្រុកកំណើត" 
@@ -1523,7 +1523,7 @@ function RegisterStudentContent() {
                               </div>
                               
                               <div className="space-y-2 lg:col-span-3">
-                                <Label htmlFor={`church-${formIndex}`} className="text-sm font-medium">ព្រះវិហារ</Label>
+                                <Label htmlFor={`church-${formIndex}`} className="text-base font-medium">ព្រះវិហារ</Label>
                                 <Input 
                                   id={`church-${formIndex}`} 
                                   placeholder="ព្រះវិហារ" 
@@ -1567,7 +1567,7 @@ function RegisterStudentContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* Living With */}
                             <div className="space-y-2">
-                              <Label htmlFor="living-with" className="text-sm font-medium">នៅជាមួយអ្នកណា</Label>
+                              <Label htmlFor="living-with" className="text-base font-medium">នៅជាមួយអ្នកណា</Label>
                               <Input 
                                 id="living-with" 
                                 placeholder="នៅជាមួយអ្នកណា" 
@@ -1590,12 +1590,12 @@ function RegisterStudentContent() {
                                   familyInfo: { ...formData.familyInfo, ownHouse: checked as boolean }
                                 })}
                               />
-                              <Label htmlFor="own-house" className="text-sm font-medium ">នៅផ្ទះផ្ទាល់ខ្លួន?</Label>
+                              <Label htmlFor="own-house" className="text-base font-medium ">នៅផ្ទះផ្ទាល់ខ្លួន?</Label>
                             </div>
 
                             {/* Duration in KPC */}
                             <div className="space-y-2">
-                              <Label htmlFor="duration-in-kpc" className="text-sm font-medium">រយៈពេលនៅកំពង់ចាម</Label>
+                              <Label htmlFor="duration-in-kpc" className="text-base font-medium">រយៈពេលនៅកំពង់ចាម</Label>
                               <div className="relative">
                                 <Input 
                                   id="duration-in-kpc" 
@@ -1613,14 +1613,14 @@ function RegisterStudentContent() {
                                   }}
                                 />
                                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                  <span className="text-gray-500 text-sm">ឆ្នាំ</span>
+                                  <span className="text-gray-500 text-base">ឆ្នាំ</span>
                                 </div>
                               </div>
                             </div>
 
                             {/* Living Condition */}
                             <div className="space-y-2">
-                              <Label htmlFor="living-condition" className="text-sm font-medium">ជីវភាព</Label>
+                              <Label htmlFor="living-condition" className="text-base font-medium">ជីវភាព</Label>
                               <Select
                                 value={formData.familyInfo.livingCondition || ''}
                                 onValueChange={(value) => setFormData({
@@ -1644,7 +1644,7 @@ function RegisterStudentContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {/* Organization Help */}
                             <div className="space-y-2">
-                              <Label htmlFor="organization-help" className="text-sm font-medium">ទទួលជំនួយពីអង្គការ</Label>
+                              <Label htmlFor="organization-help" className="text-base font-medium">ទទួលជំនួយពីអង្គការ</Label>
                               <Input 
                                 id="organization-help" 
                                 placeholder="អង្គការ" 
@@ -1659,7 +1659,7 @@ function RegisterStudentContent() {
 
                             {/* School Info */}
                             <div className="space-y-2">
-                              <Label htmlFor="know-school" className="text-sm font-medium">ស្គាល់សាលាតាមរយៈ</Label>
+                              <Label htmlFor="know-school" className="text-base font-medium">ស្គាល់សាលាតាមរយៈ</Label>
                               <Input 
                                 id="know-school" 
                                 placeholder="ស្គាល់សាលាតាម" 
@@ -1674,7 +1674,7 @@ function RegisterStudentContent() {
 
                             {/* Religion */}
                             <div className="space-y-2">
-                              <Label htmlFor="religion" className="text-sm font-medium">សាសនា</Label>
+                              <Label htmlFor="religion" className="text-base font-medium">សាសនា</Label>
                               <Input 
                                 id="religion" 
                                 placeholder="សាសនា" 
@@ -1689,7 +1689,7 @@ function RegisterStudentContent() {
 
                             {/* Church Name */}
                             <div className="space-y-2">
-                              <Label htmlFor="church-name" className="text-sm font-medium">ឈ្មោះព្រះវិហារ</Label>
+                              <Label htmlFor="church-name" className="text-base font-medium">ឈ្មោះព្រះវិហារ</Label>
                               <Input 
                                 id="church-name" 
                                 placeholder="ព្រះវិហារ" 
@@ -1707,7 +1707,7 @@ function RegisterStudentContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {/* Can Help School */}
                             <div className="space-y-2">
-                              <Label htmlFor="can-help-school" className="text-sm font-medium">លទ្ធភាពជួយសាលា</Label>
+                              <Label htmlFor="can-help-school" className="text-base font-medium">លទ្ធភាពជួយសាលា</Label>
                               <Select
                                 value={formData.familyInfo.canHelpSchool ? 'yes' : 'no'}
                                 onValueChange={(value) => setFormData({
@@ -1727,7 +1727,7 @@ function RegisterStudentContent() {
 
                             {/* Help Amount */}
                             <div className="space-y-2">
-                              <Label htmlFor="help-amount" className="text-sm font-medium">ថវិកាជួយសាលា</Label>
+                              <Label htmlFor="help-amount" className="text-base font-medium">ថវិកាជួយសាលា</Label>
                               <div className="relative">
                                 <Input 
                                   id="help-amount" 
@@ -1745,14 +1745,14 @@ function RegisterStudentContent() {
                                   }}
                                 />
                                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                  <span className="text-gray-500 text-sm">រៀល</span>
+                                  <span className="text-gray-500 text-base">រៀល</span>
                                 </div>
                               </div>
                             </div>
 
                             {/* Help Frequency */}
                             <div className="space-y-2">
-                              <Label htmlFor="help-frequency" className="text-sm font-medium">ក្នុងមួយ</Label>
+                              <Label htmlFor="help-frequency" className="text-base font-medium">ក្នុងមួយ</Label>
                               <Select
                                 value={formData.familyInfo.helpFrequency || ''}
                                 onValueChange={(value) => setFormData({
@@ -1785,7 +1785,7 @@ function RegisterStudentContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {/* Previous School */}
                             <div className="space-y-2">
-                              <Label htmlFor="school" className="text-sm font-medium">សាលារៀនមុន</Label>
+                              <Label htmlFor="school" className="text-base font-medium">សាលារៀនមុន</Label>
                               <Input 
                                 id="school" 
                                 className="h-12 "
@@ -1797,7 +1797,7 @@ function RegisterStudentContent() {
                             
                             {/* Transfer Reason */}
                             <div className="space-y-2">
-                              <Label htmlFor="reason" className="text-sm font-medium">មូលហេតុផ្លាស់ប្តូរ</Label>
+                              <Label htmlFor="reason" className="text-base font-medium">មូលហេតុផ្លាស់ប្តូរ</Label>
                               <Input 
                                 id="reason" 
                                 className="h-12 "
@@ -1814,7 +1814,7 @@ function RegisterStudentContent() {
                                 checked={formData.vaccinated || false}
                                 onCheckedChange={(checked) => setFormData({...formData, vaccinated: checked as boolean})}
                               />
-                              <Label htmlFor="vaccinated" className="text-center text-sm font-medium  cursor-pointer">
+                              <Label htmlFor="vaccinated" className="text-center text-base font-medium  cursor-pointer">
                                 សិស្សទទួលបានវ៉ាក់សាំងគ្រប់គ្រាន់ហើយនៅ?
                               </Label>
                             </div>
@@ -1842,7 +1842,7 @@ function RegisterStudentContent() {
                                 checked={formData.needsClothes || false}
                                 onCheckedChange={(checked) => setFormData({...formData, needsClothes: checked as boolean})}
                               />
-                              <Label htmlFor="clothes" className="text-sm font-medium cursor-pointer flex-1">
+                              <Label htmlFor="clothes" className="text-base font-medium cursor-pointer flex-1">
                                 កង្វះខាតសម្លៀកបំពាក់
                               </Label>
                             </div>
@@ -1854,7 +1854,7 @@ function RegisterStudentContent() {
                                 checked={formData.needsMaterials || false}
                                 onCheckedChange={(checked) => setFormData({...formData, needsMaterials: checked as boolean})}
                               />
-                              <Label htmlFor="materials" className="text-sm font-medium cursor-pointer flex-1">
+                              <Label htmlFor="materials" className="text-base font-medium cursor-pointer flex-1">
                                 កង្វះខាតសម្ភារៈសិក្សា
                               </Label>
                             </div>
@@ -1866,7 +1866,7 @@ function RegisterStudentContent() {
                                 checked={formData.needsTransport || false}
                                 onCheckedChange={(checked) => setFormData({...formData, needsTransport: checked as boolean})}
                               />
-                              <Label htmlFor="transport" className="text-sm font-medium cursor-pointer flex-1">
+                              <Label htmlFor="transport" className="text-base font-medium cursor-pointer flex-1">
                                 ត្រូវការឡានដើម្បីជូនមកសាលា
                               </Label>
                             </div>
@@ -1887,7 +1887,7 @@ function RegisterStudentContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">                             
                               {/* School Year */}
                               <div className="space-y-2">
-                                <Label htmlFor="school-year" className="text-sm font-medium">
+                                <Label htmlFor="school-year" className="text-base font-medium">
                                   ឆ្នាំសិក្សា
                                 </Label>
                                 <Select 
@@ -1915,7 +1915,7 @@ function RegisterStudentContent() {
 
                               {/* Registration Date */}
                               <div className="space-y-2">
-                                <Label htmlFor="registration-date" className="text-sm font-medium">
+                                <Label htmlFor="registration-date" className="text-base font-medium">
                                   ថ្ងៃខែឆ្នាំចុះឈ្មោះចូលរៀន
                                 </Label>
                                 <div className="relative">
@@ -1936,10 +1936,10 @@ function RegisterStudentContent() {
                               <div className="flex items-start space-x-3">
                                 <FileText className="h-5 w-5 text-primary dark:text-blue-400 mt-0.5 flex-shrink-0" />
                                 <div className="flex-1">
-                                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                                  <h4 className="text-base font-medium text-blue-900 dark:text-blue-100 mb-1">
                                     ព័ត៌មានដែលនឹងត្រូវបានបោះពុម្ភ
                                   </h4>
-                                  <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                                  <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                                     <div className="flex items-center space-x-2">
                                       <CheckCircle className="h-3 w-3" />
                                       <span>ព័ត៌មានផ្ទាល់ខ្លួនសិស្ស</span>
@@ -2021,7 +2021,7 @@ function RegisterStudentContent() {
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>បោះពុម្ភទម្រង់ចុះឈ្មោះសិស្សជា PDF</p>
-                                    <p className="text-xs text-gray-500 mt-1">រួមមានព័ត៌មានសិស្ស អាណាព្យាបាល និងគ្រួសារ</p>
+                                    <p className="text-sm text-gray-500 mt-1">រួមមានព័ត៌មានសិស្ស អាណាព្យាបាល និងគ្រួសារ</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
@@ -2031,7 +2031,7 @@ function RegisterStudentContent() {
                             {isCompleted && (
                               <div className="flex items-center space-x-2 text-green-600 dark:text-green-400 animate-pulse bg-green-50 dark:bg-green-900/20 px-4 py-3 rounded-lg border border-green-200 dark:border-green-800 shadow-sm">
                                 <CheckCircle className="h-4 w-4" />
-                                <span className="text-sm font-medium">
+                                <span className="text-base font-medium">
                                   {isNewStudent ? 'ការចុះឈ្មោះសិស្សបានជោគជ័យ' : 'ការកែប្រែព័ត៌មានសិស្សបានជោគជ័យ'}
                                 </span>
                               </div>

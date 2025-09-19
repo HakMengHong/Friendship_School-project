@@ -1311,7 +1311,7 @@ function AcademicManagementContent() {
                       </div>
                       
                       <div className="space-y-3">
-                        <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center space-x-2 text-base text-gray-500 dark:text-gray-400">
                           <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                           <span>បង្កើត: {new Date(year.createdAt).toLocaleDateString('km-KH')}</span>
                         </div>
@@ -1400,7 +1400,7 @@ function AcademicManagementContent() {
                   <div className="p-2 bg-blue-500 rounded-lg">
                     <Sparkles className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                  <p className="text-base text-blue-700 dark:text-blue-300 font-medium">
                     <strong>ចំណាំ:</strong> ឈ្មោះថ្នាក់នឹងត្រូវបានបង្កើតដោយស្វ័យប្រវត្តិពីថ្នាក់ និងផ្នែកដែលអ្នកជ្រើសរើស។
                   </p>
                 </div>
@@ -1408,7 +1408,7 @@ function AcademicManagementContent() {
 
               <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
                   <Select 
                     value={newCourse.schoolYearId} 
                     onValueChange={(value) => {
@@ -1428,14 +1428,14 @@ function AcademicManagementContent() {
                     </SelectContent>
                   </Select>
                   {errors.schoolYearId && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {errors.schoolYearId}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ថ្នាក់</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ថ្នាក់</label>
                   <Select 
                     value={newCourse.grade} 
                     onValueChange={(value) => {
@@ -1455,14 +1455,14 @@ function AcademicManagementContent() {
                     </SelectContent>
                   </Select>
                   {errors.grade && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {errors.grade}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ផ្នែក</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ផ្នែក</label>
                   <Input
                     value={newCourse.section}
                     onChange={(e) => {
@@ -1473,7 +1473,7 @@ function AcademicManagementContent() {
                     className={errors.section ? 'border-red-500' : ''}
                   />
                   {errors.section && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {errors.section}
                     </p>
@@ -1481,7 +1481,7 @@ function AcademicManagementContent() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី១</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី១</label>
                   <Select 
                     value={newCourse.teacherId1?.toString() || 'none'} 
                     onValueChange={(value) => setNewCourse({...newCourse, teacherId1: value === 'none' ? undefined : parseInt(value)})}
@@ -1509,7 +1509,7 @@ function AcademicManagementContent() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី២</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី២</label>
                   <Select 
                     value={newCourse.teacherId2?.toString() || 'none'} 
                     onValueChange={(value) => setNewCourse({...newCourse, teacherId2: value === 'none' ? undefined : parseInt(value)})}
@@ -1537,7 +1537,7 @@ function AcademicManagementContent() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី៣</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី៣</label>
                   <Select 
                     value={newCourse.teacherId3?.toString() || 'none'} 
                     onValueChange={(value) => setNewCourse({...newCourse, teacherId3: value === 'none' ? undefined : parseInt(value)})}
@@ -1605,7 +1605,7 @@ function AcademicManagementContent() {
                   <div className="p-2 bg-emerald-500 rounded-lg">
                     <Sparkles className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+                  <p className="text-base text-emerald-700 dark:text-emerald-300 font-medium">
                     <strong>ចំណាំ:</strong> ប្រព័ន្ធនឹងបង្កើតថ្នាក់ពីថ្នាក់ទី {gradeRange.startGrade} ទៅថ្នាក់ទី {gradeRange.endGrade} សម្រាប់ផ្នែកដែលអ្នកជ្រើសរើស។ ឈ្មោះថ្នាក់នឹងត្រូវបានបង្កើតដោយស្វ័យប្រវត្តិ។
                   </p>
                 </div>
@@ -1613,7 +1613,7 @@ function AcademicManagementContent() {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
+                  <label className="block text-base font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     ឆ្នាំសិក្សា
                   </label>
@@ -1636,7 +1636,7 @@ function AcademicManagementContent() {
                     </SelectContent>
                   </Select>
                   {errors.schoolYearId && (
-                    <p className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 dark:bg-red-950/50 p-2 rounded-lg">
+                    <p className="text-red-500 text-base mt-2 flex items-center gap-2 bg-red-50 dark:bg-red-950/50 p-2 rounded-lg">
                       <AlertCircle className="h-4 w-4" />
                       {errors.schoolYearId}
                     </p>
@@ -1644,7 +1644,7 @@ function AcademicManagementContent() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
+                  <label className="block text-base font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
                     <School className="h-4 w-4" />
                     ផ្នែក
                   </label>
@@ -1658,7 +1658,7 @@ function AcademicManagementContent() {
                     className={`h-12 text-base ${errors.section ? 'border-red-500 ring-red-200' : 'border-green-200 focus:border-green-500 focus:ring-green-200'}`}
                   />
                   {errors.section && (
-                    <p className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 dark:bg-red-950/50 p-2 rounded-lg">
+                    <p className="text-red-500 text-base mt-2 flex items-center gap-2 bg-red-50 dark:bg-red-950/50 p-2 rounded-lg">
                       <AlertCircle className="h-4 w-4" />
                       {errors.section}
                     </p>
@@ -1666,7 +1666,7 @@ function AcademicManagementContent() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
+                  <label className="block text-base font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
                     <GraduationCap className="h-4 w-4" />
                     ជ្រើសរើសថ្នាក់
                   </label>
@@ -1721,14 +1721,14 @@ function AcademicManagementContent() {
                       }
                       return grades.map((grade) => (
                         <div key={grade} className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-700 text-center">
-                          <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                          <div className="text-base font-bold text-blue-600 dark:text-blue-400">
                             ថ្នាក់ទី {grade}{newCourse.section}
                           </div>
                         </div>
                       ));
                     })()}
                   </div>
-                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-3">
+                  <p className="text-base text-blue-600 dark:text-blue-400 mt-3">
                     សរុប: {gradeRange.endGrade - gradeRange.startGrade + 1} ថ្នាក់
                   </p>
                 </div>
@@ -1739,7 +1739,7 @@ function AcademicManagementContent() {
                 <div className="mb-3 p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg">
                   <div className="flex items-center space-x-2">
                     <AlertCircle className="h-4 w-4 text-red-500" />
-                    <p className="text-sm text-red-700 dark:text-red-300">
+                    <p className="text-base text-red-700 dark:text-red-300">
                       ថ្នាក់ចាប់ផ្តើមមិនអាចធំជាងថ្នាក់បញ្ចប់បានទេ។ សូមជ្រើសរើសថ្នាក់ឡើងវិញ។
                     </p>
                   </div>
@@ -1784,13 +1784,13 @@ function AcademicManagementContent() {
                 កែប្រែថ្នាក់រៀន: ថ្នាក់ទី {editingCourse.grade} {editingCourse.section}
               </h3>
               <div className="mb-3 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                <p className="text-sm text-orange-700 dark:text-orange-300">
+                <p className="text-base text-orange-700 dark:text-orange-300">
                   💡 <strong>ចំណាំ:</strong> ឈ្មោះថ្នាក់នឹងត្រូវបានបង្កើតដោយស្វ័យប្រវត្តិពីថ្នាក់ និងផ្នែកដែលអ្នកជ្រើសរើស។
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
                   <Select 
                     value={editingCourse.schoolYearId.toString()} 
                     onValueChange={(value) => setEditingCourse({...editingCourse, schoolYearId: parseInt(value)})}
@@ -1807,14 +1807,14 @@ function AcademicManagementContent() {
                     </SelectContent>
                   </Select>
                   {errors.schoolYearId && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {errors.schoolYearId}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ថ្នាក់</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ថ្នាក់</label>
                   <Select 
                     value={editingCourse.grade} 
                     onValueChange={(value) => setEditingCourse({...editingCourse, grade: value})}
@@ -1831,14 +1831,14 @@ function AcademicManagementContent() {
                     </SelectContent>
                   </Select>
                   {errors.grade && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {errors.grade}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">ផ្នែក</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ផ្នែក</label>
                   <Input
                     value={editingCourse.section || ''}
                     onChange={(e) => setEditingCourse({...editingCourse, section: e.target.value})}
@@ -1846,7 +1846,7 @@ function AcademicManagementContent() {
                     className={errors.section ? 'border-red-500' : ''}
                   />
                   {errors.section && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {errors.section}
                     </p>
@@ -1854,7 +1854,7 @@ function AcademicManagementContent() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី១</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី១</label>
                   <Select 
                     value={editingCourse.teacherId1?.toString() || 'none'} 
                     onValueChange={(value) => setEditingCourse({...editingCourse, teacherId1: value === 'none' ? undefined : parseInt(value)})}
@@ -1875,7 +1875,7 @@ function AcademicManagementContent() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី២</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី២</label>
                   <Select 
                     value={editingCourse.teacherId2?.toString() || 'none'} 
                     onValueChange={(value) => setEditingCourse({...editingCourse, teacherId2: value === 'none' ? undefined : parseInt(value)})}
@@ -1896,7 +1896,7 @@ function AcademicManagementContent() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី៣</label>
+                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី៣</label>
                   <Select 
                     value={editingCourse.teacherId3?.toString() || 'none'} 
                     onValueChange={(value) => setEditingCourse({...editingCourse, teacherId3: value === 'none' ? undefined : parseInt(value)})}
@@ -1961,7 +1961,7 @@ function AcademicManagementContent() {
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
                   <Filter className="h-4 w-4 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-700 dark:text-purple-300">ច្រោះ:</span>
+                  <span className="text-base font-medium text-purple-700 dark:text-purple-300">ច្រោះ:</span>
                 </div>
                 
                 <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
@@ -1995,7 +1995,7 @@ function AcademicManagementContent() {
             
             {/* Results Summary */}
             <div className="mt-4 pt-4 border-t border-purple-200 dark:border-purple-800">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-base">
                 <span className="text-purple-700 dark:text-purple-300">
                   បានរកឃើញ <strong>{filteredCourses.length}</strong> ថ្នាក់រៀន
                 </span>
@@ -2098,13 +2098,13 @@ function AcademicManagementContent() {
                   <div className="flex items-center space-x-3">
                     {/* View Mode Toggle */}
                     <div className="text-right">
-                      <p className="text-sm text-purple-600 dark:text-purple-400 mb-1">បង្ហាញជា</p>
+                      <p className="text-base text-purple-600 dark:text-purple-400 mb-1">បង្ហាញជា</p>
                       <div className="flex items-center space-x-1">
                         <Button
                           variant={viewMode === 'grid' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewMode('grid')}
-                          className="h-8 px-3 text-sm bg-purple-500 hover:bg-purple-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                          className="h-8 px-3 text-base bg-purple-500 hover:bg-purple-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
                         >
                           <Grid3X3 className="h-3 w-3 mr-1" />
                           ក្រឡា
@@ -2113,7 +2113,7 @@ function AcademicManagementContent() {
                           variant={viewMode === 'table' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewMode('table')}
-                          className="h-8 px-3 text-sm bg-purple-500 hover:bg-purple-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                          className="h-8 px-3 text-base bg-purple-500 hover:bg-purple-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
                         >
                           <List className="h-3 w-3 mr-1" />
                           បញ្ជី
@@ -2210,7 +2210,7 @@ function AcademicManagementContent() {
 
                       {/* Course Footer */}
                       <div className="relative z-10 pt-4 border-t border-gray-200 dark:border-gray-600">
-                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             បង្កើត: {new Date(course.createdAt).toLocaleDateString('km-KH')}
@@ -2257,31 +2257,31 @@ function AcademicManagementContent() {
                     <table className="w-full">
                       <thead className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
                             <div className="flex items-center space-x-2">
                               <School className="h-4 w-4" />
                               <span>ថ្នាក់រៀន</span>
                             </div>
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
                             <div className="flex items-center space-x-2">
                               <UserCheck className="h-4 w-4" />
                               <span>គ្រូបង្រៀន</span>
                             </div>
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
                             <div className="flex items-center space-x-2">
                               <Calendar className="h-4 w-4" />
                               <span>ឆ្នាំសិក្សា</span>
                             </div>
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
                             <div className="flex items-center space-x-2">
                               <Clock className="h-4 w-4" />
                               <span>កាលបរិច្ឆេទបង្កើត</span>
                             </div>
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wider">
                             <div className="flex items-center space-x-2">
                               <MoreHorizontal className="h-4 w-4" />
                               <span>សកម្មភាព</span>
@@ -2298,7 +2298,7 @@ function AcademicManagementContent() {
                                   <GraduationCap className="h-5 w-5 text-white" />
                                 </div>
                                 <div>
-                                  <div className="text-xs text-purple-600 dark:text-purple-400">
+                                  <div className="text-sm text-purple-600 dark:text-purple-400">
                                     ថ្នាក់ទី {course.grade}{course.section}
                                   </div>
                                 </div>
@@ -2309,7 +2309,7 @@ function AcademicManagementContent() {
                                 {course.teacherId1 && (() => {
                                   const teacher = safeTeachers.find(t => t.userid === course.teacherId1)
                                   return teacher ? (
-                                    <div className="text-sm text-gray-900 dark:text-white">
+                                    <div className="text-base text-gray-900 dark:text-white">
                                       គ្រូទី១: {teacher.lastname}{teacher.firstname}
                                     </div>
                                   ) : null
@@ -2317,7 +2317,7 @@ function AcademicManagementContent() {
                                 {course.teacherId2 && (() => {
                                   const teacher = safeTeachers.find(t => t.userid === course.teacherId2)
                                   return teacher ? (
-                                    <div className="text-sm text-gray-900 dark:text-white">
+                                    <div className="text-base text-gray-900 dark:text-white">
                                       គ្រូទី២: {teacher.lastname}{teacher.firstname}
                                     </div>
                                   ) : null
@@ -2325,17 +2325,17 @@ function AcademicManagementContent() {
                                 {course.teacherId3 && (() => {
                                   const teacher = safeTeachers.find(t => t.userid === course.teacherId3)
                                   return teacher ? (
-                                    <div className="text-sm text-gray-900 dark:text-white">
+                                    <div className="text-base text-gray-900 dark:text-white">
                                       គ្រូទី៣: {teacher.lastname}{teacher.firstname}
                                     </div>
                                   ) : null
                                 })()}
                                 {!course.teacherId1 && !course.teacherId2 && !course.teacherId3 && (
-                                  <div className="text-sm text-gray-400">គ្មានគ្រូ</div>
+                                  <div className="text-base text-gray-400">គ្មានគ្រូ</div>
                                 )}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td className="px-6 py-4 whitespace-nowrap text-base text-gray-500 dark:text-gray-400">
                               <div className="flex items-center space-x-2">
                                 <Calendar className="h-4 w-4 text-purple-500" />
                                 <span>
@@ -2343,13 +2343,13 @@ function AcademicManagementContent() {
                                 </span>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td className="px-6 py-4 whitespace-nowrap text-base text-gray-500 dark:text-gray-400">
                               <div className="flex items-center space-x-2">
                                 <Clock className="h-4 w-4 text-purple-500" />
                                 <span>{new Date(course.createdAt).toLocaleDateString('km-KH')}</span>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="px-6 py-4 whitespace-nowrap text-base font-medium">
                               <div className="flex items-center space-x-2">
                                 <Button
                                   variant="ghost"
@@ -2445,7 +2445,7 @@ function AcademicManagementContent() {
               {/* Results Summary */}
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <p className="text-sm text-green-700 dark:text-green-300">
+                  <p className="text-base text-green-700 dark:text-green-300">
                     បានរកឃើញ <strong>{filteredSubjects.length}</strong> មុខវិជ្ជា
                   </p>
                 </div>
@@ -2475,7 +2475,7 @@ function AcademicManagementContent() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
+                  <label className="block text-base font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     ឈ្មោះមុខវិជ្ជា
                   </label>
@@ -2489,7 +2489,7 @@ function AcademicManagementContent() {
                     className={`h-12 text-lg ${errors.subjectName ? 'border-red-500 ring-red-200' : 'border-green-200 focus:border-green-500 focus:ring-green-200'}`}
                   />
                   {errors.subjectName && (
-                    <p className="text-red-500 text-sm mt-2 flex items-center gap-2 bg-red-50 dark:bg-red-950/50 p-2 rounded-lg">
+                    <p className="text-red-500 text-base mt-2 flex items-center gap-2 bg-red-50 dark:bg-red-950/50 p-2 rounded-lg">
                       <AlertCircle className="h-4 w-4" />
                       {errors.subjectName}
                     </p>
@@ -2538,7 +2538,7 @@ function AcademicManagementContent() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                  <label className="block text-base font-medium mb-2 text-blue-700 dark:text-blue-300 flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     ឈ្មោះមុខវិជ្ជា
                   </label>
@@ -2549,7 +2549,7 @@ function AcademicManagementContent() {
                     className="h-12 border-blue-200 focus:border-blue-500 dark:border-blue-700 dark:focus:border-blue-400"
                   />
                   {errors.subjectName && (
-                    <p className="text-red-500 text-sm mt-1">{errors.subjectName}</p>
+                    <p className="text-red-500 text-base mt-1">{errors.subjectName}</p>
                   )}
                 </div>
               </div>
@@ -2627,13 +2627,13 @@ function AcademicManagementContent() {
                 
                 <div className="flex items-center space-x-3">
                   <div className="text-right">
-                    <p className="text-xs text-green-600 dark:text-green-400 mb-1">បង្ហាញជា</p>
+                    <p className="text-sm text-green-600 dark:text-green-400 mb-1">បង្ហាញជា</p>
                     <div className="flex items-center space-x-1">
                       <Button
                         variant={viewMode === 'grid' ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => setViewMode('grid')}
-                        className="h-8 px-3 text-xs bg-green-500 hover:bg-green-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                        className="h-8 px-3 text-sm bg-green-500 hover:bg-green-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
                       >
                         <Grid3X3 className="h-3 w-3 mr-1" />
                         ក្រឡា
@@ -2642,7 +2642,7 @@ function AcademicManagementContent() {
                         variant={viewMode === 'table' ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => setViewMode('table')}
-                        className="h-8 px-3 text-xs bg-green-500 hover:bg-green-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                        className="h-8 px-3 text-sm bg-green-500 hover:bg-green-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
                       >
                         <List className="h-3 w-3 mr-1" />
                         បញ្ជី
@@ -2684,10 +2684,10 @@ function AcademicManagementContent() {
                       <div className="relative z-10 space-y-3 mb-3">
                         <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg border border-green-200 dark:border-green-800">
                           <div className="flex items-center justify-between">
-                            <span className="text-green-700 dark:text-green-300 text-sm font-medium">
+                            <span className="text-green-700 dark:text-green-300 text-base font-medium">
                               ឈ្មោះមុខវិជ្ជា
                             </span>
-                            <span className="text-green-800 dark:text-green-200 text-sm font-semibold">
+                            <span className="text-green-800 dark:text-green-200 text-base font-semibold">
                               {subject.subjectName}
                             </span>
                           </div>
@@ -2696,7 +2696,7 @@ function AcademicManagementContent() {
 
                       {/* Subject Footer */}
                       <div className="relative z-10 pt-4 border-t border-gray-200 dark:border-gray-600">
-                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             បង្កើត: {new Date(subject.createdAt).toLocaleDateString('km-KH')}
@@ -2737,19 +2737,19 @@ function AcademicManagementContent() {
                     <table className="w-full">
                       <thead className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-green-700 dark:text-green-300 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-green-700 dark:text-green-300 uppercase tracking-wider">
                             <div className="flex items-center space-x-2">
                               <BookOpen className="h-4 w-4" />
                               <span>មុខវិជ្ជា</span>
                             </div>
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-green-700 dark:text-green-300 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-green-700 dark:text-green-300 uppercase tracking-wider">
                             <div className="flex items-center space-x-2">
                               <Clock className="h-4 w-4" />
                               <span>កាលបរិច្ឆេទបង្កើត</span>
                             </div>
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-green-700 dark:text-green-300 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-green-700 dark:text-green-300 uppercase tracking-wider">
                             <div className="flex items-center space-x-2">
                               <MoreHorizontal className="h-4 w-4" />
                               <span>សកម្មភាព</span>
@@ -2766,22 +2766,22 @@ function AcademicManagementContent() {
                                   <BookOpenCheck className="h-5 w-5 text-white" />
                                 </div>
                                 <div>
-                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  <div className="text-base font-medium text-gray-900 dark:text-white">
                                     {subject.subjectName}
                                   </div>
-                                  <div className="text-xs text-green-600 dark:text-green-400">
+                                  <div className="text-sm text-green-600 dark:text-green-400">
                                     មុខវិជ្ជា
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td className="px-6 py-4 whitespace-nowrap text-base text-gray-500 dark:text-gray-400">
                               <div className="flex items-center space-x-2">
                                 <Clock className="h-4 w-4 text-green-500" />
                                 <span>{new Date(subject.createdAt).toLocaleDateString('km-KH')}</span>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="px-6 py-4 whitespace-nowrap text-base font-medium">
                               <div className="flex space-x-2">
                                 <Button
                                   variant="ghost"
@@ -2833,14 +2833,14 @@ function AcademicManagementContent() {
           <AlertDialogFooter className="flex gap-2">
             <AlertDialogCancel 
               onClick={() => setDeleteConfirmOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               បោះបង់
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <div className="flex items-center">
@@ -2871,14 +2871,14 @@ function AcademicManagementContent() {
           <AlertDialogFooter className="flex gap-2">
             <AlertDialogCancel 
               onClick={() => setBulkCreateConfirmOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               បោះបង់
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmBulkCreate}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-base font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <div className="flex items-center">
@@ -2905,7 +2905,7 @@ function AcademicManagementContent() {
               <br /><br />
               <span className="inline-block bg-orange-50 dark:bg-orange-950/30 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
                 {existingCoursesList.map((course, index) => (
-                  <span key={index} className="block text-sm font-medium text-orange-800 dark:text-orange-200">
+                  <span key={index} className="block text-base font-medium text-orange-800 dark:text-orange-200">
                     • {course}
                   </span>
                 ))}
@@ -2917,14 +2917,14 @@ function AcademicManagementContent() {
           <AlertDialogFooter className="flex gap-2">
             <AlertDialogCancel 
               onClick={() => setExistingCoursesWarningOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               បោះបង់
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmBulkCreate}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-base font-medium text-white bg-orange-600 border border-transparent rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <div className="flex items-center">
@@ -2955,14 +2955,14 @@ function AcademicManagementContent() {
           <AlertDialogFooter className="flex gap-2">
             <AlertDialogCancel 
               onClick={() => setSingleCreateConfirmOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               បោះបង់
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmSingleCreate}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-base font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <div className="flex items-center">
@@ -2993,7 +2993,7 @@ function AcademicManagementContent() {
           <AlertDialogFooter>
             <AlertDialogAction
               onClick={() => setDuplicateCourseWarningOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               យល់ព្រម
             </AlertDialogAction>
@@ -3017,7 +3017,7 @@ function AcademicManagementContent() {
           <AlertDialogFooter>
             <AlertDialogAction
               onClick={() => setDuplicateSchoolYearWarningOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               យល់ព្រម
             </AlertDialogAction>
@@ -3041,7 +3041,7 @@ function AcademicManagementContent() {
           <AlertDialogFooter>
             <AlertDialogAction
               onClick={() => setDuplicateSubjectWarningOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               យល់ព្រម
             </AlertDialogAction>

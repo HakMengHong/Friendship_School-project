@@ -467,7 +467,7 @@ function AddStudentClassContent() {
               <CardContent className="p-2 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <Label htmlFor="schoolYear" className="text-sm font-medium text-primary font-semibold">ឆ្នាំសិក្សា</Label>
+                  <Label htmlFor="schoolYear" className="text-base font-medium text-primary font-semibold">ឆ្នាំសិក្សា</Label>
                   <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
                     <SelectTrigger>
                       <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
@@ -482,7 +482,7 @@ function AddStudentClassContent() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="class" className="text-sm font-medium text-primary font-semibold">ថ្នាក់</Label>
+                  <Label htmlFor="class" className="text-base font-medium text-primary font-semibold">ថ្នាក់</Label>
                   <Select value={selectedClass} onValueChange={setSelectedClass}>
                     <SelectTrigger>
                       <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
@@ -498,7 +498,7 @@ function AddStudentClassContent() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="search" className="text-sm font-medium text-primary font-semibold">ស្វែងរកសិស្ស</Label>
+                  <Label htmlFor="search" className="text-base font-medium text-primary font-semibold">ស្វែងរកសិស្ស</Label>
                   <div className="relative">
                     <Input
                       id="search"
@@ -526,7 +526,7 @@ function AddStudentClassContent() {
                       variant="outline"
                       size="sm"
                       onClick={clearAllFilters}
-                      className="text-sm"
+                      className="text-base"
                     >
                       លុបការច្រោះទាំងអស់
                     </Button>
@@ -633,14 +633,14 @@ function AddStudentClassContent() {
                         <div className="font-medium">
                         {student.lastName} {student.firstName}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-base text-gray-500">
                           ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender} • {student.schoolYear}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       {isStudentEnrolled(student.studentId) && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-sm">
                           បានចុះឈ្មោះរួចហើយ
                         </Badge>
                       )}
@@ -675,7 +675,7 @@ function AddStudentClassContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="course" className="text-sm font-medium text-primary font-semibold">ថ្នាក់</Label>
+                <Label htmlFor="course" className="text-base font-medium text-primary font-semibold">ថ្នាក់</Label>
                 <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                   <SelectTrigger>
                     <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
@@ -692,7 +692,7 @@ function AddStudentClassContent() {
               
               {selectedCourse && (
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  <div className="text-base font-medium text-blue-800 dark:text-blue-200">
                     ថ្នាក់ដែលបានជ្រើសរើស:
                   </div>
                   <div className="text-blue-600 dark:text-blue-300">
@@ -716,7 +716,7 @@ function AddStudentClassContent() {
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                   <p>មិនទាន់មានសិស្សដែលបានជ្រើសរើស</p>
-                  <p className="text-sm">សូមជ្រើសរើសសិស្សពីបញ្ជីខាងលើ</p>
+                  <p className="text-base">សូមជ្រើសរើសសិស្សពីបញ្ជីខាងលើ</p>
                 </div>
               ) : (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
@@ -731,7 +731,7 @@ function AddStudentClassContent() {
                       >
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
+                            <span className="text-base font-medium text-blue-600 dark:text-blue-300">
                               {student.firstName.charAt(0)}{student.lastName.charAt(0)}
                             </span>
                           </div>
@@ -739,7 +739,7 @@ function AddStudentClassContent() {
                             <div className="font-medium text-gray-900 dark:text-white">
                             {student.lastName} {student.firstName}
                             </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-base text-gray-500 dark:text-gray-400">
                               ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender} • {student.schoolYear}
                             </div>
                           </div>
@@ -751,7 +751,7 @@ function AddStudentClassContent() {
                             onClick={() => handleStudentSelection(student.studentId)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                           >
-                            <span className="text-sm">✕</span>
+                            <span className="text-base">✕</span>
                           </Button>
                         </div>
                       </div>
@@ -762,7 +762,7 @@ function AddStudentClassContent() {
               
               {selectedStudents.length > 0 && (
                 <div className="pt-3 border-t">
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">
                       សរុបសិស្សដែលបានជ្រើសរើស:
                     </span>
@@ -785,10 +785,10 @@ function AddStudentClassContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-base text-gray-600 dark:text-gray-400">
                   សិស្សដែលបានជ្រើសរើស: <span className="font-medium">{selectedStudents.length}</span>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-base text-gray-600 dark:text-gray-400">
                   <span className="font-medium">{selectedCourse ? getSelectedCourseName() : 'មិនទាន់ជ្រើសរើស'}</span>
                 </div>
               </div>
@@ -833,7 +833,7 @@ function AddStudentClassContent() {
               </div>
               {selectedCourse && (
                 <div className="pt-3 border-t">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <div className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
                     សិស្សក្នុងថ្នាក់ {getSelectedCourseName()}:
                   </div>
                   <div className="text-2xl font-bold text-blue-600">
@@ -841,7 +841,7 @@ function AddStudentClassContent() {
                       e.courseId === parseInt(selectedCourse) && !e.drop
                     ).length}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm text-gray-500">
                     សិស្សដែលបានចុះឈ្មោះ
                   </div>
                 </div>
@@ -1001,7 +1001,7 @@ function AddStudentClassContent() {
               <br /><br />
               <span className="font-semibold text-blue-600">សិស្សដែលជ្រើសរើស:</span>
               <br />
-              <span className="text-sm">
+              <span className="text-base">
                 {selectedStudents.map((studentId, index) => {
                   const student = students.find(s => s.studentId === studentId)
                   return student ? `${student.firstName} ${student.lastName}` : ''
@@ -1012,14 +1012,14 @@ function AddStudentClassContent() {
           <AlertDialogFooter className="flex gap-2">
             <AlertDialogCancel 
               onClick={() => setAddStudentsConfirmOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               បោះបង់
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmAddStudents}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-base font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <div className="flex items-center">

@@ -762,7 +762,7 @@ function AdminUsersContent() {
             {/* Users Table Component - Inline */}
             <div className="overflow-x-auto rounded-xl border border-border/50 bg-card shadow-sm">
               <Table>
-                <TableCaption className="text-sm text-muted-foreground mb-4">
+                <TableCaption className="text-base text-muted-foreground mb-4">
                   បញ្ជីអ្នកប្រើប្រាស់ទាំងអស់ ({filteredUsers.length} នាក់)
                 </TableCaption>
                 <TableHeader>
@@ -782,7 +782,7 @@ function AdminUsersContent() {
                       <TableCell colSpan={7} className="text-center py-12">
                         <div className="flex flex-col items-center gap-3">
                           <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
-                          <p className="text-sm text-muted-foreground">កំពុងផ្ទុក...</p>
+                          <p className="text-base text-muted-foreground">កំពុងផ្ទុក...</p>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -794,8 +794,8 @@ function AdminUsersContent() {
                             <Users className="h-8 w-8 text-muted-foreground" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">មិនមានអ្នកប្រើប្រាស់</p>
-                            <p className="text-xs text-muted-foreground mt-1">ចាប់ផ្តើមបន្ថែមអ្នកប្រើថ្មី</p>
+                            <p className="text-base font-medium text-foreground">មិនមានអ្នកប្រើប្រាស់</p>
+                            <p className="text-sm text-muted-foreground mt-1">ចាប់ផ្តើមបន្ថែមអ្នកប្រើថ្មី</p>
                           </div>
                         </div>
                       </TableCell>
@@ -813,37 +813,37 @@ function AdminUsersContent() {
                                 onError={e => (e.currentTarget.src = "/placeholder-user.jpg")}
                               />
                             ) : (
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-semibold text-base shadow-sm">
                                 {user.firstname?.charAt(0) || "U"}
                               </div>
                             )}
                             <div>
                               <div className="font-medium text-primary">{user.lastname} {user.firstname}</div>
-                              <div className="text-xs text-muted-foreground">@{user.username}</div>
+                              <div className="text-sm text-muted-foreground">@{user.username}</div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="py-4 px-6">
-                          <div className="text-sm">
+                          <div className="text-base">
                             <div className="font-medium text-foreground">{user.phonenumber1 || "-"}</div>
-                            {user.phonenumber2 && <div className="text-xs text-muted-foreground mt-1">{user.phonenumber2}</div>}
+                            {user.phonenumber2 && <div className="text-sm text-muted-foreground mt-1">{user.phonenumber2}</div>}
                           </div>
                         </TableCell>
                         <TableCell className="py-4 px-6 text-center">
-                          <Badge className={`text-xs font-medium px-2 py-1 ${user.role === "admin" ? "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400" : "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"}`}>
+                          <Badge className={`text-sm font-medium px-2 py-1 ${user.role === "admin" ? "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400" : "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"}`}>
                             {user.role === "admin" ? "អ្នកគ្រប់គ្រង" : "គ្រូបង្រៀន"}
                           </Badge>
                         </TableCell>
                         <TableCell className="py-4 px-6">
-                          <div className="text-sm text-muted-foreground text-center">{user.position || "-"}</div>
+                          <div className="text-base text-muted-foreground text-center">{user.position || "-"}</div>
                         </TableCell>
                         <TableCell className="py-4 px-6">
-                          <Badge className={`text-xs font-medium px-2 py-1 ${user.status === "active" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}`}>
+                          <Badge className={`text-sm font-medium px-2 py-1 ${user.status === "active" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}`}>
                             {user.status === "active" ? "ដំណើរការ" : "បិទដំណើរការ"}
                           </Badge>
                         </TableCell>
                         <TableCell className="py-4 px-6">
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-sm text-muted-foreground">
                             {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "-"}
                           </div>
                         </TableCell>
@@ -902,7 +902,7 @@ function AdminUsersContent() {
                     <DialogTitle className="text-primary text-xl font-bold tracking-wide">
                       {editUser ? "កែប្រែអ្នកប្រើ" : "បន្ថែមអ្នកប្រើថ្មី"}
                     </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-sm mt-1">
+                    <DialogDescription className="text-muted-foreground text-base mt-1">
                       {editUser ? "កែប្រែព័ត៌មានអ្នកប្រើ" : "បំពេញព័ត៌មានដើម្បីបន្ថែមអ្នកប្រើថ្មី"}
                     </DialogDescription>
                   </div>
@@ -917,7 +917,7 @@ function AdminUsersContent() {
                   <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
                     <div className="flex items-center space-x-2 mb-4">
                       <Camera className="h-4 w-4 text-primary" />
-                      <h3 className="text-sm font-semibold text-primary">
+                      <h3 className="text-base font-semibold text-primary">
                         រូបភាពប្រវត្តិ
                       </h3>
                     </div>
@@ -950,7 +950,7 @@ function AdminUsersContent() {
                       
                       {/* Upload Controls */}
                       <div className="w-full text-center">
-                        <label htmlFor="photo-upload" className="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg cursor-pointer transition-colors text-sm font-medium">
+                        <label htmlFor="photo-upload" className="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg cursor-pointer transition-colors text-base font-medium">
                           <Upload className="w-4 h-4 mr-2" />
                           <span>ជ្រើសរើសរូបភាព</span>
                           <input
@@ -961,7 +961,7 @@ function AdminUsersContent() {
                             onChange={handleFileUpload}
                           />
                         </label>
-                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                           អនុញ្ញាត JPG, PNG, GIF • អតិបរមា 5MB
                         </p>
                       </div>
@@ -972,7 +972,7 @@ function AdminUsersContent() {
                   <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
                     <div className="flex items-center space-x-2 mb-4">
                       <UserIcon className="h-4 w-4 text-primary" />
-                      <h3 className="text-sm font-semibold text-primary">
+                      <h3 className="text-base font-semibold text-primary">
                         ព័ត៌មានផ្ទាល់ខ្លួន
                       </h3>
                     </div>
@@ -980,7 +980,7 @@ function AdminUsersContent() {
                     <div className="space-y-3">
                       {/* Last Name */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="lastname" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Label htmlFor="lastname" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                           <UserIcon className="w-3.5 h-3.5 text-primary" />
                           នាមត្រកូល <span className="text-red-500">*</span>
                         </Label>
@@ -990,14 +990,14 @@ function AdminUsersContent() {
                           value={formData.lastname}
                           onChange={handleFormInput}
                           placeholder="បញ្ចូលនាមត្រកូល"
-                          className="h-9 text-sm"
+                          className="h-9 text-base"
                           required
                         />
                       </div>
 
                       {/* First Name */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="firstname" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Label htmlFor="firstname" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                           <UserIcon className="w-3.5 h-3.5 text-primary" />
                           នាមខ្លួន <span className="text-red-500">*</span>
                         </Label>
@@ -1007,7 +1007,7 @@ function AdminUsersContent() {
                           value={formData.firstname}
                           onChange={handleFormInput}
                           placeholder="បញ្ចូលនាមខ្លួន"
-                          className="h-9 text-sm"
+                          className="h-9 text-base"
                           required
                         />
                       </div>
@@ -1022,7 +1022,7 @@ function AdminUsersContent() {
                   <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
                     <div className="flex items-center space-x-2 mb-4">
                       <Phone className="h-4 w-4 text-primary" />
-                      <h3 className="text-sm font-semibold text-primary">
+                      <h3 className="text-base font-semibold text-primary">
                         ព័ត៌មានទំនាក់ទំនង
                       </h3>
                     </div>
@@ -1030,7 +1030,7 @@ function AdminUsersContent() {
                     <div className="space-y-3">
                       {/* Phone 1 */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="phonenumber1" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Label htmlFor="phonenumber1" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                           <Phone className="w-3.5 h-3.5 text-primary" />
                           លេខទូរស័ព្ទ <span className="text-red-500">*</span>
                         </Label>
@@ -1040,14 +1040,14 @@ function AdminUsersContent() {
                           value={formData.phonenumber1}
                           onChange={handleFormInput}
                           placeholder="បញ្ចូលលេខទូរស័ព្ទ"
-                          className="h-10 text-sm"
+                          className="h-10 text-base"
                           required
                         />
                       </div>
 
                       {/* Phone 2 */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="phonenumber2" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Label htmlFor="phonenumber2" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                           <Phone className="w-3.5 h-3.5 text-primary" />
                           លេខទូរស័ព្ទទី២
                         </Label>
@@ -1057,7 +1057,7 @@ function AdminUsersContent() {
                           value={formData.phonenumber2}
                           onChange={handleFormInput}
                           placeholder="បញ្ចូលលេខទូរស័ព្ទទី២"
-                          className="h-10 text-sm"
+                          className="h-10 text-base"
                         />
                       </div>
                     </div>
@@ -1067,7 +1067,7 @@ function AdminUsersContent() {
                   <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
                     <div className="flex items-center space-x-2 mb-4">
                       <Shield className="h-4 w-4 text-primary" />
-                      <h3 className="text-sm font-semibold text-primary">
+                      <h3 className="text-base font-semibold text-primary">
                         តួនាទី និង មុខតំណែង
                       </h3>
                     </div>
@@ -1075,7 +1075,7 @@ function AdminUsersContent() {
                     <div className="space-y-3">
                       {/* Role */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="role" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Label htmlFor="role" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                           <Shield className="w-3.5 h-3.5 text-primary" />
                           តួនាទី <span className="text-red-500">*</span>
                         </Label>
@@ -1098,7 +1098,7 @@ function AdminUsersContent() {
 
                       {/* Position */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="position" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Label htmlFor="position" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                           <ClipboardList className="w-3.5 h-3.5 text-primary" />
                           មុខតំណែង
                         </Label>
@@ -1124,7 +1124,7 @@ function AdminUsersContent() {
                   <div className="bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl p-4 border border-border/50">
                     <div className="flex items-center space-x-2 mb-4">
                       <Lock className="h-4 w-4 text-primary" />
-                      <h3 className="text-sm font-semibold text-primary">
+                      <h3 className="text-base font-semibold text-primary">
                         ពាក្យសម្ងាត់
                       </h3>
                     </div>
@@ -1132,7 +1132,7 @@ function AdminUsersContent() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Password */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="password" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Label htmlFor="password" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                           <Lock className="w-3.5 h-3.5 text-primary" />
                           ពាក្យសម្ងាត់ <span className="text-red-500">*</span>
                         </Label>
@@ -1159,7 +1159,7 @@ function AdminUsersContent() {
 
                       {/* Verify Password */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="verifyPassword" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Label htmlFor="verifyPassword" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                           <Lock className="w-3.5 h-3.5 text-primary" />
                           បញ្ជាក់ពាក្យសម្ងាត់ <span className="text-red-500">*</span>
                         </Label>
@@ -1191,7 +1191,7 @@ function AdminUsersContent() {
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-2">
                         <Lock className="h-4 w-4 text-primary" />
-                        <h3 className="text-sm font-semibold text-primary">
+                        <h3 className="text-base font-semibold text-primary">
                           ផ្លាស់ប្តូរពាក្យសម្ងាត់
                         </h3>
                       </div>
@@ -1200,7 +1200,7 @@ function AdminUsersContent() {
                         variant="outline"
                         size="sm"
                         onClick={() => setShowChangePassword(!showChangePassword)}
-                        className="text-xs"
+                        className="text-sm"
                       >
                         {showChangePassword ? "លាក់" : "បង្ហាញ"}
                       </Button>
@@ -1212,7 +1212,7 @@ function AdminUsersContent() {
                         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                           <div className="flex items-start space-x-2">
                             <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                            <div className="text-sm text-blue-700 dark:text-blue-300">
+                            <div className="text-base text-blue-700 dark:text-blue-300">
                               <p className="font-medium">ព័ត៌មាន:</p>
                               <p>អ្នកអាចផ្លាស់ប្តូរពាក្យសម្ងាត់ដោយបញ្ចូលតែពាក្យសម្ងាត់ថ្មី។</p>
                             </div>
@@ -1222,7 +1222,7 @@ function AdminUsersContent() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* New Password */}
                         <div className="space-y-1.5">
-                          <Label htmlFor="newPassword" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Label htmlFor="newPassword" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                             <Lock className="w-3.5 h-3.5 text-primary" />
                             ពាក្យសម្ងាត់ថ្មី <span className="text-red-500">*</span>
                           </Label>
@@ -1249,7 +1249,7 @@ function AdminUsersContent() {
 
                         {/* Confirm New Password */}
                         <div className="space-y-1.5">
-                          <Label htmlFor="confirmNewPassword" className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Label htmlFor="confirmNewPassword" className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
                             <Lock className="w-3.5 h-3.5 text-primary" />
                             បញ្ជាក់ពាក្យសម្ងាត់ថ្មី <span className="text-red-500">*</span>
                           </Label>
@@ -1285,7 +1285,7 @@ function AdminUsersContent() {
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <p className="text-sm text-red-700 dark:text-red-300">{formError}</p>
+                      <p className="text-base text-red-700 dark:text-red-300">{formError}</p>
                     </div>
                   </div>
                 )}
@@ -1295,7 +1295,7 @@ function AdminUsersContent() {
                   <div className={`${submitMessage.type === "success" ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"} border rounded-lg p-4`}>
                     <div className="flex items-center space-x-2">
                       <div className={`w-2 h-2 ${submitMessage.type === "success" ? "bg-green-500" : "bg-red-500"} rounded-full`}></div>
-                      <p className={`text-sm ${submitMessage.type === "success" ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"}`}>
+                      <p className={`text-base ${submitMessage.type === "success" ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"}`}>
                         {submitMessage.text}
                       </p>
                     </div>
@@ -1308,14 +1308,14 @@ function AdminUsersContent() {
                     type="button"
                     variant="outline"
                     onClick={() => setFormDialogOpen(false)}
-                    className="h-9 px-5 text-sm font-medium"
+                    className="h-9 px-5 text-base font-medium"
                     disabled={formLoading}
                   >
                     បោះបង់
                   </Button>
                   <Button
                     type="submit"
-                    className="h-9 px-5 text-sm font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                    className="h-9 px-5 text-base font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                     disabled={formLoading}
                   >
                     {formLoading ? (
@@ -1351,7 +1351,7 @@ function AdminUsersContent() {
                     <DialogTitle className="text-xl font-bold tracking-wide text-red-600 dark:text-red-400">
                       លុបអ្នកប្រើ
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-muted-foreground mt-1">
+                    <DialogDescription className="text-base text-muted-foreground mt-1">
                       សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ
                     </DialogDescription>
                   </div>
@@ -1362,16 +1362,16 @@ function AdminUsersContent() {
               <div className="space-y-4">
                 <div className="flex items-center space-x-3 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-800 rounded-lg">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <div className="text-sm text-red-700 dark:text-red-300">
+                  <div className="text-base text-red-700 dark:text-red-300">
                     <p className="font-medium">តើអ្នកប្រាកដថាចង់លុបអ្នកប្រើនេះមែនទេ?</p>
-                    <p className="text-xs mt-1 opacity-80">ព័ត៌មានទាំងអស់នឹងត្រូវបានលុបជាអចិន្ត្រៃយ៍</p>
+                    <p className="text-sm mt-1 opacity-80">ព័ត៌មានទាំងអស់នឹងត្រូវបានលុបជាអចិន្ត្រៃយ៍</p>
                   </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-2">
                   <DialogClose asChild>
                     <Button 
                       variant="outline" 
-                      className="h-10 px-6 text-sm font-semibold"
+                      className="h-10 px-6 text-base font-semibold"
                       disabled={deleteLoading}
                     >
                       បោះបង់
@@ -1381,7 +1381,7 @@ function AdminUsersContent() {
                     variant="destructive"
         loading={deleteLoading}
                     onClick={() => deleteId && handleDelete(deleteId)}
-                    className="h-10 px-6 text-sm font-bold bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="h-10 px-6 text-base font-bold bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     {deleteLoading ? "កំពុងលុប..." : "លុបអ្នកប្រើ"}
                   </Button>
@@ -1406,7 +1406,7 @@ function AdminUsersContent() {
                     <DialogTitle className="text-primary text-xl font-bold tracking-wide">
                       ព័ត៌មានលម្អិតអ្នកប្រើ
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-muted-foreground mt-1">
+                    <DialogDescription className="text-base text-muted-foreground mt-1">
                       ព័ត៌មានពេញលេញពីមូលដ្ឋានទិន្នន័យ
                     </DialogDescription>
                   </div>
@@ -1432,7 +1432,7 @@ function AdminUsersContent() {
                     )}
                     <div>
                       <h3 className="text-lg font-bold text-primary">{viewDetailsUser.lastname} {viewDetailsUser.firstname}</h3>
-                      <p className="text-sm text-muted-foreground">@{viewDetailsUser.username}</p>
+                      <p className="text-base text-muted-foreground">@{viewDetailsUser.username}</p>
                       <Badge className={`mt-1 ${viewDetailsUser.status === "active" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"}`}>
                         {viewDetailsUser.status === "active" ? "ដំណើរការ" : "បិទដំណើរការ"}
                       </Badge>
@@ -1441,7 +1441,7 @@ function AdminUsersContent() {
                   
                   {/* Status Toggle */}
                   <div className="flex items-center gap-3 mt-2 mb-4">
-                    <label htmlFor="status-toggle-details" className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                    <label htmlFor="status-toggle-details" className="text-base font-medium text-foreground flex items-center gap-1.5">
                       ស្ថានភាព:
                     </label>
                     <button
@@ -1481,43 +1481,43 @@ function AdminUsersContent() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div>
-                        <label className="text-sm font-semibold text-primary">តួនាទី</label>
-                        <p className="text-sm font-medium">{viewDetailsUser.role === "admin" ? "អ្នកគ្រប់គ្រង" : "គ្រូបង្រៀន"}</p>
+                        <label className="text-base font-semibold text-primary">តួនាទី</label>
+                        <p className="text-base font-medium">{viewDetailsUser.role === "admin" ? "អ្នកគ្រប់គ្រង" : "គ្រូបង្រៀន"}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-primary">មុខតំណែង</label>
-                        <p className="text-sm font-medium">{viewDetailsUser.position || "-"}</p>
+                        <label className="text-base font-semibold text-primary">មុខតំណែង</label>
+                        <p className="text-base font-medium">{viewDetailsUser.position || "-"}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-primary">លេខទូរស័ព្ទ ១</label>
-                        <p className="text-sm font-medium">{viewDetailsUser.phonenumber1 || "-"}</p>
+                        <label className="text-base font-semibold text-primary">លេខទូរស័ព្ទ ១</label>
+                        <p className="text-base font-medium">{viewDetailsUser.phonenumber1 || "-"}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-primary">លេខទូរស័ព្ទ ២</label>
-                        <p className="text-sm font-medium">{viewDetailsUser.phonenumber2 || "-"}</p>
+                        <label className="text-base font-semibold text-primary">លេខទូរស័ព្ទ ២</label>
+                        <p className="text-base font-medium">{viewDetailsUser.phonenumber2 || "-"}</p>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-sm font-semibold text-primary">ចូលចុងក្រោយ</label>
-                        <p className="text-sm font-medium">
+                        <label className="text-base font-semibold text-primary">ចូលចុងក្រោយ</label>
+                        <p className="text-base font-medium">
                           {viewDetailsUser.lastLogin ? new Date(viewDetailsUser.lastLogin).toLocaleString() : "មិនទាន់ចូល"}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-primary">បង្កើតនៅថ្ងៃ</label>
-                        <p className="text-sm font-medium">{new Date(viewDetailsUser.createdAt).toLocaleDateString()}</p>
+                        <label className="text-base font-semibold text-primary">បង្កើតនៅថ្ងៃ</label>
+                        <p className="text-base font-medium">{new Date(viewDetailsUser.createdAt).toLocaleDateString()}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-semibold text-primary">កែប្រែចុងក្រោយ</label>
-                        <p className="text-sm font-medium">{new Date(viewDetailsUser.updatedAt).toLocaleDateString()}</p>
+                        <label className="text-base font-semibold text-primary">កែប្រែចុងក្រោយ</label>
+                        <p className="text-base font-medium">{new Date(viewDetailsUser.updatedAt).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex justify-end space-x-3 pt-4 border-t border-border/50">
                     <DialogClose asChild>
-                      <Button variant="outline" className="h-10 px-6 text-sm font-semibold">
+                      <Button variant="outline" className="h-10 px-6 text-base font-semibold">
                         បោះបង់
                       </Button>
                     </DialogClose>
@@ -1526,7 +1526,7 @@ function AdminUsersContent() {
                         setViewDetailsUser(null);
                         openDialog(viewDetailsUser);
                       }}
-                      className="h-10 px-6 text-sm font-bold"
+                      className="h-10 px-6 text-base font-bold"
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       កែប្រែ

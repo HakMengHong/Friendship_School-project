@@ -588,10 +588,10 @@ function DailyAttendanceContent() {
                     <CalendarDays className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">
                       {formData.date ? new Date(formData.date).toLocaleDateString('km-KH') : 'ថ្ងៃនេះ'}
                     </p>
-                    <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">
+                    <p className="text-base text-blue-500 dark:text-blue-300 font-medium">
                       កាលបរិច្ឆេទ
                     </p>
                   </div>
@@ -608,13 +608,13 @@ function DailyAttendanceContent() {
                     <BookOpen className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                    <p className="text-4xl font-bold text-purple-600 dark:text-purple-400">
                       {formData.course ? (() => {
                         const selectedCourse = courses.find(c => c.courseId.toString() === formData.course)
                         return selectedCourse ? `ថ្នាក់ទី ${selectedCourse.grade}${selectedCourse.section}` : 'ថ្នាក់'
                       })() : 'ថ្នាក់'}
                     </p>
-                    <p className="text-xs text-purple-500 dark:text-purple-300 font-medium">
+                    <p className="text-base text-purple-500 dark:text-purple-300 font-medium">
                       ថ្នាក់រៀន
                     </p>
                   </div>
@@ -631,10 +631,10 @@ function DailyAttendanceContent() {
                     <Users className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                    <p className="text-4xl font-bold text-green-600 dark:text-green-400">
                       {students.length}
                     </p>
-                    <p className="text-xs text-green-500 dark:text-green-300 font-medium">
+                    <p className="text-base text-green-500 dark:text-green-300 font-medium">
                       សិស្សសរុប
                     </p>
                   </div>
@@ -663,7 +663,7 @@ function DailyAttendanceContent() {
                 <Calendar className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-3xl font-bold text-white">
                   ព័ត៌មានមុខងារ
                 </h2>
                 <div className="h-1 w-8 bg-white/30 rounded-full mt-2" />
@@ -674,7 +674,7 @@ function DailyAttendanceContent() {
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <div className="space-y-2">
-                <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                   <CalendarDays className="h-4 w-4 text-primary" />
                   <span>ឆ្នាំសិក្សា</span>
                   <span className="text-red-500">*</span>
@@ -699,7 +699,7 @@ function DailyAttendanceContent() {
                 </Select>
               </div>
               <div className="space-y-2">
-              <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+              <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                 <GraduationCap className="h-4 w-4 text-primary" />
                 <span>ឆមាស</span>
                 <span className="text-red-500">*</span>
@@ -721,7 +721,7 @@ function DailyAttendanceContent() {
               </Select>
             </div>
               <div className="space-y-2">
-                <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                   <GraduationCap className="h-4 w-4 text-primary" />
                   <span>ថ្នាក់</span>
                   <span className="text-red-500">*</span>
@@ -746,7 +746,7 @@ function DailyAttendanceContent() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                   <Calendar className="h-4 w-4 text-primary" />
                   <span>កាលបរិច្ឆេទ</span>
                   <span className="text-red-500">*</span>
@@ -761,7 +761,7 @@ function DailyAttendanceContent() {
               </div>
               
               <div className="space-y-2">
-                <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                   <UserIcon className="h-4 w-4 text-primary" />
                   <span>ឈ្មោះគ្រូ</span>
                 </label>
@@ -778,7 +778,7 @@ function DailyAttendanceContent() {
               <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 via-yellow-50/95 to-yellow-50/90 dark:from-yellow-900/10 dark:via-yellow-900/15 dark:to-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                  <span className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <span className="text-base text-yellow-800 dark:text-yellow-200">
                     សូមបំពេញព័ត៌មានមុខងារទាំងអស់ដើម្បីមើលបញ្ជីសិស្ស
                   </span>
                 </div>
@@ -801,24 +801,24 @@ function DailyAttendanceContent() {
                     <Clock className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                       {statistics.amPresent + statistics.amAbsent + statistics.amLate + statistics.amExcused} នាក់
                     </p>
-                    <p className="text-xs text-blue-500 dark:text-blue-300 font-medium">
+                    <p className="text-base text-blue-500 dark:text-blue-300 font-medium">
                       ពេលព្រឹក
                     </p>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">វត្តមាន:</span>
                     <span className="font-medium text-green-600">{statistics.amPresent}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">អវត្តមាន:</span>
                     <span className="font-medium text-red-600">{statistics.amAbsent}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">យឺត:</span>
                     <span className="font-medium text-yellow-600">{statistics.amLate}</span>
                   </div>
@@ -836,24 +836,24 @@ function DailyAttendanceContent() {
                     <Clock className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
                       {statistics.pmPresent + statistics.pmAbsent + statistics.pmLate + statistics.pmExcused} នាក់
                     </p>
-                    <p className="text-xs text-orange-500 dark:text-orange-300 font-medium">
+                    <p className="text-base text-orange-500 dark:text-orange-300 font-medium">
                       ពេលរសៀល
                     </p>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">វត្តមាន:</span>
                     <span className="font-medium text-green-600">{statistics.pmPresent}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">អវត្តមាន:</span>
                     <span className="font-medium text-red-600">{statistics.pmAbsent}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">យឺត:</span>
                     <span className="font-medium text-yellow-600">{statistics.pmLate}</span>
                   </div>
@@ -871,7 +871,7 @@ function DailyAttendanceContent() {
                     <TrendingUp className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                       {statistics.totalPresent} នាក់
                     </p>
                     <p className="text-xs text-green-500 dark:text-green-300 font-medium">
@@ -880,13 +880,13 @@ function DailyAttendanceContent() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">ភាគរយ:</span>
                     <span className="font-medium text-green-600">
                       {students.length > 0 ? ((statistics.totalPresent / students.length) * 100).toFixed(1) : 0}%
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">ពីពេលព្រឹក:</span>
                     <span className="font-medium text-blue-600">+{statistics.amPresent}</span>
                   </div>
@@ -904,7 +904,7 @@ function DailyAttendanceContent() {
                     <XCircleIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    <p className="text-3xl font-bold text-red-600 dark:text-red-400">
                       {statistics.totalAbsent} នាក់
                     </p>
                     <p className="text-xs text-red-500 dark:text-red-300 font-medium">
@@ -913,13 +913,13 @@ function DailyAttendanceContent() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">ភាគរយ:</span>
                     <span className="font-medium text-red-600">
                       {students.length > 0 ? ((statistics.totalAbsent / students.length) * 100).toFixed(1) : 0}%
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-gray-600 dark:text-gray-400">ពីពេលព្រឹក:</span>
                     <span className="font-medium text-orange-600">+{statistics.amAbsent}</span>
                   </div>
@@ -948,7 +948,7 @@ function DailyAttendanceContent() {
                         <Users className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-white">
+                        <h2 className="text-3xl font-bold text-white">
                           បញ្ជីឈ្មោះសិស្ស
                         </h2>
                         <div className="flex items-center space-x-3 mt-2">
@@ -986,7 +986,7 @@ function DailyAttendanceContent() {
                   {loadingStudents ? (
                     <div className="text-center py-8">
                       <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-base text-muted-foreground">
                         កំពុងទាញយក...
                       </p>
                     </div>
@@ -995,13 +995,13 @@ function DailyAttendanceContent() {
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400">
+                            <th className="text-left py-3 px-4 text-base font-medium text-gray-600 dark:text-gray-400">
                               ឈ្មោះសិស្ស
                             </th>
-                            <th className="text-center py-3 px-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+                            <th className="text-center py-3 px-2 text-base font-medium text-gray-600 dark:text-gray-400">
                               ពេលព្រឹក
                             </th>
-                            <th className="text-center py-3 px-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+                            <th className="text-center py-3 px-2 text-base font-medium text-gray-600 dark:text-gray-400">
                               ពេលរសៀល
                             </th>
                           </tr>
@@ -1018,7 +1018,7 @@ function DailyAttendanceContent() {
                               >
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-base font-semibold">
                                       {student.photo ? (
                                         <img
                                           src={student.photo}
@@ -1030,7 +1030,7 @@ function DailyAttendanceContent() {
                                       )}
                                     </div>
                                     <div>
-                                      <div className="font-medium text-gray-900 dark:text-white text-sm">
+                                      <div className="font-medium text-gray-900 dark:text-white text-base">
                                         {student.firstName} {student.lastName}
                                       </div>
                                       <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -1100,7 +1100,7 @@ function DailyAttendanceContent() {
                       <XCircle className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">
+                      <h2 className="text-3xl font-bold text-white">
                         ឈ្មោះសិស្សអវត្តមានប្រចាំថ្ងៃ
                       </h2>
                       <div className="h-1 w-8 bg-white/30 rounded-full mt-2" />
@@ -1111,7 +1111,7 @@ function DailyAttendanceContent() {
                   {loadingAttendances ? (
                     <div className="text-center py-8">
                       <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-base text-muted-foreground">
                         កំពុងទាញយក...
                       </p>
                     </div>
@@ -1133,7 +1133,7 @@ function DailyAttendanceContent() {
                                   <h4 className="font-semibold text-gray-900 dark:text-white">
                                     {attendance.student.firstName} {attendance.student.lastName}
                                   </h4>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  <p className="text-base text-gray-500 dark:text-gray-400">
                                     {sessionOptions.find(s => s.value === attendance.session)?.label}
                                   </p>
                                 </div>
@@ -1160,7 +1160,7 @@ function DailyAttendanceContent() {
                                 </div>
                               </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="grid grid-cols-2 gap-4 text-base">
                               <div>
                                 <span className="text-gray-500 dark:text-gray-400">ថ្នាក់:</span>
                                 <span className="ml-2 font-medium">ថ្នាក់ទី {attendance.course.grade}{attendance.course.section}</span>
@@ -1174,8 +1174,8 @@ function DailyAttendanceContent() {
                             </div>
                             {attendance.reason && (
                               <div className="mt-2">
-                                <span className="text-gray-500 dark:text-gray-400 text-sm">មូលហេតុ:</span>
-                                <p className="text-sm font-medium mt-1">{attendance.reason}</p>
+                                <span className="text-gray-500 dark:text-gray-400 text-base">មូលហេតុ:</span>
+                                <p className="text-base font-medium mt-1">{attendance.reason}</p>
                               </div>
                             )}
                           </div>

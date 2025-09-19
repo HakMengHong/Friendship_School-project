@@ -1016,7 +1016,7 @@ function AddScoreContent() {
           <div className="max-w-7xl mx-auto space-y-8 p-6">
             <div className="text-center py-12">
               <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-              <p className="text-lg text-muted-foreground">កំពុងទាញយកទិន្នន័យ...</p>
+              <p className="text-xl text-muted-foreground">កំពុងទាញយកទិន្នន័យ...</p>
             </div>
           </div>
         </div>
@@ -1031,8 +1031,8 @@ function AddScoreContent() {
           <div className="max-w-7xl mx-auto space-y-8 p-6">
             <div className="text-center">
               <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-              <p className="text-lg text-destructive mb-2">មានបញ្ហាក្នុងការទាញយកទិន្នន័យ</p>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <p className="text-xl text-destructive mb-2">មានបញ្ហាក្នុងការទាញយកទិន្នន័យ</p>
+              <p className="text-base text-muted-foreground mb-4">{error}</p>
               <Button onClick={fetchInitialData}>ព្យាយាមម្តងទៀត</Button>
             </div>
           </div>
@@ -1063,7 +1063,7 @@ function AddScoreContent() {
                     <BookOpen className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">សូមជ្រើសរើស</h2>
+                    <h2 className="text-3xl font-bold text-white">សូមជ្រើសរើស</h2>
                     <div className="h-1 w-8 bg-white/30 rounded-full mt-2"></div>
                   </div>
                 </div>
@@ -1076,7 +1076,7 @@ function AddScoreContent() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                     {/* Academic Year */}
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                         <CalendarDays className="h-4 w-4 text-primary" />
                         <span>ឆ្នាំសិក្សា</span>
                         <span className="text-red-500">*</span>
@@ -1097,7 +1097,7 @@ function AddScoreContent() {
 
                     {/* Semester */}
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                         <BookOpen className="h-4 w-4 text-primary" />
                         <span>ឆមាស</span>
                         <span className="text-red-500">*</span>
@@ -1118,7 +1118,7 @@ function AddScoreContent() {
 
                     {/* Class */}
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                         <GraduationCap className="h-4 w-4 text-primary" />
                         <span>ថ្នាក់</span>
                         <span className="text-red-500">*</span>
@@ -1139,7 +1139,7 @@ function AddScoreContent() {
 
                     {/* Month */}
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                         <CalendarDays className="h-4 w-4 text-primary" />
                         <span>ខែ</span>
                         <span className="text-red-500">*</span>
@@ -1160,7 +1160,7 @@ function AddScoreContent() {
 
                     {/* Grade Year */}
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                         <TrendingUp className="h-4 w-4 text-primary" />
                         <span>ឆ្នាំពិន្ទុ</span>
                         <span className="text-red-500">*</span>
@@ -1181,7 +1181,7 @@ function AddScoreContent() {
 
                     {/* Teacher Info */}
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-sm font-semibold text-primary dark:text-gray-300">
+                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
                         <UserIcon className="h-4 w-4 text-primary" />
                         <span>ឈ្មោះគ្រូ</span>
                       </label>
@@ -1212,7 +1212,7 @@ function AddScoreContent() {
                     </div>
                     <div>
                       <h2 className="text-lg font-semibold text-primary dark:text-white">បញ្ជីឈ្មោះសិស្ស</h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-base text-gray-500 dark:text-gray-400">
                         {filteredStudents.length} នាក់ • ជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ
                       </p>
                     </div>
@@ -1255,7 +1255,7 @@ function AddScoreContent() {
                 {loadingStudents ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
-                    <p className="text-sm text-gray-500">កំពុងទាញយកសិស្ស...</p>
+                    <p className="text-base text-gray-500">កំពុងទាញយកសិស្ស...</p>
                   </div>
                 ) : filteredStudents.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
@@ -1270,7 +1270,7 @@ function AddScoreContent() {
                         onClick={() => setSelectedStudent(student)}
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-base flex-shrink-0">
                             {student.photo ? (
                               <img
                                 src={student.photo}
@@ -1282,7 +1282,7 @@ function AddScoreContent() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-primary dark:text-white truncate text-sm">
+                            <p className="font-medium text-primary dark:text-white truncate text-base">
                               {student.lastName} {student.firstName}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
@@ -1295,7 +1295,7 @@ function AddScoreContent() {
                   <div className="text-center py-8">
                     <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                     <p className="text-gray-500 font-medium">មិនរកឃើញសិស្ស</p>
-                    <p className="text-sm text-gray-400">សូមស្វែងរកឈ្មោះផ្សេង</p>
+                    <p className="text-base text-gray-400">សូមស្វែងរកឈ្មោះផ្សេង</p>
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -1317,7 +1317,7 @@ function AddScoreContent() {
                     <h2 className="text-lg font-semibold text-primary dark:text-white">
                       {editingGrade ? 'កែសម្រួលពិន្ទុ' : bulkMode ? 'បញ្ចូលពិន្ទុជាក្រុម' : 'បញ្ចូលពិន្ទុ'}
                     </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-base text-gray-500 dark:text-gray-400">
                       {bulkMode ? 'បញ្ចូលពិន្ទុសម្រាប់សិស្សច្រើននាក់' : 'បញ្ចូលពិន្ទុសម្រាប់សិស្សម្នាក់'}
                     </p>
                   </div>
@@ -1329,7 +1329,7 @@ function AddScoreContent() {
                       <div className="space-y-4">
                         {/* Subject Selection */}
                         <div>
-                          <label className="block text-sm font-medium mb-2 text-primary dark:text-gray-300">
+                          <label className="block text-base font-medium mb-2 text-primary dark:text-gray-300">
                             មុខវិជ្ជា <span className="text-red-500">*</span>
                           </label>
                           <Select value={selectedSubject} onValueChange={(value) => {
@@ -1379,7 +1379,7 @@ function AddScoreContent() {
                                       )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="font-medium text-primary dark:text-white text-sm truncate">
+                                      <p className="font-medium text-primary dark:text-white text-base truncate">
                                         {student.lastName} {student.firstName}
                                       </p>
                                       <p className="text-xs text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
@@ -1393,14 +1393,14 @@ function AddScoreContent() {
                                         min="0"
                                         max={getMaxScore(student)}
                                         step="0.01"
-                                        className="w-24 h-9 text-center text-sm"
+                                        className="w-24 h-9 text-center text-base"
                                       />
                                       <Input
                                         type="text"
                                         placeholder="មតិ"
                                         value={bulkScores[student.studentId]?.comment || ""}
                                         onChange={(e) => handleBulkCommentChange(student.studentId, e.target.value)}
-                                        className="w-44 h-9 text-sm"
+                                        className="w-44 h-9 text-base"
                                       />
                                     </div>
                                   </div>
@@ -1454,7 +1454,7 @@ function AddScoreContent() {
                             </div>
                             <div>
                               <h3 className="font-semibold text-primary dark:text-white">{selectedStudent.lastName} {selectedStudent.firstName}</h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 pt-1 pb-1">{getFormattedClass(selectedStudent)}</p>
+                              <p className="text-base text-gray-600 dark:text-gray-400 pt-1 pb-1">{getFormattedClass(selectedStudent)}</p>
                               <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                                 ពិន្ទុអតិបរមា: {getMaxScore(selectedStudent)} ពិន្ទុ
                               </p>
@@ -1466,7 +1466,7 @@ function AddScoreContent() {
                         <div className="space-y-4 pt-4">
                           {/* Subject Selection */}
                           <div>
-                            <label className="block text-sm font-medium mb-2 text-primary dark:text-gray-300">
+                            <label className="block text-base font-medium mb-2 text-primary dark:text-gray-300">
                               មុខវិជ្ជា <span className="text-red-500">*</span>
                             </label>
                             <Select value={selectedSubject} onValueChange={(value) => {
@@ -1488,7 +1488,7 @@ function AddScoreContent() {
 
                           {/* Score Input */}
                           <div className="space-y-3">
-                            <label className="block text-sm font-medium text-primary dark:text-gray-300">
+                            <label className="block text-base font-medium text-primary dark:text-gray-300">
                               លេខពិន្ទុ <span className="text-red-500">*</span>
                             </label>
                             
@@ -1516,7 +1516,7 @@ function AddScoreContent() {
 
                             {/* Error Message */}
                             {scoreError && (
-                              <div className="flex items-center space-x-2 text-red-600 text-sm">
+                              <div className="flex items-center space-x-2 text-red-600 text-base">
                                 <AlertCircle className="h-4 w-4" />
                                 <span>{scoreError}</span>
                               </div>
@@ -1525,7 +1525,7 @@ function AddScoreContent() {
 
                           {/* Comment Input */}
                           <div>
-                            <label className="block text-sm font-medium mb-2 text-primary dark:text-gray-300">
+                            <label className="block text-base font-medium mb-2 text-primary dark:text-gray-300">
                               មតិផ្សេងៗ
                               <span className="text-gray-400 text-xs ml-2">(ជម្រើស)</span>
                             </label>
@@ -1596,7 +1596,7 @@ function AddScoreContent() {
                         <p className="text-lg font-medium mb-2">
                           {bulkMode ? 'បញ្ចូលពិន្ទុជាក្រុម' : 'ជ្រើសរើសសិស្ស'}
                         </p>
-                        <p className="text-sm">
+                        <p className="text-base">
                           {bulkMode 
                             ? 'សូមជ្រើសរើសមុខវិជ្ជាដើម្បីបញ្ចូលពិន្ទុសម្រាប់សិស្សទាំងអស់'
                             : 'សូមជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ'
@@ -1620,7 +1620,7 @@ function AddScoreContent() {
                       <h2 className="text-lg font-semibold text-primary dark:text-white">
                         បញ្ជីពិន្ទុសិស្ស {selectedStudent?.lastName} {selectedStudent?.firstName || ''}
                       </h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-base text-gray-500 dark:text-gray-400">
                         សរុប {totalGrades} ពិន្ទុ • មធ្យមភាគ {averageScore}
                         {gradeListMonth !== 'all' && gradeListYear !== 'all' && (
                           <span className="ml-2 text-green-600 dark:text-green-400">
@@ -1691,7 +1691,7 @@ function AddScoreContent() {
                         </div>
                       ) : null}
                       <div className="flex items-center space-x-2">
-                        <label className="text-sm font-medium text-primary dark:text-gray-300">ខែ</label>
+                        <label className="text-base font-medium text-primary dark:text-gray-300">ខែ</label>
                         <Select value={gradeListMonth} onValueChange={setGradeListMonth}>
                           <SelectTrigger className="w-24 h-8">
                             <SelectValue placeholder="ទាំងអស់" />
@@ -1715,7 +1715,7 @@ function AddScoreContent() {
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <label className="text-sm font-medium text-primary dark:text-gray-300">ឆ្នាំ</label>
+                        <label className="text-base font-medium text-primary dark:text-gray-300">ឆ្នាំ</label>
                         <Select value={gradeListYear} onValueChange={setGradeListYear}>
                           <SelectTrigger className="w-30 h-8">
                             <SelectValue placeholder="ទាំងអស់" />
@@ -1756,7 +1756,7 @@ function AddScoreContent() {
                     {loadingGrades ? (
                       <div className="text-center py-8">
                         <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-purple-600" />
-                        <p className="text-sm text-gray-500">កំពុងទាញយកពិន្ទុ...</p>
+                        <p className="text-base text-gray-500">កំពុងទាញយកពិន្ទុ...</p>
                       </div>
                     ) : filteredGrades.length > 0 ? (
                       <>
@@ -1765,11 +1765,11 @@ function AddScoreContent() {
                           {filteredGrades.map((grade) => (
                             <div key={grade.gradeId} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                               <div className="flex items-center space-x-4 flex-1">
-                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-base">
                                   {grade.subject.subjectName.charAt(0)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-primary dark:text-white text-sm">
+                                  <p className="font-medium text-primary dark:text-white text-base">
                                     {grade.subject.subjectName}
                                   </p>
                                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -1785,7 +1785,7 @@ function AddScoreContent() {
                               
                               <div className="flex items-center space-x-3">
                                 <div className="text-right">
-                                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                                  <span className={`px-3 py-1 rounded-full text-base font-bold ${
                                     grade.grade >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
                                     grade.grade >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
                                     grade.grade >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
@@ -1842,7 +1842,7 @@ function AddScoreContent() {
                         <div className="text-center py-8">
                           <Hash className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                           <p className="text-gray-500 font-medium">មិនរកឃើញពិន្ទុ</p>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-base text-gray-400">
                             មិនមានពិន្ទុសម្រាប់ខែ និងឆ្នាំដែលបានជ្រើសរើស
                           </p>
                           <Button
@@ -1861,7 +1861,7 @@ function AddScoreContent() {
                         <div className="text-center py-8">
                           <CheckCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                           <p className="text-gray-500 font-medium">មិនមានពិន្ទុ</p>
-                          <p className="text-sm text-gray-400">សិស្សនេះមិនទាន់មានពិន្ទុនៅឡើយទេ</p>
+                          <p className="text-base text-gray-400">សិស្សនេះមិនទាន់មានពិន្ទុនៅឡើយទេ</p>
                         </div>
                       )}
                   </>
@@ -1869,7 +1869,7 @@ function AddScoreContent() {
                   <div className="text-center py-8">
                     <Hash className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                     <p className="text-gray-500 font-medium">គ្មានពិន្ទុ</p>
-                    <p className="text-sm text-gray-400">សូមជ្រើសរើសសិស្សដើម្បីមើលពិន្ទុ</p>
+                    <p className="text-base text-gray-400">សូមជ្រើសរើសសិស្សដើម្បីមើលពិន្ទុ</p>
                   </div>
                 )}
               </div>

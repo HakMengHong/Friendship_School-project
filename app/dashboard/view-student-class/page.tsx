@@ -376,7 +376,7 @@ function ViewStudentClassContent() {
                     </CardHeader>
                     <CardContent className="p-1 space-y-4">
                       <div>
-                        <Label htmlFor="schoolYear" className="text-sm font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</Label>
+                        <Label htmlFor="schoolYear" className="text-base font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</Label>
                         <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
                           <SelectTrigger className="h-11 mt-2 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200">
                             <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
@@ -392,7 +392,7 @@ function ViewStudentClassContent() {
                       </div>
                       
                       <div>
-                        <Label htmlFor="course" className="text-sm font-medium text-gray-700 dark:text-gray-300">ថ្នាក់រៀន</Label>
+                        <Label htmlFor="course" className="text-base font-medium text-gray-700 dark:text-gray-300">ថ្នាក់រៀន</Label>
                         <Select value={selectedCourse} onValueChange={handleCourseChange}>
                           <SelectTrigger className="h-11 mt-2 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200">
                             <SelectValue placeholder="ជ្រើសរើសថ្នាក់រៀន" />
@@ -409,7 +409,7 @@ function ViewStudentClassContent() {
                       </div>
 
                       <div>
-                        <Label htmlFor="search" className="text-sm font-medium text-gray-700 dark:text-gray-300">ស្វែងរកសិស្ស</Label>
+                        <Label htmlFor="search" className="text-base font-medium text-gray-700 dark:text-gray-300">ស្វែងរកសិស្ស</Label>
                         <div className="relative mt-2">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                           <Input
@@ -427,11 +427,11 @@ function ViewStudentClassContent() {
                         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 rounded-lg p-3">
                           <div className="flex items-center space-x-2 text-green-800 dark:text-green-300">
                             <Users className="h-4 w-4" />
-                            <span className="text-sm font-medium">
+                            <span className="text-base font-medium">
                               សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ
                             </span>
                           </div>
-                          <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                          <p className="text-sm text-green-600 dark:text-green-400 mt-1">
                             បានជ្រើសរើសឆ្នាំសិក្សា និងថ្នាក់រៀនរួចហើយ
                           </p>
                         </div>
@@ -444,7 +444,7 @@ function ViewStudentClassContent() {
                             variant="outline"
                             size="sm"
                             onClick={clearAllFilters}
-                            className="text-sm"
+                            className="text-base"
                           >
                             លុបការជ្រើសរើសទាំងអស់
                           </Button>
@@ -481,17 +481,17 @@ function ViewStudentClassContent() {
                     <CardContent className="p-2 space-y-3">
                       <div className="space-y-2">
                         
-                        <div className="text-sm">
+                        <div className="text-base">
           
                           <div className="text-gray-600 dark:text-gray-400 mt-1">
                             ថ្នាក់ទី {getSelectedCourseDetails()?.grade}{getSelectedCourseDetails()?.section}
                           </div>
                         </div>
-                        <div className="text-sm">
+                        <div className="text-base">
                           <span className="font-medium text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា {getSelectedCourseDetails()?.schoolYear.schoolYearCode}</span>
 
                         </div>
-                        <div className="text-sm">
+                        <div className="text-base">
                           <span className="font-medium text-gray-700 dark:text-gray-300">គ្រូគ្រប់គ្រង់ថ្នាក់</span>
                           <div className="text-gray-600 dark:text-gray-400 space-y-1 mt-1">
                             {getSelectedCourseDetails()?.teacherId1 && (
@@ -540,18 +540,18 @@ function ViewStudentClassContent() {
                   </CardHeader>
                   <CardContent className="p-2 space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-700 dark:text-gray-300">ថ្នាក់រៀនសរុប:</span>
+                      <span className="text-base text-gray-700 dark:text-gray-300">ថ្នាក់រៀនសរុប:</span>
                       <span className="font-medium text-gray-900 dark:text-white">{filteredCourses.length}</span>
                     </div>
                     {shouldShowStudents ? (
                       <>
                         <div className="flex justify-between">
-                          <span className="text-sm text-gray-700 dark:text-gray-300">សិស្សដែលបានចុះឈ្មោះ:</span>
+                          <span className="text-base text-gray-700 dark:text-gray-300">សិស្សដែលបានចុះឈ្មោះ:</span>
                           <span className="font-medium text-gray-900 dark:text-white">{filteredEnrollments.length}</span>
                         </div>
                         <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
                           <div className="flex justify-between">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">សិស្សក្នុងថ្នាក់នេះ:</span>
+                            <span className="text-base text-gray-700 dark:text-gray-300">សិស្សក្នុងថ្នាក់នេះ:</span>
                             <span className="font-medium text-blue-600 dark:text-blue-400">
                               {filteredEnrollments.filter(e => e.courseId === parseInt(selectedCourse)).length}
                             </span>
@@ -560,7 +560,7 @@ function ViewStudentClassContent() {
                       </>
                     ) : (
                       <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                        <p className="text-sm">
+                        <p className="text-base">
                           ជ្រើសរើសឆ្នាំសិក្សា និងថ្នាក់រៀនដើម្បីមើលស្ថិតិសិស្ស
                         </p>
                       </div>
@@ -619,24 +619,24 @@ function ViewStudentClassContent() {
                           <Users className="h-10 w-10 text-blue-600 dark:text-blue-400" />
                         </div>
                         <p className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-300">សូមជ្រើសរើសថ្នាក់រៀន និងឆ្នាំសិក្សា</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-base text-gray-600 dark:text-gray-400">
                           សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ នៅពេលអ្នកជ្រើសរើសឆ្នាំសិក្សា និងថ្នាក់រៀន
                         </p>
                         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50 shadow-sm">
-                          <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                          <p className="text-base text-blue-800 dark:text-blue-200 font-medium">
                             ជំហាន:
                           </p>
-                          <ol className="text-sm text-blue-700 dark:text-blue-300 mt-3 space-y-2 text-left max-w-xs mx-auto">
+                          <ol className="text-base text-blue-700 dark:text-blue-300 mt-3 space-y-2 text-left max-w-xs mx-auto">
                             <li className="flex items-center space-x-2">
-                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-xs font-semibold">1</span>
+                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">1</span>
                               <span>ជ្រើសរើសឆ្នាំសិក្សា</span>
                             </li>
                             <li className="flex items-center space-x-2">
-                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-xs font-semibold">2</span>
+                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">2</span>
                               <span>ជ្រើសរើសថ្នាក់រៀន</span>
                             </li>
                             <li className="flex items-center space-x-2">
-                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-xs font-semibold">3</span>
+                              <span className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">3</span>
                               <span>សិស្សនឹងបង្ហាញដោយស្វ័យប្រវត្តិ</span>
                             </li>
                           </ol>
@@ -648,7 +648,7 @@ function ViewStudentClassContent() {
                           <Users className="h-10 w-10 text-gray-400 dark:text-gray-500" />
                         </div>
                         <p className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-300">មិនមានសិស្ស</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-base text-gray-600 dark:text-gray-400">
                           {searchTerm 
                             ? 'មិនរកឃើញសិស្សដែលត្រូវនឹងការស្វែងរក'
                             : 'មិនមានសិស្សដែលបានចុះឈ្មោះក្នុងថ្នាក់នេះ'
@@ -682,7 +682,7 @@ function ViewStudentClassContent() {
                                   <div className="font-medium text-lg text-gray-900 dark:text-white">
                                     {student.firstName} {student.lastName}
                                   </div>
-                                  <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                                  <div className="text-base text-gray-500 dark:text-gray-400 space-y-1">
                                     <div>ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender}</div>
                                     <div>ឆ្នាំសិក្សា: {student.schoolYear} • ថ្ងៃចុះឈ្មោះ: {new Date(enrollment.enrollmentDate).toLocaleDateString('km-KH')}</div>
                                   </div>
@@ -728,7 +728,7 @@ function ViewStudentClassContent() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   បញ្ជាក់ការដកសិស្ស
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-base text-gray-500 dark:text-gray-400">
                   តើអ្នកប្រាកដជាចង់ដកសិស្សនេះចេញពីថ្នាក់រៀនមែនទេ?
                 </p>
               </div>
@@ -738,7 +738,7 @@ function ViewStudentClassContent() {
               <div className="font-medium text-gray-900 dark:text-white">
                 {removingStudent.student.firstName} {removingStudent.student.lastName}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-base text-gray-500 dark:text-gray-400">
                 ថ្នាក់ទី {removingStudent.student.class} • {removingStudent.student.schoolYear}
               </div>
             </div>

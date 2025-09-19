@@ -747,14 +747,14 @@ export default function IDCardsPage() {
               <h3 className="text-2xl font-bold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-500">
                 ប័ណ្ណសម្គាល់សិស្ស
               </h3>
-              <p className="text-muted-foreground leading-relaxed text-sm">
+              <p className="text-muted-foreground leading-relaxed text-base">
                 {loadingStates.studentCard ? 'កំពុងបង្កើត និងទាញយកប័ណ្ណសម្គាល់...' : 'បង្កើតប័ណ្ណសម្គាល់សម្រាប់សិស្សតាមឆ្នាំសិក្សា និងថ្នាក់'}
               </p>
             </div>
 
             {/* Action Button */}
             <div className="mt-6 flex justify-center">
-              <div className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-semibold transition-all duration-500 ${
+              <div className={`inline-flex items-center px-6 py-3 rounded-full text-base font-semibold transition-all duration-500 ${
                 loadingStates.studentCard 
                   ? 'bg-muted text-muted-foreground cursor-not-allowed' 
                   : 'bg-muted text-muted-foreground group-hover:bg-blue-500 group-hover:text-white group-hover:shadow-lg'
@@ -799,14 +799,14 @@ export default function IDCardsPage() {
               <h3 className="text-2xl font-bold text-foreground group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-500">
                 ប័ណ្ណសម្គាល់គ្រូបង្រៀន
               </h3>
-              <p className="text-muted-foreground leading-relaxed text-sm">
+              <p className="text-muted-foreground leading-relaxed text-base">
                 {loadingStates.teacherCard ? 'កំពុងបង្កើត និងទាញយកប័ណ្ណសម្គាល់...' : `ចុចដើម្បីបង្កើតប័ណ្ណសម្គាល់សម្រាប់គ្រូបង្រៀន ${(teachers || []).length} នាក់ (ឯកសារតែមួយ)`}
               </p>
             </div>
 
             {/* Action Button */}
             <div className="mt-6 flex justify-center">
-              <div className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-semibold transition-all duration-500 ${
+              <div className={`inline-flex items-center px-6 py-3 rounded-full text-base font-semibold transition-all duration-500 ${
                 loadingStates.teacherCard 
                   ? 'bg-muted text-muted-foreground cursor-not-allowed' 
                   : 'bg-muted text-muted-foreground group-hover:bg-green-500 group-hover:text-white group-hover:shadow-lg'
@@ -858,13 +858,13 @@ export default function IDCardsPage() {
               <div className="space-y-4">
                 {/* School Year Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="schoolYear" className="text-sm font-semibold text-foreground flex items-center space-x-2">
+                  <Label htmlFor="schoolYear" className="text-base font-semibold text-foreground flex items-center space-x-2">
                     <GraduationCap className="h-4 w-4 text-primary" />
                     <span>ឆ្នាំសិក្សា</span>
                     <span className="text-red-500 font-bold">*</span>
                   </Label>
                   <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
-                    <SelectTrigger className="h-11 text-sm bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200">
+                    <SelectTrigger className="h-11 text-base bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200">
                       <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                     </SelectTrigger>
                     <SelectContent>
@@ -879,12 +879,12 @@ export default function IDCardsPage() {
 
                 {/* Course Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="course" className="text-sm font-semibold text-foreground flex items-center space-x-2">
+                  <Label htmlFor="course" className="text-base font-semibold text-foreground flex items-center space-x-2">
                     <BookOpen className="h-4 w-4 text-primary" />
                     <span>ថ្នាក់រៀន</span>
                   </Label>
                   <Select value={selectedCourse} onValueChange={handleCourseChange}>
-                    <SelectTrigger className="h-11 text-sm bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200">
+                    <SelectTrigger className="h-11 text-base bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200">
                       <SelectValue placeholder="ជ្រើសរើសថ្នាក់រៀន (ទុកទទេសម្រាប់ទាំងអស់)" />
                     </SelectTrigger>
                     <SelectContent>
@@ -908,7 +908,7 @@ export default function IDCardsPage() {
                     <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center">
                       <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <div className="text-sm text-blue-700 dark:text-blue-300">
+                    <div className="text-base text-blue-700 dark:text-blue-300">
                       នឹងបង្កើតប័ណ្ណសម្គាល់សម្រាប់: 
                       <span className="font-semibold text-blue-800 dark:text-blue-200 ml-1">
                         {filteredStudents.length} សិស្ស
@@ -925,7 +925,7 @@ export default function IDCardsPage() {
                         <div className="w-6 h-6 bg-green-100 dark:bg-green-800/50 rounded-full flex items-center justify-center">
                           <Users className="h-3 w-3 text-green-600 dark:text-green-400" />
                         </div>
-                        <div className="text-sm text-green-700 dark:text-green-300 font-medium">
+                        <div className="text-base text-green-700 dark:text-green-300 font-medium">
                           បានជ្រើសរើស {selectedStudents.length} សិស្ស
                         </div>
                       </div>
@@ -953,7 +953,7 @@ export default function IDCardsPage() {
                         </Button>
                       </div>
                       {selectedStudents.length > 4 && (
-                        <div className="text-xs text-red-600 dark:text-red-400 mt-1">
+                        <div className="text-sm text-red-600 dark:text-red-400 mt-1">
                           អាចបង្កើតបានច្រើនបំផុត 4 នាក់ក្នុងមួយទំព័រ
                         </div>
                       )}
@@ -1014,7 +1014,7 @@ export default function IDCardsPage() {
             {teacherConfirmData?.teachers && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <Label className="text-base font-medium text-gray-700 dark:text-gray-300">
                     បញ្ជីគ្រូបង្រៀន:
                   </Label>
                   <div className="flex gap-2">
@@ -1023,7 +1023,7 @@ export default function IDCardsPage() {
                       variant="outline"
                       size="sm"
                       onClick={selectAllTeachers}
-                      className="text-xs h-7"
+                      className="text-sm h-7"
                     >
                       ជ្រើសរើសទាំងអស់
                     </Button>
@@ -1032,7 +1032,7 @@ export default function IDCardsPage() {
                       variant="outline"
                       size="sm"
                       onClick={deselectAllTeachers}
-                      className="text-xs h-7"
+                      className="text-sm h-7"
                     >
                       លុបជ្រើសរើស
                     </Button>
@@ -1048,10 +1048,10 @@ export default function IDCardsPage() {
                         className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                       />
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                           {teacher.lastname} {teacher.firstname}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {teacher.role === 'admin' ? 'អ្នកគ្រប់គ្រង' : 'គ្រូបង្រៀន'}
                         </p>
                       </div>
@@ -1065,9 +1065,9 @@ export default function IDCardsPage() {
             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <div className="flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-700 dark:text-blue-300">
+                <div className="text-base text-blue-700 dark:text-blue-300">
                   <p className="font-medium">ព័ត៌មានសំខាន់:</p>
-                  <ul className="mt-1 space-y-1 text-xs">
+                  <ul className="mt-1 space-y-1 text-sm">
                     <li>• នេះនឹងបង្កើតឯកសារ PDF តែមួយ</li>
                     <li>• ប័ណ្ណសម្គាល់ទាំងអស់នឹងត្រូវបានបង្កើតក្នុងមួយទំព័រ</li>
                     <li>• ឯកសារនឹងចាប់ផ្តើមទាញយកដោយស្វ័យប្រវត្តិ</li>

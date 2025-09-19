@@ -343,14 +343,14 @@ function StudentListReportContent() {
                 }`}>
                   {type.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">
+                <p className="text-muted-foreground leading-relaxed text-base">
                   {type.description}
                 </p>
               </div>
 
               {/* Action Button */}
               <div className="mt-6 flex justify-center">
-                <div className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-semibold transition-all duration-500 ${
+                <div className={`inline-flex items-center px-6 py-3 rounded-full text-base font-semibold transition-all duration-500 ${
                   selectedReportType === type.id
                     ? 'bg-primary text-white shadow-lg'
                     : 'bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-white group-hover:shadow-lg'
@@ -408,13 +408,13 @@ function StudentListReportContent() {
                 <div className="space-y-4">
                   <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                 <div className="space-y-2">
-                      <Label htmlFor="reportType" className="flex items-center space-x-2 text-sm font-semibold text-primary">
+                      <Label htmlFor="reportType" className="flex items-center space-x-2 text-base font-semibold text-primary">
                         <School className="h-4 w-4" />
                         <span>ប្រភេទរបាយការណ៍</span>
                         <span className="text-red-500 font-bold">*</span>
                   </Label>
                   <Select value={selectedReportType} onValueChange={setSelectedReportType}>
-                        <SelectTrigger className="h-10 text-sm border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
+                        <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -445,7 +445,7 @@ function StudentListReportContent() {
                 {/* Report Configuration */}
                 <div className="space-y-4">
                   {isLoadingData && (
-                    <div className="flex items-center justify-center space-x-2 py-4 text-sm text-muted-foreground">
+                    <div className="flex items-center justify-center space-x-2 py-4 text-base text-muted-foreground">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                       <span>កំពុងផ្ទុកទិន្នន័យ...</span>
                     </div>
@@ -454,7 +454,7 @@ function StudentListReportContent() {
                   <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                     <div className={`grid gap-4 ${selectedReportType === 'all-students' ? 'grid-cols-1' : 'grid-cols-2'}`}>
                 <div className="space-y-2">
-                        <Label htmlFor="academicYear" className="flex items-center space-x-2 text-sm font-semibold text-primary">
+                        <Label htmlFor="academicYear" className="flex items-center space-x-2 text-base font-semibold text-primary">
                           <GraduationCap className="h-4 w-4" />
                           <span>ឆ្នាំសិក្សា</span>
                           <span className="text-red-500 font-bold">*</span>
@@ -465,7 +465,7 @@ function StudentListReportContent() {
                             setReportData({...reportData, academicYear: value, class: ""})
                           }}
                         >
-                          <SelectTrigger className="h-10 text-sm border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
+                          <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
                             <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                           </SelectTrigger>
                           <SelectContent>
@@ -479,7 +479,7 @@ function StudentListReportContent() {
                       </div>
                       {selectedReportType !== 'all-students' && (
                         <div className="space-y-2">
-                          <Label htmlFor="class" className="flex items-center space-x-2 text-sm font-semibold text-primary">
+                          <Label htmlFor="class" className="flex items-center space-x-2 text-base font-semibold text-primary">
                             <Users className="h-4 w-4" />
                             <span>ថ្នាក់</span>
                         </Label>
@@ -488,7 +488,7 @@ function StudentListReportContent() {
                             onValueChange={(value) => setReportData({...reportData, class: value})}
                             disabled={!reportData.academicYear}
                           >
-                            <SelectTrigger className="h-10 text-sm border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
+                            <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
                               <SelectValue placeholder={reportData.academicYear ? "ជ្រើសរើសថ្នាក់" : "សូមជ្រើសរើសឆ្នាំសិក្សាមុន"} />
                             </SelectTrigger>
                             <SelectContent>
@@ -511,12 +511,12 @@ function StudentListReportContent() {
                     <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label className="flex items-center space-x-2 text-sm font-semibold text-primary">
+                          <Label className="flex items-center space-x-2 text-base font-semibold text-primary">
                             <Users className="h-4 w-4" />
                             <span>ជ្រើសរើសសិស្ស</span>
                             <span className="text-red-500 font-bold">*</span>
                           </Label>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             ជ្រើសរើសសិស្សដែលចង់បញ្ចូលក្នុងរបាយការណ៍
                           </p>
                         </div>
@@ -524,7 +524,7 @@ function StudentListReportContent() {
                         {/* Selected Students Display */}
                         {reportData.selectedStudents.length > 0 && (
                           <div className="space-y-2">
-                            <p className="text-sm font-medium text-primary">
+                            <p className="text-base font-medium text-primary">
                               សិស្សដែលបានជ្រើសរើស ({reportData.selectedStudents.length} នាក់):
                             </p>
                             <div className="flex flex-wrap gap-2">
@@ -570,7 +570,7 @@ function StudentListReportContent() {
                               }
                             }}
                           >
-                            <SelectTrigger className="h-10 text-sm border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
+                            <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
                               <SelectValue placeholder="ជ្រើសរើសសិស្ស" />
                             </SelectTrigger>
                             <SelectContent>
@@ -599,7 +599,7 @@ function StudentListReportContent() {
                                   selectedStudents: allStudentIds
                                 }))
                               }}
-                              className="h-8 px-3 text-xs"
+                              className="h-8 px-3 text-sm"
                             >
                               ជ្រើសរើសទាំងអស់
                             </Button>
@@ -613,7 +613,7 @@ function StudentListReportContent() {
                                   selectedStudents: []
                                 }))
                               }}
-                              className="h-8 px-3 text-xs"
+                              className="h-8 px-3 text-sm"
                             >
                               លុបទាំងអស់
                             </Button>
@@ -640,13 +640,13 @@ function StudentListReportContent() {
                           />
                           <Label 
                             htmlFor="showStudentList" 
-                            className="flex items-center space-x-2 text-sm font-semibold text-primary cursor-pointer"
+                            className="flex items-center space-x-2 text-base font-semibold text-primary cursor-pointer"
                           >
                             <Users className="h-4 w-4" />
                             <span>បង្ហាញបញ្ជីឈ្មោះសិស្ស</span>
                           </Label>
                         </div>
-                        <p className="text-xs text-muted-foreground ml-7">
+                        <p className="text-sm text-muted-foreground ml-7">
                           បញ្ចូលបញ្ជីឈ្មោះសិស្សក្នុងរបាយការណ៍ព័ត៌មានលម្អិត
                         </p>
                       </div>
@@ -658,13 +658,13 @@ function StudentListReportContent() {
                 <div className="space-y-4">
                   <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                   <div className="space-y-2">
-                      <Label htmlFor="format" className="flex items-center space-x-2 text-sm font-semibold text-primary">
+                      <Label htmlFor="format" className="flex items-center space-x-2 text-base font-semibold text-primary">
                         <FileType className="h-4 w-4" />
                         <span>ទម្រង់ឯកសារ</span>
                         <span className="text-red-500 font-bold">*</span>
                     </Label>
                     <Select value={reportData.format} onValueChange={(value) => setReportData({...reportData, format: value})}>
-                        <SelectTrigger className="h-10 text-sm border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
+                        <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -693,7 +693,7 @@ function StudentListReportContent() {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowReportModal(false)}
-                    className="h-10 px-6 text-sm font-semibold hover:bg-muted hover:text-foreground text-muted-foreground border-border/50 hover:border-border hover:scale-[1.02] transition-all duration-200"
+                    className="h-10 px-6 text-base font-semibold hover:bg-muted hover:text-foreground text-muted-foreground border-border/50 hover:border-border hover:scale-[1.02] transition-all duration-200"
                   >
                     បោះបង់
                   </Button>
@@ -701,7 +701,7 @@ function StudentListReportContent() {
                     type="submit"
                     size="sm"
                     disabled={isGenerating}
-                    className="h-10 px-6 text-sm font-bold bg-primary hover:bg-primary/90 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="h-10 px-6 text-base font-bold bg-primary hover:bg-primary/90 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     {isGenerating ? (
                       <>

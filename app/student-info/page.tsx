@@ -328,19 +328,19 @@ function StudentInfoContent() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
           <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
             <div className="text-2xl font-bold text-blue-600">{students.length}</div>
-            <div className="text-sm text-blue-500">សិស្សសរុប</div>
+            <div className="text-base text-blue-500">សិស្សសរុប</div>
           </div>
           <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
             <div className="text-2xl font-bold text-purple-600">{classes.length}</div>
-            <div className="text-sm text-purple-500">ថ្នាក់រៀន</div>
+            <div className="text-base text-purple-500">ថ្នាក់រៀន</div>
           </div>
           <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
             <div className="text-2xl font-bold text-green-600">{academicYears.length}</div>
-            <div className="text-sm text-green-500">ឆ្នាំសិក្សា</div>
+            <div className="text-base text-green-500">ឆ្នាំសិក្សា</div>
           </div>
           <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
             <div className="text-2xl font-bold text-orange-600">{selectedStudent ? '1' : '0'}</div>
-            <div className="text-sm text-orange-500">សិស្សជ្រើសរើស</div>
+            <div className="text-base text-orange-500">សិស្សជ្រើសរើស</div>
           </div>
         </div>
       </div>
@@ -359,7 +359,7 @@ function StudentInfoContent() {
           <div className="flex flex-col lg:flex-row lg:items-end gap-4">
             <div className="flex-1 min-w-[300px]">
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                <Label className="text-gray-700 dark:text-gray-300 text-base font-medium">
                   សូមបញ្ចូលឈ្មោះសិស្ស
                 </Label>
               </div>
@@ -370,7 +370,7 @@ function StudentInfoContent() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onFocus={() => setShowDropdown(true)}
-                  className="pl-10 pr-10 h-10 text-sm border-2 focus:border-blue-500 transition-colors"
+                  className="pl-10 pr-10 h-10 text-base border-2 focus:border-blue-500 transition-colors"
                 />
                 <ChevronDown 
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
@@ -397,14 +397,14 @@ function StudentInfoContent() {
                               <User className="h-4 w-4 text-white" />
                             </div>
                             <div className="flex-1">
-                              <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                              <p className="font-semibold text-gray-900 dark:text-white text-base">
                                 {student.lastName} {student.firstName}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
                                 {getGradeLabel(student.class)}{student.schoolYear ? ` • ${student.schoolYear}` : ''}
                               </p>
                             </div>
-                            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-0.5 text-xs">
+                            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-0.5 text-sm">
                             {getStatusLabel(student.status)}
                             </Badge>
                           </div>
@@ -412,8 +412,8 @@ function StudentInfoContent() {
                       ) : (
                         <div className="p-6 text-gray-500 dark:text-gray-400 text-center">
                           <User className="h-8 w-8 mx-auto mb-3 text-gray-300" />
-                          <p className="text-sm">រកមិនឃើញឈ្មោះសិស្ស</p>
-                          <p className="text-xs mt-1">សូមព្យាយាមស្វែងរកឈ្មោះផ្សេង</p>
+                          <p className="text-base">រកមិនឃើញឈ្មោះសិស្ស</p>
+                          <p className="text-sm mt-1">សូមព្យាយាមស្វែងរកឈ្មោះផ្សេង</p>
                         </div>
                       )}
                     </div>
@@ -436,7 +436,7 @@ function StudentInfoContent() {
                   }}
                   className="h-4 w-4"
                 />
-                <Label htmlFor="filter-toggle" className="text-gray-700 dark:text-gray-300 cursor-pointer text-sm font-medium">
+                <Label htmlFor="filter-toggle" className="text-gray-700 dark:text-gray-300 cursor-pointer text-base font-medium">
                   រកតាមឆ្នាំសិក្សា និងថ្នាក់
                 </Label>
               </div>
@@ -445,7 +445,7 @@ function StudentInfoContent() {
                 <div className="space-y-3">
                   {loadingFilters && (
                     <div className="text-center py-2">
-                      <div className="inline-flex items-center space-x-2 text-sm text-gray-500">
+                      <div className="inline-flex items-center space-x-2 text-base text-gray-500">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
                         <span>កំពុងផ្ទុកជម្រើស...</span>
                       </div>
@@ -454,7 +454,7 @@ function StudentInfoContent() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <div className="w-full sm:w-[160px]">
                       <Select value={selectedYear} onValueChange={setSelectedYear}>
-                        <SelectTrigger className="h-10 text-sm">
+                        <SelectTrigger className="h-10 text-base">
                           <Calendar className="mr-2 h-4 w-4" />
                           <SelectValue placeholder="ឆ្នាំសិក្សា" />
                         </SelectTrigger>
@@ -476,7 +476,7 @@ function StudentInfoContent() {
                     
                     <div className="w-full sm:w-[160px]">
                       <Select value={selectedClass} onValueChange={setSelectedClass}>
-                        <SelectTrigger className="h-10 text-sm">
+                        <SelectTrigger className="h-10 text-base">
                           <BookOpen className="mr-2 h-4 w-4" />
                           <SelectValue placeholder="ថ្នាក់" />
                         </SelectTrigger>
@@ -526,7 +526,7 @@ function StudentInfoContent() {
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                       {selectedStudent.lastName} {selectedStudent.firstName} ({selectedStudent.studentId})
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    <p className="text-gray-600 dark:text-gray-400 text-base">
                       {(calculateAgeYears(selectedStudent.dob) ?? '-') + ' ឆ្នាំ'} • {selectedStudent.gender === 'male' ? 'ប្រុស' : selectedStudent.gender === 'female' ? 'ស្រី' : '-'}
                     </p>
                   </div>
@@ -535,17 +535,17 @@ function StudentInfoContent() {
                     {/* Key Info */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/10 rounded-lg p-3 text-center shadow-sm">
-                        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">ថ្ងៃចុះឈ្មោះ</div>
-                        <div className="text-sm font-bold text-blue-700 dark:text-blue-300">{formatDate(selectedStudent.registrationDate)}</div>
+                        <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">ថ្ងៃចុះឈ្មោះ</div>
+                        <div className="text-base font-bold text-blue-700 dark:text-blue-300">{formatDate(selectedStudent.registrationDate)}</div>
                       </div>
                       <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 rounded-lg p-3 text-center shadow-sm">
-                        <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">ស្ថានភាព</div>
-                        <div className="text-sm font-bold text-green-700 dark:text-green-300">{getStatusLabel(selectedStudent.status)}</div>
+                        <div className="text-sm text-green-600 dark:text-green-400 font-medium mb-1">ស្ថានភាព</div>
+                        <div className="text-base font-bold text-green-700 dark:text-green-300">{getStatusLabel(selectedStudent.status)}</div>
                       </div>
                     </div>
                     {/* Education Info */}
                     <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/10 rounded-lg p-4 shadow-sm">
-                      <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center text-sm">
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center text-base">
                         <div className="p-1.5 bg-blue-100 dark:bg-blue-900/20 rounded-md mr-2">
                           <GraduationCap className="h-3 w-3 text-blue-600" />
                         </div>
@@ -553,17 +553,17 @@ function StudentInfoContent() {
                       </h4>
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400 text-xs">ថ្នាក់:</span>
-                          <span className="font-bold text-gray-900 dark:text-white text-sm">{getGradeLabel(selectedStudent.class)}</span>
+                          <span className="text-gray-600 dark:text-gray-400 text-sm">ថ្នាក់:</span>
+                          <span className="font-bold text-gray-900 dark:text-white text-base">{getGradeLabel(selectedStudent.class)}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400 text-xs">ឆ្នាំសិក្សា:</span>
-                          <span className="font-bold text-gray-900 dark:text-white text-sm">{selectedStudent.schoolYear || '-'}</span>
+                          <span className="text-gray-600 dark:text-gray-400 text-sm">ឆ្នាំសិក្សា:</span>
+                          <span className="font-bold text-gray-900 dark:text-white text-base">{selectedStudent.schoolYear || '-'}</span>
                         </div>
                         {selectedStudent.registerToStudy !== undefined && (
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400 text-xs">ចុះឈ្មោះរៀន:</span>
-                          <Badge className={selectedStudent.registerToStudy ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 px-2 py-0.5 text-xs" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 px-2 py-0.5 text-xs"}>
+                          <span className="text-gray-600 dark:text-gray-400 text-sm">ចុះឈ្មោះរៀន:</span>
+                          <Badge className={selectedStudent.registerToStudy ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 px-2 py-0.5 text-sm" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 px-2 py-0.5 text-sm"}>
                             {selectedStudent.registerToStudy ? "បានចុះឈ្មោះ" : "មិនទាន់ចុះឈ្មោះ"}
                           </Badge>
                         </div>
@@ -573,13 +573,13 @@ function StudentInfoContent() {
 
                     {/* Emergency Contact */}
                     <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/10 rounded-lg p-4 shadow-sm">
-                      <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center text-sm">
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center text-base">
                         <div className="p-1.5 bg-orange-100 dark:bg-orange-900/20 rounded-md mr-2">
                           <AlertCircle className="h-3 w-3 text-orange-600" />
                         </div>
                         លេខទំនាក់ទំនងគោល
                       </h4>
-                      <span className="text-gray-700 dark:text-gray-300 text-sm">{selectedStudent.phone || '-'}</span>
+                      <span className="text-gray-700 dark:text-gray-300 text-base">{selectedStudent.phone || '-'}</span>
                     </div>
                   </div>
                 </div>
@@ -597,7 +597,7 @@ function StudentInfoContent() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex-1 px-4 py-3 text-xs font-semibold flex items-center justify-center space-x-2 border-b-2 transition-all duration-200 ${
+                      className={`flex-1 px-4 py-3 text-sm font-semibold flex items-center justify-center space-x-2 border-b-2 transition-all duration-200 ${
                         activeTab === tab.id 
                           ? 'border-blue-500 text-blue-600 bg-white dark:bg-gray-900 shadow-sm' 
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-900'
@@ -631,7 +631,7 @@ function StudentInfoContent() {
                           <div className="p-2 bg-blue-200 dark:bg-blue-800 rounded-lg">
                             <User className="h-4 w-4 text-blue-700 dark:text-blue-300" />
                           </div>
-                          <span className="text-sm font-semibold text-blue-800 dark:text-blue-200">ឈ្មោះសិស្ស</span>
+                          <span className="text-base font-semibold text-blue-800 dark:text-blue-200">ឈ្មោះសិស្ស</span>
                         </div>
                         <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{selectedStudent.lastName} {selectedStudent.firstName}</p>
                       </div>
@@ -641,7 +641,7 @@ function StudentInfoContent() {
                           <div className="p-2 bg-green-200 dark:bg-green-800 rounded-lg">
                             <Calendar className="h-4 w-4 text-green-700 dark:text-green-300" />
                           </div>
-                          <span className="text-sm font-semibold text-green-800 dark:text-green-200">ថ្ងៃខែឆ្នាំកំណើត</span>
+                          <span className="text-base font-semibold text-green-800 dark:text-green-200">ថ្ងៃខែឆ្នាំកំណើត</span>
                         </div>
                         <p className="text-lg font-bold text-green-900 dark:text-green-100">{formatDate(selectedStudent.dob)}</p>
                       </div>
@@ -651,7 +651,7 @@ function StudentInfoContent() {
                           <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-lg">
                             <GraduationCap className="h-4 w-4 text-purple-700 dark:text-purple-300" />
                           </div>
-                          <span className="text-sm font-semibold text-purple-800 dark:text-purple-200">ថ្នាក់ទី</span>
+                          <span className="text-base font-semibold text-purple-800 dark:text-purple-200">ថ្នាក់ទី</span>
                         </div>
                         <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{getGradeLabel(selectedStudent.class)}</p>
                       </div>
@@ -661,7 +661,7 @@ function StudentInfoContent() {
                           <div className="p-2 bg-orange-200 dark:bg-orange-800 rounded-lg">
                             <CalendarCheck className="h-4 w-4 text-orange-700 dark:text-orange-300" />
                           </div>
-                          <span className="text-sm font-semibold text-orange-800 dark:text-orange-200">ថ្ងៃចុះឈ្មោះ</span>
+                          <span className="text-base font-semibold text-orange-800 dark:text-orange-200">ថ្ងៃចុះឈ្មោះ</span>
                         </div>
                         <p className="text-lg font-bold text-orange-900 dark:text-orange-100">{formatDate(selectedStudent.registrationDate)}</p>
                       </div>
@@ -671,7 +671,7 @@ function StudentInfoContent() {
                           <div className="p-2 bg-red-200 dark:bg-red-800 rounded-lg">
                             <User className="h-4 w-4 text-red-700 dark:text-red-300" />
                           </div>
-                          <span className="text-sm font-semibold text-red-800 dark:text-red-200">ភេទ</span>
+                          <span className="text-base font-semibold text-red-800 dark:text-red-200">ភេទ</span>
                         </div>
                         <p className="text-lg font-bold text-red-900 dark:text-red-100">{selectedStudent.gender === 'male' ? 'ប្រុស' : selectedStudent.gender === 'female' ? 'ស្រី' : '-'}</p>
                       </div>
@@ -681,7 +681,7 @@ function StudentInfoContent() {
                           <div className="p-2 bg-indigo-200 dark:bg-indigo-800 rounded-lg">
                             <Calendar className="h-4 w-4 text-indigo-700 dark:text-indigo-300" />
                           </div>
-                          <span className="text-sm font-semibold text-indigo-800 dark:text-indigo-200">ឆ្នាំសិក្សា</span>
+                          <span className="text-base font-semibold text-indigo-800 dark:text-indigo-200">ឆ្នាំសិក្សា</span>
                         </div>
                         <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">{selectedStudent.schoolYear || '-'}</p>
                       </div>
@@ -691,7 +691,7 @@ function StudentInfoContent() {
                           <div className="p-2 bg-teal-200 dark:bg-teal-800 rounded-lg">
                             <Home className="h-4 w-4 text-teal-700 dark:text-teal-300" />
                           </div>
-                          <span className="text-sm font-semibold text-teal-800 dark:text-teal-200">សាលាមុន</span>
+                          <span className="text-base font-semibold text-teal-800 dark:text-teal-200">សាលាមុន</span>
                         </div>
                         <p className="text-lg font-bold text-teal-900 dark:text-teal-100">{selectedStudent.previousSchool || '-'}</p>
                       </div>
@@ -701,7 +701,7 @@ function StudentInfoContent() {
                           <div className="p-2 bg-pink-200 dark:bg-pink-800 rounded-lg">
                             <AlertCircle className="h-4 w-4 text-pink-700 dark:text-pink-300" />
                           </div>
-                          <span className="text-sm font-semibold text-pink-800 dark:text-pink-200">មូលហេតុផ្លាស់ទី</span>
+                          <span className="text-base font-semibold text-pink-800 dark:text-pink-200">មូលហេតុផ្លាស់ទី</span>
                         </div>
                         <p className="text-lg font-bold text-pink-900 dark:text-pink-100">{selectedStudent.transferReason || '-'}</p>
                       </div>
@@ -725,7 +725,7 @@ function StudentInfoContent() {
                             <MapPin className="h-5 w-5 text-blue-700 dark:text-blue-300" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">លេខផ្ទះ</p>
+                            <p className="text-base font-semibold text-blue-800 dark:text-blue-200">លេខផ្ទះ</p>
                             <p className="text-xl font-bold text-blue-900 dark:text-blue-100">{selectedStudent.studentHouseNumber || '-'}</p>
                           </div>
                         </div>
@@ -737,7 +737,7 @@ function StudentInfoContent() {
                             <MapPin className="h-5 w-5 text-green-700 dark:text-green-300" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-green-800 dark:text-green-200">ភូមិ</p>
+                            <p className="text-base font-semibold text-green-800 dark:text-green-200">ភូមិ</p>
                             <p className="text-xl font-bold text-green-900 dark:text-green-100">{selectedStudent.studentVillage || '-'}</p>
                           </div>
                         </div>
@@ -749,7 +749,7 @@ function StudentInfoContent() {
                             <MapPin className="h-5 w-5 text-purple-700 dark:text-purple-300" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-purple-800 dark:text-purple-200">ស្រុក/ខណ្ឌ</p>
+                            <p className="text-base font-semibold text-purple-800 dark:text-purple-200">ស្រុក/ខណ្ឌ</p>
                             <p className="text-xl font-bold text-purple-900 dark:text-purple-100">{selectedStudent.studentDistrict || '-'}</p>
                           </div>
                         </div>
@@ -761,7 +761,7 @@ function StudentInfoContent() {
                             <MapPin className="h-5 w-5 text-orange-700 dark:text-orange-300" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-orange-800 dark:text-orange-200">ខេត្ត/ក្រុង</p>
+                            <p className="text-base font-semibold text-orange-800 dark:text-orange-200">ខេត្ត/ក្រុង</p>
                             <p className="text-xl font-bold text-orange-900 dark:text-orange-100">{selectedStudent.studentProvince || '-'}</p>
                           </div>
                         </div>
@@ -773,7 +773,7 @@ function StudentInfoContent() {
                             <MapPin className="h-5 w-5 text-red-700 dark:text-red-300" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-red-800 dark:text-red-200">ស្រុកកំណើត</p>
+                            <p className="text-base font-semibold text-red-800 dark:text-red-200">ស្រុកកំណើត</p>
                             <p className="text-xl font-bold text-red-900 dark:text-red-100">{selectedStudent.studentBirthDistrict || '-'}</p>
                           </div>
                         </div>
@@ -785,7 +785,7 @@ function StudentInfoContent() {
                             <Phone className="h-5 w-5 text-indigo-700 dark:text-indigo-300" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-indigo-800 dark:text-indigo-200">លេខទូរស័ព្ទ</p>
+                            <p className="text-base font-semibold text-indigo-800 dark:text-indigo-200">លេខទូរស័ព្ទ</p>
                             <p className="text-xl font-bold text-indigo-900 dark:text-indigo-100">{selectedStudent.phone || '-'}</p>
                           </div>
                         </div>
@@ -810,7 +810,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-blue-200 dark:bg-blue-800 rounded-lg">
                               <Users className="h-4 w-4 text-blue-700 dark:text-blue-300" />
                             </div>
-                            <span className="text-sm font-semibold text-blue-800 dark:text-blue-200">នៅជាមួយអ្នកណា</span>
+                            <span className="text-base font-semibold text-blue-800 dark:text-blue-200">នៅជាមួយអ្នកណា</span>
                           </div>
                           <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{selectedStudent.family.livingWith || '-'}</p>
                         </div>
@@ -820,7 +820,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-green-200 dark:bg-green-800 rounded-lg">
                               <Home className="h-4 w-4 text-green-700 dark:text-green-300" />
                             </div>
-                            <span className="text-sm font-semibold text-green-800 dark:text-green-200">នៅផ្ទះផ្ទាល់ខ្លួន?</span>
+                            <span className="text-base font-semibold text-green-800 dark:text-green-200">នៅផ្ទះផ្ទាល់ខ្លួន?</span>
                           </div>
                           <p className="text-lg font-bold text-green-900 dark:text-green-100">{selectedStudent.family.ownHouse ? 'បាទ/ចាស' : 'ទេ'}</p>
                         </div>
@@ -830,7 +830,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-lg">
                               <Calendar className="h-4 w-4 text-purple-700 dark:text-purple-300" />
                             </div>
-                            <span className="text-sm font-semibold text-purple-800 dark:text-purple-200">រយៈពេលនៅកំពង់ចាម</span>
+                            <span className="text-base font-semibold text-purple-800 dark:text-purple-200">រយៈពេលនៅកំពង់ចាម</span>
                           </div>
                           <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{selectedStudent.family.durationInKPC || '-'}</p>
                         </div>
@@ -840,7 +840,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-orange-200 dark:bg-orange-800 rounded-lg">
                               <HeartPulse className="h-4 w-4 text-orange-700 dark:text-orange-300" />
                             </div>
-                            <span className="text-sm font-semibold text-orange-800 dark:text-orange-200">ជីវភាព</span>
+                            <span className="text-base font-semibold text-orange-800 dark:text-orange-200">ជីវភាព</span>
                           </div>
                           <p className="text-lg font-bold text-orange-900 dark:text-orange-100">{selectedStudent.family.livingCondition || '-'}</p>
                         </div>
@@ -850,7 +850,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-red-200 dark:bg-red-800 rounded-lg">
                               <Award className="h-4 w-4 text-red-700 dark:text-red-300" />
                             </div>
-                            <span className="text-sm font-semibold text-red-800 dark:text-red-200">ទទួលជំនួយពីអង្គការ</span>
+                            <span className="text-base font-semibold text-red-800 dark:text-red-200">ទទួលជំនួយពីអង្គការ</span>
                           </div>
                           <p className="text-lg font-bold text-red-900 dark:text-red-100">{selectedStudent.family.organizationHelp || '-'}</p>
                         </div>
@@ -860,7 +860,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-indigo-200 dark:bg-indigo-800 rounded-lg">
                               <GraduationCap className="h-4 w-4 text-indigo-700 dark:text-indigo-300" />
                             </div>
-                            <span className="text-sm font-semibold text-indigo-800 dark:text-indigo-200">ស្គាល់សាលាតាមរយៈ</span>
+                            <span className="text-base font-semibold text-indigo-800 dark:text-indigo-200">ស្គាល់សាលាតាមរយៈ</span>
                           </div>
                           <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">{selectedStudent.family.knowSchool || '-'}</p>
                         </div>
@@ -870,7 +870,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-pink-200 dark:bg-pink-800 rounded-lg">
                               <Grape className="h-4 w-4 text-pink-700 dark:text-pink-300" />
                             </div>
-                            <span className="text-sm font-semibold text-pink-800 dark:text-pink-200">សាសនា</span>
+                            <span className="text-base font-semibold text-pink-800 dark:text-pink-200">សាសនា</span>
                           </div>
                           <p className="text-lg font-bold text-pink-900 dark:text-pink-100">{selectedStudent.family.religion || '-'}</p>
                         </div>
@@ -880,7 +880,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-yellow-200 dark:bg-yellow-800 rounded-lg">
                               <Home className="h-4 w-4 text-yellow-700 dark:text-yellow-300" />
                             </div>
-                            <span className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">ឈ្មោះព្រះវិហារ</span>
+                            <span className="text-base font-semibold text-yellow-800 dark:text-yellow-200">ឈ្មោះព្រះវិហារ</span>
                           </div>
                           <p className="text-lg font-bold text-yellow-900 dark:text-yellow-100">{selectedStudent.family.churchName || '-'}</p>
                         </div>
@@ -890,7 +890,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-teal-200 dark:bg-teal-800 rounded-lg">
                               <Award className="h-4 w-4 text-teal-700 dark:text-teal-300" />
                             </div>
-                            <span className="text-sm font-semibold text-teal-800 dark:text-teal-200">លទ្ធភាពជួយសាលា</span>
+                            <span className="text-base font-semibold text-teal-800 dark:text-teal-200">លទ្ធភាពជួយសាលា</span>
                           </div>
                           <p className="text-lg font-bold text-teal-900 dark:text-teal-100">{selectedStudent.family.canHelpSchool ? 'បាទ/ចាស' : 'ទេ'}</p>
                         </div>
@@ -900,7 +900,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-cyan-200 dark:bg-cyan-800 rounded-lg">
                               <Award className="h-4 w-4 text-cyan-700 dark:text-cyan-300" />
                             </div>
-                            <span className="text-sm font-semibold text-cyan-800 dark:text-cyan-200">ថវិកាជួយសាលា</span>
+                            <span className="text-base font-semibold text-cyan-800 dark:text-cyan-200">ថវិកាជួយសាលា</span>
                           </div>
                           <p className="text-lg font-bold text-cyan-900 dark:text-cyan-100">{selectedStudent.family.helpAmount ? `${selectedStudent.family.helpAmount.toLocaleString()} ៛` : '-'}</p>
                         </div>
@@ -910,7 +910,7 @@ function StudentInfoContent() {
                             <div className="p-2 bg-emerald-200 dark:bg-emerald-800 rounded-lg">
                               <Calendar className="h-4 w-4 text-emerald-700 dark:text-emerald-300" />
                             </div>
-                            <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">ក្នុងមួយ</span>
+                            <span className="text-base font-semibold text-emerald-800 dark:text-emerald-200">ក្នុងមួយ</span>
                           </div>
                           <p className="text-lg font-bold text-emerald-900 dark:text-emerald-100">{selectedStudent.family.helpFrequency || '-'}</p>
                         </div>
@@ -919,7 +919,7 @@ function StudentInfoContent() {
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 p-8 rounded-xl text-center shadow-sm">
                         <Home className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                         <p className="text-base text-gray-600 dark:text-gray-400 font-medium">សិស្សនេះមិនមានព័ត៌មានគ្រួសារទេ</p>
-                        <p className="text-gray-500 dark:text-gray-500 mt-1 text-sm">ព័ត៌មានគ្រួសារនឹងបង្ហាញនៅទីនេះ</p>
+                        <p className="text-gray-500 dark:text-gray-500 mt-1 text-base">ព័ត៌មានគ្រួសារនឹងបង្ហាញនៅទីនេះ</p>
                       </div>
                     )}
                   </div>
@@ -938,11 +938,11 @@ function StudentInfoContent() {
                                 <User className="h-6 w-6 text-white" />
                               </div>
                               <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">អាណាព្យាបាល {index + 1}</p>
+                                <p className="text-base text-gray-600 dark:text-gray-400 font-medium">អាណាព្យាបាល {index + 1}</p>
                                 <p className="text-lg font-bold text-gray-900 dark:text-white">
                                   {guardian.firstName} {guardian.lastName}
                                 </p>
-                                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">{guardian.relation}</p>
+                                <p className="text-base text-blue-600 dark:text-blue-400 font-medium">{guardian.relation}</p>
                               </div>
                             </div>
 
@@ -950,92 +950,92 @@ function StudentInfoContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                               {/* Personal Information */}
                               <div className="space-y-3">
-                                <h6 className="text-sm font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">ព័ត៌មានផ្ទាល់ខ្លួន</h6>
+                                <h6 className="text-base font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">ព័ត៌មានផ្ទាល់ខ្លួន</h6>
                                 
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">នាមត្រកូល:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.lastName || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">នាមត្រកូល:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.lastName || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">នាមខ្លួន:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.firstName || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">នាមខ្លួន:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.firstName || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ត្រូវជា:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.relation || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ត្រូវជា:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.relation || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">លេខទូរស័ព្ទ:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.phone || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">លេខទូរស័ព្ទ:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.phone || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">មុខរបរ:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.occupation || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">មុខរបរ:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.occupation || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ប្រាក់ចំណូល:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.income ? `${guardian.income.toLocaleString()} ៛` : '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ប្រាក់ចំណូល:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.income ? `${guardian.income.toLocaleString()} ៛` : '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ចំនួនកូនក្នុងបន្ទុក:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.childrenCount || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ចំនួនកូនក្នុងបន្ទុក:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.childrenCount || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ជឿព្រះយ៉េស៊ូ?</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.believeJesus ? 'បាទ/ចាស' : 'ទេ'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ជឿព្រះយ៉េស៊ូ?</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.believeJesus ? 'បាទ/ចាស' : 'ទេ'}</span>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Address Information */}
                               <div className="space-y-3">
-                                <h6 className="text-sm font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">អាសយដ្ឋាន</h6>
+                                <h6 className="text-base font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">អាសយដ្ឋាន</h6>
                                 
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ផ្ទះលេខ:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.houseNumber || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ផ្ទះលេខ:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.houseNumber || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ភូមិ/សង្កាត់:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.village || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ភូមិ/សង្កាត់:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.village || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ស្រុក/ខណ្ឌ:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.district || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ស្រុក/ខណ្ឌ:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.district || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ខេត្ត/ក្រុង:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.province || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ខេត្ត/ក្រុង:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.province || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ស្រុកកំណើត:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.birthDistrict || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ស្រុកកំណើត:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.birthDistrict || '-'}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">ព្រះវិហារ:</span>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">{guardian.church || '-'}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">ព្រះវិហារ:</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.church || '-'}</span>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Additional Information */}
                               <div className="space-y-3">
-                                <h6 className="text-sm font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">ព័ត៌មានបន្ថែម</h6>
+                                <h6 className="text-base font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">ព័ត៌មានបន្ថែម</h6>
                                 
                                 <div className="space-y-2">
                                   <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">អាណាព្យាបាលចម្បង</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">អាណាព្យាបាលចម្បង</span>
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">មានទំនាក់ទំនងជាមួយសិស្ស</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">មានទំនាក់ទំនងជាមួយសិស្ស</span>
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">អាចជួយសាលា</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">អាចជួយសាលា</span>
                                   </div>
                                 </div>
 
@@ -1044,13 +1044,13 @@ function StudentInfoContent() {
                                   {guardian.phone && (
                                     <div className="flex items-center justify-center p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
                                       <Phone className="h-4 w-4 text-blue-600 mr-2" />
-                                      <span className="text-sm font-medium text-blue-600">ទូរស័ព្ទ: {guardian.phone}</span>
+                                      <span className="text-base font-medium text-blue-600">ទូរស័ព្ទ: {guardian.phone}</span>
                                     </div>
                                   )}
                                   {guardian.occupation && (
                                     <div className="flex items-center justify-center p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
                                       <User className="h-4 w-4 text-green-600 mr-2" />
-                                      <span className="text-sm font-medium text-green-600">{guardian.occupation}</span>
+                                      <span className="text-base font-medium text-green-600">{guardian.occupation}</span>
                                     </div>
                                   )}
                                 </div>
@@ -1063,7 +1063,7 @@ function StudentInfoContent() {
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 p-8 rounded-lg text-center shadow-sm">
                         <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                         <p className="text-base text-gray-600 dark:text-gray-400 font-medium">សិស្សនេះមិនមានអាណាព្យាបាលទេ</p>
-                        <p className="text-gray-500 dark:text-gray-500 mt-1 text-sm">អាណាព្យាបាលនឹងបង្ហាញនៅទីនេះ</p>
+                        <p className="text-gray-500 dark:text-gray-500 mt-1 text-base">អាណាព្យាបាលនឹងបង្ហាញនៅទីនេះ</p>
                       </div>
                     )}
                   </div>

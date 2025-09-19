@@ -463,14 +463,14 @@ function AbsenceReportContent() {
                 }`}>
                   {type.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">
+                <p className="text-muted-foreground leading-relaxed text-base">
                   {type.description}
                 </p>
               </div>
 
               {/* Action Button */}
               <div className="mt-6 flex justify-center">
-                <div className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-semibold transition-all duration-500 ${
+                <div className={`inline-flex items-center px-6 py-3 rounded-full text-base font-semibold transition-all duration-500 ${
                   reportType === type.id
                     ? 'bg-primary text-white shadow-lg'
                     : 'bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-white group-hover:shadow-lg'
@@ -507,7 +507,7 @@ function AbsenceReportContent() {
                   <div className="p-1 rounded-lg bg-primary/10">
                     <UserCheck className="h-3 w-3 text-primary" />
                   </div>
-                  <CardTitle className="text-xl font-bold tracking-wide text-center text-primary">
+                  <CardTitle className="text-2xl font-bold tracking-wide text-center text-primary">
                       បង្កើតរបាយការណ៍អវត្តមាន
                     </CardTitle>
                 </div>
@@ -531,7 +531,7 @@ function AbsenceReportContent() {
                 <div className="space-y-4">
                   
                   {isLoadingData && (
-                    <div className="flex items-center justify-center space-x-2 py-4 text-sm text-muted-foreground">
+                    <div className="flex items-center justify-center space-x-2 py-4 text-base text-muted-foreground">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                       <span>កំពុងផ្ទុកទិន្នន័យ...</span>
                     </div>
@@ -541,28 +541,28 @@ function AbsenceReportContent() {
                     <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-lg h-10">
                       <TabsTrigger 
                         value="daily" 
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-sm font-semibold"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
                       >
                         <Calendar className="mr-1 h-4 w-4 text-primary" />
                         ប្រចាំថ្ងៃ
                       </TabsTrigger>
                       <TabsTrigger 
                         value="monthly"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-sm font-semibold"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
                       >
                         <BarChart3 className="mr-1 h-4 w-4 text-primary" />
                         ប្រចាំខែ
                       </TabsTrigger>
                       <TabsTrigger 
                         value="semester"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-sm font-semibold"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
                       >
                         <GraduationCap className="mr-1 h-4 w-4 text-primary" />
                         ប្រចាំឆមាស
                       </TabsTrigger>
                       <TabsTrigger 
                         value="yearly"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-sm font-semibold"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
                       >
                         <TrendingUp className="mr-1 h-4 w-4 text-primary" />
                         ប្រចាំឆ្នាំ
@@ -575,7 +575,7 @@ function AbsenceReportContent() {
                         <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor="startDate" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('startDate') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="startDate" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('startDate') ? 'text-red-500' : 'text-primary'}`}>
                                 <Calendar className="h-4 w-4" />
                                 <span>ថ្ងៃចាប់ផ្តើម</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -588,7 +588,7 @@ function AbsenceReportContent() {
                                   setStartDate(e.target.value)
                                   clearValidationErrors()
                                 }}
-                                className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('startDate') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -597,7 +597,7 @@ function AbsenceReportContent() {
                                 />
                               </div>
                             <div className="space-y-2">
-                              <Label htmlFor="endDate" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('endDate') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="endDate" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('endDate') ? 'text-red-500' : 'text-primary'}`}>
                                 <Calendar className="h-4 w-4" />
                                 <span>ថ្ងៃបញ្ចប់</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -610,7 +610,7 @@ function AbsenceReportContent() {
                                   setEndDate(e.target.value)
                                   clearValidationErrors()
                                 }}
-                                className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('endDate') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -627,7 +627,7 @@ function AbsenceReportContent() {
                         <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor="academicYear" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="academicYear" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
                                 <GraduationCap className="h-4 w-4" />
                                 <span>ឆ្នាំសិក្សា</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -636,7 +636,7 @@ function AbsenceReportContent() {
                                 setAcademicYear(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('academicYear') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -653,7 +653,7 @@ function AbsenceReportContent() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="year" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('year') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="year" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('year') ? 'text-red-500' : 'text-primary'}`}>
                                 <Calendar className="h-4 w-4" />
                                 <span>ឆ្នាំ</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -663,7 +663,7 @@ function AbsenceReportContent() {
                                 setMonth("") // Reset month when year changes
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('year') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -688,7 +688,7 @@ function AbsenceReportContent() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="month" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('month') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="month" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('month') ? 'text-red-500' : 'text-primary'}`}>
                                 <CalendarDays className="h-4 w-4" />
                                 <span>ខែ</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -697,7 +697,7 @@ function AbsenceReportContent() {
                                 setMonth(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('month') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -723,7 +723,7 @@ function AbsenceReportContent() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="class" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="class" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
                                 <Users className="h-4 w-4" />
                                 <span>ថ្នាក់</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -732,7 +732,7 @@ function AbsenceReportContent() {
                                 setClassFilter(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('class') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -757,7 +757,7 @@ function AbsenceReportContent() {
                         <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor="academicYearSemester" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="academicYearSemester" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
                                 <GraduationCap className="h-4 w-4" />
                                 <span>ឆ្នាំសិក្សា</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -766,7 +766,7 @@ function AbsenceReportContent() {
                                 setAcademicYear(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('academicYear') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -783,7 +783,7 @@ function AbsenceReportContent() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="semester" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('semester') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="semester" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('semester') ? 'text-red-500' : 'text-primary'}`}>
                                 <FileText className="h-4 w-4" />
                                 <span>ឆមាស</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -792,7 +792,7 @@ function AbsenceReportContent() {
                                 setSemester(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('semester') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -806,7 +806,7 @@ function AbsenceReportContent() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="classSemester" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="classSemester" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
                                 <Users className="h-4 w-4" />
                                 <span>ថ្នាក់</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -815,7 +815,7 @@ function AbsenceReportContent() {
                                 setClassFilter(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('class') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -840,7 +840,7 @@ function AbsenceReportContent() {
                         <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor="academicYearYearly" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="academicYearYearly" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
                                 <GraduationCap className="h-4 w-4" />
                                 <span>ឆ្នាំសិក្សា</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -849,7 +849,7 @@ function AbsenceReportContent() {
                                 setAcademicYear(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('academicYear') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -866,7 +866,7 @@ function AbsenceReportContent() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="classYearly" className={`flex items-center space-x-2 text-sm font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
+                              <Label htmlFor="classYearly" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
                                 <Users className="h-4 w-4" />
                                 <span>ថ្នាក់</span>
                                 <span className="text-red-500 font-bold">*</span>
@@ -875,7 +875,7 @@ function AbsenceReportContent() {
                                 setClassFilter(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-sm focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
                                   hasFieldError('class') 
                                     ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
                                     : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
@@ -902,13 +902,13 @@ function AbsenceReportContent() {
                 <div className="space-y-4">
                   <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
                 <div className="space-y-2">
-                      <Label htmlFor="format" className="flex items-center space-x-2 text-sm font-semibold text-primary">
+                      <Label htmlFor="format" className="flex items-center space-x-2 text-base font-semibold text-primary">
                         <FileType className="h-4 w-4" />
                         <span>ទម្រង់ឯកសារ</span>
                         <span className="text-red-500 font-bold">*</span>
                     </Label>
                     <Select value={format} onValueChange={setFormat}>
-                      <SelectTrigger className="h-10 text-sm border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
+                      <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -940,7 +940,7 @@ function AbsenceReportContent() {
                       setShowReportModal(false)
                       setValidationErrors([])
                     }}
-                    className="h-10 px-6 text-sm font-semibold hover:bg-muted hover:text-foreground text-muted-foreground border-border/50 hover:border-border hover:scale-[1.02] transition-all duration-200"
+                    className="h-10 px-6 text-base font-semibold hover:bg-muted hover:text-foreground text-muted-foreground border-border/50 hover:border-border hover:scale-[1.02] transition-all duration-200"
                   >
                     បោះបង់
                   </Button>
@@ -948,7 +948,7 @@ function AbsenceReportContent() {
                     type="submit"
                     size="sm"
                     disabled={isGenerating}
-                    className="h-10 px-6 text-sm font-bold bg-primary hover:bg-primary/90 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="h-10 px-6 text-base font-bold bg-primary hover:bg-primary/90 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     {isGenerating ? (
                       <>
