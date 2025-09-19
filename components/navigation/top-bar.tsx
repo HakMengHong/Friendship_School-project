@@ -354,10 +354,10 @@ export function TopBar({ className, user }: TopBarProps) {
     <div className={`bg-gradient-to-r from-card via-card/95 to-card/90 border-b border-border p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm backdrop-blur-sm ${className}`}>
       {/* Left side - Title */}
       <div className="flex-1 min-w-0">
-        <h1 className="text-xl md:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-1 truncate">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-1 truncate">
           {pageInfo.title}
         </h1>
-        <p className="text-xs md:text-sm text-muted-foreground mt-1 hidden sm:block">
+        <p className="text-sm md:text-base text-muted-foreground mt-1 hidden sm:block">
           {pageInfo.subtitle}
         </p>
       </div>
@@ -374,7 +374,7 @@ export function TopBar({ className, user }: TopBarProps) {
             >
               <Bell className="h-5 w-5" />
               {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-sm rounded-full flex items-center justify-center animate-pulse">
                   {notifications.length > 9 ? '9+' : notifications.length}
                 </span>
               )}
@@ -387,7 +387,7 @@ export function TopBar({ className, user }: TopBarProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs p-1"
+                  className="text-sm p-1"
                   onClick={fetchNotifications}
                   disabled={notificationsLoading}
                 >
@@ -400,7 +400,7 @@ export function TopBar({ className, user }: TopBarProps) {
             {notificationsLoading ? (
               <div className="p-4 text-center text-muted-foreground">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
-                <p className="text-sm">កំពុងផ្ទុក...</p>
+                <p className="text-base">កំពុងផ្ទុក...</p>
               </div>
             ) : notifications.length > 0 ? (
               notifications.slice(0, 5).map((notification, index) => (
@@ -413,14 +413,14 @@ export function TopBar({ className, user }: TopBarProps) {
                     notification.type === 'warning' ? 'text-yellow-500' : 'text-blue-500'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{notification.message}</p>
+                    <p className="text-base font-medium truncate">{notification.message}</p>
                     {notification.details && (
-                      <p className="text-xs text-muted-foreground truncate">{notification.details}</p>
+                      <p className="text-sm text-muted-foreground truncate">{notification.details}</p>
                     )}
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-xs text-muted-foreground">{notification.time}</p>
+                      <p className="text-sm text-muted-foreground">{notification.time}</p>
                       {notification.author && (
-                        <p className="text-xs text-muted-foreground">ដោយ: {notification.author}</p>
+                        <p className="text-sm text-muted-foreground">ដោយ: {notification.author}</p>
                       )}
                     </div>
                   </div>
@@ -429,14 +429,14 @@ export function TopBar({ className, user }: TopBarProps) {
             ) : (
               <div className="p-4 text-center text-muted-foreground">
                 <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">មិនមានការជូនដំណឹង</p>
+                <p className="text-base">មិនមានការជូនដំណឹង</p>
               </div>
             )}
             {notifications.length > 5 && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                  <span className="text-sm">មើលទាំងអស់</span>
+                  <span className="text-base">មើលទាំងអស់</span>
                 </DropdownMenuItem>
               </>
             )}
@@ -454,11 +454,11 @@ export function TopBar({ className, user }: TopBarProps) {
               className="flex items-center space-x-2 md:space-x-3 pl-2 md:pl-4 border-l border-border hover:bg-primary/10 transition-all duration-200 group flex-shrink-0"
             >
               <div className="text-right hidden sm:block">
-                <p className="text-xs md:text-sm font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent hover:from-primary/90 hover:to-primary/70 transition-all duration-200 truncate max-w-24 md:max-w-32">
+                <p className="text-sm md:text-base font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent hover:from-primary/90 hover:to-primary/70 transition-all duration-200 truncate max-w-24 md:max-w-32">
                   {user ? `${user.lastname} ${user.firstname}` : "អ្នកប្រើប្រាស់"}
                 </p>
                 <div className="flex items-center gap-1">
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {user?.position || (user?.role === 'admin' ? 'នាយក' : 'គ្រូបង្រៀន')}
                   </p>
                   {user?.role === 'admin' && (
@@ -479,17 +479,17 @@ export function TopBar({ className, user }: TopBarProps) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="flex items-center space-x-2">
               <User className="w-4 h-4" />
-              <span className="text-primary">ព័ត៌មានផ្ទាល់ខ្លួន</span>
+              <span className="text-base text-primary">ព័ត៌មានផ្ទាល់ខ្លួន</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleProfileClick}>
               <User className="w-4 h-4 mr-2" />
-              <span>កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
+              <span className="text-base">កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
               <LogOut className="w-4 h-4 mr-2" />
-              <span>ចាកចេញ</span>
+              <span className="text-base">ចាកចេញ</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -501,10 +501,10 @@ export function TopBar({ className, user }: TopBarProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <Edit className="w-5 h-5 text-primary" />
-              <span>កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
+              <span className="text-xl">កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
             </DialogTitle>
             <DialogDescription>
-              កែប្រែព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក
+              <span className="text-base">កែប្រែព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក</span>
             </DialogDescription>
           </DialogHeader>
 
@@ -512,7 +512,7 @@ export function TopBar({ className, user }: TopBarProps) {
             {/* Photo Upload */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center space-x-2">
+                <CardTitle className="text-xl flex items-center space-x-2">
                   <Camera className="w-5 h-5 text-primary" />
                   <span>រូបភាព</span>
                 </CardTitle>
@@ -539,7 +539,7 @@ export function TopBar({ className, user }: TopBarProps) {
                     <Label htmlFor="photo" className="cursor-pointer">
                       <div className="flex items-center space-x-2 p-3 border-2 border-dashed border-primary/30 rounded-lg hover:border-primary/50 transition-colors">
                         <Camera className="w-5 h-5 text-primary" />
-                        <span className="text-sm font-medium text-primary">
+                        <span className="text-base font-medium text-primary">
                           ជ្រើសរើសរូបភាព
                         </span>
                       </div>
@@ -551,7 +551,7 @@ export function TopBar({ className, user }: TopBarProps) {
                       onChange={handlePhotoChange}
                       className="hidden"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       JPG, PNG, GIF (អតិបរមា 5MB)
                     </p>
                   </div>
@@ -562,7 +562,7 @@ export function TopBar({ className, user }: TopBarProps) {
             {/* Contact Information */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center space-x-2">
+                <CardTitle className="text-xl flex items-center space-x-2">
                   <Phone className="w-5 h-5 text-primary" />
                   <span>ព័ត៌មានទំនាក់ទំនង</span>
                 </CardTitle>
@@ -571,7 +571,7 @@ export function TopBar({ className, user }: TopBarProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Phone 1 */}
                   <div className="space-y-2">
-                    <Label htmlFor="phonenumber1" className="text-sm font-medium">
+                    <Label htmlFor="phonenumber1" className="text-base font-medium">
                       លេខទូរស័ព្ទ <span className="text-red-500">*</span>
                     </Label>
                     <Input
@@ -585,7 +585,7 @@ export function TopBar({ className, user }: TopBarProps) {
 
                   {/* Phone 2 */}
                   <div className="space-y-2">
-                    <Label htmlFor="phonenumber2" className="text-sm font-medium">
+                    <Label htmlFor="phonenumber2" className="text-base font-medium">
                       លេខទូរស័ព្ទទី២
                     </Label>
                     <Input
@@ -603,7 +603,7 @@ export function TopBar({ className, user }: TopBarProps) {
             {/* Password Change */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center space-x-2">
+                <CardTitle className="text-xl flex items-center space-x-2">
                   <Lock className="w-5 h-5 text-primary" />
                   <span>ផ្លាស់ប្តូរពាក្យសម្ងាត់</span>
                 </CardTitle>
@@ -612,7 +612,7 @@ export function TopBar({ className, user }: TopBarProps) {
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                   <div className="flex items-start space-x-2">
                     <AlertCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-blue-700 dark:text-blue-300">
+                    <div className="text-base text-blue-700 dark:text-blue-300">
                       <p className="font-medium">ព័ត៌មាន:</p>
                       <p>ទុកទទេប្រសិនបើមិនចង់ផ្លាស់ប្តូរពាក្យសម្ងាត់</p>
                     </div>
@@ -622,7 +622,7 @@ export function TopBar({ className, user }: TopBarProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* New Password */}
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium">
+                    <Label htmlFor="password" className="text-base font-medium">
                       ពាក្យសម្ងាត់ថ្មី
                     </Label>
                     <div className="relative">
@@ -646,7 +646,7 @@ export function TopBar({ className, user }: TopBarProps) {
 
                   {/* Confirm Password */}
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                    <Label htmlFor="confirmPassword" className="text-base font-medium">
                       បញ្ជាក់ពាក្យសម្ងាត់
                     </Label>
                     <div className="relative">

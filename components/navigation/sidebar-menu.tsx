@@ -227,10 +227,10 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
             <GraduationCap className="w-7 h-7 text-primary fallback-icon hidden" />
           </div>
           <div className={cn("ml-4 transition-opacity duration-300", isCollapsed ? "opacity-0 w-0" : "opacity-100")}>
-            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent whitespace-nowrap">
+            <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent whitespace-nowrap">
               សាលាមិត្តភាព
             </h1>
-            <p className="text-sm text-muted-foreground whitespace-nowrap">Friendship School</p>
+            <p className="text-base text-muted-foreground whitespace-nowrap">Friendship School</p>
           </div>
         </div>
 
@@ -262,7 +262,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                   <button
                     onClick={(e) => handleParentItemClick(item, e)}
                     className={cn(
-                      "flex items-center flex-1 rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-primary/20",
+                      "flex items-center flex-1 rounded-xl py-3 px-4 text-base font-medium transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-primary/20",
                       active 
                         ? "bg-primary text-primary-foreground shadow-sm" 
                         : "text-muted-foreground hover:bg-muted hover:text-muted-foreground",
@@ -295,7 +295,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                         key={subItem.id}
                         onClick={() => handleNavigation(subItem.href)}
                         className={cn(
-                          "flex items-center w-full rounded-lg py-2 px-3 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
+                          "flex items-center w-full rounded-lg py-2 px-3 text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
                           isActive(subItem.href)
                             ? "bg-primary text-primary-foreground font-medium shadow-sm"
                             : "text-muted-foreground hover:bg-muted hover:text-muted-foreground",
@@ -317,7 +317,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         <button
           onClick={handleLogout}
           className={cn(
-            "flex items-center w-full rounded-xl py-3 px-4 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
+            "flex items-center w-full rounded-xl py-3 px-4 text-base font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
             "text-muted-foreground hover:bg-muted hover:text-muted-foreground",
             isCollapsed && "justify-center px-3",
           )}
