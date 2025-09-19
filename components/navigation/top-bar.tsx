@@ -351,49 +351,65 @@ export function TopBar({ className, user }: TopBarProps) {
   }, [])
 
   return (
-    <div className={`bg-gradient-to-r from-card via-card/95 to-card/90 border-b border-border p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm backdrop-blur-sm ${className}`}>
+    <div className={`bg-gradient-to-r from-card/95 via-card/90 to-card/85 backdrop-blur-xl border-b border-border/50 p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg shadow-primary/5 relative overflow-hidden ${className}`}>
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/10 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+      
       {/* Left side - Title */}
-      <div className="flex-1 min-w-0">
-        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-relaxed py-1 truncate">
-          {pageInfo.title}
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-1 hidden sm:block">
-          {pageInfo.subtitle}
-        </p>
+      <div className="flex-1 min-w-0 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/60 rounded-full"></div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent leading-relaxed py-1 truncate">
+              {pageInfo.title}
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground/80 mt-1 hidden sm:block font-medium">
+              {pageInfo.subtitle}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Right side actions */}
-      <div className="flex items-center space-x-1 md:space-x-4 w-full md:w-auto">
+      <div className="flex items-center space-x-2 md:space-x-4 w-full md:w-auto relative z-10">
         {/* Notifications */}
         <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              className="relative p-2 hover:bg-primary/10 transition-all duration-200"
+              className="relative p-3 hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 transition-all duration-300 rounded-2xl group"
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
               {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-sm rounded-full flex items-center justify-center animate-pulse">
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse shadow-lg">
                   {notifications.length > 9 ? '9+' : notifications.length}
                 </span>
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel className="flex items-center justify-between">
-              <span className="text-primary">ការជូនដំណឹង</span>
+          <DropdownMenuContent align="end" className="w-80 bg-gradient-to-b from-card/95 to-card/90 backdrop-blur-xl border border-border/50 shadow-2xl">
+            <DropdownMenuLabel className="flex items-center justify-between bg-gradient-to-r from-primary/5 to-primary/10 p-4 rounded-t-lg">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-primary" />
+                <span className="text-primary font-bold">ការជូនដំណឹង</span>
+                {notifications.length > 0 && (
+                  <span className="px-2 py-0.5 bg-primary/20 text-primary text-xs font-bold rounded-full">
+                    {notifications.length}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center space-x-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-sm p-1"
+                  className="text-sm p-2 hover:bg-primary/10 rounded-xl transition-all duration-300"
                   onClick={fetchNotifications}
                   disabled={notificationsLoading}
                 >
-                  <RefreshCw className={`h-3 w-3 ${notificationsLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`h-4 w-4 ${notificationsLoading ? 'animate-spin' : ''}`} />
                 </Button>
-                
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -406,21 +422,27 @@ export function TopBar({ className, user }: TopBarProps) {
               notifications.slice(0, 5).map((notification, index) => (
                 <DropdownMenuItem 
                   key={notification.id || index} 
-                  className="flex items-start space-x-3 p-3 cursor-pointer hover:bg-accent"
+                  className="flex items-start space-x-3 p-4 cursor-pointer hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 transition-all duration-300 group"
                   onClick={() => markNotificationAsRead(notification.id)}
                 >
-                  <AlertCircle className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
-                    notification.type === 'warning' ? 'text-yellow-500' : 'text-blue-500'
-                  }`} />
+                  <div className={`p-2 rounded-xl ${
+                    notification.type === 'warning' 
+                      ? 'bg-yellow-100 dark:bg-yellow-900/20' 
+                      : 'bg-blue-100 dark:bg-blue-900/20'
+                  }`}>
+                    <AlertCircle className={`h-4 w-4 ${
+                      notification.type === 'warning' ? 'text-yellow-600 dark:text-yellow-400' : 'text-blue-600 dark:text-blue-400'
+                    }`} />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium truncate">{notification.message}</p>
+                    <p className="text-base font-semibold truncate group-hover:text-primary transition-colors">{notification.message}</p>
                     {notification.details && (
-                      <p className="text-sm text-muted-foreground truncate">{notification.details}</p>
+                      <p className="text-sm text-muted-foreground truncate mt-1">{notification.details}</p>
                     )}
-                    <div className="flex items-center justify-between mt-1">
-                      <p className="text-sm text-muted-foreground">{notification.time}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-muted-foreground font-medium">{notification.time}</p>
                       {notification.author && (
-                        <p className="text-sm text-muted-foreground">ដោយ: {notification.author}</p>
+                        <p className="text-xs text-muted-foreground">ដោយ: {notification.author}</p>
                       )}
                     </div>
                   </div>
@@ -451,45 +473,67 @@ export function TopBar({ className, user }: TopBarProps) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center space-x-2 md:space-x-3 pl-2 md:pl-4 border-l border-border hover:bg-primary/10 transition-all duration-200 group flex-shrink-0"
+              className="flex items-center space-x-3 md:space-x-4 pl-3 md:pl-4 border-l border-border/50 hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 transition-all duration-300 group flex-shrink-0 rounded-2xl"
             >
               <div className="text-right hidden sm:block">
-                <p className="text-sm md:text-base font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent hover:from-primary/90 hover:to-primary/70 transition-all duration-200 truncate max-w-24 md:max-w-32">
+                <p className="text-sm md:text-base font-black bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent hover:from-primary/80 hover:to-primary/60 transition-all duration-300 truncate max-w-24 md:max-w-32">
                   {user ? `${user.lastname} ${user.firstname}` : "អ្នកប្រើប្រាស់"}
                 </p>
-                <div className="flex items-center gap-1">
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-muted-foreground font-medium">
                     {user?.position || (user?.role === 'admin' ? 'នាយក' : 'គ្រូបង្រៀន')}
                   </p>
                   {user?.role === 'admin' && (
-                    <Crown className="w-3 h-3 text-yellow-500" />
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/20 dark:to-yellow-800/10 rounded-full">
+                      <Crown className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
+                      <span className="text-xs font-bold text-yellow-700 dark:text-yellow-300">Admin</span>
+                    </div>
                   )}
                   {user?.role === 'teacher' && (
-                    <BookOpen className="w-3 h-3 text-blue-500" />
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/20 dark:to-blue-800/10 rounded-full">
+                      <BookOpen className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                      <span className="text-xs font-bold text-blue-700 dark:text-blue-300">Teacher</span>
+                    </div>
                   )}
                 </div>
               </div>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 hover:from-primary/90 hover:to-primary/70 transition-all duration-200 cursor-pointer group">
-                <span className="group-hover:scale-110 transition-transform duration-200 text-sm md:text-base">
+              <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-2xl flex items-center justify-center text-white font-black shadow-xl hover:shadow-2xl hover:scale-110 hover:from-primary/80 hover:to-primary/60 transition-all duration-300 cursor-pointer group overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
+                <span className="relative z-10 group-hover:scale-110 transition-transform duration-300 text-sm md:text-base">
                   {user?.avatar || user?.firstname?.charAt(0) || "U"}
                 </span>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                </div>
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel className="flex items-center space-x-2">
-              <User className="w-4 h-4" />
-              <span className="text-base text-primary">ព័ត៌មានផ្ទាល់ខ្លួន</span>
+          <DropdownMenuContent align="end" className="w-64 bg-gradient-to-b from-card/95 to-card/90 backdrop-blur-xl border border-border/50 shadow-2xl">
+            <DropdownMenuLabel className="flex items-center space-x-3 bg-gradient-to-r from-primary/5 to-primary/10 p-4 rounded-t-lg">
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <User className="w-4 h-4 text-primary" />
+              </div>
+              <span className="text-base text-primary font-bold">ព័ត៌មានផ្ទាល់ខ្លួន</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleProfileClick}>
-              <User className="w-4 h-4 mr-2" />
-              <span className="text-base">កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
+            <DropdownMenuItem 
+              onClick={handleProfileClick}
+              className="flex items-center space-x-3 p-4 hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 transition-all duration-300 group"
+            >
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-xl group-hover:bg-blue-200 dark:group-hover:bg-blue-800/30 transition-colors">
+                <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <span className="text-base font-medium group-hover:text-primary transition-colors">កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
-              <LogOut className="w-4 h-4 mr-2" />
-              <span className="text-base">ចាកចេញ</span>
+            <DropdownMenuItem 
+              onClick={handleLogout} 
+              className="flex items-center space-x-3 p-4 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100/50 hover:text-red-700 focus:text-red-700 transition-all duration-300 group dark:text-red-400 dark:hover:from-red-900/20 dark:hover:to-red-800/10 dark:hover:text-red-300"
+            >
+              <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-xl group-hover:bg-red-200 dark:group-hover:bg-red-800/30 transition-colors">
+                <LogOut className="w-4 h-4 text-red-600 dark:text-red-400" />
+              </div>
+              <span className="text-base font-medium group-hover:translate-x-0.5 transition-transform duration-300">ចាកចេញ</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
