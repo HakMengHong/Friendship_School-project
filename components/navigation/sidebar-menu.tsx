@@ -267,7 +267,7 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
             {/* Animated ring */}
             <div className="absolute inset-0 rounded-3xl border-2 border-white/20 group-hover:border-white/40 transition-colors duration-300"></div>
           </div>
-           <div className={cn("ml-6 transition-all duration-500 ease-out flex flex-col justify-center", isCollapsed ? "opacity-0 w-0 scale-95" : "opacity-100 scale-100")}>
+           <div className={cn("ml-6 pr-16 transition-all duration-500 ease-out flex flex-col justify-center", isCollapsed ? "opacity-0 w-0 scale-95" : "opacity-100 scale-100")}>
              <h1 
                className="text-3xl font-black font-khmer tracking-wide bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent whitespace-nowrap" 
                style={{ 
@@ -289,26 +289,26 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         <button
           onClick={toggleSidebar}
           onKeyDown={handleKeyDown}
-          className="absolute -right-4 top-1/2 -translate-y-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 backdrop-blur-2xl rounded-3xl p-3.5 border border-primary/20 shadow-2xl hover:shadow-primary/25 hover:scale-110 active:scale-95 transition-all duration-300 z-20 focus:outline-none focus:ring-4 focus:ring-primary/30 focus:ring-offset-2 focus:ring-offset-card group"
+          className="absolute -right-5 top-1/2 -translate-y-1/2 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 backdrop-blur-2xl rounded-2xl p-3 border border-primary/20 shadow-xl hover:shadow-primary/25 hover:scale-105 active:scale-95 transition-all duration-300 z-20 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 focus:ring-offset-card group"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={isCollapsed ? "Click to expand sidebar (Ctrl+B)" : "Click to collapse sidebar (Ctrl+B)"}
           tabIndex={0}
         >
           <div className="relative">
             {/* Background glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
             {/* Icon container */}
-            <div className="relative z-10 p-1">
+            <div className="relative z-10">
               {isCollapsed ? (
                 <Menu 
-                  size={22} 
+                  size={20} 
                   strokeWidth={2.5} 
                   className="text-primary group-hover:text-primary/90 group-active:text-primary/70 transition-all duration-200 drop-shadow-sm" 
                 />
               ) : (
                 <ChevronLeft 
-                  size={22} 
+                  size={20} 
                   strokeWidth={2.5} 
                   className="text-primary group-hover:text-primary/90 group-active:text-primary/70 transition-all duration-200 drop-shadow-sm" 
                 />
@@ -316,14 +316,14 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
             </div>
             
             {/* Animated border */}
-            <div className="absolute inset-0 rounded-3xl border-2 border-primary/30 group-hover:border-primary/50 transition-colors duration-300"></div>
+            <div className="absolute inset-0 rounded-2xl border-2 border-primary/30 group-hover:border-primary/50 transition-colors duration-300"></div>
             
             {/* Ripple effect */}
-            <div className="absolute inset-0 rounded-3xl bg-primary/20 scale-0 group-active:scale-100 transition-transform duration-200"></div>
+            <div className="absolute inset-0 rounded-2xl bg-primary/20 scale-0 group-active:scale-100 transition-transform duration-200"></div>
             
             {/* Pulse animation for collapsed state */}
             {isCollapsed && (
-              <div className="absolute inset-0 rounded-3xl border-2 border-primary/40 animate-pulse"></div>
+              <div className="absolute inset-0 rounded-2xl border-2 border-primary/40 animate-pulse"></div>
             )}
           </div>
         </button>
