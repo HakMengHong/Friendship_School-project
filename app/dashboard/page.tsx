@@ -6,50 +6,16 @@ import {
   Users, 
   BookOpen, 
   Award, 
-  Star, 
-  TrendingUp, 
   Activity, 
-  Trash2 as TrashIcon,
-  Plus,
-  BarChart3,
   UserCheck,
   Clock,
-  CheckCircle,
-  XCircle,
-  UserPlus,
-  GraduationCap,
-  Sun,
-  Moon,
-  RefreshCw,
-  Download,
-  Search,
-  Settings,
-  AlertTriangle,
-  Shield,
-  Database,
-  FileText,
-  Calendar,
-  Target,
-  Zap,
-  Eye,
-  EyeOff,
-  Palette,
-  Sparkles,
-  Layers,
-  Globe,
-  Wifi,
-  WifiOff
+  RefreshCw
 } from "lucide-react"
-import { KhmerCalendar } from "@/components/calendar/khmer_calendar"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts'
 import { Loader2, AlertCircle } from "lucide-react"
 import { useTheme } from "next-themes"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export default function DashboardPage() {
   return (
@@ -85,35 +51,20 @@ function DashboardContent() {
     section: string
   }
 
-  interface Attendance {
-    attendanceId: number
-    status: string
-    attendanceDate: string
-  }
-
   // State for real data
   const [students, setStudents] = useState<Student[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [courses, setCourses] = useState<Course[]>([])
-  const [attendances, setAttendances] = useState<Attendance[]>([])
   const [grades, setGrades] = useState<any[]>([])
   const [recentActivities, setRecentActivities] = useState<any[]>([])
-  const [learningQualityData, setLearningQualityData] = useState<any[]>([])
   
-  // Enhanced dashboard state
-  const [autoRefresh, setAutoRefresh] = useState(false)
-  const [lastRefresh, setLastRefresh] = useState(new Date())
-  const [searchQuery, setSearchQuery] = useState("")
+  // Dashboard state
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
-  // UI state
-  const [showSidebar, setShowSidebar] = useState(false)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
-  const [compactMode, setCompactMode] = useState(false)
   
   // Use existing theme system
-  const { theme, resolvedTheme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const isDarkMode = resolvedTheme === 'dark'
 
   // Fetch real data from APIs with progressive loading
@@ -150,34 +101,20 @@ function DashboardContent() {
 
       // Fetch additional data in background
       const additionalData = await Promise.allSettled([
-        fetch('/api/attendance'),
         fetch('/api/grades'),
-        fetch('/api/activity-logs?limit=10'),
-        fetch('/api/learning-quality')
+        fetch('/api/activity-logs?limit=10')
       ])
 
       // Process additional data
       if (additionalData[0].status === 'fulfilled' && additionalData[0].value.ok) {
-        const attendancesData = await additionalData[0].value.json()
-        setAttendances(Array.isArray(attendancesData) ? attendancesData : [])
-      }
-
-      if (additionalData[1].status === 'fulfilled' && additionalData[1].value.ok) {
-        const gradesData = await additionalData[1].value.json()
+        const gradesData = await additionalData[0].value.json()
         setGrades(Array.isArray(gradesData) ? gradesData : [])
       }
 
-      if (additionalData[2].status === 'fulfilled' && additionalData[2].value.ok) {
-        const activitiesData = await additionalData[2].value.json()
+      if (additionalData[1].status === 'fulfilled' && additionalData[1].value.ok) {
+        const activitiesData = await additionalData[1].value.json()
         setRecentActivities(Array.isArray(activitiesData) ? activitiesData : [])
       }
-
-      if (additionalData[3].status === 'fulfilled' && additionalData[3].value.ok) {
-        const learningQualityData = await additionalData[3].value.json()
-        setLearningQualityData(learningQualityData.monthlyData || [])
-      }
-
-      setLastRefresh(new Date())
     } catch (err) {
       console.error('Error fetching dashboard data:', err)
       if (err instanceof Error && err.message === 'Request timeout') {
@@ -193,58 +130,26 @@ function DashboardContent() {
   // Load UI preferences from localStorage
   useEffect(() => {
     const savedAnimations = localStorage.getItem('dashboard-animations')
-    const savedCompactMode = localStorage.getItem('dashboard-compact-mode')
     if (savedAnimations) setAnimationsEnabled(savedAnimations === 'true')
-    if (savedCompactMode) setCompactMode(savedCompactMode === 'true')
   }, [])
 
-  const toggleAnimations = () => {
-    const newAnimations = !animationsEnabled
-    setAnimationsEnabled(newAnimations)
-    localStorage.setItem('dashboard-animations', newAnimations.toString())
-  }
-
-  const toggleCompactMode = () => {
-    const newCompactMode = !compactMode
-    setCompactMode(newCompactMode)
-    localStorage.setItem('dashboard-compact-mode', newCompactMode.toString())
-  }
-
-  // Auto-refresh effect
+  // Load dashboard data on component mount
   useEffect(() => {
     fetchDashboardData()
-
-    if (autoRefresh) {
-      const interval = setInterval(fetchDashboardData, 300000) // 5 minutes instead of 30 seconds
-      return () => clearInterval(interval)
-    }
-  }, [autoRefresh])
+  }, [])
 
   // Calculate dashboard stats
   const dashboardStats = {
     totalStudents: students.length,
     totalUsers: users.length,
     totalCourses: courses.length,
-    totalAttendances: attendances.length,
-    totalGrades: grades.length,
-    averageGrade: grades.length > 0 ? grades.reduce((sum, grade) => sum + (grade.grade || 0), 0) / grades.length : 0,
-    activeStudents: students.filter(s => s.status === 'ACTIVE').length
+    totalGrades: grades.length
   }
-
-  // System health calculation
-  const systemHealth = {
-    database: 'healthy',
-    api: 'healthy',
-    performance: 'good',
-    uptime: '99.9%'
-  }
-
 
   // Get activity icon
   const getActivityIcon = (action: string) => {
     switch (action.toLowerCase()) {
       case 'login': return <UserCheck className="h-4 w-4" />
-      case 'logout': return <UserPlus className="h-4 w-4" />
       case 'grade': return <Award className="h-4 w-4" />
       case 'attendance': return <Clock className="h-4 w-4" />
       default: return <Activity className="h-4 w-4" />
@@ -453,132 +358,7 @@ function DashboardContent() {
             </CardContent>
           </Card>
         </div>
-            </div>
-
-        {/* Charts Section */}
-
-          {/* Learning Quality Chart */}
-          <div className="relative mb-8">
-            <div 
-              className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 rounded-3xl -z-10" 
-            />
-            
-            <Card className="backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80">
-              <CardHeader className="p-6 bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 text-white rounded-t-xl">
-                <CardTitle className="text-white flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="text-xl text-white">គុណភាពការសិក្សា</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                {learningQualityData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={learningQualityData}>
-                      <CartesianGrid 
-                        strokeDasharray="3 3" 
-                        stroke="#e5e7eb" 
-                        className="dark:stroke-gray-700"
-                      />
-                      <XAxis 
-                        dataKey="month" 
-                        tick={{ fill: '#6b7280' }}
-                        className="dark:fill-gray-400"
-                      />
-                      <YAxis 
-                        tick={{ fill: '#6b7280' }}
-                        className="dark:fill-gray-400"
-                      />
-                      <Tooltip 
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px',
-                          color: 'hsl(var(--card-foreground))'
-                        }}
-                      />
-                      <Legend />
-                      <Bar 
-                        dataKey="quality" 
-                        fill="#3b82f6" 
-                        className="dark:fill-blue-400"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <BarChart3 className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                    <p className="text-base">មិនមានទិន្នន័យ</p>
-                  </div>
-                )}
-                </CardContent>
-              </Card>
-          </div>
-
-
-        {/* Top Students */}
-        <div className="relative">
-          <div 
-            className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-orange-50/20 to-red-50/30 dark:from-yellow-950/20 dark:via-orange-950/20 dark:to-red-950/20 rounded-3xl -z-10" 
-          />
-          
-          <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 ${
-            isDarkMode 
-              ? 'bg-slate-800/80 hover:bg-slate-700/80' 
-              : 'bg-white/80 hover:bg-white/90'
-          }`}>
-            <CardHeader className="p-6 bg-gradient-to-r from-yellow-500 via-orange-600 to-red-600 text-white rounded-t-xl">
-              <CardTitle className="text-white flex items-center space-x-2">
-                <Star className="h-5 w-5" />
-                <span className="text-xl">សិស្សពូកែ</span>
-          </CardTitle>
-        </CardHeader>
-            <CardContent className="p-6">
-          {students.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {students.slice(0, 4).map((student) => (
-                    <div 
-                      key={student.studentId} 
-                      className="border-2 rounded-lg p-4 transition-all duration-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                      {student.firstName.charAt(0)}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {student.lastName} {student.firstName}
-                          </p>
-                          <p className="text-base text-gray-500 dark:text-gray-400">
-                            {student.class}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                        <p className="text-base text-gray-600 dark:text-gray-400">
-                          សិស្សសកម្ម
-                        </p>
-                    <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
-                            ថ្នាក់ {student.class}
-                          </span>
-                      <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
-                        {student.status === 'ACTIVE' ? 'សកម្ម' : 'អសកម្ម'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Users className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-              <p className="text-base">មិនមានសិស្ស</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-        </div>
       </div>
+    </div>
   )
 }

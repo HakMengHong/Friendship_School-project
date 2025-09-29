@@ -117,6 +117,23 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>លទ្ធផលនៃការសិក្សាប្រចាំខែ</title>
   <style>
+    /* Khmer font definitions */
+    @font-face {
+      font-family: 'Khmer MEF2';
+      src: url('/fonts/khmer_mef2_regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    
+    @font-face {
+      font-family: 'Khmer OS Siemreap';
+      src: url('/fonts/khmer_os_siemreap.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -124,7 +141,7 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
     }
 
     body {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 10pt;
       line-height: 1.4;
       color: #333;
@@ -166,27 +183,27 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
     .kingdom-motto {
       font-size: 15pt;
       font-weight: bold;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       margin-bottom: 5px;
     }
 
     .nation-religion-king {
       font-size: 13pt;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       margin-bottom: 15px;
     }
 
     .report-title {
       font-size: 13pt;
       font-weight: bold;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       margin-bottom: 10px;
     }
 
     .class-info {
       font-size: 10pt;
       font-weight: bold;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       margin-bottom: 5px;
     }
 
@@ -194,7 +211,7 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
       padding-top: 10px;
       font-size: 12pt;
       font-weight: bold;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
 
     .header-right {
@@ -228,7 +245,7 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
       margin-bottom: 0;
       border: 1px solid #333;
       font-size: 9pt;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       table-layout: fixed;
     }
 
@@ -239,7 +256,7 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
       border: 2px solid #333;
       border-top: none;
       font-size: 9pt;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       table-layout: fixed;
     }
 
@@ -284,7 +301,7 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
     .attendance-row td {
       text-align: center;
       font-size: 10pt;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
 
     .signature-section {
@@ -313,7 +330,7 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
     .signature-title {
       font-size: 10pt;
       font-weight: bold;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       margin-bottom: 15px;
     }
 

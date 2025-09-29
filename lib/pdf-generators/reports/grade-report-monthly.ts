@@ -195,13 +195,30 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
   <meta name="generator" content="">
   <title>របាយការណ៍ពិន្ទុប្រចាំខែ</title>
   <style>
+    /* Khmer font definitions */
+    @font-face {
+      font-family: 'Khmer MEF2';
+      src: url('/fonts/khmer_mef2_regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    
+    @font-face {
+      font-family: 'Khmer OS Siemreap';
+      src: url('/fonts/khmer_os_siemreap.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    
     /* Base Styles */
     * {
       box-sizing: border-box;
     }
     
     body {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       margin: 0;
       padding: 0;
       font-size: 9pt;
@@ -242,7 +259,7 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
     .header-center {
       flex: 1;
       text-align: center;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       z-index: 1;
     }
     
@@ -256,13 +273,13 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
       font-size: 15pt;
       font-weight: bold;
       margin: 0 0 6px 0;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       color: #000;
     }
     
     .nation-religion-king {
       font-size: 13pt;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       color: #000;
       margin: 0 0 50px 0;
     }
@@ -289,7 +306,7 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
       border: 1px solid #000;
       padding: 3px 4px;
       text-align: center;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 10pt;
       vertical-align: middle;
     }
@@ -396,7 +413,7 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
       display: flex;
       justify-content: space-between;
       margin-top: 20px;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       gap: 20px;
       page-break-inside: avoid;
     }
@@ -654,12 +671,12 @@ export async function generateMonthlyGradeReportPDF(data: MonthlyGradeReportData
       preferCSSPageSize: true,
       displayHeaderFooter: true,
       headerTemplate: `
-      <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+      <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
         របាយការណ៍ពិន្ទុប្រចាំខែ
       </div>
     `,
       footerTemplate: `
-      <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+      <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
         ទំព័រទី <span class="pageNumber"></span> នៃ <span class="totalPages"></span>
       </div>
     `

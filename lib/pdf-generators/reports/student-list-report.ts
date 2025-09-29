@@ -159,13 +159,13 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
     .kingdom-motto {
       font-size: 15pt;
       font-weight: bold;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       margin-bottom: 5px;
     }
 
     .nation-religion-king {
       font-size: 13pt;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       margin-bottom: 15px;
     }
 
@@ -177,7 +177,7 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
     .report-title {
       font-size: 13pt;
       font-weight: bold;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       text-align: center;
       margin: 20px 0;
     }
@@ -193,7 +193,7 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
       border: 1px solid #000;
       padding: 8px;
       text-align: center;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
     .student-table th {
@@ -204,25 +204,25 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
     .summary-row {
       background-color: #f8f8f8;
       font-weight: bold;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
     .signature-section {
       display: flex;
       justify-content: flex-end;
       margin-top: 30px;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
     .signature-part {
       text-align: center;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
     .signature-line {
       margin: 5px 0;
       font-size: 14px;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
   </style>
 </head>
@@ -335,12 +335,12 @@ export const generateStudentListReportPDF = async (
       preferCSSPageSize: false,
       displayHeaderFooter: true,
       headerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
           ${getReportTypeText(data.reportType)}
         </div>
       `,
       footerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
           ទំព័រទី <span class="pageNumber"></span> នៃ <span class="totalPages"></span>
         </div>
       `

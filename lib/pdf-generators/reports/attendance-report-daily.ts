@@ -109,15 +109,30 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${reportTitle}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@100;200;300;400;500;600;700;800;900&display=swap');
+    /* Khmer font definitions */
+    @font-face {
+      font-family: 'Khmer MEF2';
+      src: url('/fonts/khmer_mef2_regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    
+    @font-face {
+      font-family: 'Khmer OS Siemreap';
+      src: url('/fonts/khmer_os_siemreap.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
     
     /* Base font configuration */
     * {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
     body {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
     /* Custom styles for attendance report - not using getStudentRegistrationCSS to avoid font conflicts */
@@ -164,7 +179,7 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
     .school-name {
       font-size: 16px;
       margin-top: 8px;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
     }
     
     .national-section {
@@ -176,33 +191,33 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
     .national-title {
       font-size: 18px;
       margin-bottom: 5px;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
     }
     
     .national-subtitle {
       font-size: 16px;
       font-weight: normal;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
     }
     
     .report-title {
       text-align: center;
       font-size: 18px;
       margin: 2px 0;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
     .report-title-line1 {
       font-size: 18px;
       font-weight: normal;
       margin-bottom: 5px;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
     }
     
     .report-title-line2 {
       font-size: 14px;
       font-weight: normal;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
     .attendance-table {
@@ -216,7 +231,7 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
       border: 1px solid #000;
       padding: 7px;
       text-align: center;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 12px;
     }
     
@@ -233,7 +248,7 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
       font-size: 16px;
       text-align: center;
       text-transform: underline;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
     }
   </style>
 </head>
@@ -376,12 +391,12 @@ export const generateAttendanceReportPDF = async (
       preferCSSPageSize: true,
       displayHeaderFooter: true,
       headerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
           បញ្ជីអវត្តមានសិស្ស
         </div>
       `,
       footerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
           ទំព័រទី <span class="pageNumber"></span> នៃ <span class="totalPages"></span>
         </div>
       `

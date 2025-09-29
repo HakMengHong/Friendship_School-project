@@ -237,16 +237,18 @@ const getStudentRegistrationCSS = (): string => {
   return `
     @font-face {
       font-family: 'Khmer MEF2';
-      src: url('/Khmer MEF2 Regular.ttf') format('truetype');
+      src: url('/fonts/khmer_mef2_regular.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
+      font-display: swap;
     }
     
     @font-face {
       font-family: 'Khmer OS Siemreap';
-      src: url('/KhmerOSSiemreap.ttf') format('truetype');
+      src: url('/fonts/khmer_os_siemreap.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
+      font-display: swap;
     }
 
     * { 
@@ -256,7 +258,7 @@ const getStudentRegistrationCSS = (): string => {
     }
     
     body {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       line-height: 1.6;
       color: #1a1a1a;
@@ -335,7 +337,7 @@ const getStudentRegistrationCSS = (): string => {
       background-color: #f0f0f0;
       border: 2px solid #333;
       color: #333;
-      font-family: 'Khmer OS Siemreap', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 12px;
       font-weight: normal;
       text-align: center;
@@ -346,21 +348,21 @@ const getStudentRegistrationCSS = (): string => {
     .national-header {
       flex: 1;
       text-align: center;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       padding: 0 10px;
     }
 
     .national-title {
       font-size: 16pt;
       font-weight: normal;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       color: #1a1a1a;
       margin-bottom: 3px;
     }
 
     .national-subtitle {
       font-size: 14pt;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       color: #333;
       margin-bottom: 8px;
     }
@@ -378,7 +380,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .photo-label {
-      font-family: 'Khmer OS Siemreap', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 10px;
       color: #666;
       text-align: center;
@@ -395,7 +397,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .header-content h1 {
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: 13pt;
       font-weight: normal;
       margin: 10px 0;
@@ -409,7 +411,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .section-title {
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: 12pt;
       font-weight: normal;
       margin: 5px 0 5px 0;
@@ -417,7 +419,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .student-summary, .address-summary, .requirements-summary {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       line-height: 1.7;
       color: #1a1a1a;
@@ -429,7 +431,7 @@ const getStudentRegistrationCSS = (): string => {
 
     .address-summary,
     .family-summary {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       line-height: 1.7;
       color: #1a1a1a;
@@ -449,7 +451,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .guardian-name {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       font-weight: normal;
       color: #1a1a1a;
@@ -460,7 +462,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .guardian-details {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       color: #374151;
       line-height: 1.6;
@@ -482,14 +484,12 @@ const getStudentRegistrationCSS = (): string => {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       color: #1a1a1a;
       flex-shrink: 0;
       padding: 5px;
-      background-color: #f8fafc;
       border-radius: 6px;
-      border: 1px solid #e2e8f0;
     }
 
     .checkbox {
@@ -517,14 +517,14 @@ const getStudentRegistrationCSS = (): string => {
     .letter-greeting-title {
       text-align: center;
       margin-bottom: 3px;
-      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: 13pt;
       font-weight: normal;
       color: #1a1a1a;
     }
 
     .letter-greeting {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       line-height: 1.8;
       color: #1a1a1a;
@@ -540,7 +540,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .rule {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       line-height: 1.7;
       color: #374151;
@@ -565,7 +565,7 @@ const getStudentRegistrationCSS = (): string => {
 
 
     .letter-closing {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       line-height: 1.7;
       color: #333;
@@ -575,7 +575,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .letter-date {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       color: #333;
       margin: 8px 0;
@@ -596,7 +596,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .signature-label {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       font-weight: bold;
       color: #333;
@@ -604,7 +604,7 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .signature-name {
-      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 11pt;
       color: #1a1a1a;
       margin-top: 8px;
@@ -917,12 +917,12 @@ export const generateStudentRegistrationPDF = async (
       preferCSSPageSize: false,
       displayHeaderFooter: true,
       headerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
           ពាក្យចុះឈ្មោះសិស្ស
         </div>
       `,
       footerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
           ទំព័រទី <span class="pageNumber"></span> នៃ <span class="totalPages"></span>
         </div>
       `

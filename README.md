@@ -1,257 +1,293 @@
-# Friendship School Management System
+# 🏫 Friendship School Management System
 
-A comprehensive school management system built with Next.js, React, TypeScript, and PostgreSQL. Features role-based access control for administrators and teachers, with capabilities for student management, attendance tracking, grade management, and academic administration.
+A comprehensive, modern school management system built with Next.js, TypeScript, and PostgreSQL. Features include student management, attendance tracking, grade management, PDF report generation, and more.
 
-## 🚀 **Quick Start**
+![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-### **Option 1: Docker Setup (Recommended)**
+## ✨ Features
+
+### 🎓 **Student Management**
+- Student registration and profile management
+- Class enrollment and scheduling
+- Student ID card generation
+- Academic progress tracking
+
+### 📊 **Attendance System**
+- Daily attendance tracking
+- Monthly and semester reports
+- Attendance analytics and insights
+- Automated report generation
+
+### 📈 **Grade Management**
+- Grade entry and management
+- Gradebook functionality
+- Performance analytics
+- Report card generation
+
+### 📋 **Report Generation**
+- Student registration forms
+- Attendance reports (daily, monthly, semester, yearly)
+- Grade reports and transcripts
+- Government compliance reports
+- Bulk PDF generation
+
+### 🎨 **Modern UI/UX**
+- Responsive design with glassmorphism effects
+- Dark/light mode support
+- Khmer language support
+- Smooth animations and transitions
+- Mobile-optimized interface
+
+### 🔐 **Security & Authentication**
+- Secure user authentication
+- Role-based access control
+- Session management
+- Password protection
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- PostgreSQL 15+
+- Docker (optional)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/friendship-school-project.git
+   cd friendship-school-project
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Setup environment**
+   ```bash
+   cp production.env .env
+   # Edit .env with your database credentials
+   ```
+
+4. **Setup database**
+   ```bash
+   npx prisma generate
+   npx prisma migrate dev
+   npm run db:seed
+   ```
+
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+Visit `http://localhost:3000` to see the application.
+
+## 🐳 Docker Deployment
+
+### Quick Deploy to Ubuntu Server
+
+1. **Upload project to server**
+   ```bash
+   scp -r * user@your-server-ip:/opt/friendship-school/
+   ```
+
+2. **Run deployment script**
+   ```bash
+   ssh user@your-server-ip
+   cd /opt/friendship-school
+   chmod +x deploy.sh
+   ./deploy.sh
+   ```
+
+The deployment script will automatically:
+- Install Docker and Docker Compose
+- Configure environment variables
+- Build and deploy the application
+- Setup SSL certificates (if domain provided)
+- Configure firewall and backups
+
+### Manual Docker Setup
+
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd Friendship_School-project
-
-# Start PostgreSQL and pgAdmin with Docker
-docker-compose up -d
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-# Create .env file with:
-# DATABASE_URL="postgresql://postgres:password123@localhost:5432/postgres"
-# NEXTAUTH_SECRET="your-secret-key-here"
-# NEXTAUTH_URL="http://localhost:3000"
-
-# Generate Prisma client and run migrations
-npx prisma generate
-npx prisma migrate dev
-
-# Add initial users
-node scripts/add-teachers.js
-
-# Start development server
-npm run dev
-```
-
-### **Option 2: Manual PostgreSQL Setup**
-```bash
-# Clone the repository
-git clone <repository-url>
-cd Friendship_School-project
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your database credentials
+# Build and start services
+docker-compose -f docker-compose.prod.yml up -d --build
 
 # Run database migrations
-npx prisma migrate dev
-
-# Start development server
-npm run dev
+docker-compose -f docker-compose.prod.yml exec app npx prisma migrate deploy
 ```
 
-### **Prerequisites**
-- Node.js 18+
-- Docker Desktop (for Docker setup) OR PostgreSQL database
-- Git
-
-### **Database Setup**
-```bash
-# Generate Prisma client
-npx prisma generate
-
-# Add initial users
-node scripts/add-teachers.js
-
-# Check database connectivity
-node scripts/check-database.js
-```
-
-### **🐳 Docker Services**
-- **PostgreSQL**: localhost:5432 (postgres/password123)
-- **pgAdmin4**: http://localhost:8080 (admin@admin.com/admin123)
-- **Application**: http://localhost:3000
-
-> 📖 **Detailed Docker Setup**: See [DOCKER_SETUP.md](./DOCKER_SETUP.md) for complete instructions
-
-## 🏗️ **Technology Stack**
-
-### **Frontend**
-- **Next.js 15.2.4** - React framework with App Router
-- **React 18** - UI library with hooks and context
-- **TypeScript** - Type-safe development
-- **Tailwind CSS 3.4.17** - Utility-first styling
-- **Radix UI & Shadcn/ui** - Accessible component library
-
-### **Backend & Database**
-- **Prisma ORM 6.11.1** - Database toolkit and ORM
-- **PostgreSQL** - Relational database
-- **bcryptjs** - Password hashing
-- **Puppeteer** - Server-side PDF generation
-- **ExcelJS** - Excel export functionality
-
-## 🔒 **Security Features**
-
-- **Multi-layer protection** with Next.js middleware
-- **Role-based access control** (Admin/Teacher)
-- **Server-side route protection**
-- **Client-side role guards**
-- **Cookie-based authentication**
-- **Secure password hashing**
-
-## 📁 **Project Structure**
+## 📁 Project Structure
 
 ```
-Friendship_School-project/
-├── app/                          # Next.js App Router pages
+friendship-school-project/
+├── app/                          # Next.js App Router
 │   ├── api/                      # API routes
-│   ├── dashboard/                # Admin dashboard pages
+│   ├── dashboard/                # Dashboard pages
 │   ├── attendance/               # Attendance management
 │   ├── grade/                    # Grade management
-│   ├── student-info/             # Student information
-│   ├── register-student/         # Student registration
-│   ├── login/                    # Authentication
-│   └── unauthorized/             # Access denied page
+│   └── student-info/             # Student information
 ├── components/                   # Reusable UI components
+│   ├── ui/                       # Base UI components
+│   ├── layout/                   # Layout components
+│   └── navigation/               # Navigation components
 ├── lib/                          # Utility libraries
-├── prisma/                       # Database schema
+│   ├── pdf-generators/           # PDF generation system
+│   ├── auth-service.ts           # Authentication service
+│   └── prisma.ts                 # Database client
+├── prisma/                       # Database schema and migrations
 ├── public/                       # Static assets
-├── scripts/                      # Development scripts
-├── middleware.ts                 # Route protection
-└── package.json                  # Dependencies
+├── scripts/                      # Utility scripts
+└── docs/                         # Documentation
 ```
 
-## 🎯 **Key Features**
+## 🛠️ Technology Stack
 
-### **Student Management**
-- Student registration with PDF generation
-- Student information display and management
-- Student enrollment in courses
-- Student removal functionality
+### Frontend
+- **Next.js 15.5.2** - React framework with App Router
+- **TypeScript** - Type-safe JavaScript
+- **Tailwind CSS** - Utility-first CSS framework
+- **Radix UI** - Accessible component primitives
+- **Lucide React** - Beautiful icons
+- **Chart.js** - Data visualization
 
-### **Attendance System**
-- Daily attendance tracking
-- Attendance reports and analytics
-- Course-based attendance management
+### Backend
+- **Next.js API Routes** - Serverless API endpoints
+- **Prisma ORM** - Database toolkit and ORM
+- **PostgreSQL** - Robust relational database
+- **bcryptjs** - Password hashing
+- **Puppeteer** - PDF generation
 
-### **Grade Management**
-- Grade entry and editing
-- Gradebook management
-- Grade reports and analytics
-- Subject and semester organization
+### DevOps & Deployment
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+- **Nginx** - Reverse proxy and load balancer
+- **Let's Encrypt** - SSL certificates
+- **GitHub Actions** - CI/CD pipeline
 
-### **Academic Administration**
-- School year management
-- Course creation and management
-- Subject management
-- User account management
+## 📊 Database Schema
 
-### **Data Export**
-- PDF generation for student records
-- Excel export for reports
-- Chart visualization for analytics
+The application uses PostgreSQL with the following main entities:
 
-## 🔧 **Development**
+- **Users** - System users (admins, teachers)
+- **Students** - Student information and profiles
+- **Subjects** - Academic subjects
+- **Courses** - Class courses
+- **Grades** - Student grades and assessments
+- **Attendance** - Daily attendance records
+- **Enrollments** - Student course enrollments
 
-### **Available Scripts**
+## 🔧 Configuration
+
+### Environment Variables
+
 ```bash
-# Development
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-
 # Database
-npx prisma studio    # Open Prisma Studio
-npx prisma generate  # Generate Prisma client
-npx prisma migrate   # Run migrations
-```
+DATABASE_URL="postgresql://user:password@localhost:5432/friendship_school"
 
-### **Environment Variables**
-Create a `.env` file with:
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
+# Authentication
 NEXTAUTH_SECRET="your-secret-key"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="https://your-domain.com"
+
+# Application
+NODE_ENV="production"
+PORT=3000
 ```
 
-## 🧪 **Testing**
+### Docker Configuration
 
-### **Security Testing**
+The project includes production-ready Docker configuration:
+
+- **Multi-stage Dockerfile** for optimized builds
+- **Docker Compose** for service orchestration
+- **Health checks** for service monitoring
+- **Volume mounts** for data persistence
+
+## 📱 Features Overview
+
+### Dashboard
+- Modern analytics dashboard
+- Real-time statistics
+- Quick access to key features
+- Responsive design
+
+### Student Management
+- Student registration forms
+- Profile management
+- ID card generation
+- Academic tracking
+
+### Attendance System
+- Daily attendance marking
+- Bulk attendance entry
+- Attendance reports
+- Analytics and insights
+
+### Grade Management
+- Grade entry interface
+- Gradebook functionality
+- Performance tracking
+- Report generation
+
+### PDF Reports
+- Student registration forms
+- Attendance reports (multiple formats)
+- Grade reports and transcripts
+- Government compliance documents
+- Bulk PDF generation
+
+## 🚀 Deployment Options
+
+### 1. Docker (Recommended)
 ```bash
-# Test route protection
-node scripts/test-security-comprehensive.js
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### **Database Testing**
+### 2. Manual Deployment
+Follow the detailed guide in `UBUNTU_DEPLOYMENT_GUIDE.md`
+
+### 3. Vercel/Netlify
 ```bash
-# Check database connectivity
-node scripts/check-database.js
+npm run build
+npm run start
 ```
 
-## 📊 **API Endpoints**
+## 📚 Documentation
 
-### **Authentication**
-- `POST /api/auth/login` - User login
-- `GET /api/auth/users` - Get available users
+- **[Deployment Guide](UBUNTU_DEPLOYMENT_GUIDE.md)** - Complete Ubuntu server deployment
+- **[API Documentation](docs/)** - API endpoints and usage
+- **[Database Schema](docs/DATABASE_ARCHITECTURE.md)** - Database structure
+- **[Development Setup](docs/DEVELOPMENT_SETUP_ARCHITECTURE.md)** - Local development
 
-### **Student Management**
-- `GET /api/students` - Get all students
-- `POST /api/students` - Create new student
-- `PUT /api/students/:id` - Update student
-- `DELETE /api/students/:id` - Remove student
-
-### **Academic Management**
-- `GET /api/school-years` - Get school years
-- `GET /api/courses` - Get courses
-- `GET /api/subjects` - Get subjects
-- `GET /api/semesters` - Get semesters
-
-### **Attendance & Grades**
-- `GET /api/attendance` - Get attendance data
-- `POST /api/attendance` - Record attendance
-- `GET /api/grades` - Get grades
-- `POST /api/grades` - Record grades
-
-## 🔄 **User Workflows**
-
-### **Admin Workflow**
-1. Login with admin credentials
-2. Access dashboard for overview
-3. Manage students, courses, and users
-4. View reports and analytics
-5. Export data as needed
-
-### **Teacher Workflow**
-1. Login with teacher credentials
-2. Access daily attendance page
-3. Record student attendance
-4. Manage grades for assigned courses
-5. View student information
-
-## 📚 **Documentation**
-
-For detailed documentation, see:
-- [Complete Project Documentation](./PROJECT_DOCUMENTATION.md)
-- [Scripts Documentation](./scripts/README.md)
-
-## 🤝 **Contributing**
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📄 **License**
+## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Issues**: [GitHub Issues](https://github.com/your-username/friendship-school-project/issues)
+- **Documentation**: [Project Docs](docs/)
+- **Email**: support@friendship-school.com
+
+## 🙏 Acknowledgments
+
+- Built for Friendship School
+- Special thanks to the development team
+- Inspired by modern school management needs
 
 ---
 
-**Last Updated**: December 2024  
-**Version**: 1.0.0  
-**Status**: Production Ready ✅
+**Made with ❤️ for better education management**

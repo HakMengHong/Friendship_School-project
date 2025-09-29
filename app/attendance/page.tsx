@@ -4,19 +4,27 @@ import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RoleGuard } from "@/components/ui/role-guard"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { 
   Calendar,
   BarChart3,
-  TrendingUp,
-  TrendingDown,
   AlertCircle,
   CheckCircle,
   XCircle,
   Clock,
   UserCheck,
   Users,
-  Loader2
+  Loader2,
+  Filter,
+  Search,
+  RefreshCw,
+  TrendingUp,
+  TrendingDown,
+  Eye,
+  MoreHorizontal
 } from "lucide-react"
 import { Bar } from 'react-chartjs-2'
 import {
@@ -89,6 +97,8 @@ function AbsenceContent() {
   const [selectedCourse, setSelectedCourse] = useState<string>('')
   const [selectedStatus, setSelectedStatus] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table')
 
   // Data states
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
@@ -97,6 +107,7 @@ function AbsenceContent() {
   const [loading, setLoading] = useState(false)
   const [loadingAttendances, setLoadingAttendances] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
   // Fetch initial data
   useEffect(() => {
@@ -138,6 +149,7 @@ function AbsenceContent() {
       
       console.log(`✅ Successfully loaded ${schoolYearsData.length} school years and ${coursesData.length} courses`)
       setError(null) // Clear any previous errors
+      setLastUpdated(new Date())
     } catch (error) {
       console.error('Error fetching initial data:', error)
       setError(error instanceof Error ? error.message : 'Failed to fetch initial data')
@@ -182,6 +194,7 @@ function AbsenceContent() {
         console.log('ℹ️ No attendance records found for the selected criteria')
       }
       setError(null) // Clear any previous errors
+      setLastUpdated(new Date())
     } catch (error) {
       console.error('Error fetching attendances:', error)
       setError(error instanceof Error ? error.message : 'Failed to fetch attendances')
@@ -223,43 +236,23 @@ function AbsenceContent() {
     }
   }, [attendances])
 
-  // Weekly absence data - simplified for now
-  const weeklyAbsenceData = {
-    labels: ['ថ្ងៃច័ន្ទ', 'ថ្ងៃអង្គារ', 'ថ្ងៃពុធ', 'ថ្ងៃព្រហស្បតិ៍', 'ថ្ងៃសុក្រ'],
+  // Chart data - using real statistics
+  const chartData = {
+    labels: ['អវត្តមាន(ឥតច្បាប់)', 'យឺត', 'អវត្តមាន(មានច្បាប់)'],
     datasets: [
       {
-        label: 'ចំនួនអវត្តមាន',
-        data: [statistics.totalAbsent, statistics.totalAbsent, statistics.totalAbsent, statistics.totalAbsent, statistics.totalAbsent],
-        backgroundColor: 'rgba(147, 51, 234, 0.7)',
-        borderColor: 'rgba(147, 51, 234, 1)',
-        borderWidth: 2,
-      }
-    ]
-  }
-
-  // Monthly trend data - simplified for now
-  const monthlyTrendData = {
-    labels: ['មករា', 'កុម្ភៈ', 'មិនា'],
-    datasets: [
-      {
-        label: 'អវត្តមាន(មានច្បាប់)',
-        data: [statistics.totalExcused, statistics.totalExcused, statistics.totalExcused],
-        backgroundColor: 'rgba(16, 185, 129, 0.7)',
-        borderColor: 'rgba(16, 185, 129, 1)',
-        borderWidth: 2,
-      },
-      {
-        label: 'អវត្តមាន(ឥតច្បាប់)',
-        data: [statistics.totalAbsent, statistics.totalAbsent, statistics.totalAbsent],
-        backgroundColor: 'rgba(244, 63, 94, 0.7)',
-        borderColor: 'rgba(244, 63, 94, 1)',
-        borderWidth: 2,
-      },
-      {
-        label: 'យឺត',
-        data: [statistics.totalLate, statistics.totalLate, statistics.totalLate],
-        backgroundColor: 'rgba(245, 158, 11, 0.7)',
-        borderColor: 'rgba(245, 158, 11, 1)',
+        label: 'ចំនួនសិស្ស',
+        data: [statistics.totalAbsent, statistics.totalLate, statistics.totalExcused],
+        backgroundColor: [
+          'rgba(244, 63, 94, 0.7)',
+          'rgba(245, 158, 11, 0.7)',
+          'rgba(16, 185, 129, 0.7)'
+        ],
+        borderColor: [
+          'rgba(244, 63, 94, 1)',
+          'rgba(245, 158, 11, 1)',
+          'rgba(16, 185, 129, 1)'
+        ],
         borderWidth: 2,
       }
     ]
@@ -274,7 +267,7 @@ function AbsenceContent() {
       tooltip: {
         callbacks: {
           label: function(tooltipItem: any) {
-            return `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y} ដង`
+            return `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y} នាក់`
           }
         }
       }
@@ -284,14 +277,12 @@ function AbsenceContent() {
         beginAtZero: true,
         ticks: {
           callback: function(tickValue: any) {
-            return `${tickValue} ដង`
+            return `${tickValue} នាក់`
           }
         }
       }
     }
   }
-
-
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -323,446 +314,391 @@ function AbsenceContent() {
     }
   }
 
+  const clearFilters = () => {
+    setSelectedDate(new Date().toISOString().split('T')[0])
+    setSelectedCourse('')
+    setSelectedStatus('')
+    setSearchTerm('')
+  }
+
   return (
-    <div className="space-y-6 p-6">
-             {/* Error Display */}
-       {error && (
-         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-           <div className="flex items-center gap-2">
-             <AlertCircle className="h-5 w-5 text-red-500" />
-             <span className="text-base text-red-700 font-medium">កំហុស:</span>
-             <span className="text-base text-red-600">{error}</span>
-             <button
-               onClick={() => setError(null)}
-               className="ml-auto text-red-500 hover:text-red-700"
-             >
-               ✕
-             </button>
-           </div>
-         </div>
-       )}
-
-
-
-             {/* Admin Control Panel */}
-       <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-         <CardHeader>
-           <div className="flex items-center justify-between">
-             <CardTitle className="text-xl flex items-center gap-2">
-               <BarChart3 className="h-5 w-5 text-blue-500" />
-               ផ្ទាំងគ្រប់គ្រងវត្តមាន
-             </CardTitle>
-             <div className="flex items-center gap-2">
-               <button
-                 onClick={() => {
-                   setSelectedDate(new Date().toISOString().split('T')[0])
-                   setSelectedCourse('')
-                   setSelectedStatus('')
-                   setSearchTerm('')
-                 }}
-                 className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
-               >
-                 កំណត់ឡើងវិញ
-               </button>
-               <button
-                 onClick={fetchAttendances}
-                 className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-               >
-                 ធ្វើបច្ចុប្បន្នភាព
-               </button>
-             </div>
-           </div>
-         </CardHeader>
-         <CardContent>
-           {loading ? (
-             <div className="text-center py-8">
-               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-               <p className="text-base text-muted-foreground">កំពុងទាញយក...</p>
-             </div>
-           ) : schoolYears.length === 0 || courses.length === 0 ? (
-             <div className="text-center py-8">
-               <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-               <p className="text-base text-red-600 font-medium">មិនអាចទាញយកទិន្នន័យបានទេ</p>
-               <p className="text-base text-muted-foreground mt-2">
-                 សូមពិនិត្យការតភ្ជាប់ទៅមូលដ្ឋានទិន្នន័យ ឬព្យាយាមម្តងទៀត
-               </p>
-               <button
-                 onClick={fetchInitialData}
-                 className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-               >
-                 ព្យាយាមម្តងទៀត
-               </button>
-             </div>
-           ) : (
-           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-             <div>
-               <label className="text-base font-medium mb-2 block">ឆ្នាំសិក្សា</label>
-               <select 
-                 value={selectedSchoolYear} 
-                 onChange={(e) => setSelectedSchoolYear(e.target.value)}
-                 className="w-full p-2 border border-gray-300 rounded-md"
-               >
-                 <option value="">ជ្រើសរើសឆ្នាំសិក្សា</option>
-                 {schoolYears.map((year) => (
-                   <option key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                     {year.schoolYearCode}
-                   </option>
-                 ))}
-               </select>
-             </div>
-             <div>
-               <label className="text-base font-medium mb-2 block">ថ្នាក់</label>
-               <select 
-                 value={selectedCourse} 
-                 onChange={(e) => setSelectedCourse(e.target.value)}
-                 className="w-full p-2 border border-gray-300 rounded-md"
-               >
-                 <option value="">ជ្រើសរើសថ្នាក់</option>
-                 {filteredCourses.map((course) => (
-                   <option key={course.courseId} value={course.courseId.toString()}>
-                     {course.courseName}
-                   </option>
-                 ))}
-               </select>
-             </div>
-             <div>
-               <label className="text-base font-medium mb-2 block">កាលបរិច្ឆេទ</label>
-               <input 
-                 type="date" 
-                 value={selectedDate} 
-                 onChange={(e) => setSelectedDate(e.target.value)}
-                 className="w-full p-2 border border-gray-300 rounded-md"
-               />
-             </div>
-             <div>
-               <label className="text-base font-medium mb-2 block">ស្ថានភាព</label>
-               <select 
-                 value={selectedStatus} 
-                 onChange={(e) => setSelectedStatus(e.target.value)}
-                 className="w-full p-2 border border-gray-300 rounded-md"
-               >
-                 <option value="">ជ្រើសរើសស្ថានភាព</option>
-                 <option value="absent">អវត្តមាន(ឥតច្បាប់)</option>
-                 <option value="late">យឺត</option>
-                 <option value="excused">អវត្តមាន(មានច្បាប់)</option>
-               </select>
-             </div>
-             <div>
-               <label className="text-base font-medium mb-2 block">ស្វែងរក</label>
-               <input 
-                 type="text" 
-                 placeholder="ស្វែងរកសិស្ស..."
-                 value={searchTerm} 
-                 onChange={(e) => setSearchTerm(e.target.value)}
-                 className="w-full p-2 border border-gray-300 rounded-md"
-               />
-                            </div>
-             </div>
-           )}
-         </CardContent>
-       </Card>
-
-               {/* Admin Statistics Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-base font-medium">អវត្តមាន(ឥតច្បាប់)</CardTitle>
-              <AlertCircle className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-red-600">{statistics.totalAbsent} នាក់</div>
-              <p className="text-sm text-muted-foreground">ត្រូវដោះស្រាយភ្លាមៗ</p>
-              <div className="mt-2 text-sm text-red-600">
-                {statistics.totalAbsent > 0 ? `⚠️ ត្រូវការការអភិវឌ្ឍន៍` : '✅ គ្រប់គ្រងបានល្អ'}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-base font-medium">យឺត</CardTitle>
-              <Clock className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-yellow-600">{statistics.totalLate} នាក់</div>
-              <p className="text-sm text-muted-foreground">ត្រូវការការអភិវឌ្ឍន៍</p>
-              <div className="mt-2 text-sm text-yellow-600">
-                {statistics.totalLate > 0 ? `⏰ ត្រូវការការអភិវឌ្ឍន៍` : '✅ គ្រប់គ្រងបានល្អ'}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-base font-medium">អវត្តមាន(មានច្បាប់)</CardTitle>
-              <UserCheck className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">{statistics.totalExcused} នាក់</div>
-              <p className="text-sm text-muted-foreground">អវត្តមានច្បាប់</p>
-              <div className="mt-2 text-sm text-green-600">
-                ✅ គ្រប់គ្រងបានល្អ
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-base font-medium">សរុបកត់ត្រា</CardTitle>
-              <Users className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600">{attendances.length} នាក់</div>
-              <p className="text-sm text-muted-foreground">កត់ត្រាវត្តមាន</p>
-              <div className="mt-2 text-sm text-blue-600">
-                📊 ទិន្នន័យពេញលេញ
-              </div>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen">
+      <div className="container mx-auto space-y-4">
+        {/* Modern Header */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-indigo-500/20 rounded-3xl -z-10" />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6">
+            <div>
+          </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 hover:bg-white dark:hover:bg-slate-700 transition-all duration-300"
+              >
+                <Filter className="h-4 w-4" />
+                តម្រង
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchAttendances}
+                disabled={loadingAttendances}
+                className="flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 hover:bg-white dark:hover:bg-slate-700 transition-all duration-300"
+              >
+                <RefreshCw className={`h-4 w-4 ${loadingAttendances ? 'animate-spin' : ''}`} />
+                ធ្វើបច្ចុប្បន្នភាព
+              </Button>
+            </div>
+          </div>
         </div>
 
-             {/* Admin Analytics Dashboard */}
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-         {/* Attendance Pattern Analysis */}
-         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
-           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-             <CardTitle className="text-base font-medium flex items-center gap-2">
-               <BarChart3 className="h-4 w-4 text-purple-500" />
-               ការវិភាគគំរូវត្តមាន
-             </CardTitle>
-             <div className="text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded">
-               ប្រចាំសប្តាហ៍
-             </div>
-           </CardHeader>
-           <CardContent>
-             <Bar data={weeklyAbsenceData} options={chartOptions} />
-             <div className="mt-3 text-sm text-muted-foreground text-center">
-               ការវិភាគគំរូវត្តមានប្រចាំសប្ងៃដើម្បីដឹងថ្ងៃណាមានអវត្តមានច្រើន
-             </div>
-           </CardContent>
-         </Card>
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 dark:bg-red-900/20 dark:border-red-800">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-red-700 font-medium dark:text-red-400">កំហុស:</p>
+                <p className="text-red-600 dark:text-red-300">{error}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setError(null)}
+                className="text-red-500 hover:text-red-700 hover:bg-red-100"
+              >
+                ✕
+              </Button>
+            </div>
+          </div>
+        )}
 
-         {/* Monthly Trend Analysis */}
-         <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-             <CardTitle className="text-base font-medium flex items-center gap-2">
-               <Calendar className="h-4 w-4 text-blue-500" />
-               ការវិភាគអវត្តមានប្រចាំខែ
-             </CardTitle>
-             <div className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
-               ប្រចាំខែ
-             </div>
-           </CardHeader>
-           <CardContent>
-             <Bar 
-               data={monthlyTrendData} 
-               options={{
-                 ...chartOptions,
-                 scales: {
-                   ...chartOptions.scales,
-                   x: {
-                     stacked: true,
-                   },
-                   y: {
-                     ...chartOptions.scales.y,
-                     stacked: true
-                   }
-                 }
-               }} 
-             />
-             <div className="mt-3 text-sm text-muted-foreground text-center">
-               ការវិភាគអវត្តមានប្រចាំខែដើម្បីដឹងថាខែណាមានបញ្ហាច្រើន
-             </div>
-           </CardContent>
-         </Card>
-       </div>
+        {/* Modern Filter Panel */}
+        {showFilters && (
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm dark:bg-slate-800/80">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                តម្រងទិន្នន័យ
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">ឆ្នាំសិក្សា</label>
+                  <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {schoolYears.map((year) => (
+                        <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
+                          {year.schoolYearCode}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-             {/* Admin Student Management Panel */}
-       <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
-         <CardHeader>
-           <div className="flex items-center justify-between">
-             <div className="flex items-center space-x-2">
-               <Users className="h-5 w-5 text-green-600" />
-               <CardTitle className="text-xl">ផ្ទាំងគ្រប់គ្រងសិស្ស</CardTitle>
-             </div>
-             <div className="flex items-center gap-4">
-               <div className="text-base text-gray-500">
-                 សរុប: {filteredAttendances.length} នាក់
-               </div>
-               <div className="flex items-center gap-2">
-                 <div className="text-sm bg-red-100 text-red-700 px-2 py-1 rounded">
-                   អវត្តមាន: {statistics.totalAbsent}
-                 </div>
-                 <div className="text-sm bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                   យឺត: {statistics.totalLate}
-                 </div>
-                 <div className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                   ច្បាប់: {statistics.totalExcused}
-                 </div>
-               </div>
-             </div>
-           </div>
-         </CardHeader>
-         <CardContent>
-           {loadingAttendances ? (
-             <div className="text-center py-8">
-               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-               <p className="text-base text-muted-foreground">កំពុងទាញយក...</p>
-             </div>
-           ) : filteredAttendances.length > 0 ? (
-             <div className="overflow-x-auto">
-               <Table>
-                 <TableHeader>
-                   <TableRow>
-                     <TableHead className="text-base font-semibold">ឈ្មោះសិស្ស</TableHead>
-                     <TableHead className="text-base font-semibold">ថ្នាក់</TableHead>
-                     <TableHead className="text-base font-semibold">ស្ថានភាព</TableHead>
-                     <TableHead className="text-base font-semibold">វេន</TableHead>
-                     <TableHead className="text-base font-semibold">កាលបរិច្ឆេទ</TableHead>
-                     <TableHead className="text-base font-semibold">មូលហេតុ</TableHead>
-                     <TableHead className="text-base font-semibold">ការអនុវត្ត</TableHead>
-                   </TableRow>
-                 </TableHeader>
-                 <TableBody>
-                   {filteredAttendances.map((attendance) => (
-                     <TableRow key={attendance.attendanceId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                       <TableCell className="font-medium">
-                         <div>
-                           <div className="text-lg font-semibold">{attendance.student.firstName} {attendance.student.lastName}</div>
-                           <div className="text-sm text-gray-500">ID: {attendance.student.studentId}</div>
-                         </div>
-                       </TableCell>
-                       <TableCell>
-                         <div>
-                           <div className="text-base font-medium">{attendance.course.courseName}</div>
-                           <div className="text-sm text-gray-500">{attendance.course.grade} {attendance.course.section}</div>
-                         </div>
-                       </TableCell>
-                       <TableCell>
-                         <div className="flex items-center space-x-2">
-                           {getStatusIcon(attendance.status)}
-                           {getStatusBadge(attendance.status)}
-                         </div>
-                       </TableCell>
-                       <TableCell>
-                         <Badge variant="outline" className="text-sm">
-                           {attendance.session === 'AM' ? 'ព្រឹក' : attendance.session === 'PM' ? 'រសៀល' : 'ពេញមួយថ្ងៃ'}
-                         </Badge>
-                       </TableCell>
-                       <TableCell>
-                         <div>
-                           <div>{attendance.attendanceDate}</div>
-                           <div className="text-sm text-gray-500">
-                             {attendance.recordedBy ? `ដោយ: ${attendance.recordedBy}` : 'មិនមានអ្នកកត់ត្រា'}
-                           </div>
-                         </div>
-                       </TableCell>
-                       <TableCell>
-                         {attendance.reason ? (
-                           <span className="text-base text-gray-600 dark:text-gray-400">{attendance.reason}</span>
-                         ) : (
-                           <span className="text-base text-gray-400">-</span>
-                         )}
-                       </TableCell>
-                       <TableCell>
-                         <div className="flex items-center gap-2">
-                           <button className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
-                             កែប្រែ
-                           </button>
-                           <button className="text-sm bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200">
-                             លុប
-                           </button>
-                         </div>
-                       </TableCell>
-                     </TableRow>
-                   ))}
-                 </TableBody>
-               </Table>
-             </div>
-           ) : (
-             <div className="text-center py-8">
-               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-               <p className="text-base text-gray-500 dark:text-gray-400">
-                 {searchTerm ? "រកមិនឃើញសិស្ស" : "មិនមានកត់ត្រាវត្តមាននៅថ្ងៃនេះទេ"}
-               </p>
-               <p className="text-base text-muted-foreground mt-2">
-                 សូមជ្រើសរើសកាលបរិច្ឆេទ ឬថ្នាក់ដើម្បីមើលកត់ត្រាវត្តមាន
-               </p>
-             </div>
-           )}
-                  </CardContent>
-       </Card>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">ថ្នាក់</label>
+                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredCourses.map((course) => (
+                        <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                          {course.courseName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-       {/* Admin Insights & Summary */}
-       <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-indigo-500">
-         <CardHeader>
-           <CardTitle className="text-xl flex items-center gap-2">
-             <BarChart3 className="h-5 w-5 text-indigo-500" />
-             ការវិភាគ និងអនុសាសន៍សម្រាប់អ្នកគ្រប់គ្រង
-           </CardTitle>
-         </CardHeader>
-         <CardContent>
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-             <div className="space-y-3">
-               <h4 className="text-lg font-semibold text-indigo-700">📊 ស្ថានភាពបច្ចុប្បន្ន</h4>
-               <div className="space-y-2 text-base">
-                 <div className="flex justify-between">
-                   <span>អវត្តមានឥតច្បាប់:</span>
-                   <span className={`font-semibold ${statistics.totalAbsent > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                     {statistics.totalAbsent > 0 ? '⚠️ ត្រូវដោះស្រាយ' : '✅ គ្រប់គ្រងបានល្អ'}
-                   </span>
-                 </div>
-                 <div className="flex justify-between">
-                   <span>យឺតយ៉ាវ:</span>
-                   <span className={`font-semibold ${statistics.totalLate > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
-                     {statistics.totalLate > 0 ? '⏰ ត្រូវការការអភិវឌ្ឍន៍' : '✅ គ្រប់គ្រងបានល្អ'}
-                   </span>
-                 </div>
-                 <div className="flex justify-between">
-                   <span>អវត្តមានច្បាប់:</span>
-                   <span className="font-semibold text-green-600">✅ គ្រប់គ្រងបានល្អ</span>
-                 </div>
-               </div>
-             </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">កាលបរិច្ឆេទ</label>
+                  <Input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
 
-             <div className="space-y-3">
-               <h4 className="text-lg font-semibold text-indigo-700">🎯 សកម្មភាពដែលត្រូវធ្វើ</h4>
-               <div className="space-y-2 text-base">
-                 {statistics.totalAbsent > 0 && (
-                   <div className="p-2 bg-red-50 border-l-4 border-red-400 rounded">
-                     <p className="text-red-700">• ត្រូវដោះស្រាយអវត្តមានឥតច្បាប់ {statistics.totalAbsent} នាក់</p>
-                   </div>
-                 )}
-                 {statistics.totalLate > 0 && (
-                   <div className="p-2 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-                     <p className="text-yellow-700">• ត្រូវការការអភិវឌ្ឍន៍សិស្សយឺត {statistics.totalLate} នាក់</p>
-                   </div>
-                 )}
-                 {statistics.totalAbsent === 0 && statistics.totalLate === 0 && (
-                   <div className="p-2 bg-green-50 border-l-4 border-green-400 rounded">
-                     <p className="text-green-700">• គ្រប់គ្រងបានល្អ! មិនមានបញ្ហាដែលត្រូវដោះស្រាយ</p>
-                   </div>
-                 )}
-               </div>
-             </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">ស្ថានភាព</label>
+                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="ជ្រើសរើសស្ថានភាព" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="absent">អវត្តមាន(ឥតច្បាប់)</SelectItem>
+                      <SelectItem value="late">យឺត</SelectItem>
+                      <SelectItem value="excused">អវត្តមាន(មានច្បាប់)</SelectItem>
+                      <SelectItem value="present">វត្តមាន</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-             <div className="space-y-3">
-               <h4 className="text-lg font-semibold text-indigo-700">💡 អនុសាសន៍</h4>
-               <div className="space-y-2 text-base">
-                 <div className="p-2 bg-blue-50 border-l-4 border-blue-400 rounded">
-                   <p className="text-blue-700">• តាមដានអវត្តមានឥតច្បាប់ជាប្រចាំ</p>
-                 </div>
-                 <div className="p-2 bg-blue-50 border-l-4 border-blue-400 rounded">
-                   <p className="text-blue-700">• បង្កើតផែនការការអភិវឌ្ឍន៍សិស្សយឺត</p>
-                 </div>
-                 <div className="p-2 bg-blue-50 border-l-4 border-blue-400 rounded">
-                   <p className="text-blue-700">• ការវាយតម្លៃគុណភាពការអប់រំ</p>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </CardContent>
-       </Card>
-     </div>
-   )
- }
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">ស្វែងរក</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="ស្វែងរកសិស្ស..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-2 mt-4">
+                <Button variant="outline" onClick={clearFilters} size="sm">
+                  កំណត់ឡើងវិញ
+                </Button>
+                <Button onClick={() => setShowFilters(false)} size="sm">
+                  ប្រើប្រាស់
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Modern Statistics Dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-red-500 via-red-600 to-pink-500 rounded-xl shadow-lg">
+                  <AlertCircle className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-right">
+                  <p className="text-4xl font-bold text-red-600 dark:text-red-400">
+                    {statistics.totalAbsent.toLocaleString('km-KH')}
+                  </p>
+                  <p className="text-xl text-red-600 dark:text-red-400 font-medium">
+                    អវត្តមាន(ឥតច្បាប់)
+                  </p>
+                </div>
+              </div>
+              <div className="h-1 bg-gradient-to-r from-red-500 via-red-600 to-pink-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              {statistics.totalAbsent > 0 && (
+                <div className="mt-4 flex items-center text-xs text-red-600 dark:text-red-400">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  ត្រូវការការអភិវឌ្ឍន៍
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-yellow-500 via-orange-600 to-amber-500 rounded-xl shadow-lg">
+                  <Clock className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-right">
+                  <p className="text-4xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {statistics.totalLate.toLocaleString('km-KH')}
+                  </p>
+                  <p className="text-xl text-yellow-600 dark:text-yellow-400 font-medium">
+                    យឺត
+                  </p>
+                </div>
+              </div>
+              <div className="h-1 bg-gradient-to-r from-yellow-500 via-orange-600 to-amber-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              {statistics.totalLate > 0 && (
+                <div className="mt-4 flex items-center text-xs text-yellow-600 dark:text-yellow-400">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  ត្រូវការការអភិវឌ្ឍន៍
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-green-500 via-emerald-600 to-teal-500 rounded-xl shadow-lg">
+                  <UserCheck className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-right">
+                  <p className="text-4xl font-bold text-green-600 dark:text-green-400">
+                    {statistics.totalExcused.toLocaleString('km-KH')}
+                  </p>
+                  <p className="text-xl text-green-600 dark:text-green-400 font-medium">
+                    អវត្តមាន(មានច្បាប់)
+                  </p>
+                </div>
+              </div>
+              <div className="h-1 bg-gradient-to-r from-green-500 via-emerald-600 to-teal-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="mt-4 flex items-center text-xs text-green-600 dark:text-green-400">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                គ្រប់គ្រងបានល្អ
+              </div>
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-500 rounded-xl shadow-lg">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-right">
+                  <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                    {attendances.length.toLocaleString('km-KH')}
+                  </p>
+                  <p className="text-xl text-blue-600 dark:text-blue-400 font-medium">
+                    សរុបកត់ត្រា
+                  </p>
+                </div>
+              </div>
+              <div className="h-1 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="mt-4 flex items-center text-xs text-blue-600 dark:text-blue-400">
+                <BarChart3 className="h-3 w-3 mr-1" />
+                ទិន្នន័យពេញលេញ
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modern Analytics Dashboard */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-rose-50/30 dark:from-purple-950/20 dark:via-pink-950/20 dark:to-rose-950/20 rounded-3xl -z-10" />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Chart Section */}
+            <div className="lg:col-span-2">
+              <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80`}>
+                <CardHeader className="p-6 bg-gradient-to-r from-purple-500 via-pink-600 to-rose-600 text-white rounded-t-xl">
+                  <CardTitle className="text-white flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <BarChart3 className="h-6 w-6 text-white" />
+                      </div>
+                      <span className="text-xl text-white">ស្ថិតិវត្តមានសិស្ស</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge className="bg-white/20 text-white">
+                        ប្រចាំថ្ងៃ
+                      </Badge>
+                      <div className="text-xs text-white/80">
+                        ចុងក្រោយ: {lastUpdated.toLocaleTimeString('km-KH')}
+                      </div>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="h-80">
+                    <Bar data={chartData} options={chartOptions} />
+                  </div>
+                  <div className="mt-4 text-sm text-muted-foreground text-center">
+                    ការវិភាគស្ថិតិវត្តមានសិស្សប្រចាំថ្ងៃ {selectedDate}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+          {/* Quick Insights */}
+          <div className="space-y-6">
+            <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80`}>
+              <CardHeader className="p-6 bg-gradient-to-r from-blue-500 via-cyan-600 to-teal-600 text-white rounded-t-xl">
+                <CardTitle className="text-white flex items-center space-x-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Eye className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="text-xl text-white">ការវិភាគរហ័ស</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div className="space-y-3">
+                  <div className="group flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                        <AlertCircle className="h-4 w-4 text-red-500" />
+                      </div>
+                      <span className="text-sm font-medium text-red-700 dark:text-red-300">អវត្តមានឥតច្បាប់</span>
+                    </div>
+                    <span className="text-xl font-bold text-red-600 dark:text-red-400">{statistics.totalAbsent}</span>
+                  </div>
+                  
+                  <div className="group flex items-center justify-between p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-xl hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-yellow-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                        <Clock className="h-4 w-4 text-yellow-500" />
+                      </div>
+                      <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">យឺត</span>
+                    </div>
+                    <span className="text-xl font-bold text-yellow-600 dark:text-yellow-400">{statistics.totalLate}</span>
+                  </div>
+                  
+                  <div className="group flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                        <UserCheck className="h-4 w-4 text-green-500" />
+                      </div>
+                      <span className="text-sm font-medium text-green-700 dark:text-green-300">អវត្តមានច្បាប់</span>
+                    </div>
+                    <span className="text-xl font-bold text-green-600 dark:text-green-400">{statistics.totalExcused}</span>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="text-sm text-muted-foreground">
+                    សរុបកត់ត្រា: <span className="font-semibold text-foreground">{attendances.length}</span> នាក់
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    កាលបរិច្ឆេទ: {new Date(selectedDate).toLocaleDateString('km-KH')}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+          </div>
+        </div>
+        </div>
+
+        {/* Modern Footer */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-50/50 via-blue-50/50 to-indigo-50/50 dark:from-slate-800/50 dark:via-slate-700/50 dark:to-slate-800/50 rounded-2xl -z-10" />
+          <div className="text-center py-8 px-6">
+            <div className="text-sm text-muted-foreground mb-4">
+              ប្រព័ន្ធគ្រប់គ្រងវត្តមានសិស្ស • ធ្វើបច្ចុប្បន្នភាពចុងក្រោយ: {lastUpdated.toLocaleString('km-KH')}
+            </div>
+            <div className="flex justify-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={fetchAttendances} 
+                disabled={loadingAttendances}
+                className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/20 hover:bg-white dark:hover:bg-slate-700 transition-all duration-300"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loadingAttendances ? 'animate-spin' : ''}`} />
+                ធ្វើបច្ចុប្បន្នភាព
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowFilters(!showFilters)}
+                className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/20 hover:bg-white dark:hover:bg-slate-700 transition-all duration-300"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                តម្រងទិន្នន័យ
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

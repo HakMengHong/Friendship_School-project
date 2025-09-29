@@ -170,7 +170,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       height: auto;
       min-height: auto;
     }
@@ -287,7 +287,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
       position: relative;
       overflow: hidden;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
@@ -347,7 +347,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: 10px;
       color: #2563eb;
       font-weight: normal;
@@ -356,7 +356,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     }
     
     .school-name {
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: ${fonts.schoolName}px;
       font-weight: normal;
       color: #1e40af;
@@ -370,7 +370,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     }
     
     .card-type {
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: ${fonts.cardType}px;
       color: #64748b;
       font-weight: normal;
@@ -419,7 +419,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     }
     
     .photo-placeholder {
-      font-family: 'Khmer OS Siemreap', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
       font-size: 10px;
       color: #64748b;
       text-align: center;
@@ -444,7 +444,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     }
     
     .info-label {
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: ${fonts.infoLabel}px;
       color: #1e40af;
       width: 50px;
@@ -454,7 +454,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     }
     
     .info-value {
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: ${fonts.infoValue}px;
       color: #374151;
       font-weight: normal;
@@ -463,7 +463,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     }
     
     .teacher-name {
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-size: ${fonts.teacherName}px;
       font-weight: normal;
       color: #1e40af;
@@ -485,7 +485,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
       background: linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
       color: #1e40af;
       border-radius: 8px;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       font-weight: normal;
       border: 2px solid rgba(30, 64, 175, 0.2);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

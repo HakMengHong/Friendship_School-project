@@ -123,7 +123,7 @@ function getIDCardCSS(): string {
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
     }
     
     ${getStudentRegistrationCSS()}
@@ -179,7 +179,7 @@ function getIDCardCSS(): string {
       border-radius: 20px;
       position: relative;
       overflow: hidden;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;

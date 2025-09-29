@@ -38,7 +38,7 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 
 # Create necessary directories
-RUN mkdir -p /app/logs
+RUN mkdir -p /app/logs /app/reports
 RUN chown -R nextjs:nodejs /app
 
 USER nextjs

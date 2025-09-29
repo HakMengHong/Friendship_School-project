@@ -1,0 +1,17 @@
+[Unit]
+Description=Friendship School Management System
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/friendship-school
+ExecStart=/usr/local/bin/docker-compose -f /opt/friendship-school/docker-compose.prod.yml up -d
+ExecStop=/usr/local/bin/docker-compose -f /opt/friendship-school/docker-compose.prod.yml down
+TimeoutStartSec=0
+User=friendship
+Group=friendship
+
+[Install]
+WantedBy=multi-user.target

@@ -41,6 +41,9 @@ export const resetSplashPreferences = () => {
 }
 
 export const shouldShowSplash = (): boolean => {
+  if (typeof window === 'undefined') {
+    return true // Show splash by default on server side
+  }
   const preferences = getSplashPreferences()
   return !preferences.hasSeenSplash || !preferences.skipSplash
 } 

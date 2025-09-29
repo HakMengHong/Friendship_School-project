@@ -57,7 +57,7 @@ export function generateStudentIDCardBackHTML(data: StudentIDCardBackData): stri
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
     }
     
     ${getStudentRegistrationCSS()}
@@ -72,7 +72,7 @@ export function generateStudentIDCardBackHTML(data: StudentIDCardBackData): stri
       border-radius: 20px;
       position: relative;
       overflow: hidden;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
       display: flex;
       flex-direction: column;
     }
@@ -278,7 +278,7 @@ export function generateBulkStudentIDCardBackHTML(data: BulkStudentIDCardBackDat
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
+      font-family: 'Khmer MEF2', 'Khmer OS Siemreap', 'Arial Unicode MS', sans-serif;
     }
     
     ${getStudentRegistrationCSS()}

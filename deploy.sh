@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Friendship School Management System - Production Deployment Script
-# This script automates the deployment process on a Linux server
+# Friendship School - Ubuntu Server Deployment Script
+# This script automates the deployment process
 
 set -e  # Exit on any error
 
@@ -13,252 +13,268 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_NAME="friendship-school"
-PROJECT_DIR="/opt/friendship-school"
-BACKUP_DIR="/backups/friendship-school"
-LOG_FILE="/var/log/friendship-school/deploy.log"
+APP_NAME="friendship-school"
+APP_DIR="/opt/friendship-school"
+DOMAIN=""
+EMAIL=""
 
 # Functions
-log() {
-    echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1" | tee -a $LOG_FILE
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-success() {
-    echo -e "${GREEN}✅ $1${NC}" | tee -a $LOG_FILE
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
-warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}" | tee -a $LOG_FILE
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-error() {
-    echo -e "${RED}❌ $1${NC}" | tee -a $LOG_FILE
-    exit 1
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
 }
 
 # Check if running as root
-if [[ $EUID -eq 0 ]]; then
-   error "This script should not be run as root. Please run as a regular user with sudo privileges."
-fi
+check_root() {
+    if [[ $EUID -eq 0 ]]; then
+        print_error "This script should not be run as root. Please run as a regular user with sudo privileges."
+        exit 1
+    fi
+}
 
-# Create log directory
-sudo mkdir -p /var/log/friendship-school
-sudo chown $USER:$USER /var/log/friendship-school
+# Install Docker and Docker Compose
+install_docker() {
+    print_status "Installing Docker and Docker Compose..."
+    
+    # Update package index
+    sudo apt-get update
+    
+    # Install prerequisites
+    sudo apt-get install -y \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release
+    
+    # Add Docker's official GPG key
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    
+    # Set up stable repository
+    echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
+    # Install Docker Engine
+    sudo apt-get update
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+    
+    # Install Docker Compose
+    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    
+    # Add user to docker group
+    sudo usermod -aG docker $USER
+    
+    print_success "Docker and Docker Compose installed successfully"
+    print_warning "Please log out and log back in for docker group changes to take effect"
+}
 
-log "Starting deployment of $PROJECT_NAME..."
-
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    error "Docker is not installed. Please install Docker first."
-fi
-
-if ! command -v docker-compose &> /dev/null; then
-    error "Docker Compose is not installed. Please install Docker Compose first."
-fi
-
-# Check if Node.js is installed
-if ! command -v node &> /dev/null; then
-    error "Node.js is not installed. Please install Node.js 18+ first."
-fi
-
-# Check if Git is installed
-if ! command -v git &> /dev/null; then
-    error "Git is not installed. Please install Git first."
-fi
-
-# Create project directory if it doesn't exist
-if [ ! -d "$PROJECT_DIR" ]; then
-    log "Creating project directory: $PROJECT_DIR"
-    sudo mkdir -p $PROJECT_DIR
-    sudo chown $USER:$USER $PROJECT_DIR
-fi
-
-# Create backup directory
-sudo mkdir -p $BACKUP_DIR
-sudo chown $USER:$USER $BACKUP_DIR
-
-# Navigate to project directory
-cd $PROJECT_DIR
-
-# Backup current deployment if it exists
-if [ -f "package.json" ]; then
-    log "Creating backup of current deployment..."
-    BACKUP_NAME="backup_$(date +%Y%m%d_%H%M%S)"
-    tar -czf "$BACKUP_DIR/$BACKUP_NAME.tar.gz" .
-    success "Backup created: $BACKUP_NAME.tar.gz"
-fi
-
-# Clone or pull latest code
-if [ -d ".git" ]; then
-    log "Pulling latest changes from Git..."
-    git pull origin main
-else
-    log "Cloning repository..."
-    git clone https://github.com/HakMengHong/Friendship_School-project.git .
-fi
-
-# Check if .env file exists
-if [ ! -f ".env" ]; then
-    if [ -f "env.production.example" ]; then
-        log "Creating .env file from template..."
-        cp env.production.example .env
-        warning "Please update .env file with your production values before continuing."
-        warning "Edit the file: nano .env"
-        read -p "Press Enter after updating .env file..."
+# Setup application directory
+setup_app_directory() {
+    print_status "Setting up application directory..."
+    
+    if [ ! -d "$APP_DIR" ]; then
+        sudo mkdir -p "$APP_DIR"
+        sudo chown $USER:$USER "$APP_DIR"
+        print_success "Created application directory: $APP_DIR"
     else
-        error ".env file not found and no template available."
+        print_warning "Application directory already exists: $APP_DIR"
     fi
-fi
+}
 
-# Install dependencies
-log "Installing Node.js dependencies..."
-npm install
-
-# Generate Prisma client
-log "Generating Prisma client..."
-npx prisma generate
-
-# Start database services
-log "Starting database services..."
-docker-compose -f docker-compose.prod.yml up -d postgres pgadmin4
-
-# Wait for database to be ready
-log "Waiting for database to be ready..."
-sleep 10
-
-# Run database migrations
-log "Running database migrations..."
-npx prisma migrate deploy
-
-# Add initial users if they don't exist
-log "Setting up initial users..."
-if [ -f "scripts/add-teachers.js" ]; then
-    node scripts/add-teachers.js || warning "Failed to add initial users (may already exist)"
-fi
-
-# Build the application
-log "Building application for production..."
-npm run build
-
-# Stop existing application if running
-if command -v pm2 &> /dev/null; then
-    if pm2 list | grep -q $PROJECT_NAME; then
-        log "Stopping existing application..."
-        pm2 stop $PROJECT_NAME
-        pm2 delete $PROJECT_NAME
-    fi
-fi
-
-# Start application with PM2
-log "Starting application with PM2..."
-if command -v pm2 &> /dev/null; then
-    pm2 start npm --name $PROJECT_NAME -- start
-    pm2 save
-    success "Application started with PM2"
-else
-    warning "PM2 not installed. Starting application directly..."
-    npm start &
-    success "Application started directly"
-fi
-
-# Setup Nginx if available
-if command -v nginx &> /dev/null; then
-    log "Configuring Nginx..."
-    if [ -f "nginx.conf" ]; then
-        sudo cp nginx.conf /etc/nginx/sites-available/$PROJECT_NAME
-        sudo ln -sf /etc/nginx/sites-available/$PROJECT_NAME /etc/nginx/sites-enabled/
-        sudo nginx -t && sudo systemctl reload nginx
-        success "Nginx configured and reloaded"
+# Clone or update repository
+setup_repository() {
+    print_status "Setting up repository..."
+    
+    cd "$APP_DIR"
+    
+    if [ -d ".git" ]; then
+        print_status "Updating existing repository..."
+        git pull origin main
     else
-        warning "Nginx configuration file not found"
+        print_status "Please upload your project files to $APP_DIR"
+        print_warning "You can use SCP, SFTP, or git clone to upload your project files"
+        print_status "Example: scp -r /path/to/your/project/* user@server:$APP_DIR/"
+        read -p "Press Enter when you have uploaded your project files..."
     fi
-fi
+}
 
-# Setup SSL with Let's Encrypt if domain is configured
-if [ -n "$NEXTAUTH_URL" ] && [[ $NEXTAUTH_URL == https://* ]]; then
-    DOMAIN=$(echo $NEXTAUTH_URL | sed 's|https://||' | sed 's|/.*||')
-    if command -v certbot &> /dev/null; then
-        log "Setting up SSL certificate for $DOMAIN..."
-        sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email admin@$DOMAIN || warning "SSL setup failed"
+# Setup environment file
+setup_environment() {
+    print_status "Setting up environment configuration..."
+    
+    cd "$APP_DIR"
+    
+    if [ ! -f ".env" ]; then
+        if [ -f "production.env" ]; then
+            cp production.env .env
+            print_success "Created .env file from production.env template"
+        else
+            print_error "No production.env template found. Please create .env file manually."
+            exit 1
+        fi
     fi
-fi
+    
+    # Generate secure secrets
+    NEXTAUTH_SECRET=$(openssl rand -base64 32)
+    
+    # Update .env file with generated secrets
+    sed -i "s/your-production-secret-key-change-this/$NEXTAUTH_SECRET/g" .env
+    
+    print_success "Environment file configured with secure secrets"
+    print_warning "Please review and update .env file with your specific settings"
+}
 
-# Setup monitoring
-log "Setting up monitoring..."
-if command -v pm2 &> /dev/null; then
-    pm2 install pm2-logrotate
-    pm2 set pm2-logrotate:max_size 10M
-    pm2 set pm2-logrotate:retain 30
-fi
+# Deploy application
+deploy_application() {
+    print_status "Deploying application with Docker..."
+    
+    cd "$APP_DIR"
+    
+    # Build and start services
+    docker-compose -f docker-compose.prod.yml up -d --build
+    
+    # Wait for services to be ready
+    print_status "Waiting for services to start..."
+    sleep 30
+    
+    # Check service status
+    docker-compose -f docker-compose.prod.yml ps
+    
+    print_success "Application deployed successfully"
+}
 
-# Setup backup cron job
-log "Setting up backup cron job..."
-(crontab -l 2>/dev/null; echo "0 2 * * * $PROJECT_DIR/backup.sh") | crontab -
+# Setup database
+setup_database() {
+    print_status "Setting up database..."
+    
+    cd "$APP_DIR"
+    
+    # Wait for database to be ready
+    print_status "Waiting for database to be ready..."
+    sleep 10
+    
+    # Run migrations
+    docker-compose -f docker-compose.prod.yml exec app npx prisma migrate deploy
+    
+    print_success "Database setup completed"
+}
+
+# Configure firewall
+configure_firewall() {
+    print_status "Configuring firewall..."
+    
+    # Allow necessary ports
+    sudo ufw allow 22/tcp    # SSH
+    sudo ufw allow 80/tcp    # HTTP
+    sudo ufw allow 443/tcp   # HTTPS
+    
+    # Enable firewall
+    sudo ufw --force enable
+    
+    print_success "Firewall configured"
+}
+
+# Setup SSL certificate
+setup_ssl() {
+    if [ -n "$DOMAIN" ]; then
+        print_status "Setting up SSL certificate for domain: $DOMAIN"
+        
+        # Install Certbot
+        sudo apt-get install -y certbot python3-certbot-nginx
+        
+        # Get SSL certificate
+        sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "$EMAIL"
+        
+        # Setup auto-renewal
+        (crontab -l 2>/dev/null; echo "0 12 * * * /usr/bin/certbot renew --quiet") | crontab -
+        
+        print_success "SSL certificate configured"
+    else
+        print_warning "No domain specified. SSL certificate setup skipped."
+        print_warning "You can set up SSL later by running: sudo certbot --nginx -d your-domain.com"
+    fi
+}
 
 # Create backup script
-cat > backup.sh << 'EOF'
+create_backup_script() {
+    print_status "Creating backup script..."
+    
+    cat > "$APP_DIR/backup.sh" << 'EOF'
 #!/bin/bash
-BACKUP_DIR="/backups/friendship-school"
 DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/opt/friendship-school/backups"
+mkdir -p "$BACKUP_DIR"
 
-# Database backup
-docker exec friendship-postgres pg_dump -U postgres friendship_school > $BACKUP_DIR/db_backup_$DATE.sql
+# Backup database
+docker-compose -f /opt/friendship-school/docker-compose.prod.yml exec -T postgres pg_dump -U postgres friendship_school > "$BACKUP_DIR/backup_$DATE.sql"
 
-# Application backup
-tar -czf $BACKUP_DIR/app_backup_$DATE.tar.gz -C /opt/friendship-school .
+# Clean old backups (keep last 7 days)
+find "$BACKUP_DIR" -name "backup_*.sql" -mtime +7 -delete
 
-# Keep only last 7 days
-find $BACKUP_DIR -name "*.sql" -mtime +7 -delete
-find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -delete
-
-echo "Backup completed: $DATE"
+echo "Backup completed: backup_$DATE.sql"
 EOF
+    
+    chmod +x "$APP_DIR/backup.sh"
+    
+    # Setup daily backup cron job
+    (crontab -l 2>/dev/null; echo "0 2 * * * $APP_DIR/backup.sh") | crontab -
+    
+    print_success "Backup script created and scheduled"
+}
 
-chmod +x backup.sh
-
-# Final status check
-log "Performing final status check..."
-
-# Check if application is running
-if command -v pm2 &> /dev/null; then
-    if pm2 list | grep -q $PROJECT_NAME; then
-        success "Application is running with PM2"
-    else
-        error "Application failed to start with PM2"
+# Main deployment function
+main() {
+    print_status "Starting Friendship School deployment..."
+    
+    # Get user input
+    read -p "Enter your domain name (optional, press Enter to skip): " DOMAIN
+    if [ -n "$DOMAIN" ]; then
+        read -p "Enter your email for SSL certificate: " EMAIL
     fi
-fi
+    
+    # Run deployment steps
+    check_root
+    install_docker
+    setup_app_directory
+    setup_repository
+    setup_environment
+    deploy_application
+    setup_database
+    configure_firewall
+    setup_ssl
+    create_backup_script
+    
+    print_success "Deployment completed successfully!"
+    echo
+    print_status "Access your application:"
+    if [ -n "$DOMAIN" ]; then
+        echo "  - Main App: https://$DOMAIN"
+        echo "  - pgAdmin: https://$DOMAIN:8080"
+    else
+        echo "  - Main App: http://$(curl -s ifconfig.me):3000"
+        echo "  - pgAdmin: http://$(curl -s ifconfig.me):8080"
+    fi
+    echo
+    print_status "Useful commands:"
+    echo "  - View logs: docker-compose -f $APP_DIR/docker-compose.prod.yml logs -f"
+    echo "  - Restart app: docker-compose -f $APP_DIR/docker-compose.prod.yml restart app"
+    echo "  - Check status: docker-compose -f $APP_DIR/docker-compose.prod.yml ps"
+    echo
+    print_warning "Please log out and log back in for docker group changes to take effect"
+}
 
-# Check if database is accessible
-if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
-    success "Database services are running"
-else
-    error "Database services are not running"
-fi
-
-# Check if application responds
-if curl -f http://localhost:3000/api/auth/heartbeat > /dev/null 2>&1; then
-    success "Application is responding to requests"
-else
-    warning "Application may not be responding to requests"
-fi
-
-# Display final information
-echo ""
-success "Deployment completed successfully!"
-echo ""
-echo -e "${BLUE}📋 Deployment Summary:${NC}"
-echo -e "  • Project Directory: $PROJECT_DIR"
-echo -e "  • Application URL: http://localhost:3000"
-echo -e "  • Database: PostgreSQL (Docker)"
-echo -e "  • pgAdmin: http://localhost:8080"
-echo -e "  • Logs: /var/log/friendship-school/"
-echo -e "  • Backups: $BACKUP_DIR"
-echo ""
-echo -e "${YELLOW}🔧 Next Steps:${NC}"
-echo -e "  1. Update your domain DNS to point to this server"
-echo -e "  2. Configure SSL certificate if using a domain"
-echo -e "  3. Update .env file with production values"
-echo -e "  4. Test all functionality"
-echo -e "  5. Setup monitoring and alerting"
-echo ""
-echo -e "${GREEN}🎉 Your Friendship School Management System is now live!${NC}"
+# Run main function
+main "$@"
