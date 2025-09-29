@@ -11,7 +11,7 @@ const nextConfig = {
   },
   output: 'standalone',
   experimental: {
-    outputFileTracingRoot: undefined,
+    // Removed deprecated outputFileTracingRoot option
   },
 }
 
