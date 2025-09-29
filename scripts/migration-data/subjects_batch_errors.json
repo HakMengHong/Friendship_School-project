@@ -1,0 +1,263 @@
+[
+  {
+    "batch": 1,
+    "record": 1,
+    "data": {
+      "SubjectID": "22",
+      "Subject Name": "នព្វន្ត"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 2,
+    "data": {
+      "SubjectID": "23",
+      "Subject Name": "ធរណីមាត្រ"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 3,
+    "data": {
+      "SubjectID": "24",
+      "Subject Name": "អង់គ្លេស"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 4,
+    "data": {
+      "SubjectID": "25",
+      "Subject Name": "មាត្រាប្រពន្ធ័"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 5,
+    "data": {
+      "SubjectID": "26",
+      "Subject Name": "រឿងនិទាន"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 6,
+    "data": {
+      "SubjectID": "27",
+      "Subject Name": "សរសេរតាមអាន"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 7,
+    "data": {
+      "SubjectID": "28",
+      "Subject Name": "រៀនអាន"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 8,
+    "data": {
+      "SubjectID": "29",
+      "Subject Name": "វិទ្យាសាស្រ្ត​និងសិក្សាសង្គម"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 9,
+    "data": {
+      "SubjectID": "32",
+      "Subject Name": "កុំព្យូទ័រ"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 10,
+    "data": {
+      "SubjectID": "34",
+      "Subject Name": "មេសូត្រ"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 11,
+    "data": {
+      "SubjectID": "36",
+      "Subject Name": "វេយ្យាករណ៏"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 12,
+    "data": {
+      "SubjectID": "37",
+      "Subject Name": "សំណេរ"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 13,
+    "data": {
+      "SubjectID": "38",
+      "Subject Name": "អក្សរផ្ចង់"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 14,
+    "data": {
+      "SubjectID": "43",
+      "Subject Name": "សីលធម៌-ពលរដ្ឋវិទ្យា"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 15,
+    "data": {
+      "SubjectID": "44",
+      "Subject Name": "គំនូរ"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 16,
+    "data": {
+      "SubjectID": "45",
+      "Subject Name": "ចំរៀង-របាំ"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 17,
+    "data": {
+      "SubjectID": "47",
+      "Subject Name": "ហត្ថកម្ម"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 18,
+    "data": {
+      "SubjectID": "48",
+      "Subject Name": "អប់រំកាយ"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 19,
+    "data": {
+      "SubjectID": "50",
+      "Subject Name": "វិទ្យាសាស្រ្ត"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 20,
+    "data": {
+      "SubjectID": "51",
+      "Subject Name": "រូបវិទ្យា"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 21,
+    "data": {
+      "SubjectID": "52",
+      "Subject Name": "គីមីវិទ្យា"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 22,
+    "data": {
+      "SubjectID": "53",
+      "Subject Name": "ជីវវិទ្យា"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 23,
+    "data": {
+      "SubjectID": "54",
+      "Subject Name": "ផែនដីវិទ្យា"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 24,
+    "data": {
+      "SubjectID": "55",
+      "Subject Name": "ភាសា​ខ្មែរ"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 25,
+    "data": {
+      "SubjectID": "56",
+      "Subject Name": "ប្រវត្តិវិទ្យា"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 26,
+    "data": {
+      "SubjectID": "57",
+      "Subject Name": "គណិតវិទ្យា"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 27,
+    "data": {
+      "SubjectID": "58",
+      "Subject Name": "គេហកិច្ច"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 28,
+    "data": {
+      "SubjectID": "59",
+      "Subject Name": "ភូមិវិទ្យា"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  },
+  {
+    "batch": 1,
+    "record": 29,
+    "data": {
+      "SubjectID": "60",
+      "Subject Name": "តែងសេចក្តី"
+    },
+    "error": "\nInvalid `prisma.subject.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:440:41\n\n  437 const subjectData = { ...transformedRecord };\n  438 delete subjectData.subjectId; // Remove auto-increment field\n  439 \n→ 440 result = await prisma.subject.create({\n        data: {\n      +   subjectName: String\n        }\n      })\n\nArgument `subjectName` must not be null."
+  }
+]

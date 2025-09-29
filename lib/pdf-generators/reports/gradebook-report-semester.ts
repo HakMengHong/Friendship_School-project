@@ -4,30 +4,7 @@ import { ReportOptions } from '../core/types'
 
 // Constants
 const SEMESTER_NAMES = ['ឆមាសទី ១', 'ឆមាសទី ២']
-const GRADE_THRESHOLDS = {
-  // For grades 1-6 (full average is 10)
-  A_PLUS: 9.5, // ល្អ​ប្រសើរ​ណាស់ = មធ្យមភាគ x ០,៩៥
-  A: 9,        // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
-  A_MINUS: 8.5, // ល្អ​ប្រសើរ​បង្គួរ = មធ្យមភាគ x ០,៨៥
-  B_PLUS: 8,   // ល្អ​ណាស់​ណាស់ = មធ្យមភាគ x ០,៨
-  B: 7.5,      // ល្អ​ណាស់ = មធ្យមភាគ x ០,៧៥
-  B_MINUS: 7,  // ល្អ​ណាស់​បង្គួរ = មធ្យមភាគ x ០,៧
-  C_PLUS: 6.5, // ល្អ​ណាស់ = មធ្យមភាគ x ០,៦៥
-  C: 6,        // ល្អ​ = មធ្យមភាគ x ០,៦
-  C_MINUS: 5.5, // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥៥
-  D: 5,        // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
-  // For grades 7-9 (full average is 50)
-  A_PLUS_HIGH: 47.5, // ល្អ​ប្រសើរ​ណាស់ = មធ្យមភាគ x ០,៩៥
-  A_HIGH: 45,        // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
-  A_MINUS_HIGH: 42.5, // ល្អ​ប្រសើរ​បង្គួរ = មធ្យមភាគ x ០,៨៥
-  B_PLUS_HIGH: 40,   // ល្អ​ណាស់​ណាស់ = មធ្យមភាគ x ០,៨
-  B_HIGH: 37.5,      // ល្អ​ណាស់ = មធ្យមភាគ x ០,៧៥
-  B_MINUS_HIGH: 35,  // ល្អ​ណាស់​បង្គួរ = មធ្យមភាគ x ០,៧
-  C_PLUS_HIGH: 32.5, // ល្អ​ណាស់ = មធ្យមភាគ x ០,៦៥
-  C_HIGH: 30,        // ល្អ​ = មធ្យមភាគ x ០,៦
-  C_MINUS_HIGH: 27.5, // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥៥
-  D_HIGH: 25         // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
-} as const
+// Simplified grading system using A, B, C, D, E, F
 
 // Helper function for rounding numbers
 function round(num: number, decimals: number = 1): string {
@@ -40,45 +17,30 @@ function getGradeStatus(average: number, gradeLevel: string): string {
   
   if (gradeNum >= 1 && gradeNum <= 6) {
     // Grades 1-6: Full average is 10
-    if (average >= GRADE_THRESHOLDS.A_PLUS) return 'A+' // ល្អ​ប្រសើរ​ណាស់
-    if (average >= GRADE_THRESHOLDS.A) return 'A'       // ល្អ​ប្រសើរ
-    if (average >= GRADE_THRESHOLDS.A_MINUS) return 'A-' // ល្អ​ប្រសើរ​បង្គួរ
-    if (average >= GRADE_THRESHOLDS.B_PLUS) return 'B+'  // ល្អ​ណាស់​ណាស់
-    if (average >= GRADE_THRESHOLDS.B) return 'B'        // ល្អ​ណាស់
-    if (average >= GRADE_THRESHOLDS.B_MINUS) return 'B-' // ល្អ​ណាស់​បង្គួរ
-    if (average >= GRADE_THRESHOLDS.C_PLUS) return 'C+'  // ល្អ​ណាស់
-    if (average >= GRADE_THRESHOLDS.C) return 'C'        // ល្អ​
-    if (average >= GRADE_THRESHOLDS.C_MINUS) return 'C-' // ល្អ​បង្គួរ
-    if (average >= GRADE_THRESHOLDS.D) return 'D'        // ល្អ​បង្គួរ
+    if (average >= 9) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
+    if (average >= 8) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (average >= 7) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (average >= 6) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (average >= 5) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
     return 'F' // ខ្សោយ
   }
   
   if (gradeNum >= 7 && gradeNum <= 9) {
     // Grades 7-9: Full average is 50
-    if (average >= GRADE_THRESHOLDS.A_PLUS_HIGH) return 'A+' // ល្អ​ប្រសើរ​ណាស់
-    if (average >= GRADE_THRESHOLDS.A_HIGH) return 'A'       // ល្អ​ប្រសើរ
-    if (average >= GRADE_THRESHOLDS.A_MINUS_HIGH) return 'A-' // ល្អ​ប្រសើរ​បង្គួរ
-    if (average >= GRADE_THRESHOLDS.B_PLUS_HIGH) return 'B+'  // ល្អ​ណាស់​ណាស់
-    if (average >= GRADE_THRESHOLDS.B_HIGH) return 'B'        // ល្អ​ណាស់
-    if (average >= GRADE_THRESHOLDS.B_MINUS_HIGH) return 'B-' // ល្អ​ណាស់​បង្គួរ
-    if (average >= GRADE_THRESHOLDS.C_PLUS_HIGH) return 'C+'  // ល្អ​ណាស់
-    if (average >= GRADE_THRESHOLDS.C_HIGH) return 'C'        // ល្អ​
-    if (average >= GRADE_THRESHOLDS.C_MINUS_HIGH) return 'C-' // ល្អ​បង្គួរ
-    if (average >= GRADE_THRESHOLDS.D_HIGH) return 'D'        // ល្អ​បង្គួរ
+    if (average >= 45) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
+    if (average >= 40) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (average >= 35) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (average >= 30) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (average >= 25) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
     return 'F' // ខ្សោយ
   }
   
   // Fallback for unknown grade levels
-  if (average >= GRADE_THRESHOLDS.A_PLUS) return 'A+'
-  if (average >= GRADE_THRESHOLDS.A) return 'A'
-  if (average >= GRADE_THRESHOLDS.A_MINUS) return 'A-'
-  if (average >= GRADE_THRESHOLDS.B_PLUS) return 'B+'
-  if (average >= GRADE_THRESHOLDS.B) return 'B'
-  if (average >= GRADE_THRESHOLDS.B_MINUS) return 'B-'
-  if (average >= GRADE_THRESHOLDS.C_PLUS) return 'C+'
-  if (average >= GRADE_THRESHOLDS.C) return 'C'
-  if (average >= GRADE_THRESHOLDS.C_MINUS) return 'C-'
-  if (average >= GRADE_THRESHOLDS.D) return 'D'
+  if (average >= 90) return 'A'
+  if (average >= 80) return 'B'
+  if (average >= 70) return 'C'
+  if (average >= 60) return 'D'
+  if (average >= 50) return 'E'
   return 'F'
 }
 
@@ -464,7 +426,7 @@ export function generateSemesterGradebookReportHTML(data: SemesterGradebookRepor
             <td class="grade-value">${round(subject.grade)}</td>
             <td class="grade-value">${subject.subjectRank || 'N/A'}</td>
             <td class="grade-value">${subject.letterGrade}</td>
-            <td>${subject.gradeComment || 'មិនមាន'}</td>
+            <td>${subject.gradeComment}</td>
           </tr>
         `).join('')}
         

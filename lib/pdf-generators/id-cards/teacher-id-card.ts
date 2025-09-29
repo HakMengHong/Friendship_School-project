@@ -350,7 +350,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
       font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
       font-size: 10px;
       color: #2563eb;
-      font-weight: bold;
+      font-weight: normal;
       text-align: center;
       line-height: 1.2;
     }
@@ -358,7 +358,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     .school-name {
       font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
       font-size: ${fonts.schoolName}px;
-      font-weight: 700;
+      font-weight: normal;
       color: #1e40af;
       margin-bottom: 6px;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -373,7 +373,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
       font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
       font-size: ${fonts.cardType}px;
       color: #64748b;
-      font-weight: 500;
+      font-weight: normal;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       letter-spacing: 0.3px;
       background: rgba(255, 255, 255, 0.8);
@@ -449,7 +449,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
       color: #1e40af;
       width: 50px;
       flex-shrink: 0;
-      font-weight: 600;
+      font-weight: normal;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
     
@@ -457,7 +457,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
       font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
       font-size: ${fonts.infoValue}px;
       color: #374151;
-      font-weight: 500;
+      font-weight: normal;
       flex: 1;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
@@ -465,7 +465,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
     .teacher-name {
       font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
       font-size: ${fonts.teacherName}px;
-      font-weight: 700;
+      font-weight: normal;
       color: #1e40af;
       margin-bottom: 8px;
       text-align: center;
@@ -486,7 +486,7 @@ function getTeacherIDCardCSS(ngoLogoBase64?: string, isBulk: boolean = false): s
       color: #1e40af;
       border-radius: 8px;
       font-family: 'Khmer MEF2', 'Noto Sans Khmer', sans-serif;
-      font-weight: 700;
+      font-weight: normal;
       border: 2px solid rgba(30, 64, 175, 0.2);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       position: relative;

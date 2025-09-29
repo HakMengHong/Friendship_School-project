@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     // Transform the data to match the frontend interface
     const transformedUsers = users.map(user => ({
-      userid: user.userId, // Changed from userId to userid to match frontend
+      userId: user.userId, // Use userId to match frontend interface
       username: user.username,
       password: '', // Don't send password
       firstname: user.firstname,
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     })
 
     const transformedUser = {
-      userid: newUser.userId,
+      userId: newUser.userId,
       username: newUser.username,
       password: '',
       firstname: newUser.firstname,

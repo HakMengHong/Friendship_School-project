@@ -4,6 +4,17 @@ import { useState, useEffect, useRef } from "react";
 import { RoleGuard } from "@/components/ui/role-guard";
 
 // Type definitions
+interface Course {
+  courseId: number;
+  grade: string;
+  section: string;
+  courseName: string;
+  schoolYear: {
+    schoolYearId: number;
+    schoolYearCode: string;
+  };
+}
+
 interface Guardian {
   guardianId: number;
   firstName?: string;
@@ -37,6 +48,22 @@ interface FamilyInfo {
   religion?: string;
 }
 
+interface Enrollment {
+  enrollmentId: number;
+  courseId: number;
+  studentId: number;
+  drop: boolean;
+  dropSemesterId?: number;
+  dropDate?: string | Date;
+  dropReason?: string;
+  course?: Course;
+  dropSemester?: {
+    semesterId: number;
+    semester: string;
+    semesterCode: string;
+  };
+}
+
 interface Student {
   studentId: number;
   firstName: string;
@@ -44,6 +71,7 @@ interface Student {
   gender: string;
   dob: string | Date;
   class: string;
+  section?: string;
   photo?: string;
   phone?: string;
   registrationDate?: string | Date;
@@ -69,6 +97,7 @@ interface Student {
   schoolYear?: string;
   family?: FamilyInfo;
   guardians?: Guardian[];
+  enrollments?: Enrollment[];
 }
 
 // API response interfaces
@@ -78,12 +107,14 @@ interface SchoolYearResponse {
   createdAt: string;
 }
 
-interface ClassesResponse {
-  classes: string[];
-}
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
   User, 
   Users, 
@@ -99,19 +130,27 @@ import {
   Phone,
   MapPin,
   GraduationCap,
-  AlertCircle
+  AlertCircle,
+  X,
+  MinusCircle,
+  Save,
+  RotateCcw,
+  Trash2
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 // Helpers for displaying grade labels
 const getGradeLabel = (value?: string | null) => {
   if (!value) return "-";
   const n = Number(value);
   if (!Number.isFinite(n)) return value;
-  return `ថ្នាក់ទី${n}`;
+  return `ថ្នាក់ទី ${n}`;
+};
+
+// Helper for displaying course labels (grade + section)
+const getCourseLabel = (course: Course) => {
+  return `ថ្នាក់ទី ${course.grade}${course.section}`;
 };
 
 
@@ -169,12 +208,43 @@ function StudentInfoContent() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [activeTab, setActiveTab] = useState('basic');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterByYearClass, setFilterByYearClass] = useState(false);
+  const [filterByYearClass, setFilterByYearClass] = useState(true);
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+  
+  // Drop Study Dialog State
+  const [showDropDialog, setShowDropDialog] = useState(false);
+  const [dropFormData, setDropFormData] = useState({
+    dropCourseId: '',
+    dropSemesterId: '',
+    dropDate: '',
+    dropReason: ''
+  });
+  const [isDropping, setIsDropping] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [showDropFields, setShowDropFields] = useState(false);
+  const [currentDropEnrollment, setCurrentDropEnrollment] = useState<Enrollment | null>(null);
+  
+  // Toast hook
+  const { toast } = useToast();
+
+  // Remove Drop Study Dialog State
+  const [showRemoveDropDialog, setShowRemoveDropDialog] = useState(false);
+  const [selectedDropEnrollment, setSelectedDropEnrollment] = useState<Enrollment | null>(null);
+
+  // Clear selected class when school year changes
+  useEffect(() => {
+    setSelectedClass('');
+  }, [selectedYear]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Database-driven filter values
+  const [academicYears, setAcademicYears] = useState<string[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [semesters, setSemesters] = useState<Array<{semesterId: number, semester: string, semesterCode: string}>>([]);
+  const [loadingFilters, setLoadingFilters] = useState(false);
 
   // Fetch students from API
   useEffect(() => {
@@ -187,6 +257,15 @@ function StudentInfoContent() {
         const data = await res.json();
         const list = Array.isArray(data) ? data : []; // API returns array directly, not wrapped in students object
         if (isMounted) {
+          console.log('🔍 Students loaded:', {
+            count: list.length,
+            students: list.map(s => ({
+              name: `${s.lastName} ${s.firstName}`,
+              class: s.class,
+              section: s.section,
+              schoolYear: s.schoolYear
+            }))
+          });
           setStudents(list);
           setFilteredStudents(list);
         }
@@ -222,13 +301,49 @@ function StudentInfoContent() {
   useEffect(() => {
     let result = students;
     
+    console.log('🔍 Filtering Debug:', {
+      totalStudents: students.length,
+      selectedYear,
+      selectedClass,
+      coursesCount: courses.length,
+      courses: courses.map(c => ({ courseId: c.courseId, grade: c.grade, section: c.section }))
+    });
+    
     // Apply year and class filters FIRST (this affects both dropdown and student list)
-    if (filterByYearClass) {
       if (selectedYear && selectedYear !== 'all') {
         result = result.filter(student => (student.schoolYear || '') === selectedYear);
+      console.log('After year filter:', result.length);
       }
       if (selectedClass && selectedClass !== 'all') {
-        result = result.filter(student => (student.class || '') === selectedClass);
+      // selectedClass is now a courseId, so we need to find the course and match by grade + section
+      const selectedCourse = courses.find(course => course.courseId.toString() === selectedClass);
+      console.log('Selected course:', selectedCourse);
+      if (selectedCourse) {
+        const beforeFilter = result.length;
+        result = result.filter(student => {
+          // First try exact match with both grade and section
+          const exactMatch = student.class === selectedCourse.grade && 
+            student.section === selectedCourse.section;
+          
+          // If no exact match, try just grade match (fallback)
+          const gradeMatch = student.class === selectedCourse.grade && 
+            (!student.section || !selectedCourse.section);
+          
+          const matches = exactMatch || gradeMatch;
+          
+          console.log('Student match check:', {
+            studentName: `${student.lastName} ${student.firstName}`,
+            studentClass: student.class,
+            studentSection: student.section,
+            courseGrade: selectedCourse.grade,
+            courseSection: selectedCourse.section,
+            exactMatch,
+            gradeMatch,
+            finalMatch: matches
+          });
+          return matches;
+        });
+        console.log('After class filter:', beforeFilter, '->', result.length);
       }
     }
     
@@ -250,12 +365,7 @@ function StudentInfoContent() {
     });
     
     setFilteredStudents(result);
-  }, [students, searchTerm, filterByYearClass, selectedYear, selectedClass]);
-
-  // Database-driven filter values
-  const [academicYears, setAcademicYears] = useState<string[]>([]);
-  const [classes, setClasses] = useState<string[]>([]);
-  const [loadingFilters, setLoadingFilters] = useState(false);
+  }, [students, searchTerm, selectedYear, selectedClass, courses]);
 
 
 
@@ -273,11 +383,35 @@ function StudentInfoContent() {
           setAcademicYears(yearsData.map(year => year.schoolYearCode));
         }
         
-        // Fetch classes (grades from courses)
-        const classesRes = await fetch('/api/classes');
-        if (classesRes.ok) {
-          const classesData: ClassesResponse = await classesRes.json();
-          setClasses(classesData.classes);
+        // Fetch courses (grade + section from courses)
+        const coursesRes = await fetch('/api/courses');
+        if (coursesRes.ok) {
+          const coursesData: Course[] = await coursesRes.json();
+          console.log('🔍 Courses loaded:', {
+            count: coursesData.length,
+            courses: coursesData.map(c => ({
+              courseId: c.courseId,
+              grade: c.grade,
+              section: c.section,
+              courseName: c.courseName
+            }))
+          });
+          setCourses(coursesData);
+        }
+        
+        // Fetch semesters
+        const semestersRes = await fetch('/api/semesters');
+        if (semestersRes.ok) {
+          const semestersData = await semestersRes.json();
+          console.log('🔍 Semesters loaded:', {
+            count: semestersData.length,
+            semesters: semestersData.map((s: any) => ({
+              semesterId: s.semesterId,
+              semester: s.semester,
+              semesterCode: s.semesterCode
+            }))
+          });
+          setSemesters(semestersData);
         }
       } catch (error) {
         console.error('Error fetching filters:', error);
@@ -311,109 +445,359 @@ function StudentInfoContent() {
     setActiveTab('basic');
   };
 
+  // Form validation function
+  const validateDropForm = () => {
+    const errors = [];
+    
+    // Only validate drop fields if user has chosen to drop study
+    if (showDropFields) {
+      if (!dropFormData.dropCourseId) {
+        errors.push('សូមជ្រើសរើសថ្នាក់បោះបង់ការសិក្សា');
+      }
+      
+      if (!dropFormData.dropSemesterId) {
+        errors.push('សូមជ្រើសរើសឆមាសបោះបង់ការសិក្សា');
+      }
+      
+      if (!dropFormData.dropDate) {
+        errors.push('សូមបញ្ចូលថ្ងៃបោះបង់ការសិក្សា');
+      }
+      
+      if (!dropFormData.dropReason.trim()) {
+        errors.push('សូមបញ្ចូលមូលហេតុបោះបង់ការសិក្សា');
+      }
+    }
+    
+    return errors;
+  };
+
+  // Clear validation errors when user starts interacting with form
+  const clearValidationErrors = () => {
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
+  };
+
+  // Check if student has dropped enrollment and populate dialog
+  const openDropDialog = () => {
+    if (!selectedStudent) return;
+    
+    const droppedEnrollment = selectedStudent.enrollments?.find(e => e.drop);
+    if (droppedEnrollment) {
+      // Student is already dropped - show current drop info
+      setCurrentDropEnrollment(droppedEnrollment);
+      setShowDropFields(false); // Don't show new drop fields
+    } else {
+      // Student is not dropped - show new drop option
+      setCurrentDropEnrollment(null);
+      setShowDropFields(false); // Start with radio selection
+      
+      // Auto-select the highest grade class
+      const activeEnrollments = selectedStudent.enrollments?.filter(e => !e.drop);
+      if (activeEnrollments && activeEnrollments.length > 0) {
+        // Sort by grade (highest first) and auto-select the first one
+        const sortedEnrollments = activeEnrollments.sort((a, b) => {
+          const gradeA = parseInt(a.course?.grade || '0');
+          const gradeB = parseInt(b.course?.grade || '0');
+          return gradeB - gradeA; // Descending order (highest first)
+        });
+        
+        const highestGradeEnrollment = sortedEnrollments[0];
+        if (highestGradeEnrollment) {
+          setDropFormData(prev => ({
+            ...prev,
+            dropCourseId: highestGradeEnrollment.courseId.toString()
+          }));
+        }
+      } else {
+        // No active enrollments - clear the form
+        setDropFormData(prev => ({
+          ...prev,
+          dropCourseId: ''
+        }));
+      }
+    }
+    
+    setShowDropDialog(true);
+    setValidationErrors([]);
+  };
+
+  // Handle Drop Enrollment
+  const handleDropEnrollment = async () => {
+    if (!selectedStudent) return;
+    
+    // If user doesn't want to drop, just close the dialog
+    if (!showDropFields) {
+      setShowDropDialog(false);
+      setDropFormData({ dropCourseId: '', dropSemesterId: '', dropDate: '', dropReason: '' });
+      setShowDropFields(false);
+      setValidationErrors([]);
+      toast({
+        title: "បានបិទ",
+        description: "បានបិទប្រអប់បោះបង់ការសិក្សា",
+      });
+      return;
+    }
+    
+    // Validate form
+    const errors = validateDropForm();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      toast({
+        title: "មានបញ្ហា",
+        description: errors.join(', '),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Clear validation errors if form is valid
+    setValidationErrors([]);
+    
+    // Find the enrollment for the selected course
+    const enrollment = selectedStudent.enrollments?.find(e => 
+      !e.drop && e.courseId === parseInt(dropFormData.dropCourseId)
+    );
+    if (!enrollment) {
+      toast({
+        title: "មានបញ្ហា",
+        description: 'មិនមានការចុះឈ្មោះសកម្មសម្រាប់ថ្នាក់ដែលជ្រើសរើស',
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDropping(true);
+    
+    try {
+      const response = await fetch(`/api/enrollments/${enrollment.enrollmentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          drop: true,
+          dropSemesterId: dropFormData.dropSemesterId ? parseInt(dropFormData.dropSemesterId) : null,
+          dropDate: dropFormData.dropDate,
+          dropReason: dropFormData.dropReason
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh student data by refetching the selected student
+        const studentRes = await fetch(`/api/students/${selectedStudent.studentId}`);
+        if (studentRes.ok) {
+          const updatedStudent = await studentRes.json();
+          setSelectedStudent(updatedStudent);
+        }
+        
+        setShowDropDialog(false);
+        setDropFormData({ dropCourseId: '', dropSemesterId: '', dropDate: '', dropReason: '' });
+        setShowDropFields(false);
+        setValidationErrors([]);
+        
+        toast({
+          title: "ជោគជ័យ",
+          description: "បានបោះបង់ការសិក្សាដោយជោគជ័យ",
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to drop enrollment');
+      }
+    } catch (error) {
+      console.error('Error dropping enrollment:', error);
+      toast({
+        title: "មានបញ្ហា",
+        description: 'មានបញ្ហាក្នុងការបោះបង់ការសិក្សា',
+        variant: "destructive",
+      });
+    } finally {
+      setIsDropping(false);
+    }
+  };
+
+  // Handle Undo Drop Study from main dialog
+  const handleUndoDropFromDialog = async () => {
+    if (!selectedStudent || !currentDropEnrollment) return;
+    
+    setIsDropping(true);
+    
+    try {
+      const response = await fetch(`/api/enrollments/${currentDropEnrollment.enrollmentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          drop: false,
+          dropSemesterId: null,
+          dropDate: null,
+          dropReason: null
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh student data
+        const studentRes = await fetch(`/api/students/${selectedStudent.studentId}`);
+        if (studentRes.ok) {
+          const updatedStudent = await studentRes.json();
+          setSelectedStudent(updatedStudent);
+        }
+        
+        setShowDropDialog(false);
+        setCurrentDropEnrollment(null);
+        setValidationErrors([]);
+        
+        toast({
+          title: "ជោគជ័យ",
+          description: "បានដកចេញការបោះបង់ការសិក្សាដោយជោគជ័យ",
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to undo drop enrollment');
+      }
+    } catch (error) {
+      console.error('Error undoing drop enrollment:', error);
+      toast({
+        title: "មានបញ្ហា",
+        description: 'មានបញ្ហាក្នុងការដកចេញការបោះបង់ការសិក្សា',
+        variant: "destructive",
+      });
+    } finally {
+      setIsDropping(false);
+    }
+  };
+
+  // Handle Remove Drop Study (Restore Enrollment)
+  const handleRemoveDropStudy = async () => {
+    if (!selectedStudent || !selectedDropEnrollment) return;
+    
+    try {
+      const response = await fetch(`/api/enrollments/${selectedDropEnrollment.enrollmentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          drop: false,
+          dropSemesterId: null,
+          dropDate: null,
+          dropReason: null
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh student data by refetching the selected student
+        const studentRes = await fetch(`/api/students/${selectedStudent.studentId}`);
+        if (studentRes.ok) {
+          const updatedStudent = await studentRes.json();
+          setSelectedStudent(updatedStudent);
+        }
+        setShowRemoveDropDialog(false);
+        setSelectedDropEnrollment(null);
+        alert('បានដកចេញការបោះបង់ការសិក្សាដោយជោគជ័យ');
+      } else {
+        throw new Error('Failed to remove drop study');
+      }
+    } catch (error) {
+      console.error('Error removing drop study:', error);
+      alert('មានបញ្ហាក្នុងការដកចេញការបោះបង់ការសិក្សា');
+    }
+  };
+
 
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 p-6">
-      {/* Modern Header Section */}
-      <div className="text-center space-y-6 p-8 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
-          ព័ត៌មានសិស្ស
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          ប្រព័ន្ធគ្រប់គ្រង និងមើលព័ត៌មានលម្អិតរបស់សិស្ស
-        </p>
-        
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
-            <div className="text-2xl font-bold text-blue-600">{students.length}</div>
-            <div className="text-base text-blue-500">សិស្សសរុប</div>
-          </div>
-          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
-            <div className="text-2xl font-bold text-purple-600">{classes.length}</div>
-            <div className="text-base text-purple-500">ថ្នាក់រៀន</div>
-          </div>
-          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
-            <div className="text-2xl font-bold text-green-600">{academicYears.length}</div>
-            <div className="text-base text-green-500">ឆ្នាំសិក្សា</div>
-          </div>
-          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
-            <div className="text-2xl font-bold text-orange-600">{selectedStudent ? '1' : '0'}</div>
-            <div className="text-base text-orange-500">សិស្សជ្រើសរើស</div>
-          </div>
-        </div>
-      </div>
-
       {/* Search and Filter Section */}
       <Card className="hover:shadow-lg transition-all duration-200 border-0 shadow-md">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center space-x-2 text-lg">
-            <div className="p-1.5 bg-blue-100 dark:bg-blue-900/20 rounded-md">
-              <Search className="h-4 w-4 text-blue-600" />
-            </div>
-            <span>ស្វែងរកសិស្ស</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col lg:flex-row lg:items-end gap-4">
-            <div className="flex-1 min-w-[300px]">
-              <div className="flex items-center justify-between mb-2">
-                <Label className="text-gray-700 dark:text-gray-300 text-base font-medium">
-                  សូមបញ្ចូលឈ្មោះសិស្ស
-                </Label>
+        {/* Decorative Background Elements */}
+        <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-6">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
+              
+          <div className="relative z-10 flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+              <Search className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+              <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">ស្វែងរកសិស្ស</h2>
+              <div className="flex items-center space-x-4 mt-3">
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                      ព័ត៌មានសិស្ស
+                </Badge>
+                <Badge variant="outline" className="bg-white/10 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                  ការរកឃើញដោយស្វ័យប្រវត្តិ
+                  </Badge>
               </div>
+              <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
+                </div>
+              </div>
+            </CardHeader>
+        <CardContent className="space-y-6 pt-6">
+          {/* Search Fields and Clear Button in One Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
+            {/* Student Search Field */}
+            <div className="space-y-3 group lg:col-span-2">
+              <label className="flex items-center space-x-2 text-sm font-semibold text-blue-600 dark:text-gray-300 transition-colors duration-200">
+                <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+                <span>សរសេរឈ្មោះសិស្ស</span>
+              </label>
               <div className="relative" ref={dropdownRef}>
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 z-10 pointer-events-none" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400 z-10 pointer-events-none" />
                 <Input
                   placeholder="សរសេរឈ្មោះសិស្ស..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onFocus={() => setShowDropdown(true)}
-                  className="pl-10 pr-10 h-10 text-base border-2 focus:border-blue-500 transition-colors"
+                  className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 group-hover:shadow-lg text-blue-600 dark:text-blue-400 pl-12 pr-12"
                 />
                 <ChevronDown 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
                   onClick={() => setShowDropdown(!showDropdown)}
                 />
               
                 {showDropdown && (
-                  <div className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
-                    <div className="max-h-60 overflow-auto">
+                  <div className="absolute z-20 w-full mt-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-2 border-gray-200/60 dark:border-gray-700/60 rounded-xl shadow-2xl overflow-hidden">
+                    <div className="max-h-64 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
                       {filteredStudents.length > 0 ? (
                         filteredStudents.map((student: Student) => (
                           <div
                             key={student.studentId}
-                            className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-all duration-200 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
+                            className="flex items-center p-4 hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-purple-50/80 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 cursor-pointer transition-all duration-300 border-b border-gray-100/50 dark:border-gray-600/50 last:border-b-0 group"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setSearchTerm(`${student.lastName} ${student.firstName}`);
+                              setSearchTerm(`${student.lastName}${student.firstName}`);
                               handleStudentSelect(student);
                               setShowDropdown(false);
                             }}
                           >
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mr-3 shadow-md">
-                              <User className="h-4 w-4 text-white" />
-                            </div>
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-200">
+                              <User className="h-5 w-5 text-white" />
+                              </div>
                             <div className="flex-1">
-                              <p className="font-semibold text-gray-900 dark:text-white text-base">
-                                {student.lastName} {student.firstName}
+                              <p className="font-semibold text-gray-900 dark:text-white text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+                                {student.lastName}{student.firstName}
                               </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                              <p className="text-base text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
                                 {getGradeLabel(student.class)}{student.schoolYear ? ` • ${student.schoolYear}` : ''}
                               </p>
                             </div>
-                            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-0.5 text-sm">
-                            {getStatusLabel(student.status)}
+                            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 text-sm font-medium group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40 transition-colors duration-200">
+                              {getStatusLabel(student.status)}
                             </Badge>
                           </div>
                         ))
                       ) : (
-                        <div className="p-6 text-gray-500 dark:text-gray-400 text-center">
-                          <User className="h-8 w-8 mx-auto mb-3 text-gray-300" />
-                          <p className="text-base">រកមិនឃើញឈ្មោះសិស្ស</p>
-                          <p className="text-sm mt-1">សូមព្យាយាមស្វែងរកឈ្មោះផ្សេង</p>
+                        <div className="p-8 text-gray-500 dark:text-gray-400 text-center">
+                          <User className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                          <p className="text-lg font-medium">រកមិនឃើញឈ្មោះសិស្ស</p>
+                          <p className="text-base mt-2">សូមព្យាយាមស្វែងរកឈ្មោះផ្សេង</p>
                         </div>
                       )}
                     </div>
@@ -422,48 +806,34 @@ function StudentInfoContent() {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-                <Checkbox
-                  id="filter-toggle"
-                  checked={filterByYearClass}
-                  onCheckedChange={(checked) => {
-                    setFilterByYearClass(checked === true);
-                    if (checked !== true) {
-                      setSelectedYear("");
-                      setSelectedClass("");
-                    }
-                  }}
-                  className="h-4 w-4"
-                />
-                <Label htmlFor="filter-toggle" className="text-gray-700 dark:text-gray-300 cursor-pointer text-base font-medium">
-                  រកតាមឆ្នាំសិក្សា និងថ្នាក់
-                </Label>
+            {/* Academic Year Field */}
+            <div className="space-y-3 group lg:col-span-1">
+              <label className="flex items-center space-x-2 text-sm font-semibold text-purple-600 dark:text-gray-300 transition-colors duration-200">
+                <div className="p-1 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                  <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
-
-              {filterByYearClass && (
-                <div className="space-y-3">
+                <span>ឆ្នាំសិក្សា</span>
+              </label>
                   {loadingFilters && (
-                    <div className="text-center py-2">
-                      <div className="inline-flex items-center space-x-2 text-base text-gray-500">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                        <span>កំពុងផ្ទុកជម្រើស...</span>
+                <div className="text-center py-4">
+                  <div className="inline-flex items-center space-x-3 text-lg text-gray-600 dark:text-gray-400">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500"></div>
+                    <span className="font-medium">កំពុងផ្ទុកជម្រើស...</span>
                       </div>
                     </div>
                   )}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="w-full sm:w-[160px]">
                       <Select value={selectedYear} onValueChange={setSelectedYear}>
-                        <SelectTrigger className="h-10 text-base">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          <SelectValue placeholder="ឆ្នាំសិក្សា" />
+                <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-purple-200 dark:border-purple-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 group-hover:shadow-lg text-purple-600 dark:text-purple-400">
+                          <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {loadingFilters ? (
-                            <SelectItem value="loading" disabled>កំពុងផ្ទុក...</SelectItem>
-                          ) : academicYears.length > 0 ? (
+                <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                  {academicYears.length > 0 ? (
                             academicYears.map(year => (
-                              <SelectItem key={year} value={year}>
+                      <SelectItem 
+                        key={year} 
+                        value={year}
+                        className="hover:bg-purple-50 dark:hover:bg-purple-900/20 focus:bg-purple-100 dark:focus:bg-purple-900/30 focus:text-purple-900 dark:focus:text-purple-100"
+                      >
                                 {year}
                               </SelectItem>
                             ))
@@ -474,148 +844,724 @@ function StudentInfoContent() {
                       </Select>
                     </div>
                     
-                    <div className="w-full sm:w-[160px]">
+            {/* Class Field */}
+            <div className="space-y-3 group lg:col-span-1">
+              <label className="flex items-center space-x-2 text-sm font-semibold text-green-600 dark:text-gray-300 transition-colors duration-200">
+                <div className="p-1 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <BookOpen className="h-4 w-4 text-green-600 dark:text-green-400" />
+                </div>
+                <span>ថ្នាក់</span>
+              </label>
                       <Select value={selectedClass} onValueChange={setSelectedClass}>
-                        <SelectTrigger className="h-10 text-base">
-                          <BookOpen className="mr-2 h-4 w-4" />
-                          <SelectValue placeholder="ថ្នាក់" />
+                <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-green-200 dark:border-green-700 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 group-hover:shadow-lg text-green-600 dark:text-green-400">
+                          <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {loadingFilters ? (
-                            <SelectItem value="loading" disabled>កំពុងផ្ទុក...</SelectItem>
-                          ) : classes.length > 0 ? (
-                            classes.map(classValue => (
-                              <SelectItem key={classValue} value={classValue}>
-                                {getGradeLabel(classValue)}
+                <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                  {courses.length > 0 ? (
+                    (() => {
+                      const filteredCourses = courses.filter(course => !selectedYear || course.schoolYear.schoolYearCode === selectedYear);
+                      console.log('🔍 Filtered courses for dropdown:', {
+                        selectedYear,
+                        totalCourses: courses.length,
+                        filteredCourses: filteredCourses.length,
+                        courses: filteredCourses.map(c => ({ courseId: c.courseId, grade: c.grade, section: c.section, schoolYear: c.schoolYear.schoolYearCode }))
+                      });
+                      return filteredCourses.map(course => (
+                        <SelectItem 
+                          key={course.courseId} 
+                          value={course.courseId.toString()}
+                          className="hover:bg-green-50 dark:hover:bg-green-900/20 focus:bg-green-100 dark:focus:bg-green-900/30 focus:text-green-900 dark:focus:text-green-100"
+                        >
+                          {getCourseLabel(course)}
                               </SelectItem>
-                            ))
+                      ));
+                    })()
                           ) : (
                             <SelectItem value="no-data" disabled>គ្មានថ្នាក់</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
                     </div>
+
+            {/* Clear All Filters Button */}
+            <div className="space-y-3 group lg:col-span-1">
+              <label className="flex items-center space-x-2 text-sm font-semibold text-red-600 dark:text-gray-300 transition-colors duration-200">
+                <div className="p-1 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                  <X className="h-4 w-4 text-red-600 dark:text-red-400" />
                   </div>
-                </div>
-              )}
+                <span>សកម្មភាព</span>
+              </label>
+              <Button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedYear('');
+                  setSelectedClass('');
+                  setFilterByYearClass(true);
+                }}
+                variant="outline"
+                className="w-full h-12 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/10 border-2 border-red-200 dark:border-red-700 hover:border-red-300 dark:hover:border-red-600 hover:bg-gradient-to-r hover:from-red-100 hover:to-red-200 dark:hover:from-red-900/30 dark:hover:to-red-900/20 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300 shadow-sm hover:shadow-md font-semibold"
+              >
+                <X className="h-4 w-4 mr-2" />
+                លុបការច្រោះទាំងអស់
+              </Button>
             </div>
           </div>         
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
 
       {/* Student Details Section */}
-      {selectedStudent ? (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Student Profile Card */}
-          <div className="lg:col-span-1">
-            <Card className="hover:shadow-lg transition-all duration-200 border-0 shadow-md sticky top-4">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center text-center space-y-4">
+        {selectedStudent ? (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Modern Student Profile Card */}
+            <div className="lg:col-span-1">
+            <Card className="hover:shadow-2xl transition-all duration-300 border-0 shadow-xl bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 dark:from-gray-800 dark:via-blue-900/10 dark:to-purple-900/10 sticky top-6 overflow-hidden">
+              {/* Header Gradient */}
+              <div className="h-20 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 relative">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
                   <div className="relative">
-                    <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden border-3 border-white dark:border-gray-800 shadow-lg">
-                      <img 
-                        src={selectedStudent.photo || '/placeholder-user.jpg'} 
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-xl ring-4 ring-white/20">
+                          <img 
+                            src={selectedStudent.photo || '/placeholder-user.jpg'} 
                         alt={`${selectedStudent.lastName} ${selectedStudent.firstName}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-3 border-white dark:border-gray-800 shadow-md"></div>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {selectedStudent.lastName} {selectedStudent.firstName} ({selectedStudent.studentId})
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-base">
-                      {(calculateAgeYears(selectedStudent.dob) ?? '-') + ' ឆ្នាំ'} • {selectedStudent.gender === 'male' ? 'ប្រុស' : selectedStudent.gender === 'female' ? 'ស្រី' : '-'}
-                    </p>
-                  </div>
-                  
-                  <div className="w-full space-y-4">
-                    {/* Key Info */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/10 rounded-lg p-3 text-center shadow-sm">
-                        <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">ថ្ងៃចុះឈ្មោះ</div>
-                        <div className="text-base font-bold text-blue-700 dark:text-blue-300">{formatDate(selectedStudent.registrationDate)}</div>
-                      </div>
-                      <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 rounded-lg p-3 text-center shadow-sm">
-                        <div className="text-sm text-green-600 dark:text-green-400 font-medium mb-1">ស្ថានភាព</div>
-                        <div className="text-base font-bold text-green-700 dark:text-green-300">{getStatusLabel(selectedStudent.status)}</div>
-                      </div>
-                    </div>
-                    {/* Education Info */}
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/10 rounded-lg p-4 shadow-sm">
-                      <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center text-base">
-                        <div className="p-1.5 bg-blue-100 dark:bg-blue-900/20 rounded-md mr-2">
-                          <GraduationCap className="h-3 w-3 text-blue-600" />
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        ព័ត៌មានសិក្សា
-                      </h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400 text-sm">ថ្នាក់:</span>
-                          <span className="font-bold text-gray-900 dark:text-white text-base">{getGradeLabel(selectedStudent.class)}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400 text-sm">ឆ្នាំសិក្សា:</span>
-                          <span className="font-bold text-gray-900 dark:text-white text-base">{selectedStudent.schoolYear || '-'}</span>
-                        </div>
-                        {selectedStudent.registerToStudy !== undefined && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400 text-sm">ចុះឈ្មោះរៀន:</span>
-                          <Badge className={selectedStudent.registerToStudy ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 px-2 py-0.5 text-sm" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 px-2 py-0.5 text-sm"}>
-                            {selectedStudent.registerToStudy ? "បានចុះឈ្មោះ" : "មិនទាន់ចុះឈ្មោះ"}
-                          </Badge>
-                        </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Emergency Contact */}
-                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/10 rounded-lg p-4 shadow-sm">
-                      <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center text-base">
-                        <div className="p-1.5 bg-orange-100 dark:bg-orange-900/20 rounded-md mr-2">
-                          <AlertCircle className="h-3 w-3 text-orange-600" />
-                        </div>
-                        លេខទំនាក់ទំនងគោល
-                      </h4>
-                      <span className="text-gray-700 dark:text-gray-300 text-base">{selectedStudent.phone || '-'}</span>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-3 border-white dark:border-gray-800 shadow-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                      </div>
+                      
+              <CardContent className="pt-12">
+                <div className="flex flex-col items-center text-center space-y-6">
+                  {/* Student Name & Info */}
+                      <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                          {selectedStudent.lastName}{selectedStudent.firstName}
+                        </h3>
+                        <div className="flex items-center justify-center space-x-2">
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700">
+                            ID: {selectedStudent.studentId}
+                          </Badge>
+                        </div>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm flex items-center justify-center space-x-2">
+                      <span className="flex items-center space-x-1">
+                        <Calendar className="h-3 w-3" />
+                        <span>{(calculateAgeYears(selectedStudent.dob) ?? '-') + ' ឆ្នាំ'}</span>
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center space-x-1">
+                        <User className="h-3 w-3" />
+                        <span>{selectedStudent.gender === 'male' ? 'ប្រុស' : selectedStudent.gender === 'female' ? 'ស្រី' : '-'}</span>
+                      </span>
+                        </p>
+                      </div>
+                  
+                  {/* Quick Stats */}
+                  <div className="w-full">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="group bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/10 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-all duration-300 border border-blue-200/50 dark:border-blue-800/30">
+                        <div className="flex items-center justify-center mb-2">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                        </div>
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">ថ្ងៃចុះឈ្មោះ</div>
+                            <div className="text-sm font-bold text-blue-700 dark:text-blue-300">{formatDate(selectedStudent.registrationDate)}</div>
+                          </div>
+                      <div className="group bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-all duration-300 border border-green-200/50 dark:border-green-800/30">
+                        <div className="flex items-center justify-center mb-2">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <Badge className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          </div>
+                        </div>
+                        <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">ស្ថានភាព</div>
+                            <div className="text-sm font-bold text-green-700 dark:text-green-300">{getStatusLabel(selectedStudent.status)}</div>
+                          </div>
+                        </div>
+                            </div>
+
+                  {/* Education Information */}
+                  <div className="w-full bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-900/10 rounded-xl p-5 shadow-sm border border-indigo-200/50 dark:border-indigo-800/30">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                        <GraduationCap className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-base">ព័ត៌មានសិក្សា</h4>
+                    </div>
+                  
+                          <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 text-sm flex items-center space-x-2">
+                          <GraduationCap className="h-3 w-3" />
+                          <span>ថ្នាក់:</span>
+                        </span>
+                              <span className="font-bold text-gray-900 dark:text-white text-sm">{getGradeLabel(selectedStudent.class)}</span>
+                            </div>
+                      <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 text-sm flex items-center space-x-2">
+                          <Calendar className="h-3 w-3" />
+                          <span>ឆ្នាំសិក្សា:</span>
+                        </span>
+                              <span className="font-bold text-gray-900 dark:text-white text-sm">{selectedStudent.schoolYear || '-'}</span>
+                            </div>
+                      {/* Register to Study */}
+                            {selectedStudent.registerToStudy !== undefined && (
+                        <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                          <span className="text-gray-600 dark:text-gray-400 text-sm flex items-center space-x-2">
+                            <BookOpen className="h-3 w-3" />
+                            <span>ចុះឈ្មោះរៀន:</span>
+                          </span>
+                          <Badge className={selectedStudent.registerToStudy ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 px-2 py-1 text-xs" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 px-2 py-1 text-xs"}>
+                                {selectedStudent.registerToStudy ? "បានចុះឈ្មោះ" : "មិនទាន់ចុះឈ្មោះ"}
+                              </Badge>
+                            </div>
+                            )}
+                      
+                      {/* Drop Study Button - Above Registration Field */}
+                      {selectedStudent && (
+                        <div className="flex justify-center mb-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={openDropDialog}
+                            className="h-8 px-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/10 border-2 border-red-200 dark:border-red-700 hover:border-red-300 dark:hover:border-red-600 hover:bg-gradient-to-r hover:from-red-100 hover:to-red-200 dark:hover:from-red-900/30 dark:hover:to-red-900/20 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300 shadow-sm hover:shadow-md"
+                          >
+                            <MinusCircle className="h-3 w-3 mr-2" />
+                            <span className="text-xs">បោះបង់ការសិក្សា</span>
+                          </Button>
+                        </div>
+                      )}
+                      
+                          </div>
+                        </div>
+
+                  {/* Modern Drop Study Dialog */}
+                  <Dialog open={showDropDialog} onOpenChange={setShowDropDialog}>
+                    <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+                      <DialogHeader className="space-y-3 flex-shrink-0">
+                        <div className="flex items-center justify-center w-16 h-16 mx-auto bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-full">
+                          <MinusCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                            </div>
+                        <DialogTitle className="text-center text-xl font-bold text-gray-900 dark:text-white">
+                          {currentDropEnrollment ? "ព័ត៌មានការបោះបង់ការសិក្សា" : "បោះបង់ការសិក្សា"}
+                        </DialogTitle>
+                        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                          {currentDropEnrollment 
+                            ? "មើលព័ត៌មានការបោះបង់ការសិក្សារបស់សិស្ស" 
+                            : "បញ្ចូលព័ត៌មានសម្រាប់ការបោះបង់ការសិក្សាសិស្ស"
+                          }
+                        </p>
+                      </DialogHeader>
+                      
+                      <div className="flex-1 overflow-y-auto pr-2">
+                        <div className="space-y-6 pb-4">
+                        {/* Student Information Card */}
+                        <div className="p-5 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/10 rounded-xl border border-red-200 dark:border-red-800 shadow-sm">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="p-2 bg-red-200 dark:bg-red-800 rounded-lg">
+                              <User className="h-4 w-4 text-red-700 dark:text-red-300" />
+                            </div>
+                            <span className="text-sm font-semibold text-red-800 dark:text-red-200">ព័ត៌មានសិស្ស</span>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-sm text-red-700 dark:text-red-300">
+                              <span className="font-medium">ឈ្មោះ:</span> {selectedStudent?.lastName}{selectedStudent?.firstName} ID({selectedStudent?.studentId}) {getGradeLabel(selectedStudent?.class)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Validation Errors */}
+                        {validationErrors.length > 0 && (
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <AlertCircle className="h-4 w-4 text-red-600" />
+                              <span className="text-sm font-semibold text-red-800 dark:text-red-200">មានបញ្ហាក្នុងទម្រង់</span>
+                            </div>
+                            <ul className="space-y-1">
+                              {validationErrors.map((error, index) => (
+                                <li key={index} className="text-sm text-red-700 dark:text-red-300 flex items-center space-x-2">
+                                  <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                                  <span>{error}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {/* Current Drop Information or Drop Study Selection */}
+                        <div className="space-y-4">
+                          {currentDropEnrollment ? (
+                            /* Show Current Drop Information */
+                            <div className="space-y-4">
+                              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                <div className="flex items-center space-x-2 mb-3">
+                                  <AlertCircle className="h-5 w-5 text-red-600" />
+                                  <span className="text-base font-semibold text-red-800 dark:text-red-200">ព័ត៌មានការបោះបង់ការសិក្សាបច្ចុប្បន្ន</span>
+                                </div>
+                                <div className="space-y-3">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                                      <div className="flex items-center space-x-2 mb-2">
+                                        <Calendar className="h-4 w-4 text-blue-600" />
+                                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">ថ្នាក់បោះបង់ការសិក្សា</span>
+                                      </div>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        ថ្នាក់ទី {currentDropEnrollment.course?.grade}{currentDropEnrollment.course?.section}
+                                      </p>
+                                    </div>
+                                    
+                                    <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                                      <div className="flex items-center space-x-2 mb-2">
+                                        <Calendar className="h-4 w-4 text-blue-600" />
+                                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">ឆមាសបោះបង់ការសិក្សា</span>
+                                      </div>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        {currentDropEnrollment.dropSemester?.semester || 'មិនមានព័ត៌មាន'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                                      <div className="flex items-center space-x-2 mb-2">
+                                        <Calendar className="h-4 w-4 text-blue-600" />
+                                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">ថ្ងៃបោះបង់ការសិក្សា</span>
+                                      </div>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        {currentDropEnrollment.dropDate 
+                                          ? new Date(currentDropEnrollment.dropDate).toLocaleDateString('km-KH')
+                                          : 'មិនមានព័ត៌មាន'
+                                        }
+                                      </p>
+                                    </div>
+                                    
+                                    <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                                      <div className="flex items-center space-x-2 mb-2">
+                                        <AlertCircle className="h-4 w-4 text-blue-600" />
+                                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">មូលហេតុ</span>
+                                      </div>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        {currentDropEnrollment.dropReason || 'មិនមានព័ត៌មាន'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <RotateCcw className="h-4 w-4 text-green-600" />
+                                  <span className="text-sm font-semibold text-green-800 dark:text-green-200">ដកចេញការបោះបង់</span>
+                                </div>
+                                <p className="text-sm text-green-700 dark:text-green-300">
+                                  ប្រសិនបើអ្នកចង់ដកចេញការបោះបង់ការសិក្សា សិស្សនឹងត្រលប់ទៅស្ថានភាពកំពុងសិក្សាវិញ។
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            /* Show Drop Study Selection */
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                              <Label className="text-base font-semibold text-blue-800 dark:text-blue-200 flex items-center space-x-2 mb-3">
+                                <AlertCircle className="h-5 w-5" />
+                                <span>តើអ្នកចង់បោះបង់ការសិក្សាសម្រាប់សិស្សនេះទេ?</span>
+                              </Label>
+                              <RadioGroup
+                                value={showDropFields ? "yes" : "no"}
+                                onValueChange={(value) => {
+                                  setShowDropFields(value === "yes");
+                                  setValidationErrors([]);
+                                if (value === "no") {
+                                  setDropFormData({ dropCourseId: '', dropSemesterId: '', dropDate: '', dropReason: '' });
+                                } else if (value === "yes") {
+                                  // When switching back to "yes", auto-select highest grade again
+                                  const activeEnrollments = selectedStudent?.enrollments?.filter(e => !e.drop);
+                                  if (activeEnrollments && activeEnrollments.length > 0) {
+                                    const sortedEnrollments = activeEnrollments.sort((a, b) => {
+                                      const gradeA = parseInt(a.course?.grade || '0');
+                                      const gradeB = parseInt(b.course?.grade || '0');
+                                      return gradeB - gradeA;
+                                    });
+                                    
+                                    const highestGradeEnrollment = sortedEnrollments[0];
+                                    if (highestGradeEnrollment) {
+                                      setDropFormData(prev => ({
+                                        ...prev,
+                                        dropCourseId: highestGradeEnrollment.courseId.toString()
+                                      }));
+                                    }
+                                  } else {
+                                    // No active enrollments - clear the form
+                                    setDropFormData(prev => ({
+                                      ...prev,
+                                      dropCourseId: ''
+                                    }));
+                                  }
+                                }
+                                }}
+                                className="space-y-3"
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <RadioGroupItem value="no" id="no-drop" className="text-green-600" />
+                                  <Label htmlFor="no-drop" className="text-sm font-medium text-green-700 dark:text-green-300 cursor-pointer">
+                                    ទេ មិនបោះបង់ការសិក្សា
+                                  </Label>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                  <RadioGroupItem value="yes" id="yes-drop" className="text-red-600" />
+                                  <Label htmlFor="yes-drop" className="text-sm font-medium text-red-700 dark:text-red-300 cursor-pointer">
+                                    បាទ បោះបង់ការសិក្សា
+                                  </Label>
+                                </div>
+                              </RadioGroup>
+                            </div>
+                          )}
+
+                          {/* Drop Fields - Only show when user selects "yes" */}
+                          {showDropFields && (
+                            <div className="space-y-5 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                              <div className="flex items-center space-x-2 mb-4">
+                                <AlertCircle className="h-4 w-4 text-red-600" />
+                                <span className="text-sm font-semibold text-red-800 dark:text-red-200">ព័ត៌មានបោះបង់ការសិក្សា</span>
+                              </div>
+                              
+                              {/* Course Selection */}
+                              <div className="space-y-2">
+                                <Label htmlFor="dropCourse" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center space-x-2">
+                                  <BookOpen className="h-4 w-4" />
+                                  <span>ថ្នាក់បោះបង់ការសិក្សា *</span>
+                                </Label>
+                        <Select 
+                          value={dropFormData.dropCourseId} 
+                          onValueChange={(value) => {
+                            setDropFormData(prev => ({ ...prev, dropCourseId: value }));
+                            clearValidationErrors();
+                          }}
+                          disabled={isDropping || !selectedStudent?.enrollments?.filter(e => !e.drop).length}
+                        >
+                                  <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-500 focus:border-red-500 dark:focus:border-red-400 transition-colors duration-200">
+                                    <SelectValue placeholder="ជ្រើសរើសថ្នាក់បោះបង់ការសិក្សា" />
+                                  </SelectTrigger>
+                          <SelectContent>
+                            {selectedStudent?.enrollments?.filter(e => !e.drop).length && selectedStudent?.enrollments ? (
+                              selectedStudent.enrollments
+                                .filter(e => !e.drop)
+                                .map((enrollment) => (
+                                  <SelectItem key={enrollment.courseId} value={enrollment.courseId.toString()}>
+                                    ថ្នាក់ទី {enrollment.course?.grade}{enrollment.course?.section}
+                                  </SelectItem>
+                                ))
+                            ) : (
+                              <div className="px-2 py-1.5 text-sm text-gray-500 dark:text-gray-400">
+                                មិនមានថ្នាក់សកម្ម
+                              </div>
+                            )}
+                          </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Semester and Date in One Row */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Semester Selection */}
+                                <div className="space-y-2">
+                                  <Label htmlFor="dropSemester" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center space-x-2">
+                                    <Calendar className="h-4 w-4" />
+                                    <span>ឆមាសបោះបង់ការសិក្សា *</span>
+                                  </Label>
+                                  <Select 
+                                    value={dropFormData.dropSemesterId} 
+                                    onValueChange={(value) => {
+                                      setDropFormData(prev => ({ ...prev, dropSemesterId: value }));
+                                      clearValidationErrors();
+                                    }}
+                                    disabled={isDropping}
+                                  >
+                                    <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-500 focus:border-red-500 dark:focus:border-red-400 transition-colors duration-200">
+                                      <SelectValue placeholder="ជ្រើសរើសឆមាស" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {semesters.length > 0 ? (
+                                        semesters.map((semester) => (
+                                          <SelectItem key={semester.semesterId} value={semester.semesterId.toString()}>
+                                            {semester.semester}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
+                                        <SelectItem value="" disabled>
+                                          កំពុងផ្ទុកឆមាស...
+                                        </SelectItem>
+                                      )}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                {/* Date Selection */}
+                                <div className="space-y-2">
+                                  <Label htmlFor="dropDate" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center space-x-2">
+                                    <Calendar className="h-4 w-4" />
+                                    <span>ថ្ងៃបោះបង់ការសិក្សា *</span>
+                                  </Label>
+                                  <Input
+                                    id="dropDate"
+                                    type="date"
+                                    className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-500 focus:border-red-500 dark:focus:border-red-400 transition-colors duration-200"
+                                    value={dropFormData.dropDate}
+                                    onChange={(e) => {
+                                      setDropFormData(prev => ({ ...prev, dropDate: e.target.value }));
+                                      clearValidationErrors();
+                                    }}
+                                    disabled={isDropping}
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Reason Input */}
+                              <div className="space-y-2">
+                                <Label htmlFor="dropReason" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center space-x-2">
+                                  <AlertCircle className="h-4 w-4" />
+                                  <span>មូលហេតុបោះបង់ការសិក្សា *</span>
+                                </Label>
+                                <Input
+                                  id="dropReason"
+                                  placeholder="បញ្ចូលមូលហេតុដែលបោះបង់ការសិក្សា..."
+                                  className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-500 focus:border-red-500 dark:focus:border-red-400 transition-colors duration-200"
+                                  value={dropFormData.dropReason}
+                                  onChange={(e) => {
+                                    setDropFormData(prev => ({ ...prev, dropReason: e.target.value }));
+                                    clearValidationErrors();
+                                  }}
+                                  disabled={isDropping}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Warning Message */}
+                        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                          <div className="flex items-center space-x-2">
+                            <AlertCircle className="h-4 w-4 text-yellow-600" />
+                            <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">ព្រមាន</span>
+                          </div>
+                          <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                            ការបោះបង់ការសិក្សានេះនឹងធ្វើឲ្យសិស្សឈប់សិក្សានៅថ្នាក់នេះ។ សូមពិនិត្យព័ត៌មានឲ្យបានត្រឹមត្រូវ។
+                          </p>
+                        </div>
+                        
+                        </div>
+                      </div>
+                      
+                      {/* Action Buttons - Fixed at bottom */}
+                      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                        <div className="flex space-x-3">
+                          <Button
+                            onClick={currentDropEnrollment ? handleUndoDropFromDialog : handleDropEnrollment}
+                            disabled={isDropping}
+                            className={`flex-1 h-12 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                              currentDropEnrollment
+                                ? "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                                : showDropFields 
+                                  ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+                                  : "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                            }`}
+                          >
+                            {isDropping ? (
+                              <>
+                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                <span>{currentDropEnrollment ? "កំពុងដកចេញ..." : "កំពុងបោះបង់ការសិក្សា..."}</span>
+                              </>
+                            ) : (
+                              <>
+                                {currentDropEnrollment ? (
+                                  <RotateCcw className="h-4 w-4 mr-2" />
+                                ) : (
+                                  <Save className="h-4 w-4 mr-2" />
+                                )}
+                                <span>
+                                  {currentDropEnrollment 
+                                    ? "ដកចេញការបោះបង់" 
+                                    : showDropFields 
+                                      ? "បោះបង់ការសិក្សា" 
+                                      : "បិទប្រអប់"
+                                  }
+                                </span>
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setShowDropDialog(false);
+                              setValidationErrors([]);
+                              setDropFormData({ dropCourseId: '', dropSemesterId: '', dropDate: '', dropReason: '' });
+                              setShowDropFields(false);
+                              setCurrentDropEnrollment(null);
+                            }}
+                            disabled={isDropping}
+                            className="h-12 px-6 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Remove Drop Study Dialog */}
+                  <Dialog open={showRemoveDropDialog} onOpenChange={setShowRemoveDropDialog}>
+                    <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+                      <DialogHeader className="flex-shrink-0">
+                        <DialogTitle className="flex items-center space-x-2">
+                          <RotateCcw className="h-5 w-5 text-green-600" />
+                          <span>ដកចេញការបោះបង់ការសិក្សា</span>
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="flex-1 overflow-y-auto pr-2">
+                        <div className="space-y-4 pb-4">
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <AlertCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-semibold text-green-800 dark:text-green-200">ព័ត៌មានសិស្ស</span>
+                          </div>
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            ឈ្មោះ: {selectedStudent?.lastName}{selectedStudent?.firstName} (ID: {selectedStudent?.studentId})
+                          </p>
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            ថ្នាក់: {getGradeLabel(selectedStudent?.class)}
+                          </p>
+                        </div>
+
+                        {selectedDropEnrollment && (
+                          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <GraduationCap className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm font-semibold text-blue-800 dark:text-blue-200">ព័ត៌មានការបោះបង់ការសិក្សា</span>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm text-blue-700 dark:text-blue-300">
+                                ថ្នាក់: {selectedDropEnrollment.course ? getCourseLabel(selectedDropEnrollment.course) : `ថ្នាក់ ${selectedStudent?.class}`}
+                              </p>
+                              {selectedDropEnrollment.dropSemester && (
+                                <p className="text-sm text-blue-700 dark:text-blue-300">
+                                  ឆមាសបោះបង់ការសិក្សា: {selectedDropEnrollment.dropSemester.semester}
+                                </p>
+                              )}
+                              {selectedDropEnrollment.dropDate && (
+                                <p className="text-sm text-blue-700 dark:text-blue-300">
+                                  ថ្ងៃបោះបង់ការសិក្សា: {formatDate(selectedDropEnrollment.dropDate)}
+                                </p>
+                              )}
+                              {selectedDropEnrollment.dropReason && (
+                                <p className="text-sm text-blue-700 dark:text-blue-300">
+                                  មូលហេតុ: {selectedDropEnrollment.dropReason}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <AlertCircle className="h-4 w-4 text-yellow-600" />
+                            <span className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">ព្រមាន</span>
+                          </div>
+                          <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                            ការដកចេញការបោះបង់នេះនឹងធ្វើឲ្យសិស្សត្រលប់ទៅស្ថានភាពកំពុងសិក្សាវិញ។
+                          </p>
+                        </div>
+
+                        </div>
+                      </div>
+                      
+                      {/* Action Buttons - Fixed at bottom */}
+                      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={handleRemoveDropStudy}
+                            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                          >
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            ដកចេញការបោះបង់
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowRemoveDropDialog(false)}
+                            className="px-4"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Contact Information */}
+                  <div className="w-full bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/10 rounded-xl p-5 shadow-sm border border-orange-200/50 dark:border-orange-800/30">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                        <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                      </div>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-base">លេខទំនាក់ទំនងគោល</h4>
+                    </div>
+                    <div className="p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Phone className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                        <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{selectedStudent.phone || '-'}</span>
+                      </div>
+                        </div>
+                      </div>
+                    </div>
+                    </CardContent>
+                  </Card>
+              </div>
 
           {/* Main Content Area */}
-          <div className="lg:col-span-3 space-y-4">
-            {/* Tabs Navigation */}
-            <Card className="hover:shadow-lg transition-all duration-200 border-0 shadow-md">
+          <div className="lg:col-span-3 space-y-6">
+            {/* Modern Tabs Navigation */}
+            <Card className="hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-r from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-800/50 dark:to-gray-800 overflow-hidden">
               <CardContent className="p-0">
-                <nav className="flex bg-gray-50 dark:bg-gray-800 rounded-t-lg">
-                  {tabs.map(tab => (
+                <nav className="flex bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800">
+                  {tabs.map((tab, index) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex-1 px-4 py-3 text-sm font-semibold flex items-center justify-center space-x-2 border-b-2 transition-all duration-200 ${
+                      className={`flex-1 px-6 py-4 text-sm font-semibold flex items-center justify-center space-x-3 border-b-3 transition-all duration-300 relative group ${
                         activeTab === tab.id 
-                          ? 'border-blue-500 text-blue-600 bg-white dark:bg-gray-900 shadow-sm' 
+                          ? 'border-blue-500 text-blue-600 bg-white dark:bg-gray-900 shadow-lg' 
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-900'
                       }`}
                     >
-                      <div className={`p-1 rounded ${activeTab === tab.id ? 'bg-blue-100 dark:bg-blue-900/20' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                      {/* Active Tab Indicator */}
+                      {activeTab === tab.id && (
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                      )}
+                      
+                      <div className={`p-2 rounded-lg transition-all duration-300 ${
+                        activeTab === tab.id 
+                          ? 'bg-blue-100 dark:bg-blue-900/20 shadow-sm' 
+                          : 'bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/10'
+                      }`}>
                         {tab.icon}
                       </div>
-                      <span className="hidden sm:inline">{tab.label}</span>
+                      <span className="hidden sm:inline font-medium">{tab.label}</span>
+                      
+                      {/* Hover Effect */}
+                      <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${
+                        activeTab === tab.id 
+                          ? 'bg-blue-50/50 dark:bg-blue-900/10' 
+                          : 'bg-transparent group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/5'
+                      }`}></div>
                     </button>
                   ))}
                 </nav>
               </CardContent>
             </Card>
 
-            {/* Tab Content */}
-            <Card className="hover:shadow-lg transition-all duration-200 border-0 shadow-md">
-              <CardContent className="p-6">
+            {/* Modern Tab Content */}
+            <Card className="hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-white dark:from-gray-800 dark:via-gray-800/30 dark:to-gray-800">
+              <CardContent className="p-8">
                 {activeTab === 'basic' && (
                   <div className="space-y-6">
                     <div className="flex items-center space-x-3 mb-6">
@@ -633,7 +1579,7 @@ function StudentInfoContent() {
                           </div>
                           <span className="text-base font-semibold text-blue-800 dark:text-blue-200">ឈ្មោះសិស្ស</span>
                         </div>
-                        <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{selectedStudent.lastName} {selectedStudent.firstName}</p>
+                        <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{selectedStudent.lastName}{selectedStudent.firstName}</p>
                       </div>
                       
                       <div className="group bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 p-5 rounded-xl shadow-sm border border-green-200/50 dark:border-green-800/30 hover:shadow-md transition-all duration-300">
@@ -791,6 +1737,135 @@ function StudentInfoContent() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Drop Information Section */}
+                    {selectedStudent.enrollments && selectedStudent.enrollments.length > 0 && (
+                      <div className="mt-8">
+                        <div className="flex items-center space-x-3 mb-6">
+                          <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+                            <AlertCircle className="h-5 w-5 text-red-600" />
+                  </div>
+                          <h4 className="text-xl font-bold text-gray-900 dark:text-white">ព័ត៌មានការបោះបង់ការសិក្សា</h4>
+                        </div>
+                        
+                        {/* Check if student has dropped enrollments */}
+                        {selectedStudent.enrollments.filter(e => e.drop).length > 0 ? (
+                          <>
+                            {/* Drop Summary */}
+                            <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/10 rounded-lg border border-red-200 dark:border-red-800">
+                              <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-red-200 dark:bg-red-800 rounded-lg">
+                                  <AlertCircle className="h-5 w-5 text-red-700 dark:text-red-300" />
+                                </div>
+                                <div>
+                                  <p className="text-lg font-bold text-red-800 dark:text-red-200">
+                                    សិស្សបានបោះបង់ការសិក្សាពី {selectedStudent.enrollments.filter(e => e.drop).length} ថ្នាក់
+                                  </p>
+                                  <p className="text-sm text-red-600 dark:text-red-400">
+                                    ចាប់ពីឆ្នាំសិក្សា {selectedStudent.enrollments.filter(e => e.drop).map(e => e.course?.schoolYear?.schoolYearCode).filter(Boolean).join(', ')}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Individual Drop Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {selectedStudent.enrollments.map((enrollment, index) => (
+                                enrollment.drop && (
+                                  <div key={enrollment.enrollmentId} className="group bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/10 p-6 rounded-xl shadow-sm border border-red-200/50 dark:border-red-800/30 hover:shadow-lg hover:scale-105 transition-all duration-300">
+                                    <div className="flex items-center justify-between mb-4">
+                                      <div className="flex items-center space-x-3">
+                                        <div className="p-2 bg-red-200 dark:bg-red-800 rounded-lg">
+                                          <AlertCircle className="h-4 w-4 text-red-700 dark:text-red-300" />
+                                        </div>
+                                        <span className="text-base font-semibold text-red-800 dark:text-red-200">ថ្នាក់ដែលបោះបង់ការសិក្សា</span>
+                                      </div>
+                                      <div className="px-3 py-1 bg-red-200 dark:bg-red-800 rounded-full">
+                                        <span className="text-xs font-bold text-red-800 dark:text-red-200">បោះបង់ការសិក្សា</span>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                      <p className="text-xl font-bold text-red-900 dark:text-red-100 mb-1">
+                                        {enrollment.course ? `ថ្នាក់ទី ${enrollment.course.grade}${enrollment.course.section}` : `ថ្នាក់ទី ${selectedStudent.class}`}
+                                      </p>
+                                      {enrollment.course?.schoolYear && (
+                                        <p className="text-sm text-red-600 dark:text-red-400">
+                                          ឆ្នាំសិក្សា: {enrollment.course.schoolYear.schoolYearCode}
+                                        </p>
+                                      )}
+                                    </div>
+                                    
+                                    <div className="space-y-3">
+                                      {enrollment.dropSemester && (
+                                        <div className="flex items-center space-x-3 p-3 bg-red-100/50 dark:bg-red-900/20 rounded-lg">
+                                          <Calendar className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                          <div className="flex-1">
+                                            <p className="text-xs font-medium text-red-700 dark:text-red-300">ឆមាសបោះបង់ការសិក្សា</p>
+                                            <p className="text-sm font-bold text-red-800 dark:text-red-200">{enrollment.dropSemester.semester}</p>
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      {enrollment.dropDate && (
+                                        <div className="flex items-center space-x-3 p-3 bg-red-100/50 dark:bg-red-900/20 rounded-lg">
+                                          <Calendar className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                          <div className="flex-1">
+                                            <p className="text-xs font-medium text-red-700 dark:text-red-300">ថ្ងៃបោះបង់ការសិក្សា</p>
+                                            <p className="text-sm font-bold text-red-800 dark:text-red-200">{formatDate(enrollment.dropDate)}</p>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {enrollment.dropReason && (
+                                        <div className="flex items-center space-x-3 p-3 bg-red-100/50 dark:bg-red-900/20 rounded-lg">
+                                          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                          <div className="flex-1">
+                                            <p className="text-xs font-medium text-red-700 dark:text-red-300">មូលហេតុបោះបង់ការសិក្សា</p>
+                                            <p className="text-sm font-bold text-red-800 dark:text-red-200">{enrollment.dropReason}</p>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Remove Drop Study Button */}
+                                    <div className="mt-4 pt-4 border-t border-red-200 dark:border-red-700">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedDropEnrollment(enrollment);
+                                          setShowRemoveDropDialog(true);
+                                        }}
+                                        className="w-full h-8 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 border-2 border-green-200 dark:border-green-700 hover:border-green-300 dark:hover:border-green-600 hover:bg-gradient-to-r hover:from-green-100 hover:to-green-200 dark:hover:from-green-900/30 dark:hover:to-green-900/20 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-all duration-300 shadow-sm hover:shadow-md"
+                                      >
+                                        <RotateCcw className="h-3 w-3 mr-2" />
+                                        <span className="text-xs">ដកចេញការបោះបង់</span>
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="group bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 p-8 rounded-xl shadow-sm border border-green-200/50 dark:border-green-800/30">
+                            <div className="text-center">
+                              <div className="flex justify-center mb-4">
+                                <div className="p-4 bg-green-200 dark:bg-green-800 rounded-full">
+                                  <GraduationCap className="h-8 w-8 text-green-700 dark:text-green-300" />
+                                </div>
+                              </div>
+                              <h5 className="text-xl font-bold text-green-800 dark:text-green-200 mb-2">ស្ថានភាពសិក្សាល្អ</h5>
+                              <p className="text-lg text-green-700 dark:text-green-300 mb-2">សិស្សនេះមិនបានបោះបង់ការសិក្សាពីថ្នាក់ណាមួយទេ</p>
+                              <p className="text-sm text-green-600 dark:text-green-400">
+                                មាន {selectedStudent.enrollments.filter(e => !e.drop).length} ការចុះឈ្មោះសកម្ម
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 

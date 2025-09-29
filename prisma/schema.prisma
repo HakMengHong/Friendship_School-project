@@ -31,6 +31,10 @@ model User {
   coursesAsTeacher2   Course[]      @relation("CourseTeacher2")
   coursesAsTeacher3   Course[]      @relation("CourseTeacher3")
   grades              Grade[]
+
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Student {
@@ -63,6 +67,7 @@ model Student {
   transferReason       String?
   vaccinated           Boolean?      @default(false)
   schoolYear           String?
+  studentCommune       String?
   attendances          Attendance[]
   enrollments          Enrollment[]
   family               FamilyInfo?
@@ -90,6 +95,7 @@ model Guardian {
   occupation    String?
   province      String?
   village       String?
+  commune       String?
   student       Student  @relation(fields: [studentId], references: [studentId])
 }
 
@@ -109,6 +115,7 @@ model FamilyInfo {
   organizationHelp String?
   ownHouse         Boolean? @default(false)
   religion         String?
+  povertyCard      String?
   student          Student  @relation(fields: [studentId], references: [studentId])
 }
 
@@ -141,6 +148,11 @@ model Course {
   teacher3     User?        @relation("CourseTeacher3", fields: [teacherId3], references: [userId])
   enrollments  Enrollment[]
   grades       Grade[]
+
+  @@index([schoolYearId, grade, section])
+  @@index([teacherId1])
+  @@index([teacherId2])
+  @@index([teacherId3])
 }
 
 model Subject {
@@ -169,6 +181,10 @@ model Grade {
   student      Student   @relation(fields: [studentId], references: [studentId])
   subject      Subject   @relation(fields: [subjectId], references: [subjectId])
   user         User?     @relation(fields: [userId], references: [userId])
+
+  @@index([studentId, courseId])
+  @@index([gradeDate])
+  @@index([courseId, studentId, subjectId])
 }
 
 model Enrollment {
@@ -176,29 +192,40 @@ model Enrollment {
   courseId     Int
   studentId    Int
   drop         Boolean
-  dropSemester String?
+  dropSemesterId Int?
   dropDate     DateTime?
+  dropReason   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
   course       Course    @relation(fields: [courseId], references: [courseId])
   student      Student   @relation(fields: [studentId], references: [studentId])
+  dropSemester Semester? @relation(fields: [dropSemesterId], references: [semesterId])
+
+  @@unique([studentId, courseId])
+  @@index([studentId, courseId])
+  @@index([drop])
+  @@index([dropDate])
+  @@index([dropSemesterId])
 }
 
 model SchoolYear {
-  schoolYearId   Int      @id @default(autoincrement())
-  schoolYearCode String   @unique
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  courses        Course[]
+  schoolYearId   Int          @id @default(autoincrement())
+  schoolYearCode String       @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   attendances    Attendance[]
+  courses        Course[]
 }
 
 model Semester {
-  semesterId   Int      @id @default(autoincrement())
+  semesterId   Int          @id @default(autoincrement())
   semester     String
-  semesterCode String   @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  grades       Grade[]
+  semesterCode String       @unique
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   attendances  Attendance[]
+  enrollments  Enrollment[]
+  grades       Grade[]
 }
 
 model Attendance {
@@ -212,12 +239,12 @@ model Attendance {
   attendanceDate DateTime
   attendanceId   Int               @id @default(autoincrement())
   courseId       Int
-  course         Course            @relation(fields: [courseId], references: [courseId])
-  student        Student           @relation(fields: [studentId], references: [studentId])
   semesterId     Int?
-  semester       Semester?         @relation(fields: [semesterId], references: [semesterId])
   schoolYearId   Int?
+  course         Course            @relation(fields: [courseId], references: [courseId])
   schoolYear     SchoolYear?       @relation(fields: [schoolYearId], references: [schoolYearId])
+  semester       Semester?         @relation(fields: [semesterId], references: [semesterId])
+  student        Student           @relation(fields: [studentId], references: [studentId])
 }
 
 model ActivityLog {
@@ -227,16 +254,6 @@ model ActivityLog {
   details   String?
   timestamp DateTime @default(now())
   user      User     @relation("ActivityLogUser", fields: [userId], references: [userId])
-}
-
-model Announcement {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  author    String
-  published Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 enum AttendanceSession {

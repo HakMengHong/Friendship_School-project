@@ -113,7 +113,7 @@ export function generateStudentIDCardBackHTML(data: StudentIDCardBackData): stri
     
     .back-title {
       font-size: 16px;
-      font-weight: bold;
+      font-weight: normal;
       color: #1e40af;
       margin: 0;
     }
@@ -141,7 +141,7 @@ export function generateStudentIDCardBackHTML(data: StudentIDCardBackData): stri
       background: #f1f5f9;
       color: #1e40af;
       font-size: 12px;
-      font-weight: bold;
+      font-weight: normal;
       padding: 6px 5px;
       text-align: center;
       border: 1px solid #cbd5e1;

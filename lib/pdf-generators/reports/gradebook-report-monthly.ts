@@ -10,6 +10,39 @@ function round(num: number, decimals: number = 1): string {
   return Number(num.toFixed(decimals)).toFixed(decimals)
 }
 
+// Grade status calculation (consistent with other report generators)
+function getGradeStatus(average: number, gradeLevel: string): string {
+  const gradeNum = parseInt(gradeLevel) || 0
+  
+  if (gradeNum >= 1 && gradeNum <= 6) {
+    // Grades 1-6: Full average is 10
+    if (average >= 9) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
+    if (average >= 8) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (average >= 7) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (average >= 6) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (average >= 5) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
+    return 'F' // ខ្សោយ
+  }
+  
+  if (gradeNum >= 7 && gradeNum <= 9) {
+    // Grades 7-9: Full average is 50
+    if (average >= 45) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
+    if (average >= 40) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (average >= 35) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (average >= 30) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (average >= 25) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
+    return 'F' // ខ្សោយ
+  }
+  
+  // Fallback for unknown grade levels
+  if (average >= 90) return 'A'
+  if (average >= 80) return 'B'
+  if (average >= 70) return 'C'
+  if (average >= 60) return 'D'
+  if (average >= 50) return 'E'
+  return 'F'
+}
+
 // Monthly Gradebook Report Data Interface (Individual Student)
 export interface MonthlyGradebookReportData {
   reportType: 'monthly'
@@ -64,6 +97,10 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
     // Use student data directly (already calculated in API)
     const student = data.student
     const studentRank = student.rank || '1'
+    
+    // Calculate status using consistent grading logic
+    const classLevel = data.class || '9'
+    const calculatedStatus = getGradeStatus(student.averageGrade, classLevel)
     
     // Validate student data
     if (!student.firstName || !student.lastName) {
@@ -328,7 +365,7 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
             <td class="grade-value">${round(subject.grade)}</td>
             <td class="grade-value">${subject.subjectRank || 'N/A'}</td>
             <td class="grade-value">${subject.letterGrade}</td>
-            <td>${subject.gradeComment || 'មិនមាន'}</td>
+            <td>${subject.gradeComment}</td>
           </tr>
         `).join('')}
         
@@ -349,7 +386,7 @@ export function generateMonthlyGradebookReportHTML(data: MonthlyGradebookReportD
           <td class="grade-value" style="width: 25%;">ចំណាត់ថ្នាក់</td>
           <td class="grade-value" style="width: 25%;">${studentRank}</td>
           <td class="grade-value" style="width: 25%;">និទ្ទេស</td>
-          <td class="grade-value" style="width: 25%;">${student.status}</td>
+          <td class="grade-value" style="width: 25%;">${calculatedStatus}</td>
         </tr>
         
         <!-- Attendance Row -->

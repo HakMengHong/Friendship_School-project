@@ -7,10 +7,19 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const today = searchParams.get('today');
     const limit = searchParams.get('limit');
+    const studentId = searchParams.get('studentId');
+    const courseId = searchParams.get('courseId');
+    const semesterId = searchParams.get('semesterId');
 
-    let whereClause = {};
+    let whereClause: any = {};
     
-    if (today === 'true') {
+    // Handle specific grade filtering
+    if (studentId || courseId || semesterId) {
+      if (studentId) whereClause.studentId = parseInt(studentId);
+      if (courseId) whereClause.courseId = parseInt(courseId);
+      if (semesterId) whereClause.semesterId = parseInt(semesterId);
+    } else if (today === 'true') {
+      // Handle today filter
       const today = new Date();
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
@@ -41,6 +50,20 @@ export async function GET(request: NextRequest) {
           select: {
             courseName: true
           }
+        },
+        semester: {
+          select: {
+            semester: true,
+            semesterCode: true
+          }
+        },
+        user: {
+          select: {
+            userId: true,
+            firstname: true,
+            lastname: true,
+            role: true
+          }
         }
       },
       orderBy: {
@@ -60,9 +83,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { studentId, subjectId, semesterId, gradeDate, grade, gradeComment } = body;
+    const { studentId, subjectId, semesterId, courseId, gradeDate, grade, gradeComment, userId } = body;
 
-    if (!studentId || !subjectId || !semesterId || !gradeDate || grade === undefined) {
+    if (!studentId || !subjectId || !semesterId || !courseId || !gradeDate || grade === undefined) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -71,9 +94,11 @@ export async function POST(request: NextRequest) {
         studentId,
         subjectId,
         semesterId,
+        courseId,
         gradeDate,
         grade,
-        gradeComment
+        gradeComment,
+        userId
       }
     });
 
@@ -81,5 +106,58 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating grade:', error);
     return NextResponse.json({ error: 'Failed to create grade' }, { status: 500 });
+  }
+}
+
+// PUT: Update an existing grade
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { gradeId, studentId, subjectId, semesterId, courseId, gradeDate, grade, gradeComment, userId } = body;
+
+    if (!gradeId || !studentId || !subjectId || !semesterId || !courseId || !gradeDate || grade === undefined) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const updatedGrade = await prisma.grade.update({
+      where: { gradeId },
+      data: {
+        studentId,
+        subjectId,
+        semesterId,
+        courseId,
+        gradeDate,
+        grade,
+        gradeComment,
+        userId,
+        lastEdit: new Date()
+      }
+    });
+
+    return NextResponse.json(updatedGrade);
+  } catch (error) {
+    console.error('Error updating grade:', error);
+    return NextResponse.json({ error: 'Failed to update grade' }, { status: 500 });
+  }
+}
+
+// DELETE: Delete a grade
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const gradeId = searchParams.get('gradeId');
+
+    if (!gradeId) {
+      return NextResponse.json({ error: 'Grade ID is required' }, { status: 400 });
+    }
+
+    await prisma.grade.delete({
+      where: { gradeId: parseInt(gradeId) }
+    });
+
+    return NextResponse.json({ message: 'Grade deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting grade:', error);
+    return NextResponse.json({ error: 'Failed to delete grade' }, { status: 500 });
   }
 }

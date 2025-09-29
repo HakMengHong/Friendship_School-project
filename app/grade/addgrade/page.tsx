@@ -36,6 +36,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
 import { getCurrentUser } from "@/lib/auth-service"
 
@@ -96,24 +104,41 @@ interface Student {
 
 interface Grade {
   gradeId: number
+  courseId: number
   studentId: number
   subjectId: number
-  courseId: number
   semesterId: number
+  gradeDate: string
   grade: number
   gradeComment: string | null
-  gradeDate: string  // Now stores "MM/YY" format like "12/25"
   userId: number | null
+  lastEdit: string | null
+  createdAt: string
+  updatedAt: string
+  course?: Course
+  semester?: Semester
+  student?: Student
+  subject?: Subject
   user?: {
     userId: number
-    firstname: string
+    username: string
+    password: string
     lastname: string
+    firstname: string
+    phonenumber1: string | null
+    phonenumber2: string | null
     role: string
+    avatar: string | null
+    photo: string | null
+    position: string | null
+    status: string
+    lastLogin: string | null
+    createdAt: string
+    updatedAt: string
+    accountLockedUntil: string | null
+    failedLoginAttempts: number
+    lastFailedLogin: string | null
   }
-  student: Student
-  subject: Subject
-  course: Course
-  semester: Semester
 }
 
 interface GradeInput {
@@ -233,6 +258,11 @@ function AddScoreContent() {
 
   // Error states
   const [error, setError] = useState<string | null>(null)
+
+  // Delete dialog states
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [gradeToDelete, setGradeToDelete] = useState<Grade | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   // Score validation and formatting
   const validateScore = (value: string) => {
@@ -362,29 +392,73 @@ function AddScoreContent() {
   }
 
   // Initialize bulk scores with existing grades for the selected subject
-  const initializeBulkScores = () => {
-    if (!selectedSubject || !selectedCourse || !selectedSemester) return
+  const initializeBulkScores = useCallback(() => {
+    console.log('🔍 initializeBulkScores called with:', {
+      selectedSubject,
+      selectedCourse,
+      selectedSemester,
+      selectedMonth,
+      selectedGradeYear,
+      studentsCount: students.length,
+      gradesCount: grades.length,
+      bulkMode
+    })
+
+    if (!selectedSubject || !selectedCourse || !selectedSemester || !selectedMonth || !selectedGradeYear) {
+      console.log('🔍 initializeBulkScores: Missing required data, clearing bulkScores')
+      setBulkScores({})
+      return
+    }
+
+    if (students.length === 0) {
+      console.log('🔍 initializeBulkScores: No students available')
+      setBulkScores({})
+      return
+    }
 
     const newBulkScores: {[key: number]: {score: string, comment: string}} = {}
+    const targetDate = `${selectedMonth}/${selectedGradeYear.slice(-2)}`
     
-    filteredStudents.forEach(student => {
+    console.log('🔍 initializeBulkScores: Looking for grades with targetDate:', targetDate)
+    console.log('🔍 Available grades:', grades.map(g => ({
+      studentId: g.studentId,
+      subjectId: g.subjectId,
+      courseId: g.courseId,
+      semesterId: g.semesterId,
+      gradeDate: g.gradeDate,
+      grade: g.grade
+    })))
+    
+    // Use students instead of filteredStudents since this function is called before filteredStudents is defined
+    students.forEach(student => {
       const existingGrade = grades.find(grade => 
         grade.subjectId.toString() === selectedSubject &&
         grade.studentId === student.studentId &&
         grade.courseId.toString() === selectedCourse &&
-        grade.semesterId.toString() === selectedSemester
+        grade.semesterId.toString() === selectedSemester &&
+        grade.gradeDate === targetDate // Match exact month/year
       )
       
       if (existingGrade) {
+        console.log('🔍 Found existing grade for student:', student.studentId, existingGrade)
         newBulkScores[student.studentId] = {
           score: existingGrade.grade.toString(),
           comment: existingGrade.gradeComment || ""
         }
+      } else {
+        console.log('🔍 No existing grade for student:', student.studentId, 'with filters:', {
+          selectedSubject,
+          studentId: student.studentId,
+          selectedCourse,
+          selectedSemester,
+          targetDate
+        })
       }
     })
     
+    console.log('🔍 initializeBulkScores: Final bulkScores:', newBulkScores)
     setBulkScores(newBulkScores)
-  }
+  }, [selectedSubject, selectedCourse, selectedSemester, selectedMonth, selectedGradeYear, students, grades, bulkMode])
 
   const handleBulkCommentChange = (studentId: number, comment: string) => {
     setBulkScores(prev => ({
@@ -570,6 +644,47 @@ function AddScoreContent() {
     }
   }, [selectedStudent, selectedCourse, selectedSemester])
 
+  // Fetch grades for all students in a course (for bulk mode)
+  const fetchGradesForCourse = useCallback(async () => {
+    if (!selectedCourse || !selectedSemester) {
+      console.log('🔍 fetchGradesForCourse: Missing required data:', { 
+        selectedCourse: !!selectedCourse, 
+        selectedSemester: !!selectedSemester 
+      })
+      return
+    }
+
+    try {
+      setLoadingGrades(true)
+      setError(null)
+
+      const params = new URLSearchParams({
+        courseId: selectedCourse,
+        semesterId: selectedSemester
+      })
+
+      console.log('🔍 fetchGradesForCourse: Fetching with params:', params.toString())
+      
+      const response = await fetch(`/api/grades?${params}`)
+      console.log('🔍 fetchGradesForCourse: Response status:', response.status, response.ok)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('🔍 fetchGradesForCourse: Error response:', errorText)
+        throw new Error(`Failed to fetch grades: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      console.log('🔍 fetchGradesForCourse: Success, data length:', data.length)
+      setGrades(data)
+    } catch (error) {
+      console.error('🔍 fetchGradesForCourse: Error:', error)
+      setError('មានបញ្ហាក្នុងការទាញយកពិន្ទុ')
+    } finally {
+      setLoadingGrades(false)
+    }
+  }, [selectedCourse, selectedSemester])
+
   // Fetch grades when student changes
   useEffect(() => {
     console.log('🔍 useEffect grades: Checking conditions:', {
@@ -618,6 +733,45 @@ function AddScoreContent() {
       }
     }
   }, [selectedGradeYear, autoSyncEnabled])
+
+  // Fetch grades when entering bulk mode
+  useEffect(() => {
+    if (bulkMode && selectedCourse && selectedSemester) {
+      console.log('🔍 useEffect bulk mode: Fetching grades for course')
+      fetchGradesForCourse()
+    }
+  }, [bulkMode, selectedCourse, selectedSemester, fetchGradesForCourse])
+
+  // Re-initialize bulk scores when month/year changes in bulk mode
+  useEffect(() => {
+    console.log('🔍 useEffect bulk scores: Checking conditions:', {
+      bulkMode,
+      selectedSubject: !!selectedSubject,
+      selectedCourse: !!selectedCourse,
+      selectedSemester: !!selectedSemester,
+      selectedMonth: !!selectedMonth,
+      selectedGradeYear: !!selectedGradeYear,
+      gradesCount: grades.length,
+      studentsCount: students.length
+    })
+    
+    if (bulkMode && selectedSubject && selectedCourse && selectedSemester && selectedMonth && selectedGradeYear) {
+      console.log('🔍 useEffect bulk scores: All conditions met, calling initializeBulkScores')
+      initializeBulkScores()
+    }
+  }, [bulkMode, selectedSubject, selectedCourse, selectedSemester, selectedMonth, selectedGradeYear, grades, students, initializeBulkScores])
+
+  // Re-check existing grade when month/year changes in single mode
+  useEffect(() => {
+    if (!bulkMode && selectedSubject && selectedStudent && selectedCourse && selectedSemester && selectedMonth && selectedGradeYear) {
+      checkExistingGrade(selectedSubject)
+    }
+  }, [bulkMode, selectedSubject, selectedStudent, selectedCourse, selectedSemester, selectedMonth, selectedGradeYear, grades])
+
+  // Debug: Log bulkScores changes
+  useEffect(() => {
+    console.log('🔍 bulkScores state changed:', bulkScores)
+  }, [bulkScores])
 
   const fetchInitialData = async () => {
     try {
@@ -732,18 +886,15 @@ function AddScoreContent() {
         ? `${selectedMonth}/${selectedGradeYear.slice(-2)}`  // Take last 2 digits of year
         : `${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`
 
-      const gradeData: GradeInput = {
+      const gradeData = {
         studentId: selectedStudent.studentId,
         subjectId: parseInt(selectedSubject),
-        courseId: parseInt(selectedCourse),
         semesterId: parseInt(selectedSemester),
-        score: parseFloat(score),
+        courseId: parseInt(selectedCourse),
         grade: parseFloat(score),
         gradeComment: comment || undefined,
-        userId: getCurrentUser()?.id,
-        month: selectedMonth || undefined,
-        gradeYear: selectedGradeYear || undefined,
-        gradeDate: formattedGradeDate
+        gradeDate: formattedGradeDate,
+        userId: getCurrentUser()?.id
       }
 
       console.log('🔍 Submitting grade data:', gradeData)
@@ -790,11 +941,17 @@ function AddScoreContent() {
         })
 
         if (!response.ok) {
-          const errorData = await response.text()
+          let errorData
+          try {
+            errorData = await response.json()
+          } catch {
+            errorData = await response.text()
+          }
           console.error('Grade creation failed:', {
             status: response.status,
             statusText: response.statusText,
-            errorData
+            errorData,
+            gradeData
           })
           throw new Error(`Failed to create grade: ${response.status} ${response.statusText}`)
         }
@@ -862,13 +1019,14 @@ function AddScoreContent() {
 
   // Check if subject already has a grade and auto-switch to edit mode
   const checkExistingGrade = (subjectId: string) => {
-    if (!selectedStudent || !selectedCourse || !selectedSemester) return
+    if (!selectedStudent || !selectedCourse || !selectedSemester || !selectedMonth || !selectedGradeYear) return
 
     const existingGrade = grades.find(grade => 
       grade.subjectId.toString() === subjectId &&
       grade.studentId === selectedStudent.studentId &&
       grade.courseId.toString() === selectedCourse &&
-      grade.semesterId.toString() === selectedSemester
+      grade.semesterId.toString() === selectedSemester &&
+      grade.gradeDate === `${selectedMonth}/${selectedGradeYear.slice(-2)}` // Match exact month/year
     )
 
     if (existingGrade) {
@@ -886,24 +1044,28 @@ function AddScoreContent() {
       
       toast({
         title: "ពិន្ទុមានរួចហើយ",
-        description: `មុខវិជ្ជា ${existingGrade.subject.subjectName} មានពិន្ទុ ${existingGrade.grade} រួចហើយ។ អ្នកអាចកែសម្រួលបាន។`,
+        description: `មុខវិជ្ជា ${existingGrade.subject?.subjectName || 'មុខវិជ្ជា'} មានពិន្ទុ ${existingGrade.grade} រួចហើយ។ អ្នកអាចកែសម្រួលបាន។`,
         variant: "default"
       })
     } else {
-      // Clear edit mode for new grade
+      // Clear edit mode for new grade - no existing grade for this exact month/year
       setEditingGrade(null)
       setScore("")
       setComment("")
     }
   }
 
-  const handleDelete = async (gradeId: number) => {
-    if (!confirm('តើអ្នកប្រាកដជាចង់លុបពិន្ទុនេះមែនទេ?')) {
-      return
-    }
+  const handleDeleteClick = (grade: Grade) => {
+    setGradeToDelete(grade)
+    setDeleteDialogOpen(true)
+  }
 
+  const handleDeleteConfirm = async () => {
+    if (!gradeToDelete) return
+
+    setDeleting(true)
     try {
-              const response = await fetch(`/api/grades?gradeId=${gradeId}`, {
+      const response = await fetch(`/api/grades?gradeId=${gradeToDelete.gradeId}`, {
         method: 'DELETE'
       })
 
@@ -917,6 +1079,8 @@ function AddScoreContent() {
       })
 
       fetchGrades()
+      setDeleteDialogOpen(false)
+      setGradeToDelete(null)
     } catch (error) {
       console.error('Error deleting grade:', error)
       toast({
@@ -924,7 +1088,14 @@ function AddScoreContent() {
         description: "មានបញ្ហាក្នុងការលុបពិន្ទុ",
         variant: "destructive"
       })
+    } finally {
+      setDeleting(false)
     }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setGradeToDelete(null)
   }
 
   const handleSchoolYearChange = (value: string) => {
@@ -1042,306 +1213,429 @@ function AddScoreContent() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen animate-fade-in">
       <div className="animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8 p-6">
 
-          {/* Enhanced Filter Bar */}
-          <div className="relative">
+          {/* Modern Filter Section */}
+          <div className="relative group">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/20 to-blue-50/20 dark:from-blue-950/10 dark:via-indigo-950/10 dark:to-blue-950/10 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.05),transparent_50%)]" />
 
-            <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-              {/* Enhanced Header */}
-              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-6">
+            <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+              {/* Enhanced Modern Header */}
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-4">
                 <div className="absolute inset-0 bg-black/10" />
-                <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -translate-y-14 translate-x-14" />
-                <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
 
-                <div className="relative z-10 flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                    <BookOpen className="h-6 w-6 text-white" />
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                    <BookOpen className="h-7 w-7 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-white">សូមជ្រើសរើស</h2>
-                    <div className="h-1 w-8 bg-white/30 rounded-full mt-2"></div>
+                    <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">
+                      ព័ត៌មានមុខងារ
+                    </h2>
+                    <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
+                    <p className="text-white/90 mt-2 text-base md:text-lg">
+                      ជ្រើសរើសថ្នាក់ និងមុខវិជ្ជាដើម្បីចាប់ផ្តើមបញ្ចូលពិន្ទុ
+                    </p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-2">
-                {/* Modern Filter Row - Enhanced Design */}
-                <div className="space-y-6">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+                      {/* Academic Year */}
+                      <div className="space-y-3 group">
+                        <label className="flex items-center space-x-2 text-sm md:text-base font-semibold text-blue-600 dark:text-gray-300 transition-colors duration-200">
+                          <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <CalendarDays className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <span>ឆ្នាំសិក្សា</span>
+                          <span className="text-red-500 text-base">*</span>
+                        </label>
+                        <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
+                          <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 group-hover:shadow-lg text-blue-600 dark:text-blue-400">
+                            <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                            {schoolYears.map((year) => (
+                              <SelectItem 
+                                key={year.schoolYearId} 
+                                value={year.schoolYearId.toString()}
+                                className="hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:bg-blue-100 dark:focus:bg-blue-900/30 focus:text-blue-900 dark:focus:text-blue-100"
+                              >
+                                {year.schoolYearCode}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                  {/* Filter Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                    {/* Academic Year */}
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
-                        <CalendarDays className="h-4 w-4 text-primary" />
-                        <span>ឆ្នាំសិក្សា</span>
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <Select value={selectedSchoolYear} onValueChange={handleSchoolYearChange}>
-                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
-                          <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          {schoolYears.map((year) => (
-                            <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                              {year.schoolYearCode}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                      {/* Semester */}
+                      <div className="space-y-3 group">
+                        <label className="flex items-center space-x-2 text-sm md:text-base font-semibold text-purple-600 dark:text-gray-300 transition-colors duration-200">
+                          <div className="p-1 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <BookOpen className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <span>ឆមាស</span>
+                          <span className="text-red-500 text-base">*</span>
+                        </label>
+                        <Select value={selectedSemester} onValueChange={handleSemesterChange}>
+                          <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-purple-200 dark:border-purple-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 group-hover:shadow-lg text-purple-600 dark:text-purple-400">
+                            <SelectValue placeholder="ជ្រើសរើសឆមាស" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                            {semesters.map((semester) => (
+                              <SelectItem 
+                                key={semester.semesterId} 
+                                value={semester.semesterId.toString()}
+                                className="hover:bg-purple-50 dark:hover:bg-purple-900/20 focus:bg-purple-100 dark:focus:bg-purple-900/30 focus:text-purple-900 dark:focus:text-purple-100"
+                              >
+                                {semester.semester}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    {/* Semester */}
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
-                        <BookOpen className="h-4 w-4 text-primary" />
-                        <span>ឆមាស</span>
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <Select value={selectedSemester} onValueChange={handleSemesterChange}>
-                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
-                          <SelectValue placeholder="ជ្រើសរើសឆមាស" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          {semesters.map((semester) => (
-                            <SelectItem key={semester.semesterId} value={semester.semesterId.toString()}>
-                              {semester.semester}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                      {/* Class */}
+                      <div className="space-y-3 group">
+                        <label className="flex items-center space-x-2 text-sm md:text-base font-semibold text-green-600 dark:text-gray-300 transition-colors duration-200">
+                          <div className="p-1 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <GraduationCap className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          </div>
+                          <span>ថ្នាក់</span>
+                          <span className="text-red-500 text-base">*</span>
+                        </label>
+                        <Select value={selectedCourse} onValueChange={handleCourseChange}>
+                          <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-green-200 dark:border-green-700 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 group-hover:shadow-lg text-green-600 dark:text-green-400">
+                            <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                            {filteredCourses.map((course) => (
+                              <SelectItem 
+                                key={course.courseId} 
+                                value={course.courseId.toString()}
+                                className="hover:bg-green-50 dark:hover:bg-green-900/20 focus:bg-green-100 dark:focus:bg-green-900/30 focus:text-green-900 dark:focus:text-green-100"
+                              >
+                                ថ្នាក់ទី {course.grade}{course.section}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    {/* Class */}
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
-                        <GraduationCap className="h-4 w-4 text-primary" />
-                        <span>ថ្នាក់</span>
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <Select value={selectedCourse} onValueChange={handleCourseChange}>
-                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
-                          <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          {filteredCourses.map((course) => (
-                            <SelectItem key={course.courseId} value={course.courseId.toString()}>
-                              ថ្នាក់ទី {course.grade}{course.section}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                      {/* Month */}
+                      <div className="space-y-3 group">
+                        <label className="flex items-center space-x-2 text-sm md:text-base font-semibold text-orange-600 dark:text-gray-300 transition-colors duration-200">
+                          <div className="p-1 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                            <CalendarDays className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <span>ខែ</span>
+                          <span className="text-red-500 text-base">*</span>
+                        </label>
+                        <Select value={selectedMonth} onValueChange={handleMonthChange}>
+                          <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-orange-200 dark:border-orange-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-300 group-hover:shadow-lg text-orange-600 dark:text-orange-400">
+                            <SelectValue placeholder="ជ្រើសរើសខែ" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                            {months.map((month) => (
+                              <SelectItem 
+                                key={month.value} 
+                                value={month.value}
+                                className="hover:bg-orange-50 dark:hover:bg-orange-900/20 focus:bg-orange-100 dark:focus:bg-orange-900/30 focus:text-orange-900 dark:focus:text-orange-100"
+                              >
+                                {month.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    {/* Month */}
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
-                        <CalendarDays className="h-4 w-4 text-primary" />
-                        <span>ខែ</span>
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <Select value={selectedMonth} onValueChange={handleMonthChange}>
-                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
-                          <SelectValue placeholder="ជ្រើសរើសខែ" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          {months.map((month) => (
-                            <SelectItem key={month.value} value={month.value}>
-                              {month.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                      {/* Grade Year */}
+                      <div className="space-y-3 group">
+                        <label className="flex items-center space-x-2 text-sm md:text-base font-semibold text-rose-600 dark:text-gray-300 transition-colors duration-200">
+                          <div className="p-1 bg-rose-100 dark:bg-rose-900/30 rounded-lg">
+                            <TrendingUp className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                          </div>
+                          <span>ឆ្នាំពិន្ទុ</span>
+                          <span className="text-red-500 text-base">*</span>
+                        </label>
+                        <Select value={selectedGradeYear} onValueChange={handleGradeYearChange}>
+                          <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-rose-200 dark:border-rose-700 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:focus:ring-rose-800 hover:border-rose-300 dark:hover:border-rose-600 transition-all duration-300 group-hover:shadow-lg text-rose-600 dark:text-rose-400">
+                            <SelectValue placeholder="ជ្រើសរើសឆ្នាំ" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                            {gradeYears.map((year) => (
+                              <SelectItem 
+                                key={year.value} 
+                                value={year.value}
+                                className="hover:bg-rose-50 dark:hover:bg-rose-900/20 focus:bg-rose-100 dark:focus:bg-rose-900/30 focus:text-rose-900 dark:focus:text-rose-100"
+                              >
+                                {year.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    {/* Grade Year */}
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
-                        <TrendingUp className="h-4 w-4 text-primary" />
-                        <span>ឆ្នាំពិន្ទុ</span>
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <Select value={selectedGradeYear} onValueChange={handleGradeYearChange}>
-                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 rounded-xl">
-                          <SelectValue placeholder="ជ្រើសរើសឆ្នាំ" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          {gradeYears.map((year) => (
-                            <SelectItem key={year.value} value={year.value}>
-                              {year.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Teacher Info */}
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2 text-base font-semibold text-primary dark:text-gray-300">
-                        <UserIcon className="h-4 w-4 text-primary" />
-                        <span>ឈ្មោះគ្រូ</span>
-                      </label>
-                      <div className="h-12 px-4 py-3 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 border-2 border-primary/20 dark:border-primary/30 rounded-xl flex items-center justify-center">
-                        <div className="text-center">
-                          <span className="text-base font-semibold text-primary dark:text-primary-foreground block">
-                            {getCurrentUser()?.lastname} {getCurrentUser()?.firstname}
-                          </span>
+                      {/* Teacher Info */}
+                      <div className="space-y-3 group">
+                        <label className="flex items-center space-x-2 text-sm md:text-base font-semibold text-indigo-600 dark:text-gray-300 transition-colors duration-200">
+                          <div className="p-1 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                            <UserIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                          </div>
+                          <span>ឈ្មោះគ្រូ</span>
+                        </label>
+                        <div className="h-12 px-4 py-3 bg-gradient-to-r from-indigo-50 via-indigo-100/50 to-indigo-50 dark:from-indigo-900/20 dark:via-indigo-800/30 dark:to-indigo-900/20 border-2 border-indigo-200 dark:border-indigo-700 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-all duration-300">
+                          <div className="text-center">
+                            <span className="text-sm md:text-base font-semibold text-indigo-700 dark:text-indigo-300 block">
+                              {getCurrentUser()?.lastname} {getCurrentUser()?.firstname}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Main Content - Side by Side Layout */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {/* Left Side: Student List */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div className="space-y-4">
-                  {/* Header */}
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                      <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          {/* Main Content - 30/70 Layout */}
+          <div className="grid grid-cols-1 xl:grid-cols-[4fr_6fr] gap-8">
+            {/* Modern Student List */}
+            <div className="relative group">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-purple-50/30 dark:from-purple-950/20 dark:via-pink-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(168,85,247,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_70%_30%,rgba(168,85,247,0.05),transparent_50%)]" />
+              
+              <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+                <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-4">
+                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
+                  
+                  <div className="relative z-10 flex items-center space-x-4">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                      <Users className="h-8 w-8 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-semibold text-primary dark:text-white">បញ្ជីឈ្មោះសិស្ស</h2>
-                      <p className="text-base text-gray-500 dark:text-gray-400">
-                        {filteredStudents.length} នាក់ • ជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ
-                      </p>
+                      <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">បញ្ជីឈ្មោះសិស្ស</h2>
+                      <div className="flex items-center space-x-4 mt-3">
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                          {filteredStudents.length} នាក់
+                        </Badge>
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                          ជ្រើសរើសសិស្ស
+                        </Badge>
+                      </div>
+                      <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
                     </div>
                   </div>
+                </CardHeader>
+                
+                <CardContent className="p-4">
+                  <div className="space-y-4">
                   
-                  {/* Search and Mode Toggle */}
-                  <div className="flex items-center space-x-3">
-                    {students.length > 0 && (
-                      <div className="relative">
-                        <Input
-                          type="text"
-                          placeholder="ស្វែងរកសិស្ស..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-64 h-9 pl-9"
-                        />
-                        <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      </div>
-                    )}
-                    
-                    {students.length > 0 && !editingGrade && (
-                      <Button
-                        variant={bulkMode ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => {
-                          setBulkMode(!bulkMode)
-                          setBulkScores({})
-                          setSelectedStudent(null)
-                        }}
-                        className="h-9"
-                      >
-                        {bulkMode ? 'បញ្ចូលតែមួយ' : 'បញ្ចូលជាក្រុម'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-4">
-                {loadingStudents ? (
-                  <div className="text-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
-                    <p className="text-base text-gray-500">កំពុងទាញយកសិស្ស...</p>
-                  </div>
-                ) : filteredStudents.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-                    {filteredStudents.map(student => (
-                      <div 
-                        key={student.studentId}
-                        className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
-                          selectedStudent?.studentId === student.studentId 
-                            ? 'bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-500 shadow-md' 
-                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 bg-gray-50 dark:bg-gray-800'
-                        }`}
-                        onClick={() => setSelectedStudent(student)}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-base flex-shrink-0">
-                            {student.photo ? (
-                              <img
-                                src={student.photo}
-                                alt={`${student.lastName} ${student.firstName}`}
-                                className="w-10 h-10 rounded-full object-cover"
-                              />
-                            ) : (
-                              student.firstName.charAt(0)
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-primary dark:text-white truncate text-base">
-                              {student.lastName} {student.firstName}
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
-                          </div>
+                    {/* Modern Search and Mode Toggle */}
+                    <div className="flex items-center space-x-4">
+                      {students.length > 0 && (
+                        <div className="relative flex-1">
+                          <Input
+                            type="text"
+                            placeholder="ស្វែងរកសិស្ស..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="h-12 text-base border-2 border-purple-200 focus:border-purple-500 focus:ring-purple-200 bg-white dark:bg-gray-800 rounded-xl pl-12 pr-4 shadow-sm hover:shadow-md transition-all duration-200 focus:ring-2 focus:ring-purple-200/50"
+                          />
+                          <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-purple-400" />
+                          {searchTerm && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSearchTerm('')}
+                              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            >
+                              ✕
+                            </Button>
+                          )}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : searchTerm ? (
-                  <div className="text-center py-8">
-                    <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-gray-500 font-medium">មិនរកឃើញសិស្ស</p>
-                    <p className="text-base text-gray-400">សូមស្វែងរកឈ្មោះផ្សេង</p>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-gray-500 font-medium">សូមបំពេញគ្រប់ផ្នែកដើម្បីមើលបញ្ជីសិស្ស</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Side: Score Input */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                    <PlusIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-primary dark:text-white">
-                      {editingGrade ? 'កែសម្រួលពិន្ទុ' : bulkMode ? 'បញ្ចូលពិន្ទុជាក្រុម' : 'បញ្ចូលពិន្ទុ'}
-                    </h2>
-                    <p className="text-base text-gray-500 dark:text-gray-400">
-                      {bulkMode ? 'បញ្ចូលពិន្ទុសម្រាប់សិស្សច្រើននាក់' : 'បញ្ចូលពិន្ទុសម្រាប់សិស្សម្នាក់'}
-                    </p>
-                  </div>
+                      )}
+                      
+                      {students.length > 0 && !editingGrade && (
+                        <Button
+                          variant={bulkMode ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setBulkMode(!bulkMode)
+                            setBulkScores({})
+                            setSelectedStudent(null)
+                            // If switching to bulk mode, fetch grades for the course
+                            if (!bulkMode && selectedCourse && selectedSemester) {
+                              console.log('🔍 Switching to bulk mode, fetching grades for course')
+                              fetchGradesForCourse()
+                            }
+                          }}
+                          className={`h-12 px-6 font-semibold rounded-xl transition-all duration-300 hover:scale-105 ${
+                            bulkMode 
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg' 
+                              : 'border-2 border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-300 dark:hover:bg-purple-900/20'
+                          }`}
+                        >
+                          {bulkMode ? 'បញ្ចូលតែមួយ' : 'បញ្ចូលជាក្រុម'}
+                        </Button>
+                      )}
+                    </div>
                 </div>
-              </div>
+              </CardContent>
               
-              <div className="p-4">
-                    {bulkMode ? (
-                      <div className="space-y-4">
-                        {/* Subject Selection */}
+              <CardContent className="p-4">
+                    {loadingStudents ? (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-full flex items-center justify-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <p className="text-lg font-medium text-gray-700 dark:text-gray-300">កំពុងទាញយកសិស្ស...</p>
+                      </div>
+                    ) : filteredStudents.length > 0 ? (
+                      <div className="space-y-3 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 dark:scrollbar-thumb-purple-600 scrollbar-track-transparent hover:scrollbar-thumb-purple-400 dark:hover:scrollbar-thumb-purple-500 px-2 py-2">
+                        {filteredStudents.map((student, index) => (
+                          <div 
+                            key={student.studentId}
+                            className={`group relative overflow-hidden rounded-2xl p-4 transition-all duration-300 ${
+                              selectedStudent?.studentId === student.studentId 
+                                ? 'border-2 border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 cursor-pointer hover:shadow-lg hover:scale-[1.02]' 
+                                : 'border-2 border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 cursor-pointer hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-lg hover:scale-[1.02]'
+                            }`}
+                            onClick={() => setSelectedStudent(student)}
+                          >
+                            {/* Background Pattern */}
+                            <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                              selectedStudent?.studentId === student.studentId
+                                ? 'bg-gradient-to-r from-purple-50/50 to-pink-50/50 dark:from-purple-900/10 dark:to-pink-900/10'
+                                : 'bg-gradient-to-r from-gray-50/50 to-gray-100/50 dark:from-gray-800/10 dark:to-gray-700/10'
+                            }`} />
+
+                            <div className="relative z-10 flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                {/* Student Number Badge */}
+                                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                  {index + 1}
+                                </div>
+                                
+                                <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900/30 dark:to-pink-800/30 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shadow-sm">
+                                  {student.photo ? (
+                                    <img
+                                      src={student.photo}
+                                      alt={`${student.lastName} ${student.firstName}`}
+                                      className="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-gray-700"
+                                    />
+                                  ) : (
+                                    <span className="text-lg font-semibold text-purple-600 dark:text-purple-300">
+                                      {student.firstName.charAt(0)}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <div className="flex-1">
+                                  <div className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
+                                    {student.lastName} {student.firstName}
+                                  </div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                    {getFormattedClass(student)}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {selectedStudent?.studentId === student.studentId && (
+                                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                  <CheckCircle className="h-5 w-5 text-white" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : searchTerm ? (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-full flex items-center justify-center">
+                          <Users className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">មិនរកឃើញសិស្ស</p>
+                        <p className="text-base text-gray-500 dark:text-gray-400">សូមស្វែងរកឈ្មោះផ្សេង</p>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-full flex items-center justify-center">
+                          <Users className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">សូមបំពេញគ្រប់ផ្នែកដើម្បីមើលបញ្ជីសិស្ស</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+            {/* Modern Score Input Section */}
+            <div className="relative group">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 via-emerald-50/20 to-teal-50/30 dark:from-green-950/20 dark:via-emerald-950/15 dark:to-teal-950/20 rounded-3xl -z-10" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.05),transparent_50%)]" />
+              
+              <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+                <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 text-white p-4">
+                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
+                  
+                  <div className="relative z-10 flex items-center space-x-4">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                      <PlusIcon className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">
+                        {editingGrade ? 'កែសម្រួលពិន្ទុ' : bulkMode ? 'បញ្ចូលពិន្ទុជាក្រុម' : 'បញ្ចូលពិន្ទុ'}
+                      </h2>
+                      <div className="flex items-center space-x-4 mt-3">
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                          {bulkMode ? 'បញ្ចូលពិន្ទុសម្រាប់សិស្សច្រើននាក់' : 'បញ្ចូលពិន្ទុសម្រាប់សិស្សម្នាក់'}
+                        </Badge>
+                      </div>
+                      <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
+                    </div>
+                  </div>
+                </CardHeader>
+              
+                <CardContent className="p-4">
+                  {bulkMode ? (
+                    <div className="space-y-6">
+                      {/* Modern Subject Selection */}
+                      <div className="p-4 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/30 dark:border-green-700/30 rounded-xl">
                         <div>
-                          <label className="block text-base font-medium mb-2 text-primary dark:text-gray-300">
-                            មុខវិជ្ជា <span className="text-red-500">*</span>
+                          <label className="block text-base font-semibold mb-3 text-teal-700 dark:text-teal-300 flex items-center gap-2">
+                            <BookOpen className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                            មុខវិជ្ជា
+                            <span className="text-red-500">*</span>
                           </label>
                           <Select value={selectedSubject} onValueChange={(value) => {
+                            console.log('🔍 Subject changed in bulk mode:', value)
                             setSelectedSubject(value)
                             checkExistingGrade(value)
                             // Initialize bulk scores with existing grades
-                            setTimeout(() => initializeBulkScores(), 100)
+                            setTimeout(() => {
+                              console.log('🔍 Calling initializeBulkScores from subject change')
+                              initializeBulkScores()
+                            }, 100)
                           }}>
-                            <SelectTrigger className="h-11">
+                            <SelectTrigger className="h-14 text-base font-medium border-2 border-teal-200 focus:border-teal-500 focus:ring-teal-200 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 focus:ring-4 focus:ring-teal-200/30 px-4">
                               <SelectValue placeholder="ជ្រើសរើសមុខវិជ្ជា" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-xl shadow-xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
                               {subjects.map((subject) => (
                                 <SelectItem key={subject.subjectId} value={subject.subjectId.toString()}>
                                   {subject.subjectName}
@@ -1350,133 +1644,178 @@ function AddScoreContent() {
                             </SelectContent>
                           </Select>
                         </div>
+                      </div>
 
-                        {/* Bulk Score Input - Compact Table */}
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-primary dark:text-white">
-                              បញ្ចូលពិន្ទុ ({filteredStudents.length} នាក់)
-                            </h3>
-                            <div className="text-sm text-gray-500">
+                      {/* Modern Bulk Score Input */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-300">
+                            បញ្ចូលពិន្ទុ ({filteredStudents.length} នាក់)
+                          </h3>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
                               បញ្ចូលពិន្ទុសម្រាប់សិស្សច្រើននាក់
-                            </div>
+                            </Badge>
+                            <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                              Debug: {Object.keys(bulkScores).length} scores
+                            </Badge>
+                            <Button
+                              type="button"
+                              onClick={() => {
+                                console.log('🔍 Manual trigger of initializeBulkScores')
+                                initializeBulkScores()
+                              }}
+                              className="h-8 px-3 text-xs bg-yellow-500 hover:bg-yellow-600 text-white"
+                            >
+                              Test Init
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={() => {
+                                console.log('🔍 Manual test: Setting test bulk scores')
+                                const testScores = {
+                                  1: { score: "85", comment: "Test comment 1" },
+                                  2: { score: "92", comment: "Test comment 2" }
+                                }
+                                console.log('🔍 Setting test scores:', testScores)
+                                setBulkScores(testScores)
+                              }}
+                              className="h-8 px-3 text-xs bg-purple-500 hover:bg-purple-600 text-white"
+                            >
+                              Test Data
+                            </Button>
                           </div>
-                          
-                          <div className="max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg">
-                            <div className="divide-y divide-gray-200 dark:divide-gray-600">
-                              {filteredStudents.map(student => (
-                                <div key={student.studentId} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                        </div>
+                        
+                        <div className="max-h-80 overflow-y-auto border-2 border-green-200 dark:border-green-800 rounded-xl bg-gradient-to-r from-green-50/30 to-emerald-50/30 dark:from-green-950/20 dark:to-emerald-950/20">
+                          <div className="divide-y divide-green-200 dark:divide-green-800">
+                            {filteredStudents.map((student, index) => (
+                              <div key={student.studentId} className="p-4 hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-colors duration-200">
+                                <div className="flex items-center space-x-4">
+                                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                                    {index + 1}
+                                  </div>
+                                  
+                                  <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-200 dark:from-green-900/30 dark:to-emerald-800/30 rounded-full flex items-center justify-center shadow-sm">
+                                    {student.photo ? (
+                                      <img
+                                        src={student.photo}
+                                        alt={`${student.lastName} ${student.firstName}`}
+                                        className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700"
+                                      />
+                                    ) : (
+                                      <span className="text-sm font-semibold text-green-600 dark:text-green-300">
+                                        {student.firstName.charAt(0)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-gray-900 dark:text-white text-base">
+                                      {student.lastName} {student.firstName}
+                                    </p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">{getFormattedClass(student)}</p>
+                                  </div>
+                                  
                                   <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                                      {student.photo ? (
-                                        <img
-                                          src={student.photo}
-                                          alt={`${student.lastName} ${student.firstName}`}
-                                          className="w-8 h-8 rounded-full object-cover"
-                                        />
-                                      ) : (
-                                        student.firstName.charAt(0)
-                                      )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="font-medium text-primary dark:text-white text-base truncate">
-                                        {student.lastName} {student.firstName}
-                                      </p>
-                                      <p className="text-sm text-gray-500 dark:text-gray-400">{getFormattedClass(student)}</p>
-                                    </div>
-                                    <div className="flex items-center space-x-3">
-                                      <Input
-                                        type="number"
-                                        placeholder="ពិន្ទុ"
-                                        value={bulkScores[student.studentId]?.score || ""}
-                                        onChange={(e) => handleBulkScoreChange(student.studentId, e.target.value)}
-                                        min="0"
-                                        max={getMaxScore(student)}
-                                        step="0.01"
-                                        className="w-24 h-9 text-center text-base"
-                                      />
-                                      <Input
-                                        type="text"
-                                        placeholder="មតិ"
-                                        value={bulkScores[student.studentId]?.comment || ""}
-                                        onChange={(e) => handleBulkCommentChange(student.studentId, e.target.value)}
-                                        className="w-44 h-9 text-base"
-                                      />
-                                    </div>
+                                    <Input
+                                      type="number"
+                                      placeholder="ពិន្ទុ"
+                                      value={bulkScores[student.studentId]?.score || ""}
+                                      onChange={(e) => handleBulkScoreChange(student.studentId, e.target.value)}
+                                      min="0"
+                                      max={getMaxScore(student)}
+                                      step="0.01"
+                                      className="w-24 h-10 text-center text-sm font-semibold border-2 border-green-200 focus:border-green-500 focus:ring-green-200 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:ring-2 focus:ring-green-200/50"
+                                      onFocus={() => console.log('🔍 Score input focused for student:', student.studentId, 'bulkScores:', bulkScores[student.studentId])}
+                                    />
+                                    <Input
+                                      type="text"
+                                      placeholder="មតិ"
+                                      value={bulkScores[student.studentId]?.comment || ""}
+                                      onChange={(e) => handleBulkCommentChange(student.studentId, e.target.value)}
+                                      className="w-44 h-10 text-sm border-2 border-green-200 focus:border-green-500 focus:ring-green-200 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:ring-2 focus:ring-green-200/50"
+                                      onFocus={() => console.log('🔍 Comment input focused for student:', student.studentId, 'bulkScores:', bulkScores[student.studentId])}
+                                    />
                                   </div>
                                 </div>
-                              ))}
-                            </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
+                      </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-2 pt-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => {
-                              setBulkMode(false)
-                              setBulkScores({})
-                              setSelectedSubject("")
-                            }}
-                            className="flex-1 h-10"
-                            disabled={submitting}
-                          >
-                            បោះបង់
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={handleBulkSubmit}
-                            className="flex-1 h-10 bg-green-600 hover:bg-green-700 text-white"
-                            disabled={submitting || !selectedSubject || Object.keys(bulkScores).length === 0}
-                          >
-                            {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                            បញ្ចូលពិន្ទុ
-                          </Button>
-                        </div>
+                      {/* Modern Action Buttons */}
+                      <div className="flex gap-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setBulkMode(false)
+                            setBulkScores({})
+                            setSelectedSubject("")
+                          }}
+                          className="flex-1 h-12 px-6 bg-white dark:bg-gray-800 border-2 border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                          disabled={submitting}
+                        >
+                          បោះបង់
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleBulkSubmit}
+                          className="flex-1 h-12 px-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                          disabled={submitting || !selectedSubject || Object.keys(bulkScores).length === 0}
+                        >
+                          {submitting ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
+                          បញ្ចូលពិន្ទុ
+                        </Button>
+                      </div>
                       </div>
                     ) : selectedStudent ? (
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Selected Student Info */}
-                        <div className="bg-gradient-to-r p-4 from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 shadow-sm hover:shadow-md transition-all duration-200">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Modern Selected Student Info */}
+                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
                               {selectedStudent.photo ? (
                                 <img
                                   src={selectedStudent.photo}
                                   alt={`${selectedStudent.lastName} ${selectedStudent.firstName}`}
-                                  className="w-12 h-12 rounded-full object-cover"
+                                  className="w-16 h-16 rounded-full object-cover border-2 border-white dark:border-gray-700"
                                 />
                               ) : (
                                 selectedStudent.firstName.charAt(0)
                               )}
                             </div>
-                            <div>
-                              <h3 className="font-semibold text-primary dark:text-white">{selectedStudent.lastName} {selectedStudent.firstName}</h3>
-                              <p className="text-base text-gray-600 dark:text-gray-400 pt-1 pb-1">{getFormattedClass(selectedStudent)}</p>
-                              <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                                ពិន្ទុអតិបរមា: {getMaxScore(selectedStudent)} ពិន្ទុ
-                              </p>
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{selectedStudent.lastName} {selectedStudent.firstName}</h3>
+                              <p className="text-base text-gray-600 dark:text-gray-400 font-medium mb-2">{getFormattedClass(selectedStudent)}</p>
+                              <div className="flex items-center space-x-2">
+                                <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
+                                  ពិន្ទុអតិបរមា: {getMaxScore(selectedStudent)} ពិន្ទុ
+                                </Badge>
+                              </div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Score Input Fields */}
-                        <div className="space-y-4 pt-4">
-                          {/* Subject Selection */}
-                          <div>
-                            <label className="block text-base font-medium mb-2 text-primary dark:text-gray-300">
-                              មុខវិជ្ជា <span className="text-red-500">*</span>
+                        {/* Modern Score Input Fields */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Modern Subject Selection */}
+                          <div className="p-4 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/30 dark:border-green-700/30 rounded-xl">
+                            <label className="block text-base font-semibold mb-3 text-teal-700 dark:text-teal-300 flex items-center gap-2">
+                              <BookOpen className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                              មុខវិជ្ជា
+                              <span className="text-red-500">*</span>
                             </label>
                             <Select value={selectedSubject} onValueChange={(value) => {
                               setSelectedSubject(value)
                               checkExistingGrade(value)
                             }}>
-                              <SelectTrigger className="h-11">
+                              <SelectTrigger className="h-14 text-base font-medium border-2 border-teal-200 focus:border-teal-500 focus:ring-teal-200 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 focus:ring-4 focus:ring-teal-200/30 px-4">
                                 <SelectValue placeholder="ជ្រើសរើសមុខវិជ្ជា" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="rounded-xl shadow-xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
                                 {subjects.map((subject) => (
                                   <SelectItem key={subject.subjectId} value={subject.subjectId.toString()}>
                                     {subject.subjectName}
@@ -1486,13 +1825,14 @@ function AddScoreContent() {
                             </Select>
                           </div>
 
-                          {/* Score Input */}
-                          <div className="space-y-3">
-                            <label className="block text-base font-medium text-primary dark:text-gray-300">
-                              លេខពិន្ទុ <span className="text-red-500">*</span>
+                          {/* Modern Score Input */}
+                          <div className="p-4 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/30 dark:border-green-700/30 rounded-xl">
+                            <label className="block text-base font-semibold mb-3 text-teal-700 dark:text-teal-300 flex items-center gap-2">
+                              <Hash className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                              លេខពិន្ទុ
+                              <span className="text-red-500">*</span>
                             </label>
                             
-                            {/* Score Input with Grade Preview */}
                             <div className="relative">
                               <Input
                                 type="number"
@@ -1503,60 +1843,60 @@ function AddScoreContent() {
                                 max={selectedStudent ? getMaxScore(selectedStudent) : 100}
                                 step="0.01"
                                 placeholder={selectedStudent ? `បញ្ចូលពិន្ទុ (0-${getMaxScore(selectedStudent)})` : "បញ្ចូលពិន្ទុ (0-100)"}
-                                className={`h-12 text-lg text-center font-semibold ${
+                                className={`h-12 text-lg text-center font-semibold border-2 rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200 ${
                                   scoreError 
-                                    ? 'border-red-500 focus:border-red-500' 
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-200 focus:ring-2 focus:ring-red-200/50' 
                                     : isValidScore && score 
-                                      ? 'border-green-500 focus:border-green-500' 
-                                      : ''
+                                      ? 'border-green-500 focus:border-green-500 focus:ring-green-200 focus:ring-2 focus:ring-green-200/50' 
+                                      : 'border-green-200 focus:border-green-500 focus:ring-green-200 focus:ring-2 focus:ring-green-200/50'
                                 }`}
                               />
-                              
                             </div>
 
                             {/* Error Message */}
                             {scoreError && (
-                              <div className="flex items-center space-x-2 text-red-600 text-base">
+                              <div className="flex items-center space-x-2 text-red-600 text-base mt-3">
                                 <AlertCircle className="h-4 w-4" />
                                 <span>{scoreError}</span>
                               </div>
                             )}
                           </div>
-
-                          {/* Comment Input */}
-                          <div>
-                            <label className="block text-base font-medium mb-2 text-primary dark:text-gray-300">
+                        </div>
+                          {/* Modern Comment Input */}
+                          <div className="p-4 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/30 dark:border-green-700/30 rounded-xl">
+                            <label className="block text-base font-semibold mb-3 text-teal-700 dark:text-teal-300 flex items-center gap-2">
+                              <Edit3 className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                               មតិផ្សេងៗ
-                              <span className="text-gray-400 text-sm ml-2">(ជម្រើស)</span>
+                              <span className="text-gray-400 text-sm font-normal">(ជម្រើស)</span>
                             </label>
                             <Input
                               value={comment}
                               onChange={(e) => setComment(e.target.value)}
-                              placeholder="បញ្ចូលមតិឬយោបល់បន្ថែម"
-                              className="h-11"
+                              placeholder="បញ្ចូលមតិឬយោបល់បន្ថែម(ដាក់ក្នុងសៀវភៅតាមដាន)"
+                              className="h-12 text-base border-2 border-green-200 focus:border-green-500 focus:ring-green-200 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:ring-2 focus:ring-green-200/50"
                             />
                           </div>
-                        </div>
+                        
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-2 pt-2">
+                        {/* Modern Action Buttons */}
+                        <div className="flex gap-4">
                           {editingGrade ? (
                             <>
                               <Button 
                                 type="button" 
                                 variant="outline" 
                                 onClick={handleCancelEdit}
-                                className="flex-1 h-10"
+                                className="flex-1 h-12 px-6 bg-white dark:bg-gray-800 border-2 border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
                                 disabled={submitting}
                               >
                                 បោះបង់
                               </Button>
                               <Button 
                                 type="submit" 
-                                className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white"
+                                className="flex-1 h-12 px-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 disabled={submitting || !isValidScore || !selectedSubject || !score}
                               >
-                                {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                {submitting ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
                                 ធ្វើបច្ចុប្បន្នភាព
                               </Button>
                             </>
@@ -1573,17 +1913,17 @@ function AddScoreContent() {
                                   setIsValidScore(true)
                                   setEditingGrade(null)
                                 }}
-                                className="flex-1 h-10"
+                                className="flex-1 h-12 px-6 bg-white dark:bg-gray-800 border-2 border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
                                 disabled={submitting}
                               >
                                 សម្អាត
                               </Button>
                               <Button 
                                 type="submit" 
-                                className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white"
+                                className="flex-1 h-12 px-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 disabled={submitting || !isValidScore || !selectedSubject || !score}
                               >
-                                {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                {submitting ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
                                 បន្ថែមពិន្ទុ
                               </Button>
                             </>
@@ -1591,12 +1931,14 @@ function AddScoreContent() {
                         </div>
                       </form>
                     ) : (
-                      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                        <PlusIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium mb-2">
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-full flex items-center justify-center">
+                          <PlusIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
+                        </div>
+                        <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
                           {bulkMode ? 'បញ្ចូលពិន្ទុជាក្រុម' : 'ជ្រើសរើសសិស្ស'}
                         </p>
-                        <p className="text-base">
+                        <p className="text-base text-gray-500 dark:text-gray-400">
                           {bulkMode 
                             ? 'សូមជ្រើសរើសមុខវិជ្ជាដើម្បីបញ្ចូលពិន្ទុសម្រាប់សិស្សទាំងអស់'
                             : 'សូមជ្រើសរើសសិស្សដើម្បីបញ្ចូលពិន្ទុ'
@@ -1604,267 +1946,228 @@ function AddScoreContent() {
                         </p>
                       </div>
                     )}
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
 
-          {/* Bottom Section: Grade List - Full Width */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                      <Hash className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          {/* Modern Grade List Section */}
+          {selectedStudent && (
+          <div className="relative group">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-amber-50/20 to-yellow-50/30 dark:from-orange-950/20 dark:via-amber-950/15 dark:to-yellow-950/20 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(251,146,60,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(251,146,60,0.05),transparent_50%)]" />
+            
+            <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-orange-500 via-amber-600 to-yellow-600 text-white p-4">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
+                
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                    <Hash className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">
+                      បញ្ជីពិន្ទុសិស្ស {selectedStudent?.lastName} {selectedStudent?.firstName || ''}
+                    </h2>
+                    <div className="flex items-center space-x-4 mt-3">
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                        សរុប {totalGrades} ពិន្ទុ
+                      </Badge>
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                        មធ្យមភាគ {averageScore}
+                      </Badge>
+                      {gradeListMonth !== 'all' && gradeListYear !== 'all' && (
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                          ខែ {gradeListMonth}/{gradeListYear}
+                        </Badge>
+                      )}
+                      {gradeListMonth !== 'all' && gradeListYear === 'all' && (
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                          ខែ {gradeListMonth}
+                        </Badge>
+                      )}
+                      {gradeListMonth === 'all' && gradeListYear !== 'all' && (
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                          ឆ្នាំ {gradeListYear}
+                        </Badge>
+                      )}
                     </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-primary dark:text-white">
-                        បញ្ជីពិន្ទុសិស្ស {selectedStudent?.lastName} {selectedStudent?.firstName || ''}
-                      </h2>
-                      <p className="text-base text-gray-500 dark:text-gray-400">
-                        សរុប {totalGrades} ពិន្ទុ • មធ្យមភាគ {averageScore}
-                        {gradeListMonth !== 'all' && gradeListYear !== 'all' && (
-                          <span className="ml-2 text-green-600 dark:text-green-400">
-                            (ខែ {gradeListMonth}/{gradeListYear.slice(-2)})
-                          </span>
-                        )}
-                        {gradeListMonth !== 'all' && gradeListYear === 'all' && (
-                          <span className="ml-2 text-blue-600 dark:text-blue-400">
-                            (ខែ {gradeListMonth})
-                          </span>
-                        )}
-                        {gradeListMonth === 'all' && gradeListYear !== 'all' && (
-                          <span className="ml-2 text-purple-600 dark:text-purple-400">
-                            (ឆ្នាំ {gradeListYear})
-                          </span>
-                        )}
-                      </p>
-                    </div>
+                    <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
                   </div>
                   
-                  {/* Grade List Filters */}
-                  {selectedStudent && grades.length > 0 && (
-                    <div className="space-y-2">
-                      {/* Auto-sync explanation and toggle */}
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-1">
-                          <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                          <span>តម្រងនេះនឹងសម្រួលដោយស្វ័យប្រវត្តិពីតម្រងខាងលើ</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <label className="text-sm text-gray-600 dark:text-gray-400">សម្រួលស្វ័យប្រវត្តិ:</label>
-                          <button
-                            onClick={() => setAutoSyncEnabled(!autoSyncEnabled)}
-                            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
-                              autoSyncEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                                autoSyncEnabled ? 'translate-x-3.5' : 'translate-x-0.5'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                      {/* Sync Status Indicator */}
-                      {autoSyncEnabled && ((selectedMonth && selectedMonth !== '') || (selectedGradeYear && selectedGradeYear !== '')) ? (
-                        <div className="flex items-center space-x-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-md">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                            តម្រងដោយស្វ័យប្រវត្តិ
-                          </span>
-                        </div>
-                      ) : !autoSyncEnabled && (gradeListMonth !== 'all' || gradeListYear !== 'all') ? (
-                        <div className="flex items-center space-x-1 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-md">
-                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                          <span className="text-sm text-orange-600 dark:text-orange-400 font-medium">
-                            តម្រងដោយដៃ
-                          </span>
-                        </div>
-                      ) : (gradeListMonth !== 'all' || gradeListYear !== 'all') ? (
-                        <div className="flex items-center space-x-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-md">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                            កំពុងតម្រង
-                          </span>
-                        </div>
-                      ) : null}
-                      <div className="flex items-center space-x-2">
-                        <label className="text-base font-medium text-primary dark:text-gray-300">ខែ</label>
-                        <Select value={gradeListMonth} onValueChange={setGradeListMonth}>
-                          <SelectTrigger className="w-24 h-8">
-                            <SelectValue placeholder="ទាំងអស់" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">ទាំងអស់</SelectItem>
-                            {Array.from({ length: 12 }, (_, i) => {
-                              const month = String(i + 1).padStart(2, '0')
-                              const monthNames = [
-                                'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
-                                'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
-                              ]
-                              return (
-                                <SelectItem key={month} value={month}>
-                                  {monthNames[i]}
-                                </SelectItem>
-                              )
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <label className="text-base font-medium text-primary dark:text-gray-300">ឆ្នាំ</label>
-                        <Select value={gradeListYear} onValueChange={setGradeListYear}>
-                          <SelectTrigger className="w-30 h-8">
-                            <SelectValue placeholder="ទាំងអស់" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">ទាំងអស់</SelectItem>
-                            {gradeYears.map((year) => (
-                              <SelectItem key={year.value} value={year.value}>
-                                {year.label}
+                  {/* Header Filter Controls - Right Side */}
+                  <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-3">
+                      <label className="text-base font-semibold text-white">ខែ</label>
+                      <Select value={gradeListMonth} onValueChange={setGradeListMonth}>
+                        <SelectTrigger className="w-32 h-12 text-base font-semibold border-2 border-white/40 bg-white/30 backdrop-blur-sm text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 focus:ring-2 focus:ring-white/50 px-4">
+                          <SelectValue placeholder="ទាំងអស់" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                          <SelectItem value="all" className="text-base">ទាំងអស់</SelectItem>
+                          {Array.from({ length: 12 }, (_, i) => {
+                            const month = String(i + 1).padStart(2, '0')
+                            const monthNames = [
+                              'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
+                              'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+                            ]
+                            return (
+                              <SelectItem key={month} value={month} className="text-base">
+                                {monthNames[i]}
                               </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      {((gradeListMonth && gradeListMonth !== 'all') || (gradeListYear && gradeListYear !== 'all')) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setGradeListMonth("all")
-                            setGradeListYear("all")
-                          }}
-                          className="h-8 px-3"
-                        >
-                          សម្អាត
-                        </Button>
-                      )}
-                      </div>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  )}
+                    
+                    <div className="flex items-center space-x-3">
+                      <label className="text-base font-semibold text-white">ឆ្នាំ</label>
+                      <Select value={gradeListYear} onValueChange={setGradeListYear}>
+                        <SelectTrigger className="w-32 h-12 text-base font-semibold border-2 border-white/40 bg-white/30 backdrop-blur-sm text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 focus:ring-2 focus:ring-white/50 px-4">
+                          <SelectValue placeholder="ទាំងអស់" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
+                          <SelectItem value="all" className="text-base">ទាំងអស់</SelectItem>
+                          {gradeYears.map((year) => (
+                            <SelectItem key={year.value} value={year.value} className="text-base">
+                              {year.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* Clear Filters Button */}
+                    {((gradeListMonth && gradeListMonth !== 'all') || (gradeListYear && gradeListYear !== 'all')) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setGradeListMonth("all")
+                          setGradeListYear("all")
+                        }}
+                        className="h-12 px-6 text-base font-semibold text-white hover:text-white hover:bg-white/30 rounded-xl transition-all duration-300"
+                      >
+                        សម្អាត
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            
-            <div className="p-4">
+              </CardHeader>
+              
+              <CardContent className="p-8">
+                
+                
+                {/* Grade List Display */}
                 {selectedStudent ? (
-                  <>
-                    {loadingGrades ? (
-                      <div className="text-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-purple-600" />
-                        <p className="text-base text-gray-500">កំពុងទាញយកពិន្ទុ...</p>
-                      </div>
-                    ) : filteredGrades.length > 0 ? (
-                      <>
-                        {/* Compact Grade List */}
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {filteredGrades.map((grade) => (
-                            <div key={grade.gradeId} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                              <div className="flex items-center space-x-4 flex-1">
-                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-base">
-                                  {grade.subject.subjectName.charAt(0)}
+                  filteredGrades.length > 0 ? (
+                    <div className="space-y-3 mt-2">
+
+                      <div className="grid gap-3">
+                        {filteredGrades.map((grade, index) => (
+                          <div
+                            key={grade.gradeId}
+                            className="group relative overflow-hidden rounded-xl p-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-2 border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                {/* Grade Number Badge */}
+                                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                  {index + 1}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-primary dark:text-white text-base">
-                                    {grade.subject.subjectName}
-                                  </p>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {grade.gradeDate} • {grade.user ? `${grade.user.lastname} ${grade.user.firstname}` : 'មិនមាន'}
-                                    {grade.gradeDate && (
-                                      <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-sm">
-                                        {grade.gradeDate}
-                                      </span>
-                                    )}
-                                  </p>
+                                
+                                {/* Subject Info */}
+                                <div className="flex-1">
+                                  <div className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-300 transition-colors duration-300">
+                                    {grade.subject?.subjectName || 'មុខវិជ្ជា'}
+                                  </div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                    {(() => {
+                                      // Parse gradeDate (format: "MM/YY")
+                                      const [month, year] = grade.gradeDate ? grade.gradeDate.split('/') : ['', '']
+                                      const monthNames = [
+                                        'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
+                                        'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+                                      ]
+                                      const monthName = month && parseInt(month) <= 12 ? monthNames[parseInt(month) - 1] : 'N/A'
+                                      const fullYear = year ? `20${year}` : 'N/A'
+                                      const semesterText = grade.semester?.semester || 'N/A'
+                                      const inputDate = grade.createdAt ? new Date(grade.createdAt).toLocaleDateString('en-GB') : 'N/A'
+                                      const teacherName = grade.user ? `${grade.user.lastname}${grade.user.firstname}` : 'N/A'
+                                      
+                                      let infoText = `ខែ${monthName} ឆ្នាំ${fullYear} • ${semesterText} • ថ្ងៃខែឆ្នាំបញ្ចូល: ${inputDate} • គ្រូដែលបញ្ចូល: ${teacherName}`
+                                      
+                                      return infoText
+                                    })()}
+                                  </div>
                                 </div>
                               </div>
                               
+                              {/* Score Display */}
                               <div className="flex items-center space-x-3">
                                 <div className="text-right">
-                                  <span className={`px-3 py-1 rounded-full text-base font-bold ${
-                                    grade.grade >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                                    grade.grade >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
-                                    grade.grade >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                                    'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                                  }`}>
+                                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                                     {grade.grade}
-                                  </span>
+                                  </div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    ពិន្ទុ
+                                  </div>
                                 </div>
                                 
-                                <div className="flex space-x-1">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0 text-blue-600 border-blue-300 hover:bg-blue-50"
-                                    onClick={() => handleEdit(grade)}
+                                {/* Action Buttons */}
+                                <div className="flex items-center space-x-2">
+                                  {/* Edit Button */}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingGrade(grade)
+                                      setScore(grade.grade.toString())
+                                      setComment(grade.gradeComment || "")
+                                      setSelectedSubject(grade.subjectId.toString())
+                                    }}
+                                    className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900/20 rounded-xl p-2 group-hover:scale-110 transition-all duration-300"
                                   >
-                                    <Edit3 className="h-3 w-3" />
+                                    <Edit3 className="h-4 w-4" />
                                   </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0 text-red-600 border-red-300 hover:bg-red-50"
-                                    onClick={() => handleDelete(grade.gradeId)}
+                                  
+                                  {/* Delete Button */}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteClick(grade)}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-xl p-2 group-hover:scale-110 transition-all duration-300"
                                   >
-                                    <Trash2 className="h-3 w-3" />
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
-
-                        {/* Stats Summary - Compact */}
-                        <div className="mt-6 grid grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <div className="text-center">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">ចំនួនពិន្ទុ</p>
-                            <p className="text-lg font-bold text-primary dark:text-white">{totalGrades}</p>
+                            
+                            {/* Comment Display */}
+                            {grade.gradeComment && (
+                              <div className="mt-3 pt-3 border-t border-orange-200/50 dark:border-orange-700/50">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  <span className="font-medium">មតិ:</span> {grade.gradeComment}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <div className="text-center">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">សរុបពិន្ទុ</p>
-                            <p className="text-lg font-bold text-primary dark:text-white">{totalPoints}</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">មធ្យមភាគ</p>
-                            <p className="text-lg font-bold text-primary dark:text-white">{averageScore}</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">ថ្នាក់</p>
-                            <p className="text-lg font-bold text-primary dark:text-white">{selectedStudent ? getFormattedClass(selectedStudent) : '-'}</p>
-                          </div>
-                        </div>
-                        </>
-                      ) : grades.length > 0 ? (
-                        <div className="text-center py-8">
-                          <Hash className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                          <p className="text-gray-500 font-medium">មិនរកឃើញពិន្ទុ</p>
-                          <p className="text-base text-gray-400">
-                            មិនមានពិន្ទុសម្រាប់ខែ និងឆ្នាំដែលបានជ្រើសរើស
-                          </p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setGradeListMonth("all")
-                              setGradeListYear("all")
-                            }}
-                            className="mt-3"
-                          >
-                            មើលពិន្ទុទាំងអស់
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <CheckCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                          <p className="text-gray-500 font-medium">មិនមានពិន្ទុ</p>
-                          <p className="text-base text-gray-400">សិស្សនេះមិនទាន់មានពិន្ទុនៅឡើយទេ</p>
-                        </div>
-                      )}
-                  </>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Hash className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p className="text-gray-500 font-medium">គ្មានពិន្ទុ</p>
+                      <p className="text-base text-gray-400">សិស្សនេះមិនទាន់មានពិន្ទុ</p>
+                    </div>
+                  )
                 ) : (
                   <div className="text-center py-8">
                     <Hash className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -1872,10 +2175,84 @@ function AddScoreContent() {
                     <p className="text-base text-gray-400">សូមជ្រើសរើសសិស្សដើម្បីមើលពិន្ទុ</p>
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
+          )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="max-w-md bg-gradient-to-br from-white via-red-50/30 to-orange-50/20 dark:from-gray-900 dark:via-red-950/30 dark:to-orange-950/20 backdrop-blur-xl border-0 shadow-2xl dark:shadow-red-900/20 rounded-2xl">
+          <DialogHeader className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-red-100 dark:bg-red-900/40 rounded-xl shadow-lg dark:shadow-red-900/20">
+                <Trash2 className="h-6 w-6 text-red-600 dark:text-red-300" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold text-red-800 dark:text-red-200">
+                  លុបពិន្ទុ
+                </DialogTitle>
+                <DialogDescription className="text-red-700 dark:text-red-300 font-medium">
+                  តើអ្នកប្រាកដជាចង់លុបពិន្ទុនេះមែនទេ?
+                </DialogDescription>
+              </div>
+            </div>
+            
+            {gradeToDelete && (
+              <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/40 dark:to-orange-950/40 border border-red-200 dark:border-red-700 rounded-xl shadow-sm dark:shadow-red-900/10">
+                <div className="space-y-2">
+                  <div className="font-semibold text-gray-900 dark:text-white">
+                    {gradeToDelete.subject?.subjectName || 'មុខវិជ្ជា'}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    ពិន្ទុ: <span className="font-bold text-red-600 dark:text-red-400">{gradeToDelete.grade}</span>
+                  </div>
+                  {gradeToDelete.gradeComment && (
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      មតិ: {gradeToDelete.gradeComment}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </DialogHeader>
+          
+          <DialogFooter className="flex justify-between items-center gap-4 pt-6 border-t-2 border-red-200/50 dark:border-red-700/50 bg-gradient-to-r from-white via-red-50/50 to-white dark:from-gray-900 dark:via-red-950/30 dark:to-gray-900 px-4 -mx-6 -mb-6 p-6">
+            <div className="text-xs text-red-600 dark:text-red-400 font-medium">
+              សកម្មភាពនេះមិនអាចត្រឡប់បាន
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={handleDeleteCancel}
+                disabled={deleting}
+                className="px-6 py-2 bg-white dark:bg-gray-800 border-2 border-red-200 dark:border-red-600 text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-sm dark:shadow-red-900/10"
+              >
+                បោះបង់
+              </Button>
+              <Button
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 text-white rounded-xl font-semibold shadow-lg dark:shadow-red-900/30 hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    កំពុងលុប...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    លុបពិន្ទុ
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 } // End of AddScoreContent component

@@ -1,0 +1,1192 @@
+{
+  "timestamp": "2025-09-28T14:16:25.200Z",
+  "summary": {
+    "totalFiles": 15,
+    "successful": 15,
+    "failed": 0
+  },
+  "analyses": [
+    {
+      "fileName": "tblAnnounce.xlsx",
+      "fileSize": 8921,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblAnnounce",
+          "range": "A1:D6",
+          "rowCount": 5,
+          "columnCount": 4,
+          "headers": [
+            "AnnounceID",
+            "Title",
+            "AnnounceDate",
+            "Announcement"
+          ],
+          "sampleData": [
+            [
+              1,
+              "ថ្ងៃឈប់បុណ្យ",
+              41167,
+              "This is a test"
+            ],
+            [
+              2,
+              "ប្រជុំ",
+              41177,
+              "Meeting at the School"
+            ],
+            [
+              3,
+              "ប្រជុំ",
+              41157,
+              "Test"
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblAttendance.xlsx",
+      "fileSize": 1418916,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblAttendance",
+          "range": "A1:H30771",
+          "rowCount": 30770,
+          "columnCount": 8,
+          "headers": [
+            "AttendanceID",
+            "CourseID",
+            "StudentID",
+            "AttendanceDate",
+            "Status",
+            "Comment",
+            "User",
+            "LastEdit"
+          ],
+          "sampleData": [
+            [
+              3621,
+              34,
+              221,
+              41620,
+              "Unexcused",
+              "",
+              12,
+              41620.1211226852
+            ],
+            [
+              3622,
+              35,
+              221,
+              41620,
+              "Unexcused",
+              "",
+              12,
+              41620.1213425926
+            ],
+            [
+              3623,
+              35,
+              245,
+              41620,
+              "Excused",
+              "ឈឺ",
+              12,
+              41620.1215856482
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblCourse.xlsx",
+      "fileSize": 17031,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblCourse",
+          "range": "A1:I259",
+          "rowCount": 258,
+          "columnCount": 9,
+          "headers": [
+            "CourseID",
+            "SchoolYearID",
+            "StaffID",
+            "StaffID2",
+            "StaffID3",
+            "StaffID4",
+            "Grade",
+            "Section",
+            "CourseName"
+          ],
+          "sampleData": [
+            [
+              2,
+              1,
+              1,
+              "",
+              "",
+              "",
+              1,
+              "",
+              "ថ្នាក់ ទី 1A ព្រឹក"
+            ],
+            [
+              3,
+              1,
+              1,
+              "",
+              "",
+              "",
+              1,
+              "",
+              "ថ្នាក់ ទី 1A ល្ងាច"
+            ],
+            [
+              5,
+              1,
+              2,
+              "",
+              "",
+              "",
+              2,
+              "",
+              "ថ្នាក់ ទី 2A ព្រឹក"
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblEnrollment.xlsx",
+      "fileSize": 140695,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblEnrollment",
+          "range": "A1:F5727",
+          "rowCount": 5726,
+          "columnCount": 6,
+          "headers": [
+            "EnrollmentID",
+            "CourseID",
+            "StudentID",
+            "Drop",
+            "DropSemester",
+            "DropDate"
+          ],
+          "sampleData": [
+            [
+              33,
+              148,
+              25,
+              false,
+              "",
+              ""
+            ],
+            [
+              34,
+              114,
+              25,
+              false,
+              "",
+              ""
+            ],
+            [
+              35,
+              225,
+              26,
+              true,
+              "",
+              ""
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblGradeRankTemp1.xlsx",
+      "fileSize": 9549,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblGradeRankTemp1",
+          "range": "A1:E29",
+          "rowCount": 28,
+          "columnCount": 5,
+          "headers": [
+            "StudentID",
+            "SumOfGrade",
+            "AvgOfGrade",
+            "Sex",
+            "Enrolled"
+          ],
+          "sampleData": [
+            [
+              61,
+              675,
+              8.03571428571429,
+              "M",
+              true
+            ],
+            [
+              70,
+              549,
+              6.53571428571429,
+              "F",
+              true
+            ],
+            [
+              77,
+              529.5,
+              6.30357142857143,
+              "M",
+              true
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblGradeRankTemp2.xlsx",
+      "fileSize": 9154,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblGradeRankTemp2",
+          "range": "A1:C29",
+          "rowCount": 28,
+          "columnCount": 3,
+          "headers": [
+            "StudentID",
+            "SumOfGrade",
+            "GradeRank"
+          ],
+          "sampleData": [
+            [
+              61,
+              675,
+              5
+            ],
+            [
+              70,
+              549,
+              17
+            ],
+            [
+              77,
+              529.5,
+              18
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblGrades.xlsx",
+      "fileSize": 14225097,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblGrades",
+          "range": "A1:J308038",
+          "rowCount": 308037,
+          "columnCount": 10,
+          "headers": [
+            "GradeID",
+            "CourseID",
+            "StudentID",
+            "SubjectID",
+            "SemesterID",
+            "GradeDate",
+            "Grade",
+            "GradeComment",
+            "User",
+            "LastEdit"
+          ],
+          "sampleData": [
+            [
+              686,
+              5,
+              32,
+              26,
+              2,
+              40674,
+              9,
+              "",
+              "",
+              ""
+            ],
+            [
+              687,
+              5,
+              32,
+              27,
+              2,
+              40674,
+              9,
+              "",
+              "",
+              ""
+            ],
+            [
+              688,
+              5,
+              32,
+              22,
+              2,
+              40674,
+              9,
+              "",
+              "",
+              ""
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblPeople.xlsx",
+      "fileSize": 162507,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblPeople",
+          "range": "A1:V1529",
+          "rowCount": 1528,
+          "columnCount": 22,
+          "headers": [
+            "PeopleID",
+            "StudentID",
+            "FirstName",
+            "LastName",
+            "Relationship",
+            "PhoneNumber1",
+            "PhoneNumber2",
+            "PrimaryContact",
+            "Occupation",
+            "HouseNumber",
+            "Village",
+            "District",
+            "City",
+            "Province",
+            "BirthPlace",
+            "Christian",
+            "Church",
+            "Income",
+            "NumberOfChildren",
+            "LivingStandard",
+            "RentOwn",
+            "YearsInKC"
+          ],
+          "sampleData": [
+            [
+              159,
+              240,
+              "មុនីវឌ្ឍន៍",
+              "សុក",
+              "ឪពុក",
+              "087 861 286",
+              "",
+              true,
+              "រោងចក្រ",
+              "",
+              "នគរបាជ័យ",
+              "អំពិល",
+              "កំពង់សៀម",
+              "កំពង់ចាម",
+              "ភូមិទួលសូភី ឃុំទួលសូភី ស្រុកអូរាំងឪ ខេត្តកំពង់ចាម ប្រទេសកម្ពុជា",
+              false,
+              "",
+              800000,
+              2,
+              "",
+              "",
+              ""
+            ],
+            [
+              160,
+              233,
+              "សុខវិសាល",
+              "ហេង",
+              "ឪពុក",
+              "0966647364",
+              "",
+              true,
+              "គ្រូបង្រៀន",
+              "",
+              "ទី៧",
+              "វាលវង់",
+              "កំពង់ចាម",
+              "កំពង់ចាម",
+              "កំពង់ចាម",
+              true,
+              "",
+              300,
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              161,
+              233,
+              "សុដានី",
+              "នាង",
+              "ម្តាយ",
+              "0967762042​",
+              "",
+              true,
+              "លក់ដូរ",
+              "",
+              "ទី៧",
+              "វាលវង់",
+              "កំពង់ចាម",
+              "កំពង់ចាម",
+              "កំពង់ចាម",
+              true,
+              "",
+              100,
+              "",
+              "",
+              "",
+              ""
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblScholarships.xlsx",
+      "fileSize": 8598,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblScholarships",
+          "range": "A1:I1",
+          "rowCount": 0,
+          "columnCount": 9,
+          "headers": [
+            "ScholarshipID",
+            "CourseID",
+            "StudentID",
+            "Scholarship",
+            "HouseVisit",
+            "HouseVisitDate",
+            "HouseVisitComments",
+            "Approved",
+            "ApprovedBy"
+          ],
+          "sampleData": [],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblSchoolYear.xlsx",
+      "fileSize": 8830,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblSchoolYear",
+          "range": "A1:B16",
+          "rowCount": 15,
+          "columnCount": 2,
+          "headers": [
+            "SchoolYearID",
+            "SchoolYear"
+          ],
+          "sampleData": [
+            [
+              1,
+              "2010-2011"
+            ],
+            [
+              2,
+              "2011-2012"
+            ],
+            [
+              3,
+              "2012-2013"
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblSemester.xlsx",
+      "fileSize": 8550,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblSemester",
+          "range": "A1:B3",
+          "rowCount": 2,
+          "columnCount": 2,
+          "headers": [
+            "SemesterID",
+            "Semester"
+          ],
+          "sampleData": [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblSettings.xlsx",
+      "fileSize": 8618,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblSettings",
+          "range": "A1:E2",
+          "rowCount": 1,
+          "columnCount": 5,
+          "headers": [
+            "SettingsID",
+            "TimesAbsentEmail",
+            "SettingNumber",
+            "ToEmailAddress",
+            "CCEmailAddress"
+          ],
+          "sampleData": [
+            [
+              1,
+              6,
+              1,
+              "cgesler@gmail.com",
+              "makara.tan@gmail.com"
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblStaff.xlsx",
+      "fileSize": 10518,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblStaff",
+          "range": "A1:J27",
+          "rowCount": 26,
+          "columnCount": 10,
+          "headers": [
+            "StaffID",
+            "FirstName",
+            "LastName",
+            "Password",
+            "Active",
+            "Admin",
+            "LastLogin",
+            "Phonenumber",
+            "Phonenumber1",
+            "Phonenumber2"
+          ],
+          "sampleData": [
+            [
+              1,
+              "តុលា",
+              "គាំ",
+              "friendship",
+              0,
+              "",
+              41474.4503240741,
+              "",
+              "",
+              ""
+            ],
+            [
+              2,
+              "ឃុនណាង",
+              "ខាំ",
+              "friendship",
+              0,
+              "",
+              41456.6592939815,
+              "",
+              "",
+              ""
+            ],
+            [
+              3,
+              "ប៊ុនស្រ៊ុន",
+              "ខាយ",
+              "password",
+              0,
+              "",
+              41592.4331597222,
+              "",
+              "",
+              ""
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblStudents.xlsx",
+      "fileSize": 146029,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblStudents",
+          "range": "A1:AU753",
+          "rowCount": 752,
+          "columnCount": 47,
+          "headers": [
+            "StudentID",
+            "FirstName",
+            "LastName",
+            "Sex",
+            "Enrolled",
+            "DOB",
+            "HouseNumber",
+            "Village",
+            "Commune",
+            "District",
+            "Province",
+            "BirthPlace",
+            "StartingGrade",
+            "TransferFrom",
+            "Health",
+            "SignupDate",
+            "EnrolledDate",
+            "StopStudyDate",
+            "StopStudyReason",
+            "Picture",
+            "Note",
+            "DateAdded",
+            "AddedBy",
+            "Christian",
+            "Date Believed",
+            "Church",
+            "Healthy",
+            "Day to examine",
+            "Followup Date",
+            "Medical Notes",
+            "Latitude",
+            "Longitude",
+            "LiveWith",
+            "RentOwn",
+            "YearsInKC",
+            "LivingStandard",
+            "HelpSchool",
+            "TuitionAmountMonth",
+            "OrgHelp",
+            "OrgHelpName",
+            "Vaccine",
+            "Faith",
+            "ReferredBy",
+            "TuitionAmountMonthORyear",
+            "Student'sClothes",
+            "Student'sSupplies",
+            "NeedACar"
+          ],
+          "sampleData": [
+            [
+              26,
+              "ណារីន",
+              "សាន",
+              "M",
+              true,
+              36816,
+              "",
+              "ជ្រោយថ្ម",
+              "បឹង កុក",
+              "កំពង់ចាម",
+              "កំពង់ចាម",
+              "កំពង់ចាម",
+              "1",
+              "",
+              "",
+              40134,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              false,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "12.003777",
+              "105.461173",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              false,
+              "",
+              true,
+              "",
+              "",
+              "",
+              false,
+              false,
+              false
+            ],
+            [
+              27,
+              "ណាវី",
+              "ចេង",
+              "F",
+              false,
+              37618,
+              "",
+              "",
+              "សំបួរមាស",
+              "កំពង់ចាម",
+              "កំពង់ចាម",
+              " កំពង់ចាម ទី ១៥ កំពង់ចាម",
+              "1",
+              "",
+              "",
+              "",
+              "",
+              43530,
+              "",
+              "",
+              "",
+              "",
+              "",
+              true,
+              40909,
+              "ម៉ូមន សាលាមិត្តភាព",
+              "",
+              "",
+              "",
+              "",
+              "11.97756",
+              "105.450421",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              false,
+              "",
+              false,
+              "",
+              "",
+              "",
+              false,
+              false,
+              false
+            ],
+            [
+              28,
+              "តុលា",
+              "ទី",
+              "M",
+              false,
+              37552,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "ភូមិពាមក្នុង ពាមកោះស្នា ស្ទឹងត្រង់",
+              "",
+              "",
+              "",
+              "",
+              "",
+              42675,
+              "",
+              "",
+              "",
+              "",
+              "",
+              false,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              false,
+              "",
+              false,
+              "",
+              "",
+              "",
+              false,
+              false,
+              false
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    },
+    {
+      "fileName": "tblSubjects.xlsx",
+      "fileSize": 9573,
+      "sheetCount": 1,
+      "sheets": [
+        {
+          "name": "tblSubjects",
+          "range": "A1:C30",
+          "rowCount": 29,
+          "columnCount": 3,
+          "headers": [
+            "SubjectID",
+            "Subject",
+            "SortOrder"
+          ],
+          "sampleData": [
+            [
+              22,
+              "នព្វន្ត",
+              13
+            ],
+            [
+              23,
+              "ធរណីមាត្រ",
+              15
+            ],
+            [
+              24,
+              "អង់គ្លេស",
+              20
+            ]
+          ],
+          "emptyRows": 0
+        }
+      ]
+    }
+  ],
+  "fieldMappingSuggestions": {
+    "attendance": {
+      "sourceFile": "tblAttendance.xlsx",
+      "sheetName": "tblAttendance",
+      "headers": [
+        "AttendanceID",
+        "CourseID",
+        "StudentID",
+        "AttendanceDate",
+        "Status",
+        "Comment",
+        "User",
+        "LastEdit"
+      ],
+      "fieldMappings": {
+        "AttendanceID": "attendanceId",
+        "CourseID": "courseId",
+        "StudentID": "studentId",
+        "AttendanceDate": "attendanceDate",
+        "Status": "status",
+        "Comment": "gradeComment",
+        "User": "user",
+        "LastEdit": "lastedit"
+      }
+    },
+    "courses": {
+      "sourceFile": "tblCourse.xlsx",
+      "sheetName": "tblCourse",
+      "headers": [
+        "CourseID",
+        "SchoolYearID",
+        "StaffID",
+        "StaffID2",
+        "StaffID3",
+        "StaffID4",
+        "Grade",
+        "Section",
+        "CourseName"
+      ],
+      "fieldMappings": {
+        "CourseID": "courseId",
+        "SchoolYearID": "schoolYearId",
+        "StaffID": "staffid",
+        "StaffID2": "staffid2",
+        "StaffID3": "staffid3",
+        "StaffID4": "staffid4",
+        "Grade": "grade",
+        "Section": "section",
+        "CourseName": "courseName"
+      }
+    },
+    "enrollments": {
+      "sourceFile": "tblEnrollment.xlsx",
+      "sheetName": "tblEnrollment",
+      "headers": [
+        "EnrollmentID",
+        "CourseID",
+        "StudentID",
+        "Drop",
+        "DropSemester",
+        "DropDate"
+      ],
+      "fieldMappings": {
+        "EnrollmentID": "enrollmentId",
+        "CourseID": "courseId",
+        "StudentID": "studentId",
+        "Drop": "drop",
+        "DropSemester": "dropsemester",
+        "DropDate": "dropDate"
+      }
+    },
+    "grades": {
+      "sourceFile": "tblGrades.xlsx",
+      "sheetName": "tblGrades",
+      "headers": [
+        "GradeID",
+        "CourseID",
+        "StudentID",
+        "SubjectID",
+        "SemesterID",
+        "GradeDate",
+        "Grade",
+        "GradeComment",
+        "User",
+        "LastEdit"
+      ],
+      "fieldMappings": {
+        "GradeID": "gradeId",
+        "CourseID": "courseId",
+        "StudentID": "studentId",
+        "SubjectID": "subjectId",
+        "SemesterID": "semesterId",
+        "GradeDate": "gradeDate",
+        "Grade": "grade",
+        "GradeComment": "gradeComment",
+        "User": "user",
+        "LastEdit": "lastedit"
+      }
+    },
+    "users": {
+      "sourceFile": "tblStaff.xlsx",
+      "sheetName": "tblStaff",
+      "headers": [
+        "StaffID",
+        "FirstName",
+        "LastName",
+        "Password",
+        "Active",
+        "Admin",
+        "LastLogin",
+        "Phonenumber",
+        "Phonenumber1",
+        "Phonenumber2"
+      ],
+      "fieldMappings": {
+        "StaffID": "staffid",
+        "FirstName": "firstName",
+        "LastName": "lastName",
+        "Password": "password",
+        "Active": "active",
+        "Admin": "admin",
+        "LastLogin": "lastLogin",
+        "Phonenumber": "phonenumber",
+        "Phonenumber1": "phonenumber1",
+        "Phonenumber2": "phonenumber2"
+      }
+    },
+    "scholarships": {
+      "sourceFile": "tblScholarships.xlsx",
+      "sheetName": "tblScholarships",
+      "headers": [
+        "ScholarshipID",
+        "CourseID",
+        "StudentID",
+        "Scholarship",
+        "HouseVisit",
+        "HouseVisitDate",
+        "HouseVisitComments",
+        "Approved",
+        "ApprovedBy"
+      ],
+      "fieldMappings": {
+        "ScholarshipID": "scholarshipId",
+        "CourseID": "courseId",
+        "StudentID": "studentId",
+        "Scholarship": "scholarship",
+        "HouseVisit": "housevisit",
+        "HouseVisitDate": "housevisitdate",
+        "HouseVisitComments": "housevisitcomments",
+        "Approved": "approved",
+        "ApprovedBy": "approvedby"
+      }
+    },
+    "schoolYears": {
+      "sourceFile": "tblSchoolYear.xlsx",
+      "sheetName": "tblSchoolYear",
+      "headers": [
+        "SchoolYearID",
+        "SchoolYear"
+      ],
+      "fieldMappings": {
+        "SchoolYearID": "schoolYearId",
+        "SchoolYear": "schoolYear"
+      }
+    },
+    "semesters": {
+      "sourceFile": "tblSemester.xlsx",
+      "sheetName": "tblSemester",
+      "headers": [
+        "SemesterID",
+        "Semester"
+      ],
+      "fieldMappings": {
+        "SemesterID": "semesterId",
+        "Semester": "semester"
+      }
+    },
+    "students": {
+      "sourceFile": "tblStudents.xlsx",
+      "sheetName": "tblStudents",
+      "headers": [
+        "StudentID",
+        "FirstName",
+        "LastName",
+        "Sex",
+        "Enrolled",
+        "DOB",
+        "HouseNumber",
+        "Village",
+        "Commune",
+        "District",
+        "Province",
+        "BirthPlace",
+        "StartingGrade",
+        "TransferFrom",
+        "Health",
+        "SignupDate",
+        "EnrolledDate",
+        "StopStudyDate",
+        "StopStudyReason",
+        "Picture",
+        "Note",
+        "DateAdded",
+        "AddedBy",
+        "Christian",
+        "Date Believed",
+        "Church",
+        "Healthy",
+        "Day to examine",
+        "Followup Date",
+        "Medical Notes",
+        "Latitude",
+        "Longitude",
+        "LiveWith",
+        "RentOwn",
+        "YearsInKC",
+        "LivingStandard",
+        "HelpSchool",
+        "TuitionAmountMonth",
+        "OrgHelp",
+        "OrgHelpName",
+        "Vaccine",
+        "Faith",
+        "ReferredBy",
+        "TuitionAmountMonthORyear",
+        "Student'sClothes",
+        "Student'sSupplies",
+        "NeedACar"
+      ],
+      "fieldMappings": {
+        "StudentID": "studentId",
+        "FirstName": "firstName",
+        "LastName": "lastName",
+        "Sex": "sex",
+        "Enrolled": "enrolled",
+        "DOB": "dob",
+        "HouseNumber": "housenumber",
+        "Village": "village",
+        "Commune": "commune",
+        "District": "district",
+        "Province": "province",
+        "BirthPlace": "birthplace",
+        "StartingGrade": "startinggrade",
+        "TransferFrom": "transferfrom",
+        "Health": "health",
+        "SignupDate": "signupdate",
+        "EnrolledDate": "enrolleddate",
+        "StopStudyDate": "stopstudydate",
+        "StopStudyReason": "stopstudyreason",
+        "Picture": "picture",
+        "Note": "note",
+        "DateAdded": "dateadded",
+        "AddedBy": "addedby",
+        "Christian": "christian",
+        "Date Believed": "datebelieved",
+        "Church": "church",
+        "Healthy": "healthy",
+        "Day to examine": "daytoexamine",
+        "Followup Date": "followupdate",
+        "Medical Notes": "medicalnotes",
+        "Latitude": "latitude",
+        "Longitude": "longitude",
+        "LiveWith": "livewith",
+        "RentOwn": "rentown",
+        "YearsInKC": "yearsinkc",
+        "LivingStandard": "livingstandard",
+        "HelpSchool": "helpschool",
+        "TuitionAmountMonth": "tuitionamountmonth",
+        "OrgHelp": "orghelp",
+        "OrgHelpName": "orghelpname",
+        "Vaccine": "vaccine",
+        "Faith": "faith",
+        "ReferredBy": "referredby",
+        "TuitionAmountMonthORyear": "tuitionamountmonthoryear",
+        "Student'sClothes": "student'sclothes",
+        "Student'sSupplies": "student'ssupplies",
+        "NeedACar": "needacar"
+      }
+    },
+    "subjects": {
+      "sourceFile": "tblSubjects.xlsx",
+      "sheetName": "tblSubjects",
+      "headers": [
+        "SubjectID",
+        "Subject",
+        "SortOrder"
+      ],
+      "fieldMappings": {
+        "SubjectID": "subjectId",
+        "Subject": "subject",
+        "SortOrder": "sortorder"
+      }
+    }
+  }
+}

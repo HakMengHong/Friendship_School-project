@@ -2,31 +2,36 @@
 
 ## 📋 **Project Overview**
 
-This is a comprehensive school management system built with Next.js, React, TypeScript, and PostgreSQL. The application provides role-based access control for administrators and teachers, with features for student management, attendance tracking, grade management, and academic administration.
+This is a comprehensive school management system built with Next.js, React, TypeScript, and PostgreSQL. The application provides role-based access control for administrators and teachers, with features for student management, attendance tracking, grade management, enrollment management, and academic administration. The system includes advanced PDF generation capabilities, calendar integration, and a modern responsive UI.
 
 ## 🏗️ **Architecture & Technology Stack**
 
 ### **Frontend**
-- **Next.js 15.2.4** - React framework with App Router
+- **Next.js 15.5.2** - React framework with App Router
 - **React 18** - UI library with hooks and context
-- **TypeScript** - Type-safe development
+- **TypeScript 5** - Type-safe development
 - **Tailwind CSS 3.4.17** - Utility-first styling
 - **Radix UI & Shadcn/ui** - Accessible component library
 - **React Hook Form & Zod** - Form management and validation
 - **Next-themes** - Dark/light mode support
+- **Chart.js & Recharts** - Data visualization
+- **React Day Picker** - Calendar components
+- **Lucide React** - Icon library
 
 ### **Backend & Database**
-- **Prisma ORM 6.11.1** - Database toolkit and ORM
+- **Prisma ORM 6.16.2** - Database toolkit and ORM
 - **PostgreSQL** - Relational database
 - **bcryptjs** - Password hashing
-- **Puppeteer** - Server-side PDF generation
-- **ExcelJS** - Excel export functionality
+- **Puppeteer 24.16.2** - Server-side PDF generation
+- **ExcelJS 4.4.0** - Excel export functionality
+- **@react-pdf/renderer** - PDF document generation
 
 ### **Development Tools**
 - **GitHub** - Version control
 - **Figma** - Design and prototyping
 - **Docker Desktop** - Containerization
 - **Visual Studio Code** - Development environment
+- **TSX** - TypeScript execution
 
 ## 🔒 **Security System**
 
@@ -42,7 +47,7 @@ This is a comprehensive school management system built with Next.js, React, Type
 - **Public Routes**: Login, splash, unauthorized pages
 
 ### **Protected Routes**
-- **Admin-Only**: `/dashboard/*`, `/api/users`, `/api/school-years`
+- **Admin-Only**: `/dashboard/*`, `/api/users`, `/api/school-years`, `/grade/gradebook`, `/grade/report`
 - **Teacher-Only**: `/student-info`, `/register-student`
 - **Shared**: `/attendance/daily`, `/grade/addgrade`
 
@@ -52,6 +57,9 @@ This is a comprehensive school management system built with Next.js, React, Type
 Friendship_School-project/
 ├── app/                          # Next.js App Router pages
 │   ├── api/                      # API routes
+│   │   ├── enrollments/          # Enrollment management API
+│   │   ├── pdf-generate/         # PDF generation endpoints
+│   │   └── [other endpoints]     # Student, user, grade APIs
 │   ├── dashboard/                # Admin dashboard pages
 │   ├── attendance/               # Attendance management
 │   ├── grade/                    # Grade management
@@ -60,12 +68,20 @@ Friendship_School-project/
 │   ├── login/                    # Authentication
 │   └── unauthorized/             # Access denied page
 ├── components/                   # Reusable UI components
-│   ├── ui/                       # Base UI components
-│   └── navigation/               # Navigation components
+│   ├── ui/                       # Base UI components (Shadcn/ui)
+│   ├── navigation/               # Navigation components
+│   ├── calendar/                 # Calendar and date picker components
+│   └── student-info/             # Student-specific components
 ├── lib/                          # Utility libraries
+│   ├── pdf-generators/           # PDF generation system
+│   │   ├── core/                 # Core PDF system files
+│   │   ├── reports/              # Report generators
+│   │   └── id-cards/             # ID card generators
+│   └── [other utilities]         # Auth, Prisma, utils
 ├── prisma/                       # Database schema and migrations
-├── public/                       # Static assets
+├── public/                       # Static assets and logos
 ├── scripts/                      # Development and testing scripts
+├── hooks/                        # Custom React hooks
 ├── styles/                       # Global styles
 ├── middleware.ts                 # Route protection middleware
 └── package.json                  # Dependencies and scripts
@@ -76,8 +92,10 @@ Friendship_School-project/
 ### **Student Management**
 - Student registration with PDF generation
 - Student information display and management
-- Student enrollment in courses
+- Student enrollment in courses with dedicated enrollment system
 - Student removal functionality
+- Family information and guardian management
+- Scholarship tracking and financial aid management
 
 ### **Attendance System**
 - Daily attendance tracking
@@ -86,20 +104,27 @@ Friendship_School-project/
 
 ### **Grade Management**
 - Grade entry and editing
-- Gradebook management
-- Grade reports and analytics
+- Gradebook management with specialized reports
+- Government-style grade reports (monthly, semester, yearly)
+- Individual student gradebook reports
 - Subject and semester organization
+- Advanced grade calculation and analytics
 
 ### **Academic Administration**
 - School year management
 - Course creation and management
 - Subject management
 - User account management
+- Enrollment management system
+- Activity logging and audit trails
 
-### **Data Export**
-- PDF generation for student records
-- Excel export for reports
-- Chart visualization for analytics
+### **Data Export & Reports**
+- Advanced PDF generation system with specialized templates
+- Government-style report formatting
+- Excel export for reports and analytics
+- Chart visualization with Chart.js and Recharts
+- Student ID cards and teacher ID cards
+- Bulk document generation capabilities
 
 ## 🔧 **Development Setup**
 
@@ -178,9 +203,19 @@ node scripts/verify-complete-database.js
 
 ### **Academic Management**
 - `GET /api/school-years` - Get school years
+- `POST /api/school-years` - Create school year
 - `GET /api/courses` - Get courses
+- `POST /api/courses` - Create course
 - `GET /api/subjects` - Get subjects
+- `POST /api/subjects` - Create subject
 - `GET /api/semesters` - Get semesters
+- `GET /api/classes` - Get available classes/grades
+
+### **Enrollment Management**
+- `GET /api/enrollments` - Get all enrollments
+- `POST /api/enrollments` - Create new enrollments
+- `DELETE /api/enrollments` - Remove enrollment
+- `GET /api/enrollments/[id]` - Get specific enrollment
 
 ### **Attendance & Grades**
 - `GET /api/attendance` - Get attendance data
@@ -188,21 +223,35 @@ node scripts/verify-complete-database.js
 - `GET /api/grades` - Get grades
 - `POST /api/grades` - Record grades
 
+### **PDF Generation**
+- `POST /api/pdf-generate/generate-pdf` - Generate PDF reports
+- `POST /api/pdf-generate/generate-grade-report` - Generate grade reports
+- `POST /api/pdf-generate/generate-gradebook-report` - Generate gradebook reports
+- `POST /api/pdf-generate/generate-attendance-report` - Generate attendance reports
+- `POST /api/pdf-generate/generate-student-list-report` - Generate student lists
+- `POST /api/pdf-generate/generate-student-id-card` - Generate student ID cards
+- `POST /api/pdf-generate/generate-teacher-id-card` - Generate teacher ID cards
+
+### **Data Export**
+- `GET /api/export-excel` - Export data to Excel format
+
 ## 🔄 **User Workflows**
 
 ### **Admin Workflow**
 1. Login with admin credentials
-2. Access dashboard for overview
-3. Manage students, courses, and users
-4. View reports and analytics
-5. Export data as needed
+2. Access dashboard for comprehensive overview and analytics
+3. Manage students, courses, users, and enrollments
+4. Generate specialized reports (gradebook, attendance, government-style)
+5. Export data and generate ID cards
+6. Monitor system activity and user logs
 
 ### **Teacher Workflow**
 1. Login with teacher credentials
-2. Access daily attendance page
-3. Record student attendance
-4. Manage grades for assigned courses
-5. View student information
+2. Access daily attendance page for course management
+3. Record student attendance and manage attendance reports
+4. Enter and manage grades for assigned courses
+5. View detailed student information and family data
+6. Generate individual student reports and gradebooks
 
 ## 🛠️ **Maintenance & Updates**
 
@@ -221,17 +270,21 @@ node scripts/verify-complete-database.js
 ## 📈 **Performance Optimization**
 
 ### **Implemented Optimizations**
-- Server-side rendering (SSR)
+- Server-side rendering (SSR) with Next.js App Router
 - Static generation where possible
-- Image optimization
-- Code splitting
-- Database query optimization
+- Image optimization and lazy loading
+- Code splitting and dynamic imports
+- Database query optimization with Prisma
+- PDF generation optimization with Puppeteer
+- Client-side caching for frequently accessed data
+- Responsive design with Tailwind CSS
 
 ### **Future Optimizations**
-- Caching strategies
-- CDN integration
-- Database indexing
-- API response caching
+- Redis caching layer for API responses
+- CDN integration for static assets
+- Database connection pooling
+- Background job processing for PDF generation
+- Progressive Web App (PWA) capabilities
 
 ## 🔐 **Security Best Practices**
 
@@ -265,8 +318,31 @@ node scripts/verify-complete-database.js
 - Responsive design
 - Accessibility compliance
 
+## 🆕 **Recent Updates & Improvements**
+
+### **Major System Enhancements (2024)**
+- **Enrollment Management System**: Dedicated API endpoints and UI for managing student course enrollments
+- **Advanced PDF Generation**: Reorganized PDF system with specialized government-style report templates
+- **Enhanced Database Schema**: Added family information, guardian details, and scholarship tracking
+- **Calendar Integration**: Custom Khmer calendar components and date pickers
+- **Improved Security**: Enhanced middleware with session timeout management
+- **UI/UX Improvements**: Modern responsive design with dark/light theme support
+
+### **Removed Legacy Features**
+- **Announcements System**: Removed legacy announcement functionality
+- **Notifications System**: Removed basic notification system
+- **Generic Grade Reports**: Replaced with specialized government-style reports
+
+### **Technical Improvements**
+- **Dependency Updates**: Updated to Next.js 15.5.2, Prisma 6.16.2, and latest packages
+- **Code Organization**: Reorganized PDF generators into logical folder structure
+- **Type Safety**: Enhanced TypeScript types and interfaces
+- **Error Handling**: Improved error handling and user feedback
+
 ---
 
-**Last Updated**: December 2024  
-**Version**: 1.0.0  
-**Status**: Production Ready ✅
+**Last Updated**: January 2025  
+**Version**: 2.0.0  
+**Status**: Production Ready ✅  
+**Next.js Version**: 15.5.2  
+**Database**: PostgreSQL with Prisma ORM 6.16.2

@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { Bell, Search, Crown, BookOpen, ClipboardList, User, LogOut, Settings, AlertCircle, RefreshCw, Edit, Save, X, Eye, EyeOff, Lock, Phone, AtSign, Mail, Camera } from "lucide-react"
+import { Search, Crown, BookOpen, ClipboardList, User, LogOut, Settings, AlertCircle, RefreshCw, Edit, Save, X, Eye, EyeOff, Lock, Phone, AtSign, Mail, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,9 +33,6 @@ export function TopBar({ className, user }: TopBarProps) {
   const pathname = usePathname()
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
-  const [notifications, setNotifications] = useState<any[]>([])
-  const [showNotifications, setShowNotifications] = useState(false)
-  const [notificationsLoading, setNotificationsLoading] = useState(false)
   const [showProfileEdit, setShowProfileEdit] = useState(false)
   const [profileLoading, setProfileLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -263,67 +260,6 @@ export function TopBar({ className, user }: TopBarProps) {
     }
   }
 
-  // Fetch notifications from database
-  const fetchNotifications = async () => {
-    try {
-      setNotificationsLoading(true)
-      const response = await fetch('/api/notifications?limit=10')
-      if (response.ok) {
-        const data = await response.json()
-        setNotifications(Array.isArray(data) ? data : [])
-      } else {
-        console.error('Failed to fetch notifications')
-        setNotifications([])
-      }
-    } catch (error) {
-      console.error('Error fetching notifications:', error)
-      setNotifications([])
-    } finally {
-      setNotificationsLoading(false)
-    }
-  }
-
-  // Mark notification as read
-  const markNotificationAsRead = async (notificationId: number) => {
-    try {
-      // You can implement this API endpoint if needed
-      // await fetch(`/api/notifications/${notificationId}/read`, { method: 'PUT' })
-      
-      // For now, just remove from local state
-      setNotifications(prev => prev.filter(n => n.id !== notificationId))
-    } catch (error) {
-      console.error('Error marking notification as read:', error)
-    }
-  }
-
-  // Clear all notifications
-  const clearAllNotifications = async () => {
-    try {
-      // You can implement this API endpoint if needed
-      // await fetch('/api/notifications/clear', { method: 'DELETE' })
-      
-      // For now, just clear local state
-      setNotifications([])
-      toast({
-        title: "ការជូនដំណឹង",
-        description: "បានលុបការជូនដំណឹងទាំងអស់",
-      })
-    } catch (error) {
-      console.error('Error clearing notifications:', error)
-    }
-  }
-
-  // Fetch notifications on component mount
-  useEffect(() => {
-    fetchNotifications()
-  }, [])
-
-  // Fetch notifications when dropdown opens
-  useEffect(() => {
-    if (showNotifications) {
-      fetchNotifications()
-    }
-  }, [showNotifications])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -373,97 +309,6 @@ export function TopBar({ className, user }: TopBarProps) {
 
       {/* Right side actions */}
       <div className="flex items-center space-x-2 md:space-x-4 w-full md:w-auto relative z-10">
-        {/* Notifications */}
-        <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="relative p-3 hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 transition-all duration-300 rounded-2xl group"
-            >
-              <Bell className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
-              {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse shadow-lg">
-                  {notifications.length > 9 ? '9+' : notifications.length}
-                </span>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 bg-gradient-to-b from-card/95 to-card/90 backdrop-blur-xl border border-border/50 shadow-2xl">
-            <DropdownMenuLabel className="flex items-center justify-between bg-gradient-to-r from-primary/5 to-primary/10 p-4 rounded-t-lg">
-              <div className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-primary" />
-                <span className="text-primary font-bold">ការជូនដំណឹង</span>
-                {notifications.length > 0 && (
-                  <span className="px-2 py-0.5 bg-primary/20 text-primary text-xs font-bold rounded-full">
-                    {notifications.length}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-sm p-2 hover:bg-primary/10 rounded-xl transition-all duration-300"
-                  onClick={fetchNotifications}
-                  disabled={notificationsLoading}
-                >
-                  <RefreshCw className={`h-4 w-4 ${notificationsLoading ? 'animate-spin' : ''}`} />
-                </Button>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {notificationsLoading ? (
-              <div className="p-4 text-center text-muted-foreground">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
-                <p className="text-base">កំពុងផ្ទុក...</p>
-              </div>
-            ) : notifications.length > 0 ? (
-              notifications.slice(0, 5).map((notification, index) => (
-                <DropdownMenuItem 
-                  key={notification.id || index} 
-                  className="flex items-start space-x-3 p-4 cursor-pointer hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 transition-all duration-300 group"
-                  onClick={() => markNotificationAsRead(notification.id)}
-                >
-                  <div className={`p-2 rounded-xl ${
-                    notification.type === 'warning' 
-                      ? 'bg-yellow-100 dark:bg-yellow-900/20' 
-                      : 'bg-blue-100 dark:bg-blue-900/20'
-                  }`}>
-                    <AlertCircle className={`h-4 w-4 ${
-                      notification.type === 'warning' ? 'text-yellow-600 dark:text-yellow-400' : 'text-blue-600 dark:text-blue-400'
-                    }`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base font-semibold truncate group-hover:text-primary transition-colors">{notification.message}</p>
-                    {notification.details && (
-                      <p className="text-sm text-muted-foreground truncate mt-1">{notification.details}</p>
-                    )}
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-muted-foreground font-medium">{notification.time}</p>
-                      {notification.author && (
-                        <p className="text-xs text-muted-foreground">ដោយ: {notification.author}</p>
-                      )}
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              ))
-            ) : (
-              <div className="p-4 text-center text-muted-foreground">
-                <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-base">មិនមានការជូនដំណឹង</p>
-              </div>
-            )}
-            {notifications.length > 5 && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                  <span className="text-base">មើលទាំងអស់</span>
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
 
         {/* Theme Toggle */}
         <ThemeToggle />
@@ -473,85 +318,69 @@ export function TopBar({ className, user }: TopBarProps) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center space-x-3 md:space-x-4 pl-3 md:pl-4 border-l border-border/50 hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 transition-all duration-300 group flex-shrink-0 rounded-2xl relative overflow-hidden"
+              className="flex items-center space-x-2 md:space-x-3 pl-2 md:pl-3 border-l border-border/50 hover:bg-muted/20 transition-all duration-200 group flex-shrink-0 rounded-xl relative overflow-hidden"
             >
-              {/* Background decoration */}
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              {/* Background decoration - very subtle */}
+              <div className="absolute inset-0 bg-gradient-to-r from-muted/5 via-transparent to-muted/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
               
               <div className="text-right hidden sm:block relative z-10">
-                <p className="text-sm md:text-base font-black bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent hover:from-primary/80 hover:to-primary/60 transition-all duration-300 truncate max-w-24 md:max-w-32 group-hover:text-primary">
+                <p className="text-xs md:text-sm font-semibold text-primary group-hover:text-primary/80 transition-colors duration-200 truncate max-w-20 md:max-w-24">
                   {user ? `${user.lastname} ${user.firstname}` : "អ្នកប្រើប្រាស់"}
                 </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <p className="text-sm text-muted-foreground font-medium group-hover:text-gray-700 transition-colors duration-300">
+                <div className="flex items-center gap-1 mt-0.5">
+                  <p className="text-xs text-muted-foreground group-hover:text-muted-foreground/80 font-medium transition-colors duration-200">
                     {user?.position || (user?.role === 'admin' ? 'នាយក' : 'គ្រូបង្រៀន')}
                   </p>
                   {user?.role === 'admin' && (
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/20 dark:to-yellow-800/10 rounded-full shadow-sm group-hover:shadow-md transition-all duration-300">
-                      <Crown className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
-                      <span className="text-xs font-bold text-yellow-700 dark:text-yellow-300">Admin</span>
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/20 dark:to-yellow-800/10 rounded-full shadow-sm transition-all duration-300">
+                      <Crown className="w-2.5 h-2.5 text-yellow-600 dark:text-yellow-400" />
+                      <span className="text-xs font-medium text-yellow-700 dark:text-yellow-300">Admin</span>
                     </div>
                   )}
                   {user?.role === 'teacher' && (
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/20 dark:to-blue-800/10 rounded-full shadow-sm group-hover:shadow-md transition-all duration-300">
-                      <BookOpen className="w-3 h-3 text-blue-600 dark:text-blue-400" />
-                      <span className="text-xs font-bold text-blue-700 dark:text-blue-300">Teacher</span>
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/20 dark:to-blue-800/10 rounded-full shadow-sm transition-all duration-300">
+                      <BookOpen className="w-2.5 h-2.5 text-blue-600 dark:text-blue-400" />
+                      <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Teacher</span>
                     </div>
                   )}
                 </div>
               </div>
               
-              {/* Enhanced Avatar */}
-              <div className="relative w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-2xl flex items-center justify-center text-white font-black shadow-xl hover:shadow-2xl hover:scale-110 hover:from-primary/80 hover:to-primary/60 transition-all duration-300 cursor-pointer group overflow-hidden">
+              {/* Compact Avatar */}
+              <div className="relative w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-xl flex items-center justify-center text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden">
                 {/* Inner glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/25 to-transparent rounded-2xl"></div>
-                
-                {/* Animated ring border */}
-                <div className="absolute inset-0 rounded-2xl border-2 border-white/20 group-hover:border-white/40 transition-colors duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl"></div>
                 
                 {/* Avatar content */}
-                <span className="relative z-10 group-hover:scale-110 transition-transform duration-300 text-sm md:text-base font-black">
+                <span className="relative z-10 text-sm font-semibold">
                   {user?.avatar || user?.firstname?.charAt(0) || "U"}
                 </span>
                 
                 {/* Online status indicator */}
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-all duration-300">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-sm transition-all duration-300">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                 </div>
-                
-                {/* Hover effect overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-72 bg-gradient-to-b from-card/95 to-card/90 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl overflow-hidden">
-            {/* Enhanced Header */}
-            <DropdownMenuLabel className="flex items-center space-x-3 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 p-5 rounded-t-2xl border-b border-border/30">
-              <div className="p-2.5 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl shadow-sm">
-                <User className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg text-primary font-bold">ព័ត៌មានផ្ទាល់ខ្លួន</span>
-                <span className="text-sm text-muted-foreground">ការគ្រប់គ្រងគណនី</span>
-              </div>
-            </DropdownMenuLabel>
             
             <DropdownMenuSeparator className="bg-border/30" />
             
             {/* Enhanced Profile Edit Item */}
             <DropdownMenuItem 
               onClick={handleProfileClick}
-              className="flex items-center space-x-4 p-5 hover:bg-gradient-to-r hover:from-primary/8 hover:to-primary/5 transition-all duration-300 group cursor-pointer"
+              className="flex items-center space-x-4 p-5 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800 dark:hover:to-blue-900 transition-all duration-200 group cursor-pointer"
             >
-              <div className="p-2.5 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl group-hover:from-blue-200 group-hover:to-blue-100 dark:group-hover:from-blue-800/40 dark:group-hover:to-blue-700/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
-                <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2.5 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-800/30 rounded-xl transition-all duration-200 shadow-sm group-hover:shadow-lg group-hover:scale-105 group-hover:from-blue-300 group-hover:to-blue-200 dark:group-hover:from-blue-700 dark:group-hover:to-blue-800">
+                <User className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:text-blue-900 dark:group-hover:text-blue-100 transition-colors duration-200" />
               </div>
               <div className="flex flex-col">
-                <span className="text-base font-semibold group-hover:text-primary transition-colors duration-300">កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
-                <span className="text-sm text-muted-foreground">ធ្វើបច្ចុប្បន្នភាពព័ត៌មានរបស់អ្នក</span>
+                <span className="text-base font-semibold text-primary group-hover:text-blue-950 dark:group-hover:text-blue-50 group-hover:font-bold transition-all duration-200">កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
+                <span className="text-sm text-muted-foreground group-hover:text-blue-900 dark:group-hover:text-blue-100 group-hover:font-medium transition-all duration-200">ធ្វើបច្ចុប្បន្នភាពព័ត៌មានរបស់អ្នក</span>
               </div>
               <div className="ml-auto">
-                <div className="w-2 h-2 bg-primary/20 rounded-full group-hover:bg-primary/40 transition-colors duration-300"></div>
+                <div className="w-2 h-2 bg-primary/40 rounded-full group-hover:bg-blue-800 dark:group-hover:bg-blue-300 group-hover:scale-110 transition-all duration-200"></div>
               </div>
             </DropdownMenuItem>
             
@@ -560,17 +389,17 @@ export function TopBar({ className, user }: TopBarProps) {
             {/* Enhanced Logout Item */}
             <DropdownMenuItem 
               onClick={handleLogout} 
-              className="flex items-center space-x-4 p-5 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100/50 hover:text-red-700 focus:text-red-700 transition-all duration-300 group dark:text-red-400 dark:hover:from-red-900/20 dark:hover:to-red-800/10 dark:hover:text-red-300 cursor-pointer"
+              className="flex items-center space-x-4 p-5 text-red-600 hover:bg-gradient-to-r hover:from-red-100 hover:to-red-200 dark:hover:from-red-800 dark:hover:to-red-900 transition-all duration-200 group dark:text-red-400 cursor-pointer"
             >
-              <div className="p-2.5 bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-800/20 rounded-xl group-hover:from-red-200 group-hover:to-red-100 dark:group-hover:from-red-800/40 dark:group-hover:to-red-700/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
-                <LogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
+              <div className="p-2.5 bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900/40 dark:to-red-800/30 rounded-xl transition-all duration-200 shadow-sm group-hover:shadow-lg group-hover:scale-105 group-hover:from-red-300 group-hover:to-red-200 dark:group-hover:from-red-700 dark:group-hover:to-red-800">
+                <LogOut className="w-5 h-5 text-red-600 dark:text-red-400 group-hover:text-red-900 dark:group-hover:text-red-100 transition-colors duration-200" />
               </div>
               <div className="flex flex-col">
-                <span className="text-base font-semibold group-hover:translate-x-0.5 transition-transform duration-300">ចាកចេញ</span>
-                <span className="text-sm text-red-500/70 dark:text-red-400/70">ចេញពីគណនីរបស់អ្នក</span>
+                <span className="text-base font-semibold group-hover:text-red-950 dark:group-hover:text-red-50 group-hover:font-bold transition-all duration-200">ចាកចេញ</span>
+                <span className="text-sm text-red-500/70 dark:text-red-400/70 group-hover:text-red-900 dark:group-hover:text-red-100 group-hover:font-medium transition-all duration-200">ចេញពីគណនីរបស់អ្នក</span>
               </div>
               <div className="ml-auto">
-                <div className="w-2 h-2 bg-red-500/20 rounded-full group-hover:bg-red-500/40 transition-colors duration-300"></div>
+                <div className="w-2 h-2 bg-red-500/40 rounded-full group-hover:bg-red-800 dark:group-hover:bg-red-300 group-hover:scale-110 transition-all duration-200"></div>
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>

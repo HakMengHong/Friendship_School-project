@@ -5,7 +5,17 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request: NextRequest) {
   try {
     const courses = await prisma.course.findMany({
-      include: {
+      select: {
+        courseId: true,
+        schoolYearId: true,
+        teacherId1: true,
+        teacherId2: true,
+        teacherId3: true,
+        grade: true,
+        section: true,
+        courseName: true,
+        createdAt: true,
+        updatedAt: true,
         schoolYear: {
           select: {
             schoolYearId: true,

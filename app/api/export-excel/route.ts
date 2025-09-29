@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
     const buffer = await workbook.xlsx.writeBuffer()
 
     console.log('✅ Excel file generated successfully!')
-    console.log(`📏 File size: ${(buffer.length / 1024).toFixed(2)} KB`)
+    console.log(`📏 File size: ${(buffer.byteLength / 1024).toFixed(2)} KB`)
 
     // Return the Excel file as a download
     return new NextResponse(buffer, {
@@ -225,7 +225,7 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': 'attachment; filename="friendship-school-report.xlsx"',
-        'Content-Length': buffer.length.toString()
+        'Content-Length': buffer.byteLength.toString()
       }
     })
 

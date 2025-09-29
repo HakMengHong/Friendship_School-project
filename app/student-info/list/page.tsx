@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
@@ -17,7 +18,9 @@ import {
   X,
   GraduationCap,
   FileType,
-  School
+  School,
+  BarChart3,
+  Award
 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { RoleGuard } from "@/components/ui/role-guard"
@@ -84,6 +87,7 @@ function StudentListReportContent() {
     showStudentList: false,
     selectedStudents: [] as number[]
   })
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
 
   // API Functions
   const fetchSchoolYears = useCallback(async () => {
@@ -206,20 +210,65 @@ function StudentListReportContent() {
     }
   }, [reportData.class, students, filterStudentsByClass])
 
-  // Clear class field when switching to all-students report type
-  useEffect(() => {
-    if (selectedReportType === 'all-students') {
-      setReportData(prev => ({ ...prev, class: "", selectedStudents: [] }))
-    }
-  }, [selectedReportType])
 
   // Clear selected students when class changes
   useEffect(() => {
     setReportData(prev => ({ ...prev, selectedStudents: [] }))
   }, [reportData.class])
 
+  // Check if a specific field has validation error
+  const hasFieldError = useCallback((fieldName: string) => {
+    return validationErrors.some(error => {
+      switch (fieldName) {
+        case 'academicYear':
+          return error.includes('ឆ្នាំសិក្សា')
+        case 'class':
+          return error.includes('ថ្នាក់')
+        default:
+          return false
+      }
+    })
+  }, [validationErrors])
+
+  // Form validation
+  const validateForm = useCallback(() => {
+    const errors = []
+    
+    if (!reportData.academicYear.trim()) {
+      errors.push('សូមបំពេញឆ្នាំសិក្សា')
+    }
+    
+    if (!reportData.class) {
+      errors.push('សូមជ្រើសរើសថ្នាក់')
+    }
+    
+    return errors
+  }, [reportData.academicYear, reportData.class])
+
+  // Clear validation errors when user starts interacting with form
+  const clearValidationErrors = useCallback(() => {
+    if (validationErrors.length > 0) {
+      setValidationErrors([])
+    }
+  }, [validationErrors])
+
   const generateReport = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    const errors = validateForm()
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      toast({
+        title: "មានបញ្ហា",
+        description: errors.join(', '),
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Clear validation errors if form is valid
+    setValidationErrors([])
+    
     setIsGenerating(true)
     
     try {
@@ -280,16 +329,9 @@ function StudentListReportContent() {
       color: "bg-blue-500"
     },
     {
-      id: "all-students", 
-      title: "បញ្ជីឈ្មោះសិស្សទាំងអស់",
-      description: "របាយការណ៍បញ្ជីឈ្មោះសិស្សទាំងអស់",
-      icon: UserCheck,
-      color: "bg-green-500"
-    },
-    {
       id: "student-details",
-      title: "ព័ត៌មានលម្អិតសិស្ស", 
-      description: "របាយការណ៍ព័ត៌មានលម្អិតសិស្ស",
+      title: "ព័ត៌មានលម្អិតសិស្សតាមថ្នាក់", 
+      description: "របាយការណ៍ព័ត៌មានលម្អិតសិស្សតាមថ្នាក់",
       icon: CheckCircle,
       color: "bg-purple-500"
     }
@@ -298,7 +340,7 @@ function StudentListReportContent() {
   return (
     <div>
       {/* Report Types Grid - Modern Card Style */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {REPORT_TYPES.map((type) => (
           <div
             key={type.id}
@@ -338,8 +380,8 @@ function StudentListReportContent() {
               <div className="text-center space-y-3">
                 <h3 className={`text-2xl font-bold transition-colors duration-500 ${
                   selectedReportType === type.id 
-                    ? 'text-primary' 
-                    : 'text-foreground group-hover:text-primary'
+                  ? type.color.replace('bg-', 'text-') 
+                  : type.color.replace('bg-', 'text-') + ' group-hover:' + type.color.replace('bg-', 'text-')
                 }`}>
                   {type.title}
                 </h3>
@@ -406,44 +448,7 @@ function StudentListReportContent() {
               <form onSubmit={generateReport} className="space-y-3">
                 {/* Report Type Selection */}
                 <div className="space-y-4">
-                  <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                <div className="space-y-2">
-                      <Label htmlFor="reportType" className="flex items-center space-x-2 text-base font-semibold text-primary">
-                        <School className="h-4 w-4" />
-                        <span>ប្រភេទរបាយការណ៍</span>
-                        <span className="text-red-500 font-bold">*</span>
-                  </Label>
-                  <Select value={selectedReportType} onValueChange={setSelectedReportType}>
-                        <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="class-list">
-                        <div className="flex items-center space-x-2">
-                              <Users className="h-3 w-3 text-primary" />
-                          <span>បញ្ជីឈ្មោះតាមថ្នាក់</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="all-students">
-                        <div className="flex items-center space-x-2">
-                              <UserCheck className="h-3 w-3 text-primary" />
-                          <span>បញ្ជីឈ្មោះសិស្សទាំងអស់</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="student-details">
-                        <div className="flex items-center space-x-2">
-                              <CheckCircle className="h-3 w-3 text-primary" />
-                          <span>ព័ត៌មានលម្អិតសិស្ស</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Report Configuration */}
-                <div className="space-y-4">
+                  
                   {isLoadingData && (
                     <div className="flex items-center justify-center space-x-2 py-4 text-base text-muted-foreground">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -451,208 +456,164 @@ function StudentListReportContent() {
                     </div>
                   )}
                   
-                  <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                    <div className={`grid gap-4 ${selectedReportType === 'all-students' ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                <div className="space-y-2">
-                        <Label htmlFor="academicYear" className="flex items-center space-x-2 text-base font-semibold text-primary">
-                          <GraduationCap className="h-4 w-4" />
-                          <span>ឆ្នាំសិក្សា</span>
-                          <span className="text-red-500 font-bold">*</span>
-                        </Label>
-                        <Select 
-                          value={reportData.academicYear}
-                          onValueChange={(value) => {
-                            setReportData({...reportData, academicYear: value, class: ""})
-                          }}
-                        >
-                          <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
-                            <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {schoolYears.map((schoolYear) => (
-                              <SelectItem key={schoolYear.schoolYearId} value={schoolYear.schoolYearCode}>
-                                {schoolYear.schoolYearCode}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {selectedReportType !== 'all-students' && (
-                        <div className="space-y-2">
-                          <Label htmlFor="class" className="flex items-center space-x-2 text-base font-semibold text-primary">
-                            <Users className="h-4 w-4" />
-                            <span>ថ្នាក់</span>
-                        </Label>
-                          <Select 
-                          value={reportData.class}
-                            onValueChange={(value) => setReportData({...reportData, class: value})}
-                            disabled={!reportData.academicYear}
-                          >
-                            <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
-                              <SelectValue placeholder={reportData.academicYear ? "ជ្រើសរើសថ្នាក់" : "សូមជ្រើសរើសឆ្នាំសិក្សាមុន"} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {filteredCourses.map((course) => (
-                                <SelectItem key={course.courseId} value={course.courseId.toString()}>
-                                  ថ្នាក់ទី {course.grade}{course.section}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                      </div>
-                      )}
+                  <Tabs value={selectedReportType} onValueChange={setSelectedReportType} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-lg h-10">
+                      <TabsTrigger 
+                        value="class-list"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
+                      >
+                        <Users className="mr-1 h-4 w-4 text-primary" />
+                        បញ្ជីឈ្មោះសិស្សតាមថ្នាក់
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="student-details"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
+                      >
+                        <CheckCircle className="mr-1 h-4 w-4 text-primary" />
+                        ព័ត៌មានលម្អិតសិស្សតាមថ្នាក់
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <div className="mt-6">
+                      {/* Class List Report Form */}
+                      <TabsContent value="class-list" className="space-y-4 animate-in fade-in-50 duration-200">
+                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
+                          <div className="grid gap-4 grid-cols-2">
+                            <div className="space-y-2">
+                              <Label htmlFor="academicYear" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
+                                <GraduationCap className="h-4 w-4" />
+                                <span>ឆ្នាំសិក្សា</span>
+                                <span className="text-red-500 font-bold">*</span>
+                              </Label>
+                              <Select 
+                                value={reportData.academicYear}
+                                onValueChange={(value) => {
+                                  setReportData({...reportData, academicYear: value, class: ""})
+                                  clearValidationErrors()
+                                }}
+                              >
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('academicYear') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {schoolYears.map((schoolYear) => (
+                                    <SelectItem key={schoolYear.schoolYearId} value={schoolYear.schoolYearCode}>
+                                      {schoolYear.schoolYearCode}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="class" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
+                                <Users className="h-4 w-4" />
+                                <span>ថ្នាក់</span>
+                                <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                              <Select 
+                              value={reportData.class}
+                                onValueChange={(value) => {
+                                  setReportData({...reportData, class: value})
+                                  clearValidationErrors()
+                                }}
+                                disabled={!reportData.academicYear}
+                              >
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('class') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder={reportData.academicYear ? "ជ្រើសរើសថ្នាក់" : "សូមជ្រើសរើសឆ្នាំសិក្សាមុន"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {filteredCourses.map((course) => (
+                                    <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                                      ថ្នាក់ទី {course.grade}{course.section}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                          </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* Student Details Report Form */}
+                      <TabsContent value="student-details" className="space-y-4 animate-in fade-in-50 duration-200">
+                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
+                          <div className="grid gap-4 grid-cols-2">
+                            <div className="space-y-2">
+                              <Label htmlFor="academicYear" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
+                                <GraduationCap className="h-4 w-4" />
+                                <span>ឆ្នាំសិក្សា</span>
+                                <span className="text-red-500 font-bold">*</span>
+                              </Label>
+                              <Select 
+                                value={reportData.academicYear}
+                                onValueChange={(value) => {
+                                  setReportData({...reportData, academicYear: value, class: ""})
+                                  clearValidationErrors()
+                                }}
+                              >
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('academicYear') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {schoolYears.map((schoolYear) => (
+                                    <SelectItem key={schoolYear.schoolYearId} value={schoolYear.schoolYearCode}>
+                                      {schoolYear.schoolYearCode}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="class" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
+                                <Users className="h-4 w-4" />
+                                <span>ថ្នាក់</span>
+                                <span className="text-red-500 font-bold">*</span>
+                            </Label>
+                              <Select 
+                              value={reportData.class}
+                                onValueChange={(value) => {
+                                  setReportData({...reportData, class: value})
+                                  clearValidationErrors()
+                                }}
+                                disabled={!reportData.academicYear}
+                              >
+                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                  hasFieldError('class') 
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                }`}>
+                                  <SelectValue placeholder={reportData.academicYear ? "ជ្រើសរើសថ្នាក់" : "សូមជ្រើសរើសឆ្នាំសិក្សាមុន"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {filteredCourses.map((course) => (
+                                    <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                                      ថ្នាក់ទី {course.grade}{course.section}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                          </div>
+                          </div>
+                        </div>
+                      </TabsContent>
                     </div>
-                  </div>
+                  </Tabs>
                 </div>
 
-                {/* Student Selection for Student Details */}
-                {selectedReportType === 'student-details' && reportData.class && (
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label className="flex items-center space-x-2 text-base font-semibold text-primary">
-                            <Users className="h-4 w-4" />
-                            <span>ជ្រើសរើសសិស្ស</span>
-                            <span className="text-red-500 font-bold">*</span>
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            ជ្រើសរើសសិស្សដែលចង់បញ្ចូលក្នុងរបាយការណ៍
-                          </p>
-                        </div>
-                        
-                        {/* Selected Students Display */}
-                        {reportData.selectedStudents.length > 0 && (
-                          <div className="space-y-2">
-                            <p className="text-base font-medium text-primary">
-                              សិស្សដែលបានជ្រើសរើស ({reportData.selectedStudents.length} នាក់):
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {reportData.selectedStudents.map(studentId => {
-                                const student = filteredStudents.find(s => s.studentId === studentId)
-                                return student ? (
-                                  <Badge 
-                                    key={studentId}
-                                    variant="secondary"
-                                    className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors duration-200"
-                                  >
-                                    {student.lastName} {student.firstName}
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setReportData(prev => ({
-                                          ...prev,
-                                          selectedStudents: prev.selectedStudents.filter(id => id !== studentId)
-                                        }))
-                                      }}
-                                      className="ml-2 hover:text-red-500 transition-colors duration-200"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </Badge>
-                                ) : null
-                              })}
-                            </div>
-                          </div>
-                        )}
 
-                        {/* Student Selection Dropdown */}
-                <div className="space-y-2">
-                          <Select
-                            value=""
-                            onValueChange={(studentId) => {
-                              const id = parseInt(studentId)
-                              if (!reportData.selectedStudents.includes(id)) {
-                                setReportData(prev => ({
-                                  ...prev,
-                                  selectedStudents: [...prev.selectedStudents, id]
-                                }))
-                              }
-                            }}
-                          >
-                            <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
-                              <SelectValue placeholder="ជ្រើសរើសសិស្ស" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {filteredStudents
-                                .filter(student => !reportData.selectedStudents.includes(student.studentId))
-                                .map((student) => (
-                                <SelectItem key={student.studentId} value={student.studentId.toString()}>
-                                  {student.lastName} {student.firstName} - ថ្នាក់ទី {student.grade}{student.section}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* Select All / Clear All Buttons */}
-                        {filteredStudents.length > 0 && (
-                          <div className="flex gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                const allStudentIds = filteredStudents.map(s => s.studentId)
-                                setReportData(prev => ({
-                                  ...prev,
-                                  selectedStudents: allStudentIds
-                                }))
-                              }}
-                              className="h-8 px-3 text-sm"
-                            >
-                              ជ្រើសរើសទាំងអស់
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setReportData(prev => ({
-                                  ...prev,
-                                  selectedStudents: []
-                                }))
-                              }}
-                              className="h-8 px-3 text-sm"
-                            >
-                              លុបទាំងអស់
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Additional Options for Student Details */}
-                {selectedReportType === 'student-details' && (
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                          <Checkbox
-                            id="showStudentList"
-                            checked={reportData.showStudentList}
-                            onCheckedChange={(checked) => 
-                              setReportData({...reportData, showStudentList: checked as boolean})
-                            }
-                            className="h-4 w-4 border-primary data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          />
-                          <Label 
-                            htmlFor="showStudentList" 
-                            className="flex items-center space-x-2 text-base font-semibold text-primary cursor-pointer"
-                          >
-                            <Users className="h-4 w-4" />
-                            <span>បង្ហាញបញ្ជីឈ្មោះសិស្ស</span>
-                          </Label>
-                        </div>
-                        <p className="text-sm text-muted-foreground ml-7">
-                          បញ្ចូលបញ្ជីឈ្មោះសិស្សក្នុងរបាយការណ៍ព័ត៌មានលម្អិត
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                
 
                 {/* Export Options */}
                 <div className="space-y-4">
@@ -664,19 +625,19 @@ function StudentListReportContent() {
                         <span className="text-red-500 font-bold">*</span>
                     </Label>
                     <Select value={reportData.format} onValueChange={(value) => setReportData({...reportData, format: value})}>
-                        <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
+                      <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="pdf">
                           <div className="flex items-center space-x-2">
-                              <FileText className="h-3 w-3 text-primary" />
+                            <FileText className="h-3 w-3 text-primary" />
                             <span>PDF</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="excel">
                           <div className="flex items-center space-x-2">
-                              <Users className="h-3 w-3 text-primary" />
+                            <BarChart3 className="h-3 w-3 text-primary" />
                             <span>Excel</span>
                           </div>
                         </SelectItem>
@@ -692,7 +653,10 @@ function StudentListReportContent() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowReportModal(false)}
+                    onClick={() => {
+                      setShowReportModal(false)
+                      setValidationErrors([])
+                    }}
                     className="h-10 px-6 text-base font-semibold hover:bg-muted hover:text-foreground text-muted-foreground border-border/50 hover:border-border hover:scale-[1.02] transition-all duration-200"
                   >
                     បោះបង់
@@ -710,7 +674,7 @@ function StudentListReportContent() {
                       </>
                     ) : (
                       <>
-                        <Download className="mr-2 h-4 w-4" />
+                        <Award className="mr-2 h-4 w-4" />
                         បង្កើតរបាយការណ៍
                       </>
                     )}

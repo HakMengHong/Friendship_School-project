@@ -13,7 +13,7 @@ import { DEFAULT_CONFIG } from './utils'
 
 // Import all PDF generators
 import { generateStudentRegistrationPDF, StudentRegistrationData } from '../reports/student-registration'
-import { generateStudentReportCardPDF, StudentReportCardData } from '../reports/student-report-card'
+// import { generateStudentReportCardPDF, StudentReportCardData } from '../reports/student-report-card' // Not implemented yet
 import { generateAttendanceReportPDF, AttendanceReportData } from '../reports/attendance-report-daily'
 import { generateMonthlyAttendanceReportPDF, MonthlyAttendanceReportData } from '../reports/attendance-report-monthly'
 import { generateSemesterAttendanceReportPDF, SemesterAttendanceReportData } from '../reports/attendance-report-semester'
@@ -69,7 +69,7 @@ import { generateTeacherIDCardPDF, generateBulkTeacherIDCardPDF, TeacherIDCardDa
 // Report data types mapping
 export type ReportData = 
   | { type: ReportType.STUDENT_REGISTRATION; data: StudentRegistrationData }
-  | { type: ReportType.STUDENT_REPORT_CARD; data: StudentReportCardData }
+  // | { type: ReportType.STUDENT_REPORT_CARD; data: StudentReportCardData } // Not implemented yet
   | { type: ReportType.ATTENDANCE_REPORT; data: AttendanceReportData }
   | { type: ReportType.ATTENDANCE_REPORT_MONTHLY; data: MonthlyAttendanceReportData }
   | { type: ReportType.ATTENDANCE_REPORT_SEMESTER; data: SemesterAttendanceReportData }
@@ -110,7 +110,7 @@ export class PDFManager {
           return await generateStudentRegistrationPDF(data as StudentRegistrationData, options)
         
         case ReportType.STUDENT_REPORT_CARD:
-          return await generateStudentReportCardPDF(data as StudentReportCardData, options)
+          throw new Error('Student report card generator not yet implemented')
         
         // Add more cases as generators are implemented
         case ReportType.ATTENDANCE_REPORT:

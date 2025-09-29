@@ -2,17 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET - Fetch individual student with complete data
-export async function GET(request: NextRequest, context: any) {
-  const { params } = await context;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = parseInt(params.id as string);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     
     const student = await prisma.student.findUnique({
       where: { studentId: id },
       include: {
         guardians: true,
         family: true,
-        scholarships: true
+        scholarships: true,
+        enrollments: {
+          include: {
+            course: true,
+            dropSemester: true
+          }
+        } as any
       }
     });
 
@@ -27,10 +36,13 @@ export async function GET(request: NextRequest, context: any) {
   }
 }
 
-export async function PUT(request: NextRequest, context: any) {
-  const { params } = await context;
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = parseInt(params.id as string);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     const data = await request.json();
     const {
       student,        // { firstName, lastName, ... }
@@ -38,6 +50,9 @@ export async function PUT(request: NextRequest, context: any) {
       familyInfo,     // { fatherName, ... }
       scholarships,   // [{ type, amount, ... }]
     } = data;
+
+
+
 
     // Update student in database with proper field mapping
     const studentData = {
@@ -50,6 +65,7 @@ export async function PUT(request: NextRequest, context: any) {
       registerToStudy: student.registerToStudy || false,
       studentHouseNumber: student.studentHouseNumber,
       studentVillage: student.studentVillage,
+      studentCommune: student.studentCommune,
       studentDistrict: student.studentDistrict,
       studentProvince: student.studentProvince,
       studentBirthDistrict: student.studentBirthDistrict,
@@ -104,8 +120,9 @@ export async function PUT(request: NextRequest, context: any) {
             birthDistrict: guardian.birthDistrict,
             believeJesus: guardian.believeJesus || false,
             church: guardian.church,
-            studentId: id
-          }
+            studentId: id,
+            ...(guardian.commune && { commune: guardian.commune })
+          } as any
         });
       }
     }
@@ -123,7 +140,8 @@ export async function PUT(request: NextRequest, context: any) {
         religion: familyInfo.religion,
         churchName: familyInfo.churchName,
         durationInKPC: familyInfo.durationInKPC,
-        organizationHelp: familyInfo.organizationHelp
+        organizationHelp: familyInfo.organizationHelp,
+        povertyCard: familyInfo.povertyCard
       };
 
       await prisma.familyInfo.upsert({

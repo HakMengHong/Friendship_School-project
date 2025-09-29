@@ -25,6 +25,7 @@ export interface StudentData {
   emergencyContact: string
   studentHouseNumber: string
   studentVillage: string
+  studentCommune: string
   studentDistrict: string
   studentProvince: string
   studentBirthDistrict: string

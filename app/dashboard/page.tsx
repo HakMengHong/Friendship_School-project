@@ -6,7 +6,6 @@ import {
   Users, 
   BookOpen, 
   Award, 
-  MessageSquare, 
   Star, 
   TrendingUp, 
   Activity, 
@@ -25,7 +24,6 @@ import {
   Download,
   Search,
   Settings,
-  Bell,
   AlertTriangle,
   Shield,
   Database,
@@ -99,7 +97,6 @@ function DashboardContent() {
   const [courses, setCourses] = useState<Course[]>([])
   const [attendances, setAttendances] = useState<Attendance[]>([])
   const [grades, setGrades] = useState<any[]>([])
-  const [announcements, setAnnouncements] = useState<any[]>([])
   const [recentActivities, setRecentActivities] = useState<any[]>([])
   const [learningQualityData, setLearningQualityData] = useState<any[]>([])
   
@@ -107,15 +104,8 @@ function DashboardContent() {
   const [autoRefresh, setAutoRefresh] = useState(false)
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [searchQuery, setSearchQuery] = useState("")
-  const [notifications, setNotifications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [newAnnouncement, setNewAnnouncement] = useState({
-    title: '',
-    content: '',
-    author: 'អ្នកគ្រប់គ្រង'
-  })
   
   // UI state
   const [showSidebar, setShowSidebar] = useState(false)
@@ -162,10 +152,8 @@ function DashboardContent() {
       const additionalData = await Promise.allSettled([
         fetch('/api/attendance'),
         fetch('/api/grades'),
-        fetch('/api/announcements'),
         fetch('/api/activity-logs?limit=10'),
-        fetch('/api/learning-quality'),
-        fetch('/api/notifications?limit=5')
+        fetch('/api/learning-quality')
       ])
 
       // Process additional data
@@ -180,23 +168,13 @@ function DashboardContent() {
       }
 
       if (additionalData[2].status === 'fulfilled' && additionalData[2].value.ok) {
-        const announcementsData = await additionalData[2].value.json()
-        setAnnouncements(Array.isArray(announcementsData) ? announcementsData : [])
-      }
-
-      if (additionalData[3].status === 'fulfilled' && additionalData[3].value.ok) {
-        const activitiesData = await additionalData[3].value.json()
+        const activitiesData = await additionalData[2].value.json()
         setRecentActivities(Array.isArray(activitiesData) ? activitiesData : [])
       }
 
-      if (additionalData[4].status === 'fulfilled' && additionalData[4].value.ok) {
-        const learningQualityData = await additionalData[4].value.json()
+      if (additionalData[3].status === 'fulfilled' && additionalData[3].value.ok) {
+        const learningQualityData = await additionalData[3].value.json()
         setLearningQualityData(learningQualityData.monthlyData || [])
-      }
-
-      if (additionalData[5].status === 'fulfilled' && additionalData[5].value.ok) {
-        const notificationsData = await additionalData[5].value.json()
-        setNotifications(Array.isArray(notificationsData) ? notificationsData : [])
       }
 
       setLastRefresh(new Date())
@@ -249,7 +227,6 @@ function DashboardContent() {
     totalCourses: courses.length,
     totalAttendances: attendances.length,
     totalGrades: grades.length,
-    totalAnnouncements: announcements.length,
     averageGrade: grades.length > 0 ? grades.reduce((sum, grade) => sum + (grade.grade || 0), 0) / grades.length : 0,
     activeStudents: students.filter(s => s.status === 'ACTIVE').length
   }
@@ -262,38 +239,6 @@ function DashboardContent() {
     uptime: '99.9%'
   }
 
-  // Handle announcement operations
-  const handleAddAnnouncement = async () => {
-    try {
-      const response = await fetch('/api/announcements', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAnnouncement)
-      })
-
-      if (response.ok) {
-        setNewAnnouncement({ title: '', content: '', author: 'Admin' })
-        setShowAddForm(false)
-        fetchDashboardData()
-      }
-    } catch (err) {
-      console.error('Error adding announcement:', err)
-    }
-  }
-
-  const handleDeleteAnnouncement = async (id: number) => {
-    try {
-      const response = await fetch(`/api/announcements?id=${id}`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        fetchDashboardData()
-      }
-    } catch (err) {
-      console.error('Error deleting announcement:', err)
-    }
-  }
 
   // Get activity icon
   const getActivityIcon = (action: string) => {
@@ -406,101 +351,8 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* Weather Widget & Notifications */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-
-          {/* Enhanced Notifications Panel */}
-          <div className="relative">
-            <div 
-              className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-red-50/20 to-pink-50/30 dark:from-orange-950/20 dark:via-red-950/20 dark:to-pink-950/20 rounded-3xl -z-10" 
-            />
-            
-            <Card className="backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80">
-              <CardHeader className="p-6 bg-gradient-to-r from-orange-500 via-red-600 to-pink-600 text-white rounded-t-xl">
-                <CardTitle className="text-white flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Bell className="h-5 w-5" />
-                    <span className="text-xl text-white">ការជូនដំណឹង</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className="bg-white/20 text-white">
-                      {notifications.length}
-                    </Badge>
-                    <Button
-                      onClick={() => fetchDashboardData()}
-                      size="sm"
-                      variant="ghost"
-                      className="text-white hover:bg-white/20"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                  </div>
-              </CardTitle>
-            </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {notifications.length > 0 ? (
-                    notifications.map((notification, index) => (
-                      <div 
-                        key={index} 
-                        className="group flex items-start space-x-3 p-4 rounded-lg transition-all duration-200 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 hover:shadow-md"
-                      >
-                        <div className="flex-shrink-0">
-                          <div className={`w-3 h-3 rounded-full mt-1 ${
-                            notification.type === 'warning' 
-                              ? 'bg-yellow-500 animate-pulse' 
-                              : 'bg-blue-500'
-                          }`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="text-base font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                {notification.message}
-                              </p>
-                              {notification.details && (
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                                  {notification.details}
-                                </p>
-                              )}
-                              <div className="flex items-center space-x-3 mt-2">
-                                <span className="text-sm text-gray-500 dark:text-gray-400">
-                                  {notification.time}
-                                </span>
-                                {notification.author && (
-                                  <span className="text-sm text-blue-600 dark:text-blue-400">
-                                    ដោយ: {notification.author}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <Badge 
-                              variant="secondary" 
-                              className={`text-sm ${
-                                notification.type === 'warning' 
-                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' 
-                                  : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                              }`}
-                            >
-                              {notification.type === 'warning' ? 'សំខាន់' : 'ព័ត៌មាន'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                      <p className="text-base">មិនមានការជូនដំណឹង</p>
-                      <p className="text-sm mt-1">ការជូនដំណឹងថ្មីៗនឹងបង្ហាញនៅទីនេះ</p>
-                    </div>
-                  )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-          <div className="relative">
+        {/* Recent Activity */}
+        <div className="relative">
           <div 
             className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-rose-50/30 dark:from-purple-950/20 dark:via-pink-950/20 dark:to-rose-950/20 rounded-3xl -z-10" 
           />
@@ -664,120 +516,6 @@ function DashboardContent() {
           </div>
 
 
-        {/* Recent Activity */}
-        
-
-        {/* Announcements Section */}
-        <div className="relative mb-8">
-          <div 
-            className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-blue-50/20 to-cyan-50/30 dark:from-indigo-950/20 dark:via-blue-950/20 dark:to-cyan-950/20 rounded-3xl -z-10" 
-          />
-          
-          <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 ${
-            isDarkMode 
-              ? 'bg-slate-800/80 hover:bg-slate-700/80' 
-              : 'bg-white/80 hover:bg-white/90'
-          }`}>
-            <CardHeader className="p-6 bg-gradient-to-r from-indigo-500 via-blue-600 to-cyan-600 text-white rounded-t-xl">
-              <CardTitle className="text-white flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="h-5 w-5" />
-                  <span className="text-xl text-white">ការប្រកាស</span>
-                </div>
-          <Button 
-                  onClick={() => setShowAddForm(!showAddForm)}
-            size="sm" 
-                  className="bg-white/20 hover:bg-white/30 text-white transition-all duration-200"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  បន្ថែម
-          </Button>
-              </CardTitle>
-        </CardHeader>
-            <CardContent className="p-6">
-          {showAddForm && (
-                <div className="mb-6 p-4 rounded-lg transition-colors bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700/70">
-                  <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                    <span className="text-primary">បន្ថែមការប្រកាសថ្មី</span> 
-                  </h3>
-              <div className="space-y-4">
-                    <Input
-                      placeholder="ចំណងជើង"
-                      value={newAnnouncement.title}
-                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
-                      className="transition-colors bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400"
-                    />
-                    <Textarea
-                      placeholder="មាតិកា"
-                      value={newAnnouncement.content}
-                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
-                      className="transition-colors bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400"
-                      rows={3}
-                    />
-                    <div className="flex space-x-2">
-                      <Button 
-                        onClick={handleAddAnnouncement} 
-                        className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200"
-                      >
-                        រក្សាទុក
-                      </Button>
-                  <Button 
-                    onClick={() => {
-                          setShowAddForm(false)
-                          setNewAnnouncement({ title: '', content: '', author: 'Admin' })
-                        }}
-                        variant="outline"
-                        className="transition-all duration-200 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
-                  >
-                    បោះបង់
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-    
-          <div className="space-y-4">
-            {announcements.length > 0 ? (
-              announcements.map((announcement) => (
-                    <div 
-                      key={announcement.id} 
-                      className="p-4 rounded-lg transition-colors duration-200 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-600"
-                    >
-                      <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                          <h4 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
-                          {announcement.title}
-                          </h4>
-                          <p className="text-base mb-2 text-gray-600 dark:text-gray-400">
-                        {announcement.content}
-                      </p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                            <span>ដោយ: {announcement.author}</span>
-                            <span>{new Date(announcement.createdAt).toLocaleDateString('km-KH')}</span>
-                      </div>
-                    </div>
-                        <Button
-                      onClick={() => handleDeleteAnnouncement(announcement.id)}
-                          variant="ghost"
-                          size="sm"
-                          className="transition-all duration-200 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                        </Button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-base">មិនមានការប្រកាស</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-        </div>
-
         {/* Top Students */}
         <div className="relative">
           <div 
@@ -842,6 +580,5 @@ function DashboardContent() {
       </Card>
         </div>
       </div>
-    </div>
   )
 }

@@ -27,7 +27,9 @@ import {
   ArrowLeft,
   CheckCircle,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  TrendingUp,
+  Search
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -391,103 +393,136 @@ function AddStudentClassContent() {
   }
 
   return (
-    <div>
-  
-      {/* Error Message */}
+    <div className="min-h-screen animate-fade-in">
+      {/* Enhanced Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
-          <AlertCircle className="h-5 w-5 text-red-600" />
-          <span className="text-red-800 font-medium">
-            {error}
-          </span>
-          <div className="ml-auto flex space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => {
-                setError(null)
-                setDataLoading(true)
-                fetchAllData()
-              }}
-            >
-              ព្យាយាមម្តងទៀត
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setError(null)}
-            >
-              ✕
-            </Button>
+        <div className="relative mb-6">
+          <div className="bg-gradient-to-r from-red-50 via-red-50/80 to-red-50 dark:from-red-950/20 dark:via-red-950/10 dark:to-red-950/20 backdrop-blur-xl border-2 border-red-200 dark:border-red-800 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
+                <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-red-800 dark:text-red-200 mb-1">
+                  មានបញ្ហាក្នុងការផ្ទុកទិន្នន័យ
+                </h3>
+                <p className="text-red-700 dark:text-red-300 font-medium">
+                  {error}
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setError(null)
+                    setDataLoading(true)
+                    fetchAllData()
+                  }}
+                  className="bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  ព្យាយាមម្តងទៀត
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setError(null)}
+                  className="text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20"
+                >
+                  ✕
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Success Message */}
+      {/* Enhanced Success Message */}
       {showSuccess && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-3">
-          <CheckCircle className="h-5 w-5 text-green-600" />
-          <span className="text-green-800 font-medium">
-            បានបន្ថែមសិស្សទៅក្នុងថ្នាក់ដោយជោគជ័យ!
-          </span>
+        <div className="relative mb-6">
+          <div className="bg-gradient-to-r from-green-50 via-green-50/80 to-green-50 dark:from-green-950/20 dark:via-green-950/10 dark:to-green-950/20 backdrop-blur-xl border-2 border-green-200 dark:border-green-800 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
+                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-green-800 dark:text-green-200 mb-1">
+                  បានបន្ថែមសិស្សដោយជោគជ័យ!
+                </h3>
+                <p className="text-green-700 dark:text-green-300 font-medium">
+                  សិស្សទាំងអស់ត្រូវបានបន្ថែមទៅក្នុងថ្នាក់ដោយជោគជ័យ
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Student Selection */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Enhanced Filters */}
-          <div className="relative">
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-8">
+        {/* Left Column - Student Selection (60%) */}
+        <div className="space-y-8">
+          {/* Modern Filters Section */}
+          <div className="relative group">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/20 to-blue-50/20 dark:from-blue-950/10 dark:via-indigo-950/10 dark:to-blue-950/10 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-blue-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-blue-950/20 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.05),transparent_50%)]" />
             
-            <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-              {/* Enhanced Header */}
-              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-8">
+            <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+              {/* Modern Header */}
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-4">
                 <div className="absolute inset-0 bg-black/10" />
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
                 
                 <div className="relative z-10 flex items-center space-x-4">
-                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
                     <Users className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-white">ជ្រើសរើសសិស្ស</h2>
-                    <div className="flex items-center space-x-3 mt-2">
-                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                    <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">ជ្រើសរើសសិស្ស</h2>
+                    <div className="flex items-center space-x-4 mt-3">
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
                         ឆ្នាំសិក្សា • ថ្នាក់ • ស្វែងរក
                       </Badge>
-                      <div className="h-1 w-8 bg-white/30 rounded-full"></div>
                     </div>
+                    <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
                   </div>
                 </div>
               </CardHeader>
               
-              <CardContent className="p-2 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <Label htmlFor="schoolYear" className="text-base font-medium text-primary font-semibold">ឆ្នាំសិក្សា</Label>
-                  <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {schoolYears.map((year) => (
-                        <SelectItem key={year.schoolYearId} value={year.schoolYearCode}>
-                          {year.schoolYearCode}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="class" className="text-base font-medium text-primary font-semibold">ថ្នាក់</Label>
-                  <Select value={selectedClass} onValueChange={setSelectedClass}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
-                    </SelectTrigger>
-                    <SelectContent>
+              <CardContent className="pt-4 space-y-6">
+                {/* Modern Search and Filter Section */}
+                <div className="p-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/30 dark:border-blue-700/30 rounded-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="md:col-span-1">
+                      <Label htmlFor="schoolYear" className="block text-base font-semibold mb-3 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                        <GraduationCap className="h-4 w-4" />
+                        ឆ្នាំសិក្សា
+                      </Label>
+                      <Select value={selectedSchoolYear} onValueChange={setSelectedSchoolYear}>
+                        <SelectTrigger className="h-12 text-base border-2 border-blue-200 focus:border-blue-500 focus:ring-blue-200 bg-white dark:bg-gray-800 rounded-xl">
+                          <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {schoolYears.map((year) => (
+                            <SelectItem key={year.schoolYearId} value={year.schoolYearCode}>
+                              {year.schoolYearCode}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="md:col-span-1">
+                      <Label htmlFor="class" className="block text-base font-semibold mb-3 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        ថ្នាក់
+                      </Label>
+                      <Select value={selectedClass} onValueChange={setSelectedClass}>
+                        <SelectTrigger className="h-12 text-base border-2 border-blue-200 focus:border-blue-500 focus:ring-blue-200 bg-white dark:bg-gray-800 rounded-xl">
+                          <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                        </SelectTrigger>
+                        <SelectContent>
                       <SelectItem value="all">ទាំងអស់</SelectItem>
                       {uniqueClasses.map((classValue) => (
                         <SelectItem key={classValue} value={classValue}>
@@ -497,71 +532,83 @@ function AddStudentClassContent() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="search" className="text-base font-medium text-primary font-semibold">ស្វែងរកសិស្ស</Label>
-                  <div className="relative">
-                    <Input
-                      id="search"
-                      placeholder="ឈ្មោះសិស្ស..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    {searchTerm && (
+                    <div className="md:col-span-2">
+                      <Label htmlFor="search" className="block text-base font-semibold mb-3 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                        <UserPlus className="h-4 w-4" />
+                        ស្វែងរកសិស្ស
+                      </Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <Input
+                          id="search"
+                          placeholder="ឈ្មោះសិស្ស..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="h-12 text-base border-2 border-blue-200 focus:border-blue-500 focus:ring-blue-200 bg-white dark:bg-gray-800 rounded-xl pl-10 pr-12"
+                        />
+                        {searchTerm && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSearchTerm('')}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                          >
+                            ✕
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Clear Filters Button */}
+                  {(selectedSchoolYear || (selectedClass && selectedClass !== 'all') || searchTerm) && (
+                    <div className="flex justify-end mt-4">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => setSearchTerm('')}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                        onClick={clearAllFilters}
+                        className="text-base px-4 py-2 bg-white dark:bg-gray-800 border-2 border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl"
                       >
-                        ✕
+                        លុបការច្រោះទាំងអស់
                       </Button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              
-                {/* Clear Filters Button */}
-                {(selectedSchoolYear || (selectedClass && selectedClass !== 'all') || searchTerm) && (
-                  <div className="flex justify-end mt-5">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={clearAllFilters}
-                      className="text-base"
-                    >
-                      លុបការច្រោះទាំងអស់
-                    </Button>
-                  </div>
-                )}
-              </div>
             </CardContent>
           </Card>
         </div>
 
-          {/* Enhanced Students List */}
-          <div className="relative">
+        {/* Enhanced Students List */}
+        {/* Modern Student List Section */}
+          <div className="relative group">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-pink-50/20 to-purple-50/20 dark:from-purple-950/10 dark:via-pink-950/10 dark:to-purple-950/10 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-purple-50/30 dark:from-purple-950/20 dark:via-pink-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(168,85,247,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_70%_30%,rgba(168,85,247,0.05),transparent_50%)]" />
             
-            <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-              {/* Enhanced Header */}
-              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-8">
+            <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+              {/* Modern Header */}
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-4">
                 <div className="absolute inset-0 bg-black/10" />
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
                 
                 <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                   <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
                       <Users className="h-8 w-8 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-white">បញ្ជីសិស្ស</h2>
-                      <div className="flex items-center space-x-3 mt-2">
-                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                      <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">បញ្ជីសិស្ស</h2>
+                      <div className="flex items-center space-x-4 mt-3">
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
                           {filteredStudents.length} សិស្ស
                         </Badge>
-                        <div className="h-1 w-8 bg-white/30 rounded-full"></div>
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                          {selectedStudents.length} បានជ្រើសរើស
+                        </Badge>
                       </div>
+                      <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
                     </div>
                   </div>
                   
@@ -576,278 +623,435 @@ function AddStudentClassContent() {
                           setSelectedStudents(filteredStudents.map(s => s.studentId))
                         }
                       }}
-                      className="group px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                      className="group px-6 py-3 bg-gradient-to-r from-white/20 to-white/10 hover:from-white/30 hover:to-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                     >
                       <div className="flex items-center gap-2">
                         {selectedStudents.length === filteredStudents.length ? 'ដោះជ្រើសរើសទាំងអស់' : 'ជ្រើសរើសទាំងអស់'}
                       </div>
                     </Button>
-                    
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                      ជ្រើសរើស: {selectedStudents.length}
-                    </Badge>
                   </div>
                 </div>
               </CardHeader>
-            <CardContent>
-              {dataLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center justify-between p-3 border rounded-lg animate-pulse">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
-                        <div className="space-y-2">
-                          <div className="h-4 bg-gray-300 rounded w-32"></div>
-                          <div className="h-3 bg-gray-300 rounded w-24"></div>
+              <CardContent className="p-4">
+                {dataLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center justify-between p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl animate-pulse bg-white/50 dark:bg-gray-800/50">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                          <div className="space-y-2">
+                            <div className="h-5 bg-gray-300 dark:bg-gray-600 rounded w-40"></div>
+                            <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-32"></div>
+                          </div>
                         </div>
+                        <div className="w-20 h-8 bg-gray-300 dark:bg-gray-600 rounded-xl"></div>
                       </div>
-                      <div className="w-16 h-6 bg-gray-300 rounded"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-[550px] overflow-y-auto">
-                  {filteredStudents.map((student) => (
-                  <div
-                    key={student.studentId}
-                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
-                      isStudentEnrolled(student.studentId) 
-                        ? 'border-gray-300 bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60' 
-                        : selectedStudents.includes(student.studentId)
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                          : 'border-gray-200 hover:border-gray-300 cursor-pointer'
-                    }`}
-                    onClick={() => !isStudentEnrolled(student.studentId) && handleStudentSelection(student.studentId)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        selectedStudents.includes(student.studentId)
-                          ? 'border-blue-500 bg-blue-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {selectedStudents.includes(student.studentId) && (
-                          <CheckCircle className="w-3 h-3 text-white" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-medium">
-                        {student.lastName} {student.firstName}
-                        </div>
-                        <div className="text-base text-gray-500">
-                          ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender} • {student.schoolYear}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {isStudentEnrolled(student.studentId) && (
-                        <Badge variant="outline" className="text-sm">
-                          បានចុះឈ្មោះរួចហើយ
-                        </Badge>
-                      )}
-                      <Badge variant={student.status === 'active' ? 'default' : 'secondary'}>
-                        {student.status === 'active' ? 'សកម្ម' : 'អសកម្ម'}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-                {filteredStudents.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>គ្មានសិស្សត្រូវបង្ហាញ</p>
-                  </div>
-                )}
-              </div>
-                )}
-            </CardContent>
-          </Card>
-        </div>
-        </div>
-
-        {/* Right Column - Class Selection and Actions */}
-        <div className="space-y-6">
-          {/* Class Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex text-primary items-center space-x-2">
-                <BookOpen className="h-5 w-5 text-primary" />
-                <span>ជ្រើសរើសថ្នាក់ដើម្បីបញ្ចូលសិស្ស</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="course" className="text-base font-medium text-primary font-semibold">ថ្នាក់</Label>
-                <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredCourses.map((course) => (
-                      <SelectItem key={course.courseId} value={course.courseId.toString()}>
-                        {course.courseName}{course.section}
-                      </SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {selectedCourse && (
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div className="text-base font-medium text-blue-800 dark:text-blue-200">
-                    ថ្នាក់ដែលបានជ្រើសរើស:
-                  </div>
-                  <div className="text-blue-600 dark:text-blue-300">
-                    {getSelectedCourseName()}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Student Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-primary">
-                <Users className="h-5 w-5 text-primary" />
-                <span>សិស្សដែលបានជ្រើសរើស ({selectedStudents.length})</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {selectedStudents.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>មិនទាន់មានសិស្សដែលបានជ្រើសរើស</p>
-                  <p className="text-base">សូមជ្រើសរើសសិស្សពីបញ្ជីខាងលើ</p>
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {selectedStudents.map((studentId) => {
-                    const student = students.find(s => s.studentId === studentId)
-                    if (!student) return null
-                    
-                    return (
-                      <div
-                        key={student.studentId}
-                        className="flex items-center justify-between p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
-                            <span className="text-base font-medium text-blue-600 dark:text-blue-300">
-                              {student.firstName.charAt(0)}{student.lastName.charAt(0)}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">
-                            {student.lastName} {student.firstName}
-                            </div>
-                            <div className="text-base text-gray-500 dark:text-gray-400">
-                              ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender} • {student.schoolYear}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleStudentSelection(student.studentId)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          >
-                            <span className="text-base">✕</span>
-                          </Button>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-              
-              {selectedStudents.length > 0 && (
-                <div className="pt-3 border-t">
-                  <div className="flex items-center justify-between text-base">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      សរុបសិស្សដែលបានជ្រើសរើស:
-                    </span>
-                    <span className="font-medium text-blue-600">
-                      {selectedStudents.length} នាក់
-                    </span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          {/* Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-primary">
-                <GraduationCap className="h-5 w-5 text-primary" />
-                <span>សកម្មភាព</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="text-base text-gray-600 dark:text-gray-400">
-                  សិស្សដែលបានជ្រើសរើស: <span className="font-medium">{selectedStudents.length}</span>
-                </div>
-                <div className="text-base text-gray-600 dark:text-gray-400">
-                  <span className="font-medium">{selectedCourse ? getSelectedCourseName() : 'មិនទាន់ជ្រើសរើស'}</span>
-                </div>
-              </div>
-              
-              <Button
-                onClick={handleAddStudentsToClass}
-                disabled={selectedStudents.length === 0 || !selectedCourse || submitting}
-                className="w-full bg-green-600 hover:bg-green-700"
-              >
-                {submitting ? (
-                  <div className="flex items-center space-x-2">
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    <span>កំពុងបន្ថែម...</span>
                   </div>
                 ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    បន្ថែមសិស្សទៅក្នុងថ្នាក់
-                  </>
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 dark:scrollbar-thumb-purple-600 scrollbar-track-transparent hover:scrollbar-thumb-purple-400 dark:hover:scrollbar-thumb-purple-500 py-2 px-2">
+                    {filteredStudents.map((student, index) => (
+                      <div
+                        key={student.studentId}
+                        className={`group relative overflow-hidden rounded-2xl p-4 transition-all duration-300 ${
+                          isStudentEnrolled(student.studentId) 
+                            ? 'border-2 border-gray-300 bg-gray-100/50 dark:bg-gray-800/50 cursor-not-allowed opacity-60' 
+                            : selectedStudents.includes(student.studentId)
+                              ? 'border-2 border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 cursor-pointer hover:shadow-lg hover:scale-[1.02]'
+                              : 'border-2 border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 cursor-pointer hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-lg hover:scale-[1.02]'
+                        }`}
+                        onClick={() => !isStudentEnrolled(student.studentId) && handleStudentSelection(student.studentId)}
+                      >
+                        {/* Background Pattern */}
+                        <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                          selectedStudents.includes(student.studentId)
+                            ? 'bg-gradient-to-r from-purple-50/50 to-pink-50/50 dark:from-purple-900/10 dark:to-pink-900/10'
+                            : 'bg-gradient-to-r from-gray-50/50 to-gray-100/50 dark:from-gray-800/10 dark:to-gray-700/10'
+                        }`} />
+                        
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            {/* Student Number Badge */}
+                            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+                              {index + 1}
+                            </div>
+                            
+                            {/* Selection Checkbox */}
+                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                              selectedStudents.includes(student.studentId)
+                                ? 'border-purple-500 bg-purple-500 shadow-lg'
+                                : 'border-gray-300 dark:border-gray-600 group-hover:border-purple-400'
+                            }`}>
+                              {selectedStudents.includes(student.studentId) && (
+                                <CheckCircle className="w-4 h-4 text-white" />
+                              )}
+                            </div>
+                            
+                            <div className="flex-1">
+                              <div className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
+                                {student.lastName} {student.firstName}
+                              </div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender} • {student.schoolYear}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {isStudentEnrolled(student.studentId) && (
+                              <Badge variant="outline" className="text-xs px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700">
+                                បានចុះឈ្មោះរួចហើយ
+                              </Badge>
+                            )}
+                            <Badge variant={student.status === 'active' ? 'default' : 'secondary'} className={`text-xs px-3 py-1 ${
+                              student.status === 'active' 
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700' 
+                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600'
+                            }`}>
+                              {student.status === 'active' ? 'សកម្ម' : 'អសកម្ម'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {filteredStudents.length === 0 && (
+                      <div className="text-center py-12">
+                        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Users className="h-10 w-10 text-purple-500 dark:text-purple-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">គ្មានសិស្សត្រូវបង្ហាញ</h3>
+                        <p className="text-gray-500 dark:text-gray-400">សូមព្យាយាមផ្លាស់ប្តូរការច្រោះរឺស្វែងរកពាក្យផ្សេង</p>
+                      </div>
+                    )}
+              </div>
                 )}
-              </Button>
             </CardContent>
           </Card>
+        </div>
 
-          {/* Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg text-primary font-semibold">សង្ខេប</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between">
-                <span>សិស្សសរុប:</span>
-                <span className="font-medium">{students.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>ថ្នាក់សរុប:</span>
-                <span className="font-medium">{courses.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>ឆ្នាំសិក្សា:</span>
-                <span className="font-medium">{schoolYears.length}</span>
-              </div>
-              {selectedCourse && (
-                <div className="pt-3 border-t">
-                  <div className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    សិស្សក្នុងថ្នាក់ {getSelectedCourseName()}:
+        {/* Modern Summary Section */}
+        <div className="relative group">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-blue-50/20 to-purple-50/30 dark:from-indigo-950/20 dark:via-blue-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,0.05),transparent_50%)]" />
+          
+          <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+            <CardHeader className="relative overflow-hidden bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 text-white p-4">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
+              
+              <div className="relative z-10 flex items-center space-x-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                  <TrendingUp className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">សង្ខេប</h2>
+                  <div className="flex items-center space-x-4 mt-3">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                      ព័ត៌មានទូទៅ
+                    </Badge>
                   </div>
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Total Students */}
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                      <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-blue-800 dark:text-blue-200">
+                        {students.length}
+                      </div>
+                      <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                        សិស្សសរុប
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total Classes */}
+                <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border border-purple-200 dark:border-purple-800 rounded-xl">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-lg">
+                      <GraduationCap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-purple-800 dark:text-purple-200">
+                        {courses.length}
+                      </div>
+                      <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
+                        ថ្នាក់សរុប
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total School Years */}
+                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800 rounded-xl">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/40 rounded-lg">
+                      <BookOpen className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-green-800 dark:text-green-200">
+                        {schoolYears.length}
+                      </div>
+                      <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                        ឆ្នាំសិក្សា
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Class-specific Statistics */}
+              {selectedCourse && (
+                <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200 dark:border-orange-800 rounded-xl">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="p-2 bg-orange-100 dark:bg-orange-900/40 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div>
+                      <div className="text-base font-semibold text-orange-800 dark:text-orange-200">
+                        សិស្សក្នុងថ្នាក់ {getSelectedCourseName()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 text-center">
                     {enrollments.filter(e => 
                       e.courseId === parseInt(selectedCourse) && !e.drop
                     ).length}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-orange-600 dark:text-orange-400 font-medium text-center mt-2">
                     សិស្សដែលបានចុះឈ្មោះ
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
+        </div>
+
+        </div>
+
+        {/* Right Column - Class Selection and Actions (40%) */}
+        <div className="space-y-8">
+          {/* Modern Class Selection */}
+          <div className="relative group">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 via-emerald-50/20 to-green-50/30 dark:from-green-950/20 dark:via-emerald-950/15 dark:to-green-950/20 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,197,94,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(34,197,94,0.05),transparent_50%)]" />
+            
+            <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white p-4">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                    <BookOpen className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">ជ្រើសរើសថ្នាក់</h2>
+                    <div className="flex items-center space-x-4 mt-3">
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                        បញ្ចូលសិស្ស
+                      </Badge>
+                    </div>
+                    <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="p-4 space-y-6">
+                <div>
+                  <Label htmlFor="course" className="block text-base font-semibold mb-3 text-green-700 dark:text-green-300 flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4" />
+                    ថ្នាក់
+                  </Label>
+                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                    <SelectTrigger className="h-12 text-base border-2 border-green-200 focus:border-green-500 focus:ring-green-200 bg-white dark:bg-gray-800 rounded-xl">
+                      <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredCourses.map((course) => (
+                        <SelectItem key={course.courseId} value={course.courseId.toString()}>
+                          {course.courseName}{course.section}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedCourse && (
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800 rounded-xl shadow-sm">
+                    <div className="text-base font-semibold text-green-800 dark:text-green-200 mb-2">
+                      ថ្នាក់ដែលបានជ្រើសរើស: {getSelectedCourseName()}
+                    </div>
+
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Modern Selected Students */}
+          <div className="relative group">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-amber-50/20 to-orange-50/30 dark:from-orange-950/20 dark:via-amber-950/15 dark:to-orange-950/20 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(251,146,60,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(251,146,60,0.05),transparent_50%)]" />
+            
+            <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-orange-500 via-orange-600 to-amber-600 text-white p-4">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">សិស្សដែលបានជ្រើសរើស</h2>
+                    <div className="flex items-center space-x-4 mt-3">
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                        {selectedStudents.length} នាក់
+                      </Badge>
+                    </div>
+                    <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="p-4">
+                {selectedStudents.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="h-10 w-10 text-orange-500 dark:text-orange-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">មិនទាន់មានសិស្សដែលបានជ្រើសរើស</h3>
+                    <p className="text-gray-500 dark:text-gray-400">សូមជ្រើសរើសសិស្សពីបញ្ជីខាងលើ</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-orange-300 dark:scrollbar-thumb-orange-600 scrollbar-track-transparent hover:scrollbar-thumb-orange-400 dark:hover:scrollbar-thumb-orange-500 py-2 px-2">
+                    {selectedStudents.map((studentId, index) => {
+                      const student = students.find(s => s.studentId === studentId)
+                      if (!student) return null
+                      
+                      return (
+                        <div
+                          key={student.studentId}
+                          className="group relative overflow-hidden rounded-2xl p-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-2 border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              {/* Student Number Badge */}
+                              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                {index + 1}
+                              </div>
+                              
+                              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-800 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                                <span className="text-sm font-bold text-orange-600 dark:text-orange-300">
+                                  {student.firstName.charAt(0)}{student.lastName.charAt(0)}
+                                </span>
+                              </div>
+                              
+                              <div className="flex-1">
+                                <div className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-300 transition-colors duration-300">
+                                  {student.lastName} {student.firstName}
+                                </div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                  ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender} • {student.schoolYear}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStudentSelection(student.studentId)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl p-2 group-hover:scale-110 transition-all duration-300"
+                            >
+                              <span className="text-lg">✕</span>
+                            </Button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Modern Actions */}
+          <div className="relative group">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 via-teal-50/20 to-emerald-50/30 dark:from-emerald-950/20 dark:via-teal-950/15 dark:to-emerald-950/20 rounded-3xl -z-10" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05),transparent_50%)]" />
+            
+            <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+              <CardHeader className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white p-4">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                    <GraduationCap className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">សកម្មភាព</h2>
+                    <div className="flex items-center space-x-4 mt-3">
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                        បន្ថែមសិស្ស
+                      </Badge>
+                    </div>
+                    <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="p-4 space-y-6">
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+                    <div className="text-base font-semibold text-emerald-800 dark:text-emerald-200 mb-2">
+                      សិស្សដែលបានជ្រើសរើស: <span className="text-emerald-600 dark:text-emerald-400">{selectedStudents.length}</span>
+                    </div>
+                    <div className="text-base font-semibold text-emerald-800 dark:text-emerald-200">
+                      <span className="text-emerald-600 dark:text-emerald-400">{selectedCourse ? getSelectedCourseName() : 'មិនទាន់ជ្រើសរើស'}</span>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={handleAddStudentsToClass}
+                    disabled={selectedStudents.length === 0 || !selectedCourse || submitting}
+                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  >
+                    {submitting ? (
+                      <div className="flex items-center space-x-3">
+                        <RefreshCw className="h-5 w-5 animate-spin" />
+                        <span>កំពុងបន្ថែម...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-3">
+                        <Plus className="h-5 w-5" />
+                        <span>បន្ថែមសិស្សទៅក្នុងថ្នាក់</span>
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
         </div>
       </div>
 

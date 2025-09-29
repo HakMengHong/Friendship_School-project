@@ -1238,50 +1238,35 @@ function sortDatesByYearMonth(dates: string[]): string[] {
   })
 }
 
-// Helper function to get letter grade (same as grade-report-yearly.ts)
+// Helper function to get letter grade (consistent with other report generators)
 function getLetterGrade(score: number, gradeNum: number): string {
-  // A+ to F grading system based on grade level
+  // A to F grading system based on grade level
   if (gradeNum >= 1 && gradeNum <= 6) {
     // Grades 1-6: Full average is 10
-    if (score >= 9.5) return 'A+' // ល្អ​ប្រសើរ​ណាស់ = មធ្យមភាគ x ០,៩៥
     if (score >= 9) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
-    if (score >= 8.5) return 'A-' // ល្អ​ប្រសើរ​បង្គួរ = មធ្យមភាគ x ០,៨៥
-    if (score >= 8) return 'B+'  // ល្អ​ណាស់​ណាស់ = មធ្យមភាគ x ០,៨
-    if (score >= 7.5) return 'B'  // ល្អ​ណាស់ = មធ្យមភាគ x ០,៧៥
-    if (score >= 7) return 'B-'  // ល្អ​ណាស់​បង្គួរ = មធ្យមភាគ x ០,៧
-    if (score >= 6.5) return 'C+' // ល្អ​ណាស់ = មធ្យមភាគ x ០,៦៥
-    if (score >= 6) return 'C'   // ល្អ​ = មធ្យមភាគ x ០,៦
-    if (score >= 5.5) return 'C-' // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥៥
-    if (score >= 5) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
+    if (score >= 8) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (score >= 7) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (score >= 6) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (score >= 5) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
     return 'F' // ខ្សោយ
   }
   
   if (gradeNum >= 7 && gradeNum <= 9) {
     // Grades 7-9: Full average is 50
-    if (score >= 47.5) return 'A+' // ល្អ​ប្រសើរ​ណាស់ = មធ្យមភាគ x ០,៩៥
-    if (score >= 45) return 'A'    // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
-    if (score >= 42.5) return 'A-' // ល្អ​ប្រសើរ​បង្គួរ = មធ្យមភាគ x ០,៨៥
-    if (score >= 40) return 'B+'   // ល្អ​ណាស់​ណាស់ = មធ្យមភាគ x ០,៨
-    if (score >= 37.5) return 'B'  // ល្អ​ណាស់ = មធ្យមភាគ x ០,៧៥
-    if (score >= 35) return 'B-'   // ល្អ​ណាស់​បង្គួរ = មធ្យមភាគ x ០,៧
-    if (score >= 32.5) return 'C+' // ល្អ​ណាស់ = មធ្យមភាគ x ០,៦៥
-    if (score >= 30) return 'C'    // ល្អ​ = មធ្យមភាគ x ០,៦
-    if (score >= 27.5) return 'C-' // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥៥
-    if (score >= 25) return 'D'    // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
+    if (score >= 45) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
+    if (score >= 40) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (score >= 35) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (score >= 30) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (score >= 25) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
     return 'F' // ខ្សោយ
   }
   
   // Fallback for unknown grade levels
-  if (score >= 9.5) return 'A+'
-  if (score >= 9) return 'A'
-  if (score >= 8.5) return 'A-'
-  if (score >= 8) return 'B+'
-  if (score >= 7.5) return 'B'
-  if (score >= 7) return 'B-'
-  if (score >= 6.5) return 'C+'
-  if (score >= 6) return 'C'
-  if (score >= 5.5) return 'C-'
-  if (score >= 5) return 'D'
+  if (score >= 90) return 'A'
+  if (score >= 80) return 'B'
+  if (score >= 70) return 'C'
+  if (score >= 60) return 'D'
+  if (score >= 50) return 'E'
   return 'F'
 }
 
@@ -1315,61 +1300,36 @@ function calculateYearlyRanks(students: any[]): {
   return { semester1Ranks, semester2Ranks, overallRanks }
 }
 
-// Grade status calculation (same as grade-report-monthly.ts)
+// Grade status calculation (consistent with other report generators)
 function getGradeStatus(average: number, gradeLevel: string): string {
   const gradeNum = parseInt(gradeLevel) || 0
   
-  // Grade thresholds
-  const GRADE_THRESHOLDS = {
-    // For grades 1-6 (full average is 10)
-    A_PLUS: 9.5, A: 9, A_MINUS: 8.5, B_PLUS: 8, B: 7.5, B_MINUS: 7,
-    C_PLUS: 6.5, C: 6, C_MINUS: 5.5, D: 5,
-    // For grades 7-9 (full average is 50)
-    A_PLUS_HIGH: 47.5, A_HIGH: 45, A_MINUS_HIGH: 42.5, B_PLUS_HIGH: 40, B_HIGH: 37.5,
-    B_MINUS_HIGH: 35, C_PLUS_HIGH: 32.5, C_HIGH: 30, C_MINUS_HIGH: 27.5, D_HIGH: 25
-  }
-  
   if (gradeNum >= 1 && gradeNum <= 6) {
     // Grades 1-6: Full average is 10
-    if (average >= GRADE_THRESHOLDS.A_PLUS) return 'A+'
-    if (average >= GRADE_THRESHOLDS.A) return 'A'
-    if (average >= GRADE_THRESHOLDS.A_MINUS) return 'A-'
-    if (average >= GRADE_THRESHOLDS.B_PLUS) return 'B+'
-    if (average >= GRADE_THRESHOLDS.B) return 'B'
-    if (average >= GRADE_THRESHOLDS.B_MINUS) return 'B-'
-    if (average >= GRADE_THRESHOLDS.C_PLUS) return 'C+'
-    if (average >= GRADE_THRESHOLDS.C) return 'C'
-    if (average >= GRADE_THRESHOLDS.C_MINUS) return 'C-'
-    if (average >= GRADE_THRESHOLDS.D) return 'D'
-    return 'F'
+    if (average >= 9) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
+    if (average >= 8) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (average >= 7) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (average >= 6) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (average >= 5) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
+    return 'F' // ខ្សោយ
   }
   
   if (gradeNum >= 7 && gradeNum <= 9) {
     // Grades 7-9: Full average is 50
-    if (average >= GRADE_THRESHOLDS.A_PLUS_HIGH) return 'A+'
-    if (average >= GRADE_THRESHOLDS.A_HIGH) return 'A'
-    if (average >= GRADE_THRESHOLDS.A_MINUS_HIGH) return 'A-'
-    if (average >= GRADE_THRESHOLDS.B_PLUS_HIGH) return 'B+'
-    if (average >= GRADE_THRESHOLDS.B_HIGH) return 'B'
-    if (average >= GRADE_THRESHOLDS.B_MINUS_HIGH) return 'B-'
-    if (average >= GRADE_THRESHOLDS.C_PLUS_HIGH) return 'C+'
-    if (average >= GRADE_THRESHOLDS.C_HIGH) return 'C'
-    if (average >= GRADE_THRESHOLDS.C_MINUS_HIGH) return 'C-'
-    if (average >= GRADE_THRESHOLDS.D_HIGH) return 'D'
-    return 'F'
+    if (average >= 45) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
+    if (average >= 40) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (average >= 35) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (average >= 30) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (average >= 25) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
+    return 'F' // ខ្សោយ
   }
   
   // Fallback for unknown grade levels
-  if (average >= GRADE_THRESHOLDS.A_PLUS) return 'A+'
-  if (average >= GRADE_THRESHOLDS.A) return 'A'
-  if (average >= GRADE_THRESHOLDS.A_MINUS) return 'A-'
-  if (average >= GRADE_THRESHOLDS.B_PLUS) return 'B+'
-  if (average >= GRADE_THRESHOLDS.B) return 'B'
-  if (average >= GRADE_THRESHOLDS.B_MINUS) return 'B-'
-  if (average >= GRADE_THRESHOLDS.C_PLUS) return 'C+'
-  if (average >= GRADE_THRESHOLDS.C) return 'C'
-  if (average >= GRADE_THRESHOLDS.C_MINUS) return 'C-'
-  if (average >= GRADE_THRESHOLDS.D) return 'D'
+  if (average >= 90) return 'A'
+  if (average >= 80) return 'B'
+  if (average >= 70) return 'C'
+  if (average >= 60) return 'D'
+  if (average >= 50) return 'E'
   return 'F'
 }
 

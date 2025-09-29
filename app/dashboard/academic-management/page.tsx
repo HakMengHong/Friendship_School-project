@@ -66,7 +66,7 @@ interface Course {
 }
 
 interface Teacher {
-  userid: number
+  userId: number
   username: string
   firstname: string
   lastname: string
@@ -1057,23 +1057,27 @@ function AcademicManagementContent() {
   }
 
   return (
-    <div>
-      <div className="relative">
+    <div className="min-h-screen animate-fade-in">
+      {/* Enhanced Statistics Overview */}
+      <div className="relative mb-6">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-green-50/30 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-green-950/20 rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.05),transparent_50%)]" />
+
         <div className="text-center space-y-6 p-8">
           {/* Enhanced Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* School Years Card */}
-            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border-0 shadow-2xl hover:shadow-3xl transition-all duration-700 hover:scale-105 hover:-translate-y-2">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-700" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <Calendar className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{schoolYears.length}</p>
+                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform duration-300">{schoolYears.length}</p>
                     <p className="text-lg text-blue-500 dark:text-blue-300 font-medium">ឆ្នាំសិក្សា</p>
                   </div>
                 </div>
@@ -1082,15 +1086,16 @@ function AcademicManagementContent() {
             </div>
 
             {/* Courses Card */}
-            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border-0 shadow-2xl hover:shadow-3xl transition-all duration-700 hover:scale-105 hover:-translate-y-2">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-700" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <School className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{courses.length}</p>
+                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 group-hover:scale-105 transition-transform duration-300">{courses.length}</p>
                     <p className="text-lg text-purple-500 dark:text-purple-300 font-medium">ថ្នាក់រៀន</p>
                   </div>
                 </div>
@@ -1099,15 +1104,16 @@ function AcademicManagementContent() {
             </div>
 
             {/* Subjects Card */}
-            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border-0 shadow-2xl hover:shadow-3xl transition-all duration-700 hover:scale-105 hover:-translate-y-2">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-700" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <BookOpen className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">{subjects.length}</p>
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400 group-hover:scale-105 transition-transform duration-300">{subjects.length}</p>
                     <p className="text-lg text-green-500 dark:text-green-300 font-medium">មុខវិជ្ជា</p>
                   </div>
                 </div>
@@ -1116,15 +1122,16 @@ function AcademicManagementContent() {
             </div>
 
             {/* Teachers Card */}
-            <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border-0 shadow-2xl hover:shadow-3xl transition-all duration-700 hover:scale-105 hover:-translate-y-2">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-110 transition-transform duration-700" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <Users className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{safeTeachers.length}</p>
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400 group-hover:scale-105 transition-transform duration-300">{safeTeachers.length}</p>
                     <p className="text-lg text-orange-500 dark:text-orange-300 font-medium">គ្រូបង្រៀន</p>
                   </div>
                 </div>
@@ -1132,8 +1139,6 @@ function AcademicManagementContent() {
               </div>
             </div>
           </div>
-
-         
         </div>
       </div>
 
@@ -1151,41 +1156,43 @@ function AcademicManagementContent() {
         </Card>
       )}
 
-      {/* School Years Section */}
-      <div className="relative mb-6">
+      {/* Modern School Years Section */}
+      <div className="relative group mb-6">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/20 to-blue-50/20 dark:from-blue-950/10 dark:via-indigo-950/10 dark:to-blue-950/10 rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-blue-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-blue-950/20 rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.05),transparent_50%)]" />
         
-        <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-          {/* Enhanced Header */}
-          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-6">
+        <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+          {/* Modern Header */}
+          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white p-4">
             <div className="absolute inset-0 bg-black/10" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
             
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-3">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
                   <Calendar className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white">ឆ្នាំសិក្សា</h2>
-                  <div className="flex items-center space-x-3 mt-2">
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                  <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">ឆ្នាំសិក្សា</h2>
+                  <div className="flex items-center space-x-4 mt-3">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
                       {schoolYears.length} ឆ្នាំ
                     </Badge>
-                    <div className="h-1 w-8 bg-white/30 rounded-full"></div>
                   </div>
+                  <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
                 </div>
               </div>
               
               <Button 
                 onClick={() => setShowYearForm(!showYearForm)}
-                className="group px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="group px-6 py-3 bg-gradient-to-r from-white/20 to-white/10 hover:from-white/30 hover:to-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 variant="ghost"
               >
                 <div className="flex items-center gap-2">
-                  {showYearForm ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+                  {showYearForm ? <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> : <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />}
                   <span>{showYearForm ? 'បោះបង់' : 'បន្ថែមឆ្នាំ'}</span>
                 </div>
               </Button>
@@ -1330,53 +1337,58 @@ function AcademicManagementContent() {
         </Card>
       </div>
 
-      {/* Courses Section */}
-      <div className="relative mb-6">
+      {/* Modern Courses Section */}
+      <div className="relative group mb-6">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-pink-50/20 to-purple-50/20 dark:from-purple-950/10 dark:via-pink-950/10 dark:to-purple-950/10 rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-purple-50/30 dark:from-purple-950/20 dark:via-pink-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(168,85,247,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_70%_30%,rgba(168,85,247,0.05),transparent_50%)]" />
         
-        <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-          {/* Enhanced Header */}
-          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-6">
+        <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+          {/* Modern Header */}
+          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-purple-500 via-purple-600 to-pink-600 text-white p-4">
             <div className="absolute inset-0 bg-black/10" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
             
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-3">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
                   <School className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white">ថ្នាក់រៀន</h2>
-                  <div className="flex items-center space-x-3 mt-2">
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                  <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">ថ្នាក់រៀន</h2>
+                  <div className="flex items-center space-x-4 mt-3">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
                       {courses.length} ថ្នាក់
                     </Badge>
-                    <div className="h-1 w-8 bg-white/30 rounded-full"></div>
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                      {filteredCourses.length} បានច្រាស់
+                    </Badge>
                   </div>
+                  <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
                 </div>
               </div>
               
               <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
                 <Button 
                   onClick={() => setShowCourseForm(!showCourseForm)}
-                  className="group px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  className="group px-6 py-3 bg-gradient-to-r from-white/20 to-white/10 hover:from-white/30 hover:to-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   variant="ghost"
                 >
                   <div className="flex items-center gap-2">
-                    {showCourseForm ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+                    {showCourseForm ? <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> : <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />}
                     <span>{showCourseForm ? 'បោះបង់' : 'បន្ថែមថ្នាក់'}</span>
                   </div>
                 </Button>
                 
                 <Button 
                   onClick={() => setShowMultipleCourseForm(!showMultipleCourseForm)}
-                  className="group px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  className="group px-6 py-3 bg-gradient-to-r from-white/20 to-white/10 hover:from-white/30 hover:to-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   variant="ghost"
                 >
                   <div className="flex items-center gap-2">
-                    {showMultipleCourseForm ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+                    {showMultipleCourseForm ? <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> : <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />}
                     <span>{showMultipleCourseForm ? 'បោះបង់' : 'បង្កើតថ្នាក់រៀនច្រើន'}</span>
                   </div>
                 </Button>
@@ -1498,7 +1510,7 @@ function AcademicManagementContent() {
                         </SelectItem>
                       ) : (
                         safeTeachers.map((teacher) => (
-                          <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
+                          <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
                             <div className="flex flex-col">
                               <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
                             </div>
@@ -1526,7 +1538,7 @@ function AcademicManagementContent() {
                         </SelectItem>
                       ) : (
                         safeTeachers.map((teacher) => (
-                          <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
+                          <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
                             <div className="flex flex-col">
                               <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
                             </div>
@@ -1554,7 +1566,7 @@ function AcademicManagementContent() {
                         </SelectItem>
                       ) : (
                         safeTeachers.map((teacher) => (
-                          <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
+                          <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
                             <div className="flex flex-col">
                               <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
                             </div>
@@ -1865,7 +1877,7 @@ function AcademicManagementContent() {
                     <SelectContent>
                       <SelectItem value="none">គ្មានគ្រូ</SelectItem>
                       {safeTeachers.map((teacher) => (
-                        <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
+                        <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
                           <div className="flex flex-col">
                             <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
                           </div>
@@ -1886,7 +1898,7 @@ function AcademicManagementContent() {
                     <SelectContent>
                       <SelectItem value="none">គ្មានគ្រូ</SelectItem>
                       {safeTeachers.map((teacher) => (
-                        <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
+                        <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
                           <div className="flex flex-col">
                             <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
                           </div>
@@ -1907,7 +1919,7 @@ function AcademicManagementContent() {
                     <SelectContent>
                       <SelectItem value="none">គ្មានគ្រូ</SelectItem>
                       {safeTeachers.map((teacher) => (
-                        <SelectItem key={teacher.userid} value={teacher.userid.toString()}>
+                        <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
                           <div className="flex flex-col">
                             <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
                           </div>
@@ -2126,28 +2138,34 @@ function AcademicManagementContent() {
               {/* Courses Display - Grid View */}
               {viewMode === 'grid' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {filteredCourses.map((course) => (
-                    <div key={course.courseId} className="relative group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden">
+                  {filteredCourses.map((course, index) => (
+                    <div key={course.courseId} className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-1 cursor-pointer">
                       {/* Background Pattern */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-950/20 dark:to-blue-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 to-blue-50/30 dark:from-purple-950/20 dark:to-blue-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-blue-500/10 rounded-full translate-y-8 -translate-x-8 group-hover:scale-110 transition-transform duration-700" />
                       
-                      {/* Top Badge */}
+                      {/* Course Number Badge */}
                       <div className="absolute top-4 right-4 z-10">
-                        <Badge variant="secondary" className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 shadow-lg">
-                          <School className="h-3 w-3 mr-1" />
-                          ថ្នាក់ទី {course.grade} {course.section}
-                        </Badge>
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+                          {index + 1}
+                        </div>
                       </div>
 
                       {/* Course Header */}
-                      <div className="relative z-10 mb-3 pr-20">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg">
-                            <GraduationCap className="h-4 w-4 text-white" />
+                      <div className="relative z-10 mb-4 pr-12">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="p-3 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <GraduationCap className="h-5 w-5 text-white" />
                           </div>
-                          <h4 className="font-bold text-gray-900 dark:text-white text-xl leading-tight">
-                            {course.courseName || `ថ្នាក់ទី ${course.grade} ${course.section}`}
-                          </h4>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-gray-900 dark:text-white text-lg leading-tight group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
+                              {course.courseName || `ថ្នាក់ទី ${course.grade} ${course.section}`}
+                            </h4>
+                            <div className="text-sm text-purple-600 dark:text-purple-400 font-medium mt-1">
+                              ថ្នាក់ទី {course.grade} {course.section}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -2160,7 +2178,7 @@ function AcademicManagementContent() {
                           </span>
                           <span className="text-gray-800 dark:text-gray-200 font-medium text-base">
                             {(() => {
-                              const teacher = safeTeachers.find(t => t.userid === course.teacherId1)
+                              const teacher = safeTeachers.find(t => t.userId === course.teacherId1)
                               if (!teacher) return <span className="text-gray-400">គ្មានគ្រូ</span>
                               return (
                                 <div className="text-right">
@@ -2178,7 +2196,7 @@ function AcademicManagementContent() {
                           </span>
                           <span className="text-gray-800 dark:text-gray-200 font-medium text-base">
                             {(() => {
-                              const teacher = safeTeachers.find(t => t.userid === course.teacherId2)
+                              const teacher = safeTeachers.find(t => t.userId === course.teacherId2)
                               if (!teacher) return <span className="text-gray-400">គ្មានគ្រូ</span>
                               return (
                                 <div className="text-right">
@@ -2196,7 +2214,7 @@ function AcademicManagementContent() {
                           </span>
                           <span className="text-gray-800 dark:text-gray-200 font-medium text-base">
                             {(() => {
-                              const teacher = safeTeachers.find(t => t.userid === course.teacherId3)
+                              const teacher = safeTeachers.find(t => t.userId === course.teacherId3)
                               if (!teacher) return <span className="text-gray-400">គ្មានគ្រូ</span>
                               return (
                                 <div className="text-right">
@@ -2307,7 +2325,7 @@ function AcademicManagementContent() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="space-y-1">
                                 {course.teacherId1 && (() => {
-                                  const teacher = safeTeachers.find(t => t.userid === course.teacherId1)
+                                  const teacher = safeTeachers.find(t => t.userId === course.teacherId1)
                                   return teacher ? (
                                     <div className="text-base text-gray-900 dark:text-white">
                                       គ្រូទី១: {teacher.lastname}{teacher.firstname}
@@ -2315,7 +2333,7 @@ function AcademicManagementContent() {
                                   ) : null
                                 })()}
                                 {course.teacherId2 && (() => {
-                                  const teacher = safeTeachers.find(t => t.userid === course.teacherId2)
+                                  const teacher = safeTeachers.find(t => t.userId === course.teacherId2)
                                   return teacher ? (
                                     <div className="text-base text-gray-900 dark:text-white">
                                       គ្រូទី២: {teacher.lastname}{teacher.firstname}
@@ -2323,7 +2341,7 @@ function AcademicManagementContent() {
                                   ) : null
                                 })()}
                                 {course.teacherId3 && (() => {
-                                  const teacher = safeTeachers.find(t => t.userid === course.teacherId3)
+                                  const teacher = safeTeachers.find(t => t.userId === course.teacherId3)
                                   return teacher ? (
                                     <div className="text-base text-gray-900 dark:text-white">
                                       គ្រូទី៣: {teacher.lastname}{teacher.firstname}
@@ -2385,41 +2403,46 @@ function AcademicManagementContent() {
         </CardContent>
         </Card>
       </div>
-      {/* Subjects Section */}
-      <div className="relative mb-6">
+      {/* Modern Subjects Section */}
+      <div className="relative group mb-6">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-50/20 via-emerald-50/20 to-green-50/20 dark:from-green-950/10 dark:via-emerald-950/10 dark:to-green-950/10 rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 via-emerald-50/20 to-green-50/30 dark:from-green-950/20 dark:via-emerald-950/15 dark:to-green-950/20 rounded-3xl -z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,197,94,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(34,197,94,0.05),transparent_50%)]" />
         
-        <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-500">
-          {/* Enhanced Header */}
-          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white p-6">
+        <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+          {/* Modern Header */}
+          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 text-white p-4">
             <div className="absolute inset-0 bg-black/10" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
             
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-3">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
                   <BookOpen className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white">មុខវិជ្ជា</h2>
-                  <div className="flex items-center space-x-3 mt-2">
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                  <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">មុខវិជ្ជា</h2>
+                  <div className="flex items-center space-x-4 mt-3">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
                       {subjects.length} មុខវិជ្ជា
                     </Badge>
-                    <div className="h-1 w-8 bg-white/30 rounded-full"></div>
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
+                      {filteredSubjects.length} បានច្រាស់
+                    </Badge>
                   </div>
+                  <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
                 </div>
               </div>
               
               <Button 
                 onClick={() => setShowSubjectForm(!showSubjectForm)}
-                className="group px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="group px-6 py-3 bg-gradient-to-r from-white/20 to-white/10 hover:from-white/30 hover:to-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 variant="ghost"
               >
                 <div className="flex items-center gap-2">
-                  {showSubjectForm ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+                  {showSubjectForm ? <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> : <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />}
                   <span>{showSubjectForm ? 'បោះបង់' : 'បន្ថែមមុខវិជ្ជា'}</span>
                 </div>
               </Button>
@@ -2655,28 +2678,34 @@ function AcademicManagementContent() {
               {/* Subjects Display - Grid View */}
               {viewMode === 'grid' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {filteredSubjects.map((subject) => (
-                    <div key={subject.subjectId} className="relative group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden">
+                  {filteredSubjects.map((subject, index) => (
+                    <div key={subject.subjectId} className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-1 cursor-pointer">
                       {/* Background Pattern */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 to-emerald-50/30 dark:from-green-950/20 dark:to-emerald-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-emerald-500/10 rounded-full translate-y-8 -translate-x-8 group-hover:scale-110 transition-transform duration-700" />
                       
-                      {/* Top Badge */}
+                      {/* Subject Number Badge */}
                       <div className="absolute top-4 right-4 z-10">
-                        <Badge variant="secondary" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg">
-                          <BookOpen className="h-3 w-3 mr-1" />
-                          មុខវិជ្ជា
-                        </Badge>
+                        <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+                          {index + 1}
+                        </div>
                       </div>
 
                       {/* Subject Header */}
-                      <div className="relative z-10 mb-3 pr-20">
-                        <div className="flex items-center space-x-2 mb-3">
-                          <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
+                      <div className="relative z-10 mb-4 pr-12">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                             <BookOpenCheck className="h-5 w-5 text-white" />
                           </div>
-                          <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight">
-                            {subject.subjectName}
-                          </h3>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors duration-300">
+                              {subject.subjectName}
+                            </h3>
+                            <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1">
+                              មុខវិជ្ជា
+                            </div>
+                          </div>
                         </div>
                       </div>
 

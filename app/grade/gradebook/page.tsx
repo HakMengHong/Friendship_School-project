@@ -528,8 +528,8 @@ function GradebookReportContent() {
                 <div className="text-center space-y-3">
                   <h3 className={`text-2xl font-bold transition-colors duration-500 ${
                     reportType === type.id 
-                      ? 'text-primary' 
-                      : 'text-foreground group-hover:text-primary'
+                    ? type.color.replace('bg-', 'text-') 
+                    : type.color.replace('bg-', 'text-') + ' group-hover:' + type.color.replace('bg-', 'text-')
                   }`}>
                     {type.title}
                   </h3>

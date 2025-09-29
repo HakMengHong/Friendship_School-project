@@ -136,42 +136,49 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
     /* Custom styles for the new layout */
     .header-section {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       margin-bottom: 20px;
     }
-    
-    .logo-section {
-      flex: 0 0 auto;
+
+    .header-left {
+      flex: 0 0 80px;
     }
-    
-    .logo-section img {
-      width: 100px;
-      height: 100px;
+
+    .school-logo {
+      width: 120px;
+      height: 120px;
       object-fit: contain;
     }
-    
-    .national-section {
+
+    .header-center {
       flex: 1;
-      text-align: right;
-      padding-left: 20px;
+      text-align: center;
+      padding: 0 15px;
     }
-    
-    .national-title {
-      font-size: 18px;
+
+    .kingdom-motto {
+      font-size: 15pt;
       font-weight: bold;
+      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
       margin-bottom: 5px;
     }
-    
-    .national-subtitle {
-      font-size: 16px;
-      font-weight: normal;
+
+    .nation-religion-king {
+      font-size: 13pt;
+      font-family: 'Khmer MEF2', 'Khmer OS', 'Khmer', sans-serif;
+      margin-bottom: 15px;
+    }
+
+    .header-right {
+      flex: 0 0 80px;
+      text-align: center;
     }
     
     .report-title {
-      text-align: center;
-      font-size: 20px;
+      font-size: 13pt;
       font-weight: bold;
+      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
+      text-align: center;
       margin: 20px 0;
     }
     
@@ -186,6 +193,7 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
       border: 1px solid #000;
       padding: 8px;
       text-align: center;
+      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
     }
     
     .student-table th {
@@ -196,34 +204,42 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
     .summary-row {
       background-color: #f8f8f8;
       font-weight: bold;
+      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
     }
     
     .signature-section {
       display: flex;
       justify-content: flex-end;
       margin-top: 30px;
+      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
     }
     
     .signature-part {
       text-align: center;
+      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
     }
     
     .signature-line {
       margin: 5px 0;
       font-size: 14px;
+      font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif;
     }
   </style>
 </head>
 <body>
   <div class="document">
     <div class="header-section">
-      <div class="logo-section">
-        ${logoBase64 ? `<img src="${logoBase64}" alt="សាលាមិត្តភាព" />` : '<div class="logo-placeholder">សាលាមិត្តភាព</div>'}
+      <div class="header-left">
+        ${logoBase64 ? `<img src="${logoBase64}" alt="School Logo" class="school-logo" />` : ''}
       </div>
       
-      <div class="national-section">
-        <div class="national-title">ព្រះរាជាណាចក្រកម្ពុជា</div>
-        <div class="national-subtitle">ជាតិ សាសនា ព្រះមហាក្សត្រ</div>
+      <div class="header-center">
+        <div class="kingdom-motto">ព្រះរាជាណាចក្រកម្ពុជា</div>
+        <div class="nation-religion-king">ជាតិ សាសនា ព្រះមហាក្សត្រ</div>
+      </div>
+      
+      <div class="header-right">
+        <!-- Empty right section for balance -->
       </div>
     </div>
     
@@ -316,7 +332,18 @@ export const generateStudentListReportPDF = async (
       format: reportOptions.format,
       printBackground: true,
       margin: reportOptions.margins,
-      preferCSSPageSize: false
+      preferCSSPageSize: false,
+      displayHeaderFooter: true,
+      headerTemplate: `
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+          ${getReportTypeText(data.reportType)}
+        </div>
+      `,
+      footerTemplate: `
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer OS Content', 'Times New Roman', serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+          ទំព័រទី <span class="pageNumber"></span> នៃ <span class="totalPages"></span>
+        </div>
+      `
     })
 
     // Generate filename

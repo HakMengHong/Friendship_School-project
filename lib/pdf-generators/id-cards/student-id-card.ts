@@ -205,7 +205,7 @@ function getIDCardCSS(): string {
     .card-title {
       text-align: center;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: normal;
       color: #1e40af;
       margin: 5px 0 12px 0;
       line-height: 1.2;
@@ -275,7 +275,7 @@ function getIDCardCSS(): string {
     }
     
     .info-label {
-      font-weight: 700;
+      font-weight: normal;
       color: #1e40af;
       margin-bottom: 2px;
       text-shadow: none;
@@ -286,7 +286,7 @@ function getIDCardCSS(): string {
     .info-value {
       color: #1e40af;
       margin-bottom: 3px;
-      font-weight: 600;
+      font-weight: normal;
       text-shadow: none;
       font-size: 14px;
       text-align: center;
@@ -294,7 +294,7 @@ function getIDCardCSS(): string {
     
     .student-name {
       font-size: 14px;
-      font-weight: 800;
+      font-weight: normal;
       color: #1e40af;
       text-align: center;
       background: #f0f0f0;
@@ -308,7 +308,7 @@ function getIDCardCSS(): string {
     
     .student-id {
       font-size: 12px;
-      font-weight: 700;
+      font-weight: normal;
       color: #1e40af;
       text-align: center;
       background: #f0f0f0;
@@ -355,7 +355,7 @@ function getIDCardCSS(): string {
       color: #666;
       text-align: center;
       line-height: 1.2;
-      font-weight: 600;
+      font-weight: normal;
     }
     
     /* Below Section - Grade and Teacher Info */
@@ -378,7 +378,7 @@ function getIDCardCSS(): string {
     
     .grade-info {
       font-size: 14px;
-      font-weight: 700;
+      font-weight: normal;
       color: #1e40af;
       text-align: center;
       background: #f0f0f0;
@@ -392,7 +392,7 @@ function getIDCardCSS(): string {
     
     .teacher-name {
       font-size: 14px;
-      font-weight: 700;
+      font-weight: normal;
       color: #1e40af;
       text-align: center;
       background: #f0f0f0;
@@ -417,7 +417,7 @@ function getIDCardCSS(): string {
     }
     
     .phone-label {
-      font-weight: 700;
+      font-weight: normal;
     }
   `
 }

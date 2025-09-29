@@ -1,0 +1,418 @@
+[
+  {
+    "batch": 1,
+    "record": 1,
+    "data": {
+      "User ID": "1",
+      "Username": "គាំតុលា",
+      "FirstName": "តុលា",
+      "LastName": "គាំ",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "7/19/13",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"គាំតុលា\",\n          firstname: \"តុលា\",\n          lastname: \"គាំ\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2013-07-19T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 2,
+    "data": {
+      "User ID": "2",
+      "Username": "ខាំឃុនណាង",
+      "FirstName": "ឃុនណាង",
+      "LastName": "ខាំ",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "7/1/13",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ខាំឃុនណាង\",\n          firstname: \"ឃុនណាង\",\n          lastname: \"ខាំ\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2013-07-01T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 3,
+    "data": {
+      "User ID": "3",
+      "Username": "ខាយប៊ុនស្រ៊ុន",
+      "FirstName": "ប៊ុនស្រ៊ុន",
+      "LastName": "ខាយ",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "11/14/13",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ខាយប៊ុនស្រ៊ុន\",\n          firstname: \"ប៊ុនស្រ៊ុន\",\n          lastname: \"ខាយ\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2013-11-14T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 4,
+    "data": {
+      "User ID": "4",
+      "Username": "ម៉ែនវុទ្ឋី",
+      "FirstName": "វុទ្ឋី",
+      "LastName": "ម៉ែន",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "6/24/13",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ម៉ែនវុទ្ឋី\",\n          firstname: \"វុទ្ឋី\",\n          lastname: \"ម៉ែន\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2013-06-24T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 5,
+    "data": {
+      "User ID": "5",
+      "Username": "ហាក់ម៉េងហុង",
+      "FirstName": "ម៉េងហុង",
+      "LastName": "ហាក់",
+      "Role": "admin",
+      "Status": "inactive",
+      "LastLogin": "9/13/25",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ហាក់ម៉េងហុង\",\n          firstname: \"ម៉េងហុង\",\n          lastname: \"ហាក់\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-09-13T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 6,
+    "data": {
+      "User ID": "6",
+      "Username": "GeslerChris",
+      "FirstName": "Chris",
+      "LastName": "Gesler",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "3/25/25",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"GeslerChris\",\n          firstname: \"Chris\",\n          lastname: \"Gesler\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-03-25T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 7,
+    "data": {
+      "User ID": "7",
+      "Username": "សៀមវណ្ណៈ",
+      "FirstName": "វណ្ណៈ",
+      "LastName": "សៀម",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "8/26/16",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"សៀមវណ្ណៈ\",\n          firstname: \"វណ្ណៈ\",\n          lastname: \"សៀម\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2016-08-26T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 8,
+    "data": {
+      "User ID": "8",
+      "Username": "ភឿកផុស",
+      "FirstName": "ផុស",
+      "LastName": "ភឿក",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "8/21/17",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ភឿកផុស\",\n          firstname: \"ផុស\",\n          lastname: \"ភឿក\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2017-08-21T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 9,
+    "data": {
+      "User ID": "9",
+      "Username": "ស្រួយចាន់នាត",
+      "FirstName": "ចាន់នាត",
+      "LastName": "ស្រួយ",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "8/25/25",
+      "phonenumber1 ": "093 971 180",
+      "phonenumber2": "089 508 182"
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ស្រួយចាន់នាត\",\n          firstname: \"ចាន់នាត\",\n          lastname: \"ស្រួយ\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-08-25T00:00:00.000Z\"),\n          phonenumber1: \"093 971 180\",\n          phonenumber2: \"089 508 182\",\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 10,
+    "data": {
+      "User ID": "10",
+      "Username": "ភាពចាន់រឿន",
+      "FirstName": "ចាន់រឿន",
+      "LastName": "ភាព",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "1/8/19",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ភាពចាន់រឿន\",\n          firstname: \"ចាន់រឿន\",\n          lastname: \"ភាព\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2019-01-08T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 11,
+    "data": {
+      "User ID": "11",
+      "Username": "ស្រួយស៊ីណាត",
+      "FirstName": "ស៊ីណាត",
+      "LastName": "ស្រួយ",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "9/17/25",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ស្រួយស៊ីណាត\",\n          firstname: \"ស៊ីណាត\",\n          lastname: \"ស្រួយ\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-09-17T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 12,
+    "data": {
+      "User ID": "12",
+      "Username": "ថនប៊ុនណារិទ្ធ",
+      "FirstName": "ប៊ុនណារិទ្ធ",
+      "LastName": "ថន",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "9/16/25",
+      "phonenumber1 ": "088 938 0751",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ថនប៊ុនណារិទ្ធ\",\n          firstname: \"ប៊ុនណារិទ្ធ\",\n          lastname: \"ថន\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-09-16T00:00:00.000Z\"),\n          phonenumber1: \"088 938 0751\",\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 13,
+    "data": {
+      "User ID": "13",
+      "Username": "ចាន់ធា",
+      "FirstName": "ធា",
+      "LastName": "ចាន់",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "7/30/24",
+      "phonenumber1 ": "096 666 2344",
+      "phonenumber2": "031 266 6370"
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ចាន់ធា\",\n          firstname: \"ធា\",\n          lastname: \"ចាន់\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2024-07-30T00:00:00.000Z\"),\n          phonenumber1: \"096 666 2344\",\n          phonenumber2: \"031 266 6370\",\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 14,
+    "data": {
+      "User ID": "14",
+      "Username": "BarsonBill",
+      "FirstName": "Bill",
+      "LastName": "Barson",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "8/17/22",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"BarsonBill\",\n          firstname: \"Bill\",\n          lastname: \"Barson\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2022-08-17T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 15,
+    "data": {
+      "User ID": "16",
+      "Username": "តែស៊ីណែ",
+      "FirstName": "ស៊ីណែ",
+      "LastName": "តែ",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "8/19/25",
+      "phonenumber1 ": "086 617 511",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"តែស៊ីណែ\",\n          firstname: \"ស៊ីណែ\",\n          lastname: \"តែ\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-08-19T00:00:00.000Z\"),\n          phonenumber1: \"086 617 511\",\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 16,
+    "data": {
+      "User ID": "17",
+      "Username": "វ៉ែនស៊ីថាន",
+      "FirstName": "ស៊ីថាន",
+      "LastName": "វ៉ែន",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "6/27/25",
+      "phonenumber1 ": "012 415 674",
+      "phonenumber2": "096 394 6574"
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"វ៉ែនស៊ីថាន\",\n          firstname: \"ស៊ីថាន\",\n          lastname: \"វ៉ែន\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-06-27T00:00:00.000Z\"),\n          phonenumber1: \"012 415 674\",\n          phonenumber2: \"096 394 6574\",\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 17,
+    "data": {
+      "User ID": "18",
+      "Username": "សួន​យាងស្រេង",
+      "FirstName": "ស្រេង",
+      "LastName": "សួន​យាង",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "8/28/25",
+      "phonenumber1 ": "011 708 293",
+      "phonenumber2": "097 660 6326"
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"សួន​យាងស្រេង\",\n          firstname: \"ស្រេង\",\n          lastname: \"សួន​យាង\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-08-28T00:00:00.000Z\"),\n          phonenumber1: \"011 708 293\",\n          phonenumber2: \"097 660 6326\",\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 18,
+    "data": {
+      "User ID": "19",
+      "Username": "ផលសុភា",
+      "FirstName": "សុភា",
+      "LastName": "ផល",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "10/19/23",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ផលសុភា\",\n          firstname: \"សុភា\",\n          lastname: \"ផល\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2023-10-19T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 19,
+    "data": {
+      "User ID": "20",
+      "Username": "ហេងសុខនី",
+      "FirstName": "សុខនី",
+      "LastName": "ហេង",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "9/12/25",
+      "phonenumber1 ": "097 379 3494",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ហេងសុខនី\",\n          firstname: \"សុខនី\",\n          lastname: \"ហេង\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-09-12T00:00:00.000Z\"),\n          phonenumber1: \"097 379 3494\",\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 20,
+    "data": {
+      "User ID": "21",
+      "Username": "ចានខេមា",
+      "FirstName": "ខេមា",
+      "LastName": "ចាន",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "9/17/24",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ចានខេមា\",\n          firstname: \"ខេមា\",\n          lastname: \"ចាន\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2024-09-17T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 21,
+    "data": {
+      "User ID": "22",
+      "Username": "ខៀវសុភា",
+      "FirstName": "សុភា",
+      "LastName": "ខៀវ",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "8/7/19",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ខៀវសុភា\",\n          firstname: \"សុភា\",\n          lastname: \"ខៀវ\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2019-08-07T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 22,
+    "data": {
+      "User ID": "23",
+      "Username": "ខ្ចៅម៉ៅ",
+      "FirstName": "ម៉ៅ",
+      "LastName": "ខ្ចៅ",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "8/29/19",
+      "phonenumber1 ": "",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ខ្ចៅម៉ៅ\",\n          firstname: \"ម៉ៅ\",\n          lastname: \"ខ្ចៅ\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2019-08-29T00:00:00.000Z\"),\n          phonenumber1: null,\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 23,
+    "data": {
+      "User ID": "24",
+      "Username": "អ៊ាងស្រីណូ",
+      "FirstName": "ស្រីណូ",
+      "LastName": "អ៊ាង",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "9/15/25",
+      "phonenumber1 ": "096 395 0490",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"អ៊ាងស្រីណូ\",\n          firstname: \"ស្រីណូ\",\n          lastname: \"អ៊ាង\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-09-15T00:00:00.000Z\"),\n          phonenumber1: \"096 395 0490\",\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 24,
+    "data": {
+      "User ID": "25",
+      "Username": "សោមកុសល",
+      "FirstName": "កុសល",
+      "LastName": "សោម",
+      "Role": "teacher",
+      "Status": "active",
+      "LastLogin": "12/16/22",
+      "phonenumber1 ": "089 545 329",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"សោមកុសល\",\n          firstname: \"កុសល\",\n          lastname: \"សោម\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2022-12-16T00:00:00.000Z\"),\n          phonenumber1: \"089 545 329\",\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 25,
+    "data": {
+      "User ID": "26",
+      "Username": "ស៊ីមសំណាង",
+      "FirstName": "សំណាង",
+      "LastName": "ស៊ីម",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "8/18/25",
+      "phonenumber1 ": "096 5954957",
+      "phonenumber2": "097 328 1626"
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"ស៊ីមសំណាង\",\n          firstname: \"សំណាង\",\n          lastname: \"ស៊ីម\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-08-18T00:00:00.000Z\"),\n          phonenumber1: \"096 5954957\",\n          phonenumber2: \"097 328 1626\",\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  },
+  {
+    "batch": 1,
+    "record": 26,
+    "data": {
+      "User ID": "27",
+      "Username": "យឿនសុខរ៉ែន",
+      "FirstName": "សុខរ៉ែន",
+      "LastName": "យឿន",
+      "Role": "teacher",
+      "Status": "inactive",
+      "LastLogin": "8/20/25",
+      "phonenumber1 ": "096 610 4518",
+      "phonenumber2": ""
+    },
+    "error": "\nInvalid `prisma.user.create()` invocation in\nC:\\Users\\M3n8_H0n8\\Friendship_School-project\\scripts\\batch-migrate.js:388:38\n\n  385 const userData = { ...transformedRecord };\n  386 delete userData.userId; // Remove auto-increment field\n  387 \n→ 388 result = await prisma.user.create({\n        data: {\n          username: \"យឿនសុខរ៉ែន\",\n          firstname: \"សុខរ៉ែន\",\n          lastname: \"យឿន\",\n          role: \"teacher\",\n          status: \"inactive\",\n          lastLogin: new Date(\"2025-08-20T00:00:00.000Z\"),\n          phonenumber1: \"096 610 4518\",\n          phonenumber2: null,\n      +   password: String\n        }\n      })\n\nArgument `password` is missing."
+  }
+]

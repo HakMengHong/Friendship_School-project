@@ -8,32 +8,22 @@ import { YearlyGradeReportData } from '@/lib/pdf-generators/reports/grade-report
 
 // Helper Functions
 function getLetterGrade(score: number, gradeNum: number): string {
-  // A+ to F grading system based on grade level
+  // A to F grading system based on grade level
   if (gradeNum >= 1 && gradeNum <= 6) {
     // Grades 1-6: Full average is 10
-    if (score >= 9.5) return 'A+' // ល្អ​ប្រសើរ​ណាស់ = មធ្យមភាគ x ០,៩៥
     if (score >= 9) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
-    if (score >= 8.5) return 'A-' // ល្អ​ប្រសើរ​បង្គួរ = មធ្យមភាគ x ០,៨៥
-    if (score >= 8) return 'B+'  // ល្អ​ណាស់​ណាស់ = មធ្យមភាគ x ០,៨
-    if (score >= 7.5) return 'B' // ល្អ​ណាស់ = មធ្យមភាគ x ០,៧៥
-    if (score >= 7) return 'B-'  // ល្អ​ណាស់​បង្គួរ = មធ្យមភាគ x ០,៧
-    if (score >= 6.5) return 'C+' // ល្អ​ណាស់ = មធ្យមភាគ x ០,៦៥
-    if (score >= 6) return 'C'   // ល្អ​ = មធ្យមភាគ x ០,៦
-    if (score >= 5.5) return 'C-' // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥៥
-    if (score >= 5) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
+    if (score >= 8) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (score >= 7) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (score >= 6) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (score >= 5) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
     return 'F' // ខ្សោយ
   } else {
     // Grades 7-9: Full average is 50
-    if (score >= 47.5) return 'A+' // ល្អ​ប្រសើរ​ណាស់ = មធ្យមភាគ x ០,៩៥
     if (score >= 45) return 'A'   // ល្អ​ប្រសើរ = មធ្យមភាគ x ០,៩
-    if (score >= 42.5) return 'A-' // ល្អ​ប្រសើរ​បង្គួរ = មធ្យមភាគ x ០,៨៥
-    if (score >= 40) return 'B+'  // ល្អ​ណាស់​ណាស់ = មធ្យមភាគ x ០,៨
-    if (score >= 37.5) return 'B' // ល្អ​ណាស់ = មធ្យមភាគ x ០,៧៥
-    if (score >= 35) return 'B-'  // ល្អ​ណាស់​បង្គួរ = មធ្យមភាគ x ០,៧
-    if (score >= 32.5) return 'C+' // ល្អ​ណាស់ = មធ្យមភាគ x ០,៦៥
-    if (score >= 30) return 'C'   // ល្អ​ = មធ្យមភាគ x ០,៦
-    if (score >= 27.5) return 'C-' // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥៥
-    if (score >= 25) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
+    if (score >= 40) return 'B'   // ល្អ​ណាស់ = មធ្យមភាគ x ០,៨
+    if (score >= 35) return 'C'   // ល្អ = មធ្យមភាគ x ០,៧
+    if (score >= 30) return 'D'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៦
+    if (score >= 25) return 'E'   // ល្អ​បង្គួរ = មធ្យមភាគ x ០,៥
     return 'F' // ខ្សោយ
   }
 }

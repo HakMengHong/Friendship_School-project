@@ -22,13 +22,17 @@ interface Student {
 }
 
 interface Teacher {
-  userid: number
+  id: number
   firstname: string
   lastname: string
   username: string
   role: string
   position?: string
   phonenumber1?: string
+  phonenumber2?: string
+  avatar?: string
+  photo?: string
+  status?: string
 }
 
 interface SchoolYear {
@@ -98,7 +102,7 @@ export default function IDCardsPage() {
   // Select all teachers
   const selectAllTeachers = () => {
     if (teacherConfirmData?.teachers) {
-      setSelectedTeachers(teacherConfirmData.teachers.map(teacher => teacher.userid))
+      setSelectedTeachers(teacherConfirmData.teachers.map(teacher => teacher.id))
     }
   }
 
@@ -114,7 +118,7 @@ export default function IDCardsPage() {
       if (response.ok) {
         const data = await response.json()
         // Handle users API which returns { users: [...] }
-        if (endpoint === '/api/users' && data.users) {
+        if ((endpoint === '/api/users' || endpoint === '/api/auth/users') && data.users) {
           return data.users
         }
         return Array.isArray(data) ? data : []
@@ -135,7 +139,7 @@ export default function IDCardsPage() {
         fetchData('/api/courses'),
         fetchData('/api/enrollments'),
         fetchData('/api/students'),
-        fetchData('/api/users')
+        fetchData('/api/auth/users')
       ])
 
       setSchoolYears(schoolYearsData as SchoolYear[])
@@ -460,7 +464,7 @@ export default function IDCardsPage() {
     }
 
     // Initialize with all teachers selected
-    setSelectedTeachers(teachersToGenerate.map(teacher => teacher.userid))
+    setSelectedTeachers(teachersToGenerate.map(teacher => teacher.id))
     setTeacherConfirmData({
       count: teachersToGenerate.length,
       teachers: teachersToGenerate
@@ -744,7 +748,7 @@ export default function IDCardsPage() {
 
             {/* Title and Description */}
             <div className="text-center space-y-3">
-              <h3 className="text-2xl font-bold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-500">
+              <h3 className="text-2xl font-bold text-blue-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-500">
                 ប័ណ្ណសម្គាល់សិស្ស
               </h3>
               <p className="text-muted-foreground leading-relaxed text-base">
@@ -796,7 +800,7 @@ export default function IDCardsPage() {
 
             {/* Title and Description */}
             <div className="text-center space-y-3">
-              <h3 className="text-2xl font-bold text-foreground group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-500">
+              <h3 className="text-2xl font-bold text-green-500 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-500">
                 ប័ណ្ណសម្គាល់គ្រូបង្រៀន
               </h3>
               <p className="text-muted-foreground leading-relaxed text-base">
@@ -1040,11 +1044,11 @@ export default function IDCardsPage() {
                 </div>
                 <div className="max-h-40 overflow-y-auto space-y-2">
                   {teacherConfirmData.teachers.map((teacher, index) => (
-                    <div key={teacher.userid} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <div key={`${teacher.id}-${index}`} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                       <Checkbox
-                        id={`teacher-${teacher.userid}`}
-                        checked={selectedTeachers.includes(teacher.userid)}
-                        onCheckedChange={(checked) => handleTeacherSelection(teacher.userid, checked as boolean)}
+                        id={`teacher-${teacher.id}`}
+                        checked={selectedTeachers.includes(teacher.id)}
+                        onCheckedChange={(checked) => handleTeacherSelection(teacher.id, checked as boolean)}
                         className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                       />
                       <div className="flex-1">

@@ -20,24 +20,6 @@ async function addTestUsers() {
         role: 'admin',
         status: 'active',
         position: 'System Administrator'
-      },
-      {
-        username: 'teacher1',
-        password: hashedPassword,
-        firstname: 'Teacher',
-        lastname: 'One',
-        role: 'teacher',
-        status: 'active',
-        position: 'Mathematics Teacher'
-      },
-      {
-        username: 'teacher2',
-        password: hashedPassword,
-        firstname: 'Teacher',
-        lastname: 'Two',
-        role: 'teacher',
-        status: 'active',
-        position: 'Science Teacher'
       }
     ]
 
