@@ -28,6 +28,7 @@ export function middleware(request: NextRequest) {
     '/api/users',
     '/api/students',
     '/api/students/enrolled',
+    '/api/students/next-id',
     '/api/courses',
     '/api/school-years',
     '/api/semesters',
