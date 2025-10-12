@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '../../../../lib/prisma'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
 
 // Security configuration constants
 const MAX_FAILED_ATTEMPTS = 5
 const LOCKOUT_THRESHOLD = 3
 const LOCKOUT_DURATION = 10 * 60 * 1000 // 10 minutes in milliseconds
-
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json()

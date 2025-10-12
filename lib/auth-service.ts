@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
 
 export interface User {
   id: number
@@ -106,7 +104,7 @@ export const getAllUsers = async (): Promise<User[]> => {
       ]
     })
 
-    return dbUsers.map(dbUser => ({
+    return dbUsers.map((dbUser: any) => ({
       id: dbUser.userId,
       username: dbUser.username,
       firstname: dbUser.firstname,
