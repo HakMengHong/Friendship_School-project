@@ -2400,6 +2400,7 @@ function RegisterStudentContent() {
                                     <Calendar className="h-4 w-4 text-pink-600 dark:text-pink-400" />
                                   </div>
                                   <span>ឆ្នាំសិក្សា</span>
+                                  <span className="text-red-500 text-base">*</span>
                                 </label>
                                 <Select 
                                   value={formData.schoolYear} 

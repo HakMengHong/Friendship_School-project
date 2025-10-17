@@ -183,7 +183,7 @@ const formatDateKhmer = (date: Date): string => {
 const getLogoBase64 = (grade: string | number): string => {
   try {
     // Determine which logo to use based on grade
-    let logoFilename = 'Logo.png' // default fallback (note: capital L)
+    let logoFilename = 'logo.png' // default fallback (corrected to lowercase)
     
     if (grade) {
       // Extract numeric grade from string (e.g., "5" from "5A" or "5")
@@ -204,7 +204,7 @@ const getLogoBase64 = (grade: string | number): string => {
       return `data:image/png;base64,${logoBuffer.toString('base64')}`
     } else {
       // Fallback to default logo if specific logo doesn't exist
-      const fallbackPath = path.join(process.cwd(), 'public', 'Logo.png')
+      const fallbackPath = path.join(process.cwd(), 'public', 'logo.png')
       if (fs.existsSync(fallbackPath)) {
         const logoBuffer = fs.readFileSync(fallbackPath)
         return `data:image/png;base64,${logoBuffer.toString('base64')}`
@@ -373,10 +373,11 @@ const getStudentRegistrationCSS = (): string => {
       border: 1px solid #000;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: center;s
       background-color: #f9f9f9;
       flex-shrink: 0;
-      margin-top: 20px
+      margin-top: 20px;
+      margin-right: 20px;
     }
 
     .photo-label {
@@ -493,19 +494,29 @@ const getStudentRegistrationCSS = (): string => {
     }
 
     .checkbox {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       width: 20px;
       height: 20px;
       border: 2px solid #6b7280;
-      text-align: center;
-      line-height: 16px;
+      line-height: 20px;
       font-weight: normal;
-      color: #6b7280;
-      background-color: #fff;
+      color: #111827;
+      background-color: transparent;
       margin-right: 10px;
-      font-size: 16px;
+      font-size: 14px;
       border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      /* Avoid PDF rendering artifacts */
+      box-shadow: none;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .checkbox svg {
+      width: 14px;
+      height: 14px;
+      display: block;
     }
 
     .formal-letter {
@@ -764,15 +775,15 @@ export const generateStudentRegistrationHTML = (data: StudentRegistrationData): 
       <div class="section-title">តម្រូវការពីសាលា</div>
       <div class="checkbox-section">
         <div class="checkbox-item">
-          <span class="checkbox">${data.needsClothes ? '✓' : ''}</span>
+          <span class="checkbox">${data.needsClothes ? `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 12l5 5L19 7" stroke="#111827" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}</span>
           កង្វះខាតសម្លៀកបំពាក់
         </div>
         <div class="checkbox-item">
-          <span class="checkbox">${data.needsMaterials ? '✓' : ''}</span>
+          <span class="checkbox">${data.needsMaterials ? `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 12l5 5L19 7" stroke="#111827" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}</span>
           កង្វះខាតសម្ភារសិក្សា
         </div>
         <div class="checkbox-item">
-          <span class="checkbox">${data.needsTransport ? '✓' : ''}</span>
+          <span class="checkbox">${data.needsTransport ? `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 12l5 5L19 7" stroke="#111827" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}</span>
           ត្រូវការឡានជូនមកសាលា
         </div>
       </div>

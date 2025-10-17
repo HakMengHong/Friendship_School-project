@@ -603,19 +603,28 @@ export const getStudentRegistrationCSS = (): string => {
     }
 
     .checkbox {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       width: 20px;
       height: 20px;
       border: 2px solid #6b7280;
-      text-align: center;
-      line-height: 16px;
-      font-weight: bold;
-      color: #6b7280;
-      background-color: #fff;
+      line-height: 20px;
+      font-weight: normal;
+      color: #111827;
+      background-color: transparent;
       margin-right: 10px;
-      font-size: 16px;
+      font-size: 14px;
       border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      box-shadow: none;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .checkbox svg {
+      width: 14px;
+      height: 14px;
+      display: block;
     }
 
     .formal-letter {

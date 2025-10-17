@@ -283,7 +283,7 @@ function LoginForm() {
                 </button>
 
                 {open && (
-                  <div className="absolute top-full left-0 right-0 z-50 mt-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl hover:shadow-3xl animate-fade-in max-h-60 overflow-auto">
+                  <div className="absolute top-full left-0 right-0 z-50 mt-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl hover:shadow-3xl animate-fade-in max-h-48 overflow-y-auto">
                     {filteredUsers.length > 0 ? (
                       filteredUsers.map((user) => (
                         <div
