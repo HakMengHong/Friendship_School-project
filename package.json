@@ -8,6 +8,9 @@
     "lint": "next lint",
     "start": "next start",
     "db:seed": "tsx prisma/seed.ts",
+    "db:backup": "node scripts/backup-database-prisma.js",
+    "db:backup:pg": "node scripts/backup-database.js",
+    "db:review": "node scripts/review-database.js",
     "clean:courses": "node scripts/clean-courses.js",
     "clean:courses:advanced": "node scripts/clean-courses-advanced.js"
   },
