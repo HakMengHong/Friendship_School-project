@@ -1,101 +1,48 @@
-﻿# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+﻿# Node / Next.js
+node_modules/
+.next/
+.next-standalone/
+.next-static/
+out/
+vercel/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+*.log
 
-# local env files
-.env*.local
-.env
-.env.development.local
-.env.test.local
-.env.production.local
+# Env/Secrets
+.env*
+!.env.example
 production.env
 
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
 
 # Prisma
-prisma/migrations/dev.db*
+prisma/*.db
+prisma/migrations/**/steps.json
 
-# Generated files
-reports/*.pdf
-reports/*.xlsx
-temp-files/
-*.pdf
+# Puppeteer/Chrome
+.chromium/
+.tmp/
 
-# Backup files
-backups/
-*.backup
-*.bak
+# Coverage / Tests
+coverage/
 
-# SSL certificates
-ssl/
-*.pem
-*.key
-*.crt
+# Build artifacts
+*.tar
+*.zip
 
-# Database files
-*.db
-*.sqlite
-*.sqlite3
+# Local uploads & backups
+public/uploads/
+backup/*.sql
 
-# Log files
-*.log
-logs/
-
-# Migration data (if contains sensitive information)
-scripts/migration-data/
-scripts/*.xlsx
-scripts/*.csv
-
-# Cleanup files
-CLEANUP_SUMMARY.md
-DOCKER_SETUP.md
-LINUX_DEPLOYMENT_GUIDE.md
-env.production.example
-fix-encoding.js
-fix-khmer-simple.js
-fix-khmer-text.js
-chart.pdf
-
-# IDE files
-.vscode/settings.json
-.vscode/launch.json
-.idea/
-*.swp
-*.swo
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Next image cache
+public/.next-image/

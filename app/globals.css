@@ -5,6 +5,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Load local Khmer fonts */
+@font-face {
+  font-family: 'Khmer OS Siemreap';
+  src: url('/fonts/khmer_os_siemreap.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Khmer MEF2';
+  src: url('/fonts/khmer_mef2_regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Custom Scrollbar Styles */
 @layer utilities {
   .scrollbar-thin {
@@ -331,12 +348,25 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.5s ease-out;
 }
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite;
 }
 
 /* === TYPOGRAPHY === */

@@ -99,7 +99,6 @@ function AcademicManagementContent() {
   const [showSubjectForm, setShowSubjectForm] = useState(false)
   const [showCourseForm, setShowCourseForm] = useState(false)
   const [showMultipleCourseForm, setShowMultipleCourseForm] = useState(false)
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null)
 
   // Form data
   const [newYear, setNewYear] = useState({ schoolYearCode: '' })
@@ -172,8 +171,15 @@ function AcademicManagementContent() {
   // Subject editing state
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null)
   const [editSubjectName, setEditSubjectName] = useState('')
+  const [showEditSubjectDialog, setShowEditSubjectDialog] = useState(false)
   
-  // Course editing state (using existing editingCourse from line 102)
+  // School Year editing state
+  const [editingSchoolYear, setEditingSchoolYear] = useState<SchoolYear | null>(null)
+  const [editSchoolYearCode, setEditSchoolYearCode] = useState('')
+  const [showEditSchoolYearDialog, setShowEditSchoolYearDialog] = useState(false)
+  
+  // Course editing state
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null)
   const [editCourse, setEditCourse] = useState({
     schoolYearId: '',
     grade: '',
@@ -183,6 +189,7 @@ function AcademicManagementContent() {
     teacherId2: undefined as number | undefined,
     teacherId3: undefined as number | undefined
   })
+  const [showEditCourseDialog, setShowEditCourseDialog] = useState(false)
 
   // Memoized filtered data
   const filteredCourses = useMemo(() => {
@@ -288,6 +295,167 @@ function AcademicManagementContent() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Edit functions for popup dialogs
+  const startEditSchoolYear = (schoolYear: SchoolYear) => {
+    setEditingSchoolYear(schoolYear)
+    setEditSchoolYearCode(schoolYear.schoolYearCode)
+    setShowEditSchoolYearDialog(true)
+  }
+
+  const startEditSubject = (subject: Subject) => {
+    setEditingSubject(subject)
+    setEditSubjectName(subject.subjectName)
+    setShowEditSubjectDialog(true)
+  }
+
+  const startEditCourse = (course: Course) => {
+    setEditingCourse(course)
+    setEditCourse({
+      schoolYearId: course.schoolYearId.toString(),
+      grade: course.grade,
+      section: course.section,
+      courseName: course.courseName,
+      teacherId1: course.teacherId1,
+      teacherId2: course.teacherId2,
+      teacherId3: course.teacherId3
+    })
+    setShowEditCourseDialog(true)
+  }
+
+  // Update functions for popup dialogs
+  const handleUpdateSchoolYear = async () => {
+    if (!editSchoolYearCode.trim()) {
+      setErrors({ year: 'សូមបំពេញឆ្នាំសិក្សា' })
+      return
+    }
+
+    if (!editingSchoolYear) return
+
+    try {
+      setSubmitting(true)
+      setErrors({})
+
+      const response = await fetch(`/api/school-years/${editingSchoolYear.schoolYearId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schoolYearCode: editSchoolYearCode.trim() })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "ជោគជ័យ",
+          description: "ឆ្នាំសិក្សាត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ",
+        })
+        setShowEditSchoolYearDialog(false)
+        setEditingSchoolYear(null)
+        setEditSchoolYearCode('')
+        fetchData()
+      } else {
+        const errorData = await response.json()
+        setErrors({ year: errorData.error || 'កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាព' })
+      }
+    } catch (error) {
+      console.error('Error updating school year:', error)
+      setErrors({ year: 'កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាព' })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleUpdateSubject = async () => {
+    if (!editSubjectName.trim()) {
+      setErrors({ subject: 'សូមបំពេញឈ្មោះមុខវិជ្ជា' })
+      return
+    }
+
+    if (!editingSubject) return
+
+    try {
+      setSubmitting(true)
+      setErrors({})
+
+      const response = await fetch(`/api/subjects/${editingSubject.subjectId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subjectName: editSubjectName.trim() })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "ជោគជ័យ",
+          description: "មុខវិជ្ជាត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ",
+        })
+        setShowEditSubjectDialog(false)
+        setEditingSubject(null)
+        setEditSubjectName('')
+        fetchData()
+      } else {
+        const errorData = await response.json()
+        setErrors({ subject: errorData.error || 'កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាព' })
+      }
+    } catch (error) {
+      console.error('Error updating subject:', error)
+      setErrors({ subject: 'កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាព' })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleUpdateCourse = async () => {
+    if (!editCourse.schoolYearId || !editCourse.grade || !editCourse.section || !editCourse.courseName) {
+      setErrors({ course: 'សូមបំពេញព័ត៌មានទាំងអស់' })
+      return
+    }
+
+    if (!editingCourse) return
+
+    try {
+      setSubmitting(true)
+      setErrors({})
+
+      const response = await fetch(`/api/courses/${editingCourse.courseId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schoolYearId: parseInt(editCourse.schoolYearId),
+          grade: editCourse.grade,
+          section: editCourse.section,
+          courseName: editCourse.courseName,
+          teacherId1: editCourse.teacherId1,
+          teacherId2: editCourse.teacherId2,
+          teacherId3: editCourse.teacherId3
+        })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "ជោគជ័យ",
+          description: "ថ្នាក់រៀនត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ",
+        })
+        setShowEditCourseDialog(false)
+        setEditingCourse(null)
+        setEditCourse({
+          schoolYearId: '',
+          grade: '',
+          section: '',
+          courseName: '',
+          teacherId1: undefined,
+          teacherId2: undefined,
+          teacherId3: undefined
+        })
+        fetchData()
+      } else {
+        const errorData = await response.json()
+        setErrors({ course: errorData.error || 'កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាព' })
+      }
+    } catch (error) {
+      console.error('Error updating course:', error)
+      setErrors({ course: 'កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាព' })
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   // Add new school year
   const handleAddYear = async () => {
@@ -446,100 +614,8 @@ function AcademicManagementContent() {
     }
   }
 
-  // Edit subject
-  const handleEditSubject = async () => {
-    if (!editingSubject || !editSubjectName.trim()) {
-      toast({
-        title: "ព័ត៌មានមិនគ្រប់គ្រាន់",
-        description: "សូមបំពេញឈ្មោះមុខវិជ្ជា",
-        variant: "destructive",
-      })
-      return
-    }
 
-    // Check for duplicate subject name (excluding current subject)
-    const trimmedSubject = editSubjectName.trim()
-    const existingSubject = subjects.find(subject => 
-      subject.subjectId !== editingSubject.subjectId &&
-      subject.subjectName.toLowerCase() === trimmedSubject.toLowerCase()
-    )
-    
-    if (existingSubject) {
-      toast({
-        title: "មុខវិជ្ជាមានរួចហើយ",
-        description: `មុខវិជ្ជា ${trimmedSubject} មានរួចហើយក្នុងប្រព័ន្ធ`,
-        variant: "destructive",
-      })
-      return
-    }
 
-    try {
-      setSubmitting(true)
-
-      const response = await fetch(`/api/subjects/${editingSubject.subjectId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subjectName: trimmedSubject
-        })
-      })
-
-      if (response.ok) {
-        const updatedSubject = await response.json()
-        setSubjects(prev => prev.map(subject => 
-          subject.subjectId === editingSubject.subjectId ? updatedSubject : subject
-        ))
-        setEditingSubject(null)
-        setEditSubjectName('')
-        toast({
-          title: "បានកែប្រែមុខវិជ្ជាដោយជោគជ័យ",
-          description: `បានកែប្រែមុខវិជ្ជាជា ${updatedSubject.subjectName}`,
-        })
-      } else {
-        // Try to get the specific error message from the API response
-        let errorMessage = 'Failed to update subject'
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.message || errorData.error || errorMessage
-        } catch (parseError) {
-          errorMessage = response.status === 409 ? 'មុខវិជ្ជានេះមានរួចហើយ' : 'Failed to update subject'
-        }
-        throw new Error(errorMessage)
-      }
-    } catch (error) {
-      console.error('Error updating subject:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      
-      // Check if it's a duplicate error
-      if (errorMessage.includes('មុខវិជ្ជានេះមានរួចហើយ') || errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already exists')) {
-        toast({
-          title: "មុខវិជ្ជាមានរួចហើយ",
-          description: `មុខវិជ្ជា ${trimmedSubject} មានរួចហើយក្នុងប្រព័ន្ធ`,
-          variant: "destructive",
-        })
-      } else {
-        toast({
-          title: "កំហុសក្នុងការកែប្រែមុខវិជ្ជា",
-          description: errorMessage,
-          variant: "destructive",
-        })
-      }
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  // Start editing subject
-  const startEditSubject = (subject: Subject) => {
-    setEditingSubject(subject)
-    setEditSubjectName(subject.subjectName)
-  }
-
-  // Cancel editing subject
-  const cancelEditSubject = () => {
-    setEditingSubject(null)
-    setEditSubjectName('')
-  }
 
   // Add new course
   const handleAddCourse = async () => {
@@ -639,123 +715,8 @@ function AcademicManagementContent() {
     }
   }
 
-  // Edit course
-  const handleEditCourse = async () => {
-    if (!editingCourse) return
 
-    const errors: Record<string, string> = {}
-    if (!editingCourse.schoolYearId) errors.schoolYearId = 'សូមជ្រើសរើសឆ្នាំសិក្សា'
-    if (!editingCourse.grade) errors.grade = 'សូមជ្រើសរើសថ្នាក់'
-    if (!editingCourse.section?.trim()) errors.section = 'សូមបំពេញផ្នែក'
-    
-    if (Object.keys(errors).length > 0) {
-      setErrors(errors)
-      return
-    }
 
-    // Check for duplicate course (excluding current course)
-    const existingCourse = courses.find(c => 
-      c.courseId !== editingCourse.courseId &&
-      c.grade === editingCourse.grade && 
-      c.section === editingCourse.section?.trim() && 
-      c.schoolYearId === editingCourse.schoolYearId
-    )
-
-    if (existingCourse) {
-      toast({
-        title: "ថ្នាក់រៀនមានរួចហើយ",
-        description: `ថ្នាក់ទី ${editingCourse.grade} ផ្នែក ${editingCourse.section?.trim()} មានរួចហើយសម្រាប់ឆ្នាំសិក្សានេះ`,
-        variant: "destructive",
-      })
-      return
-    }
-
-    try {
-      setSubmitting(true)
-      setErrors({})
-
-      const response = await fetch(`/api/courses/${editingCourse.courseId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...editingCourse,
-          section: editingCourse.section?.trim(),
-          courseName: editingCourse.courseName?.trim() || `ថ្នាក់ទី ${editingCourse.grade}`
-        })
-      })
-
-      if (response.ok) {
-        const updatedCourse = await response.json()
-        setCourses(prev => prev.map(course => 
-          course.courseId === editingCourse.courseId ? updatedCourse : course
-        ))
-        setEditingCourse(null)
-        toast({
-          title: "បានធ្វើបច្ចុប្បន្នភាពថ្នាក់រៀនដោយជោគជ័យ",
-          description: `បានធ្វើបច្ចុប្បន្នភាពថ្នាក់រៀន ${updatedCourse.courseName || `ថ្នាក់ទី ${updatedCourse.grade} ${updatedCourse.section}`}`,
-        })
-      } else {
-        // Try to get the specific error message from the API response
-        let errorMessage = 'Failed to update course'
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.message || errorData.error || errorMessage
-        } catch (parseError) {
-          errorMessage = response.status === 409 ? 'ថ្នាក់រៀននេះមានរួចហើយ' : 'Failed to update course'
-        }
-        throw new Error(errorMessage)
-      }
-    } catch (error) {
-      console.error('Error updating course:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      
-      // Check if it's a duplicate error
-      if (errorMessage.includes('ថ្នាក់រៀននេះមានរួចហើយ') || errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already exists')) {
-        toast({
-          title: "ថ្នាក់រៀនមានរួចហើយ",
-          description: `ថ្នាក់ទី ${editingCourse.grade} ផ្នែក ${editingCourse.section?.trim()} មានរួចហើយសម្រាប់ឆ្នាំសិក្សានេះ`,
-          variant: "destructive",
-        })
-      } else {
-        toast({
-          title: "កំហុសក្នុងការធ្វើបច្ចុប្បន្នភាពថ្នាក់រៀន",
-          description: errorMessage,
-          variant: "destructive",
-        })
-      }
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  // Start editing course
-  const startEditCourse = (course: Course) => {
-    setEditingCourse(course)
-    setEditCourse({
-      schoolYearId: course.schoolYearId.toString(),
-      grade: course.grade,
-      section: course.section,
-      courseName: course.courseName,
-      teacherId1: course.teacherId1 || undefined,
-      teacherId2: course.teacherId2 || undefined,
-      teacherId3: course.teacherId3 || undefined
-    })
-    setErrors({})
-  }
-
-  // Cancel editing course
-  const cancelEditCourse = () => {
-    setEditingCourse(null)
-    setEditCourse({
-      schoolYearId: '',
-      grade: '',
-      section: '',
-      courseName: '',
-      teacherId1: undefined,
-      teacherId2: undefined,
-      teacherId3: undefined
-    })
-  }
 
   // Delete functions
   const handleDeleteYear = async (id: number) => {
@@ -1058,8 +1019,9 @@ function AcademicManagementContent() {
 
   return (
     <div className="min-h-screen animate-fade-in">
-      {/* Enhanced Statistics Overview */}
-      <div className="relative mb-6">
+      <div className="animate-fade-in">
+        {/* Enhanced Statistics Overview */}
+        <div className="relative mb-6">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.05),transparent_50%)]" />
@@ -1306,6 +1268,16 @@ function AcademicManagementContent() {
                           <h3 className="text-xl font-bold text-gray-900 dark:text-white">{year.schoolYearCode}</h3>
                         </div>
                         
+                        <div className="flex space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditSchoolYear(year)}
+                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl p-2"
+                            disabled={submitting}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -1315,6 +1287,7 @@ function AcademicManagementContent() {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
+                        </div>
                       </div>
                       
                       <div className="space-y-3">
@@ -1602,22 +1575,22 @@ function AcademicManagementContent() {
 
           {/* Multiple Course Creation Form */}
           {showMultipleCourseForm && (
-            <div className="mb-3 border-2 border-dashed border-green-300 rounded-xl p-4 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/30 shadow-inner">
+            <div className="mb-3 border-2 border-dashed border-purple-300 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/30 shadow-inner">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-green-500 rounded-lg">
+                <div className="p-2 bg-purple-500 rounded-lg">
                   <Plus className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-green-700 dark:text-green-300">
+                <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300">
                   បង្កើតថ្នាក់រៀនច្រើនក្នុងពេលតែមួយ
                 </h3>
               </div>
               
-              <div className="mb-3 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl shadow-sm">
+              <div className="mb-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-sm">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-emerald-500 rounded-lg">
+                  <div className="p-2 bg-blue-500 rounded-lg">
                     <Sparkles className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-base text-emerald-700 dark:text-emerald-300 font-medium">
+                  <p className="text-base text-blue-700 dark:text-blue-300 font-medium">
                     <strong>ចំណាំ:</strong> ប្រព័ន្ធនឹងបង្កើតថ្នាក់ពីថ្នាក់ទី {gradeRange.startGrade} ទៅថ្នាក់ទី {gradeRange.endGrade} សម្រាប់ផ្នែកដែលអ្នកជ្រើសរើស។ ឈ្មោះថ្នាក់នឹងត្រូវបានបង្កើតដោយស្វ័យប្រវត្តិ។
                   </p>
                 </div>
@@ -1625,7 +1598,7 @@ function AcademicManagementContent() {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                 <div>
-                  <label className="block text-base font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
+                  <label className="block text-base font-medium mb-2 text-purple-700 dark:text-purple-300 flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     ឆ្នាំសិក្សា
                   </label>
@@ -1636,7 +1609,7 @@ function AcademicManagementContent() {
                       if (errors.schoolYearId) setErrors(prev => ({ ...prev, schoolYearId: '' }))
                     }}
                   >
-                    <SelectTrigger className={`h-12 text-base ${errors.schoolYearId ? 'border-red-500 ring-red-200' : 'border-green-200 focus:border-green-500 focus:ring-green-200'}`}>
+                    <SelectTrigger className={`h-12 text-base ${errors.schoolYearId ? 'border-red-500 ring-red-200' : 'border-purple-200 focus:border-purple-500 focus:ring-purple-200'}`}>
                       <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1656,7 +1629,7 @@ function AcademicManagementContent() {
                 </div>
                 
                 <div>
-                  <label className="block text-base font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
+                  <label className="block text-base font-medium mb-2 text-purple-700 dark:text-purple-300 flex items-center gap-2">
                     <School className="h-4 w-4" />
                     ផ្នែក
                   </label>
@@ -1667,7 +1640,7 @@ function AcademicManagementContent() {
                       if (errors.section) setErrors(prev => ({ ...prev, section: '' }))
                     }}
                     placeholder="ឧ. A, B, C"
-                    className={`h-12 text-base ${errors.section ? 'border-red-500 ring-red-200' : 'border-green-200 focus:border-green-500 focus:ring-green-200'}`}
+                    className={`h-12 text-base ${errors.section ? 'border-red-500 ring-red-200' : 'border-purple-200 focus:border-purple-500 focus:ring-purple-200'}`}
                   />
                   {errors.section && (
                     <p className="text-red-500 text-base mt-2 flex items-center gap-2 bg-red-50 dark:bg-red-950/50 p-2 rounded-lg">
@@ -1678,7 +1651,7 @@ function AcademicManagementContent() {
                 </div>
                 
                 <div>
-                  <label className="block text-base font-medium mb-2 text-green-700 dark:text-green-300 flex items-center gap-2">
+                  <label className="block text-base font-medium mb-2 text-purple-700 dark:text-purple-300 flex items-center gap-2">
                     <GraduationCap className="h-4 w-4" />
                     ជ្រើសរើសថ្នាក់
                   </label>
@@ -1687,7 +1660,7 @@ function AcademicManagementContent() {
                       value={gradeRange.startGrade.toString()} 
                       onValueChange={(value) => setGradeRange({...gradeRange, startGrade: parseInt(value)})}
                     >
-                      <SelectTrigger className="h-12 text-base border-green-200 focus:border-green-500 focus:ring-green-200">
+                      <SelectTrigger className="h-12 text-base border-purple-200 focus:border-purple-500 focus:ring-purple-200">
                         <SelectValue placeholder="ថ្នាក់ចាប់ផ្តើម" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1699,13 +1672,13 @@ function AcademicManagementContent() {
                       </SelectContent>
                     </Select>
                     
-                    <span className="text-green-600 dark:text-green-400 font-medium">ទៅ</span>
+                    <span className="text-purple-600 dark:text-purple-400 font-medium">ទៅ</span>
                     
                     <Select 
                       value={gradeRange.endGrade.toString()} 
                       onValueChange={(value) => setGradeRange({...gradeRange, endGrade: parseInt(value)})}
                     >
-                      <SelectTrigger className="h-12 text-base border-green-200 focus:border-green-500 focus:ring-green-200">
+                      <SelectTrigger className="h-12 text-base border-purple-200 focus:border-purple-500 focus:ring-purple-200">
                         <SelectValue placeholder="ថ្នាក់បញ្ចប់" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1775,7 +1748,7 @@ function AcademicManagementContent() {
                 <Button 
                   onClick={handleBulkCreateCourses}
                   disabled={!newCourse.schoolYearId || !newCourse.section.trim() || submitting || gradeRange.startGrade > gradeRange.endGrade}
-                  className="px-6 py-2 bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="px-6 py-2 bg-purple-500 hover:bg-purple-600 shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   {submitting ? (
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -1788,170 +1761,6 @@ function AcademicManagementContent() {
             </div>
           )}
 
-          {/* Edit Course Form */}
-          {editingCourse && (
-            <div className="mb-3 border-2 border-dashed border-orange-300 rounded-lg p-4 bg-orange-50 dark:bg-orange-950/20">
-              <h3 className="text-lg font-semibold mb-3 text-orange-700 dark:text-orange-300 flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                កែប្រែថ្នាក់រៀន: ថ្នាក់ទី {editingCourse.grade} {editingCourse.section}
-              </h3>
-              <div className="mb-3 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                <p className="text-base text-orange-700 dark:text-orange-300">
-                  💡 <strong>ចំណាំ:</strong> ឈ្មោះថ្នាក់នឹងត្រូវបានបង្កើតដោយស្វ័យប្រវត្តិពីថ្នាក់ និងផ្នែកដែលអ្នកជ្រើសរើស។
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                <div>
-                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ឆ្នាំសិក្សា</label>
-                  <Select 
-                    value={editingCourse.schoolYearId.toString()} 
-                    onValueChange={(value) => setEditingCourse({...editingCourse, schoolYearId: parseInt(value)})}
-                  >
-                    <SelectTrigger className={errors.schoolYearId ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {schoolYears.map((year) => (
-                        <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
-                          {year.schoolYearCode}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.schoolYearId && (
-                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.schoolYearId}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ថ្នាក់</label>
-                  <Select 
-                    value={editingCourse.grade} 
-                    onValueChange={(value) => setEditingCourse({...editingCourse, grade: value})}
-                  >
-                    <SelectTrigger className={errors.grade ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((grade) => (
-                        <SelectItem key={grade} value={grade.toString()}>
-                          ថ្នាក់ទី {grade}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.grade && (
-                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.grade}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">ផ្នែក</label>
-                  <Input
-                    value={editingCourse.section || ''}
-                    onChange={(e) => setEditingCourse({...editingCourse, section: e.target.value})}
-                    placeholder="ឧ. A, B, C"
-                    className={errors.section ? 'border-red-500' : ''}
-                  />
-                  {errors.section && (
-                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.section}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី១</label>
-                  <Select 
-                    value={editingCourse.teacherId1?.toString() || 'none'} 
-                    onValueChange={(value) => setEditingCourse({...editingCourse, teacherId1: value === 'none' ? undefined : parseInt(value)})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="ជ្រើសរើសគ្រូទី១" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">គ្មានគ្រូ</SelectItem>
-                      {safeTeachers.map((teacher) => (
-                        <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី២</label>
-                  <Select 
-                    value={editingCourse.teacherId2?.toString() || 'none'} 
-                    onValueChange={(value) => setEditingCourse({...editingCourse, teacherId2: value === 'none' ? undefined : parseInt(value)})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="ជ្រើសរើសគ្រូទី២" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">គ្មានគ្រូ</SelectItem>
-                      {safeTeachers.map((teacher) => (
-                        <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-300">គ្រូទី៣</label>
-                  <Select 
-                    value={editingCourse.teacherId3?.toString() || 'none'} 
-                    onValueChange={(value) => setEditingCourse({...editingCourse, teacherId3: value === 'none' ? undefined : parseInt(value)})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="ជ្រើសរើសគ្រូទី៣" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">គ្មានគ្រូ</SelectItem>
-                      {safeTeachers.map((teacher) => (
-                        <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{teacher.lastname}{teacher.firstname}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex justify-end mt-4 space-x-3">
-                <Button 
-                  variant="outline" 
-                  onClick={cancelEditCourse}
-                  disabled={submitting}
-                >
-                  បោះបង់
-                </Button>
-                <Button 
-                  onClick={handleEditCourse} 
-                  disabled={submitting}
-                  className="bg-orange-600 hover:bg-orange-700 text-white"
-                >
-                  {submitting ? (
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Check className="h-4 w-4 mr-2" />
-                  )}
-                  រក្សាទុក
-                </Button>
-              </div>
-            </div>
-          )}
 
           {/* Modern Search and Filter Section */}
           <div className="mb-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm">
@@ -2080,7 +1889,7 @@ function AcademicManagementContent() {
                       </Button>
                       <Button
                         onClick={() => setShowMultipleCourseForm(true)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                        className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                       >
                         <Plus className="h-4 w-4" />
                         បង្កើតថ្នាក់រៀនច្រើនក្នុងពេលតែមួយ
@@ -2548,58 +2357,6 @@ function AcademicManagementContent() {
             </div>
           )}
 
-          {/* Edit Subject Form */}
-          {editingSubject && (
-            <div className="mb-3 border-2 border-dashed border-blue-300 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/30 shadow-inner">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-blue-500 rounded-lg">
-                  <Edit className="h-5 w-5 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
-                  កែប្រែមុខវិជ្ជា
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-base font-medium mb-2 text-blue-700 dark:text-blue-300 flex items-center gap-2">
-                    <BookOpen className="h-4 w-4" />
-                    ឈ្មោះមុខវិជ្ជា
-                  </label>
-                  <Input
-                    value={editSubjectName}
-                    onChange={(e) => setEditSubjectName(e.target.value)}
-                    placeholder="បញ្ចូលឈ្មោះមុខវិជ្ជា"
-                    className="h-12 border-blue-200 focus:border-blue-500 dark:border-blue-700 dark:focus:border-blue-400"
-                  />
-                  {errors.subjectName && (
-                    <p className="text-red-500 text-base mt-1">{errors.subjectName}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={cancelEditSubject}
-                  className="px-6 py-2 border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  បោះបង់
-                </Button>
-                <Button
-                  onClick={handleEditSubject}
-                  disabled={submitting}
-                  className="px-6 py-2 bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  {submitting ? (
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Check className="h-4 w-4 mr-2" />
-                  )}
-                  កែប្រែមុខវិជ្ជា
-                </Button>
-              </div>
-            </div>
-          )}
 
           {filteredSubjects.length === 0 ? (
             <div className="text-center py-16 px-6">
@@ -3077,6 +2834,364 @@ function AcademicManagementContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit School Year Dialog */}
+      <Dialog open={showEditSchoolYearDialog} onOpenChange={setShowEditSchoolYearDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-blue-700 dark:text-blue-300 flex items-center gap-3">
+              <Calendar className="h-6 w-6" />
+              កែប្រែឆ្នាំសិក្សា
+            </DialogTitle>
+            <DialogDescription className="text-blue-600 dark:text-blue-400">
+              ធ្វើបច្ចុប្បន្នភាពព័ត៌មានឆ្នាំសិក្សា
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                ឆ្នាំសិក្សា
+              </label>
+              <Input
+                value={editSchoolYearCode}
+                onChange={(e) => {
+                  setEditSchoolYearCode(e.target.value)
+                  if (errors.year) setErrors(prev => ({ ...prev, year: '' }))
+                }}
+                placeholder="ឧ. 2024-2025"
+                className={`h-12 text-base px-4 rounded-xl border-2 transition-all duration-300 ${
+                  errors.year 
+                    ? 'border-red-400 ring-red-200 bg-red-50 dark:bg-red-950/20' 
+                    : 'border-blue-200 focus:border-blue-500 focus:ring-blue-200'
+                }`}
+              />
+              {errors.year && (
+                <div className="mt-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.year}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditSchoolYearDialog(false)
+                setEditingSchoolYear(null)
+                setEditSchoolYearCode('')
+                setErrors({})
+              }}
+              className="px-6 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <X className="h-4 w-4 mr-2" />
+              បោះបង់
+            </Button>
+            <Button
+              onClick={handleUpdateSchoolYear}
+              disabled={submitting}
+              className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50"
+            >
+              {submitting ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              រក្សាទុក
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Subject Dialog */}
+      <Dialog open={showEditSubjectDialog} onOpenChange={setShowEditSubjectDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-green-700 dark:text-green-300 flex items-center gap-3">
+              <BookOpen className="h-6 w-6" />
+              កែប្រែមុខវិជ្ជា
+            </DialogTitle>
+            <DialogDescription className="text-green-600 dark:text-green-400">
+              ធ្វើបច្ចុប្បន្នភាពព័ត៌មានមុខវិជ្ជា
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                ឈ្មោះមុខវិជ្ជា
+              </label>
+              <Input
+                value={editSubjectName}
+                onChange={(e) => {
+                  setEditSubjectName(e.target.value)
+                  if (errors.subject) setErrors(prev => ({ ...prev, subject: '' }))
+                }}
+                placeholder="ឧ. ភាសារខ្មែរ"
+                className={`h-12 text-base px-4 rounded-xl border-2 transition-all duration-300 ${
+                  errors.subject 
+                    ? 'border-red-400 ring-red-200 bg-red-50 dark:bg-red-950/20' 
+                    : 'border-green-200 focus:border-green-500 focus:ring-green-200'
+                }`}
+              />
+              {errors.subject && (
+                <div className="mt-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.subject}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditSubjectDialog(false)
+                setEditingSubject(null)
+                setEditSubjectName('')
+                setErrors({})
+              }}
+              className="px-6 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <X className="h-4 w-4 mr-2" />
+              បោះបង់
+            </Button>
+            <Button
+              onClick={handleUpdateSubject}
+              disabled={submitting}
+              className="px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50"
+            >
+              {submitting ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              រក្សាទុក
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Course Dialog */}
+      <Dialog open={showEditCourseDialog} onOpenChange={setShowEditCourseDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-purple-700 dark:text-purple-300 flex items-center gap-3">
+              <School className="h-6 w-6" />
+              កែប្រែថ្នាក់រៀន
+            </DialogTitle>
+            <DialogDescription className="text-purple-600 dark:text-purple-400">
+              ធ្វើបច្ចុប្បន្នភាពព័ត៌មានថ្នាក់រៀន
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  ឆ្នាំសិក្សា
+                </label>
+                <Select
+                  value={editCourse.schoolYearId}
+                  onValueChange={(value) => {
+                    setEditCourse({...editCourse, schoolYearId: value})
+                    if (errors.schoolYearId) setErrors(prev => ({ ...prev, schoolYearId: '' }))
+                  }}
+                >
+                  <SelectTrigger className={`h-12 text-base px-4 rounded-xl border-2 transition-all duration-300 ${
+                    errors.schoolYearId 
+                      ? 'border-red-400 ring-red-200 bg-red-50 dark:bg-red-950/20' 
+                      : 'border-purple-200 focus:border-purple-500 focus:ring-purple-200'
+                  }`}>
+                    <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schoolYears.map((year) => (
+                      <SelectItem key={year.schoolYearId} value={year.schoolYearId.toString()}>
+                        {year.schoolYearCode}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.schoolYearId && (
+                  <p className="mt-2 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.schoolYearId}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  ថ្នាក់
+                </label>
+                <Select
+                  value={editCourse.grade}
+                  onValueChange={(value) => {
+                    setEditCourse({...editCourse, grade: value})
+                    if (errors.grade) setErrors(prev => ({ ...prev, grade: '' }))
+                  }}
+                >
+                  <SelectTrigger className={`h-12 text-base px-4 rounded-xl border-2 transition-all duration-300 ${
+                    errors.grade 
+                      ? 'border-red-400 ring-red-200 bg-red-50 dark:bg-red-950/20' 
+                      : 'border-purple-200 focus:border-purple-500 focus:ring-purple-200'
+                  }`}>
+                    <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
+                      <SelectItem key={grade} value={grade.toString()}>
+                        ថ្នាក់ទី {grade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.grade && (
+                  <p className="mt-2 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.grade}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  ផ្នែក
+                </label>
+                <Input
+                  value={editCourse.section}
+                  onChange={(e) => {
+                    setEditCourse({...editCourse, section: e.target.value})
+                    if (errors.section) setErrors(prev => ({ ...prev, section: '' }))
+                  }}
+                  placeholder="ឧ. A, B, C"
+                  className={`h-12 text-base px-4 rounded-xl border-2 transition-all duration-300 ${
+                    errors.section 
+                      ? 'border-red-400 ring-red-200 bg-red-50 dark:bg-red-950/20' 
+                      : 'border-purple-200 focus:border-purple-500 focus:ring-purple-200'
+                  }`}
+                />
+                {errors.section && (
+                  <p className="mt-2 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.section}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  ឈ្មោះថ្នាក់
+                </label>
+                <Input
+                  value={editCourse.courseName}
+                  onChange={(e) => {
+                    setEditCourse({...editCourse, courseName: e.target.value})
+                    if (errors.course) setErrors(prev => ({ ...prev, course: '' }))
+                  }}
+                  placeholder="ឧ. ថ្នាក់ទី 10A"
+                  className={`h-12 text-base px-4 rounded-xl border-2 transition-all duration-300 ${
+                    errors.course 
+                      ? 'border-red-400 ring-red-200 bg-red-50 dark:bg-red-950/20' 
+                      : 'border-purple-200 focus:border-purple-500 focus:ring-purple-200'
+                  }`}
+                />
+                {errors.course && (
+                  <p className="mt-2 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.course}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                ការបែងចែកគ្រូបង្រៀន
+              </h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[1, 2, 3].map((teacherNum) => (
+                  <div key={teacherNum}>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      គ្រូបង្រៀន {teacherNum}
+                    </label>
+                    <Select
+                      value={editCourse[`teacherId${teacherNum}` as keyof typeof editCourse]?.toString() || 'none'}
+                      onValueChange={(value) => {
+                        setEditCourse({
+                          ...editCourse,
+                          [`teacherId${teacherNum}`]: value === "none" ? undefined : parseInt(value)
+                        })
+                      }}
+                    >
+                      <SelectTrigger className="h-12 text-base px-4 rounded-xl border-2 border-purple-200 focus:border-purple-500 focus:ring-purple-200">
+                        <SelectValue placeholder={`ជ្រើសរើសគ្រូបង្រៀន ${teacherNum}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">មិនបានជ្រើសរើស</SelectItem>
+                        {safeTeachers.map((teacher) => (
+                          <SelectItem key={teacher.userId} value={teacher.userId.toString()}>
+                            {teacher.lastname}{teacher.firstname}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditCourseDialog(false)
+                setEditingCourse(null)
+                setEditCourse({
+                  schoolYearId: '',
+                  grade: '',
+                  section: '',
+                  courseName: '',
+                  teacherId1: undefined,
+                  teacherId2: undefined,
+                  teacherId3: undefined
+                })
+                setErrors({})
+              }}
+              className="px-6 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <X className="h-4 w-4 mr-2" />
+              បោះបង់
+            </Button>
+            <Button
+              onClick={handleUpdateCourse}
+              disabled={submitting}
+              className="px-6 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50"
+            >
+              {submitting ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              រក្សាទុក
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </div>
     </div>
   )
 }

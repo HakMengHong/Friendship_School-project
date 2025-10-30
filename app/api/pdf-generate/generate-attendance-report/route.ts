@@ -4,13 +4,14 @@ import { ReportType } from '@/lib/pdf-generators/core/types'
 import { AttendanceReportData } from '@/lib/pdf-generators/reports/attendance-report-daily'
 import { generateYearlyAttendanceReportPDF } from '@/lib/pdf-generators/reports/attendance-report-yearly'
 import { prisma } from '@/lib/prisma'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 const pdfManager = new PDFManager()
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { reportType, startDate, endDate, academicYear, month, year, semester, class: className, grade, format } = body
+    const { reportType, startDate, endDate, academicYear, month, year, semester, class: className, grade, format, userId } = body
     
     // Log request for debugging
     console.log('Attendance report request:', { reportType, month, year, className })
@@ -87,6 +88,15 @@ export async function POST(request: NextRequest) {
       .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters
       .replace(/\s+/g, '-') // Replace spaces with hyphens
 
+    // Log activity
+    if (userId) {
+      await logActivity(
+        userId,
+        ActivityMessages.GENERATE_ATTENDANCE_REPORT,
+        `បង្កើតរបាយការណ៍វត្តមាន ${reportType} - ${className || 'ទាំងអស់'}`
+      )
+    }
+
     // Stream PDF directly to client
     return new NextResponse(result.buffer as BodyInit, {
       status: 200,
@@ -151,7 +161,9 @@ async function generateDailyAttendanceData(startDate: string, endDate: string, c
       },
       course: {
         select: {
-          courseName: true
+          courseName: true,
+          grade: true,
+          section: true
         }
       }
     },
@@ -200,7 +212,9 @@ async function generateDailyAttendanceData(startDate: string, endDate: string, c
             },
             course: {
               select: {
-                courseName: true
+                courseName: true,
+                grade: true,
+                section: true
               }
             }
           },
@@ -224,7 +238,12 @@ async function generateDailyAttendanceData(startDate: string, endDate: string, c
   // Debug: Log actual class values found
   if (attendanceRecords.length > 0) {
     const uniqueClasses = [...new Set(attendanceRecords.map(record => record.student.class))]
-    console.log('Actual class values in database:', uniqueClasses)
+    console.log('Actual class values in database (student.class):', uniqueClasses)
+    
+    const uniqueCourseClasses = [...new Set(attendanceRecords.map(record => 
+      record.course.section ? `${record.course.grade}${record.course.section}` : record.course.grade
+    ))]
+    console.log('Course grade+section combinations:', uniqueCourseClasses)
   }
 
   // Process attendance data
@@ -237,11 +256,16 @@ async function generateDailyAttendanceData(startDate: string, endDate: string, c
   attendanceRecords.forEach(record => {
     const studentId = record.studentId.toString()
     if (!studentMap.has(studentId)) {
+      // Combine grade and section from course to create full class name (e.g., "5A")
+      const fullClassName = record.course.section 
+        ? `${record.course.grade}${record.course.section}` 
+        : record.course.grade || record.student.class
+      
       studentMap.set(studentId, {
         studentId,
         firstName: record.student.firstName,
         lastName: record.student.lastName,
-        class: record.student.class,
+        class: fullClassName,
         gender: record.student.gender,
         attendance: {
           present: 0,
@@ -266,7 +290,7 @@ async function generateDailyAttendanceData(startDate: string, endDate: string, c
       remarks: record.reason || undefined
     })
 
-    // Count sessions: AM/PM = 1, FULL = 2
+    // Count sessions: AM/PM = 1, FULL = 2 (for individual counts)
     const sessionCount = record.session === 'FULL' ? 2 : 1
     
     switch (record.status) {

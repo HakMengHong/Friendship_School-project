@@ -93,6 +93,7 @@ function RegisterStudentContent() {
     dob: '',
     age: '',
     studentId: '',
+    photo: '', // Add photo field
     
     // Academic Information
     class: '',
@@ -578,6 +579,7 @@ function RegisterStudentContent() {
           dob: formData.dob,
           class: formData.class,
           schoolYear: formData.schoolYear,
+          photo: formData.photo || null, // Preserve photo
           registerToStudy: formData.registerToStudy,
           studentHouseNumber: formData.studentHouseNumber,
           studentVillage: formData.studentVillage,
@@ -688,6 +690,7 @@ function RegisterStudentContent() {
       dob: '',
       age: '',
       studentId: '',
+      photo: '', // Reset photo field
       
       // Academic Information
       class: '',
@@ -803,6 +806,7 @@ function RegisterStudentContent() {
       dob: student.dob ? new Date(student.dob).toISOString().split('T')[0] : '',
       age: ageString,
       studentId: student.studentId?.toString() || '',
+      photo: student.photo || '', // Preserve photo
       
       // Academic Information
       class: student.class || '',
@@ -912,18 +916,55 @@ function RegisterStudentContent() {
     }
   }
 
-  const filteredStudents = students.filter(student => {
+  const filteredStudents = students
+    .filter(student => {
     if (!studentName) return true
     const searchTerm = studentName.toLowerCase()
     const fullName = `${student.lastName || ''}${student.firstName || ''}`.toLowerCase()
     return fullName.includes(searchTerm)
   })
+    .sort((a, b) => {
+      // Khmer alphabet order: consonants + independent vowels
+      const khmerOrder = 'កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអអាឥឦឧឨឩឪឫឬឭឮឯឰឱឲឳ';
+      
+      const getKhmerSortValue = (char: string): number => {
+        const index = khmerOrder.indexOf(char);
+        return index === -1 ? 999 : index;
+      };
+      
+      const getSortKey = (text: string): number[] => {
+        return Array.from(text).map(char => getKhmerSortValue(char));
+      };
+      
+      // Compare last names first
+      const aLastKey = getSortKey(a.lastName || '');
+      const bLastKey = getSortKey(b.lastName || '');
+      
+      for (let i = 0; i < Math.max(aLastKey.length, bLastKey.length); i++) {
+        const aVal = aLastKey[i] || 999;
+        const bVal = bLastKey[i] || 999;
+        if (aVal !== bVal) return aVal - bVal;
+      }
+      
+      // If last names are equal, compare first names
+      const aFirstKey = getSortKey(a.firstName || '');
+      const bFirstKey = getSortKey(b.firstName || '');
+      
+      for (let i = 0; i < Math.max(aFirstKey.length, bFirstKey.length); i++) {
+        const aVal = aFirstKey[i] || 999;
+        const bVal = bFirstKey[i] || 999;
+        if (aVal !== bVal) return aVal - bVal;
+      }
+      
+      return 0;
+    })
 
   return (
     <div className="min-h-screen animate-fade-in">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-8">
 
-        <div className="flex flex-col lg:flex-row gap-2 items-start">
+          <div className="flex flex-col lg:flex-row gap-4 items-start">
           {/* Modern Sidebar */}
           <div className="w-full lg:w-80 flex-shrink-0">
             <Card className="p-4 h-full border-0 shadow-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl">
@@ -965,7 +1006,7 @@ function RegisterStudentContent() {
                 {loading ? (
                   <div className=" py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                    <p className="text-base text-gray-500 dark:text-gray-400">កំពុងផ្ទុក...</p>
+                    <p className="text-base text-gray-500 dark:text-gray-400 text-center">កំពុងផ្ទុក...</p>
                   </div>
                 ) : filteredStudents.length > 0 ? (
                   <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -980,14 +1021,22 @@ function RegisterStudentContent() {
                         }`}
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-base font-medium">
-                            {student.firstName?.charAt(0) || ''}{student.lastName?.charAt(0) || ''}
-                          </div>
+                          {student.photo ? (
+                            <img 
+                              src={student.photo} 
+                              alt={`${student.lastName}${student.firstName}`}
+                              className="w-14 h-14 rounded-full object-cover border-2 border-blue-300 dark:border-blue-600 shadow-md"
+                            />
+                          ) : (
+                            <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-semibold shadow-md">
+                              {student.lastName?.charAt(0) || ''}{student.firstName?.charAt(0) || ''}
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-900 dark:text-white truncate">
                               {student.lastName}{student.firstName}
                             </p>
-                            <p className="text-base text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               {getGradeLabel(student.class)} • ID: {student.studentId}
                             </p>
                           </div>
@@ -2587,6 +2636,7 @@ function RegisterStudentContent() {
             </Card>
           )}
         </div>
+          </div>
         </div>
       </div>
     </div>

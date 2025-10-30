@@ -39,7 +39,7 @@ import {
 
 // Hook and service imports
 import { toast } from "@/hooks/use-toast"
-import { getCurrentUser } from "@/lib/auth-service"
+import { getCurrentUser, User as AuthUser } from "@/lib/auth-service"
 
 // Component imports
 import { CustomDatePicker } from "@/components/calendar"
@@ -64,6 +64,9 @@ interface Course {
   courseName: string
   grade: string
   section: string
+  teacherId1: number | null
+  teacherId2: number | null
+  teacherId3: number | null
   schoolYear: SchoolYear
 }
 
@@ -162,7 +165,7 @@ function DailyAttendanceContent() {
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   // User and form state
-  const [currentUser, setCurrentUser] = useState<{ username?: string; lastname?: string; firstname?: string } | null>(null)
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [attendanceForm, setAttendanceForm] = useState<AttendanceFormData>({
     studentId: 0,
     courseId: 0,
@@ -182,14 +185,14 @@ function DailyAttendanceContent() {
       color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' 
     },
     { 
-      value: 'absent', 
-      label: 'អវត្តមាន(ឥតច្បាប់)', 
-      color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' 
-    },
-    { 
       value: 'excused', 
       label: 'អវត្តមាន(ច្បាប់)', 
       color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' 
+    },
+    { 
+      value: 'absent', 
+      label: 'អវត្តមាន(ឥតច្បាប់)', 
+      color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' 
     }
   ]
 
@@ -207,6 +210,11 @@ function DailyAttendanceContent() {
   useEffect(() => {
     const user = getCurrentUser()
     setCurrentUser(user)
+    console.log('👤 Current user loaded:', { 
+      username: user?.username, 
+      role: user?.role, 
+      id: user?.id
+    })
   }, [])
 
   // Fetch initial data
@@ -245,16 +253,55 @@ function DailyAttendanceContent() {
   }, [formData.date, semesters])
 
 
-  // Filter students based on search term
+  // Filter students based on search term and sort by Khmer order
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredStudents(students)
-    } else {
-      const filtered = students.filter(student =>
+    let result = students;
+    
+    // Filter by search term
+    if (searchTerm) {
+      result = students.filter(student =>
         `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
       )
-      setFilteredStudents(filtered)
     }
+    
+    // Sort by Khmer alphabetical order
+    result = result.sort((a, b) => {
+      // Khmer alphabet order: consonants + independent vowels
+      const khmerOrder = 'កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអអាឥឦឧឨឩឪឫឬឭឮឯឰឱឲឳ';
+      
+      const getKhmerSortValue = (char: string): number => {
+        const index = khmerOrder.indexOf(char);
+        return index === -1 ? 999 : index;
+      };
+      
+      const getSortKey = (text: string): number[] => {
+        return Array.from(text).map(char => getKhmerSortValue(char));
+      };
+      
+      // Compare last names first
+      const aLastKey = getSortKey(a.lastName || '');
+      const bLastKey = getSortKey(b.lastName || '');
+      
+      for (let i = 0; i < Math.max(aLastKey.length, bLastKey.length); i++) {
+        const aVal = aLastKey[i] || 999;
+        const bVal = bLastKey[i] || 999;
+        if (aVal !== bVal) return aVal - bVal;
+      }
+      
+      // If last names are equal, compare first names
+      const aFirstKey = getSortKey(a.firstName || '');
+      const bFirstKey = getSortKey(b.firstName || '');
+      
+      for (let i = 0; i < Math.max(aFirstKey.length, bFirstKey.length); i++) {
+        const aVal = aFirstKey[i] || 999;
+        const bVal = bFirstKey[i] || 999;
+        if (aVal !== bVal) return aVal - bVal;
+      }
+      
+      return 0;
+    });
+    
+    setFilteredStudents(result)
   }, [students, searchTerm])
 
   // ============================================================================
@@ -548,12 +595,32 @@ function DailyAttendanceContent() {
   // COMPUTED VALUES
   // ============================================================================
   
-  // Filter courses based on selected school year
-  const filteredCourses = useMemo(() => 
-    formData.schoolYear 
+  // Filter courses based on selected school year and teacher role
+  const filteredCourses = useMemo(() => {
+    let filtered = formData.schoolYear 
       ? courses.filter(course => course.schoolYear.schoolYearId.toString() === formData.schoolYear)
       : courses
-  , [courses, formData.schoolYear])
+    
+    // If user is a teacher, only show courses where they are assigned
+    if (currentUser && currentUser.role === 'teacher') {
+      const teacherId = currentUser.id
+      filtered = filtered.filter(course => 
+        course.teacherId1 === teacherId || 
+        course.teacherId2 === teacherId || 
+        course.teacherId3 === teacherId
+      )
+      
+      console.log('👨‍🏫 Teacher filter applied:', {
+        teacherId,
+        teacherName: `${currentUser.lastname}${currentUser.firstname}`,
+        totalCourses: courses.length,
+        filteredBySchoolYear: formData.schoolYear ? courses.filter(c => c.schoolYear.schoolYearId.toString() === formData.schoolYear).length : courses.length,
+        filteredByTeacher: filtered.length
+      })
+    }
+    
+    return filtered
+  }, [courses, formData.schoolYear, currentUser])
 
   // Calculate statistics
   const statistics = useMemo(() => {
@@ -648,9 +715,9 @@ function DailyAttendanceContent() {
 
   return (
     <div className="min-h-screen animate-fade-in">
-
-      {/* Enhanced Form Section */}
-      <div className="relative mb-4">
+      <div className="animate-fade-in">
+        {/* Enhanced Form Section */}
+        <div className="relative mb-4">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.05),transparent_50%)]" />
@@ -1499,6 +1566,7 @@ function DailyAttendanceContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // GET all subjects
 export async function GET() {
@@ -22,7 +23,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { subjectName } = body
+    const { subjectName, userId } = body
 
     if (!subjectName) {
       return NextResponse.json(
@@ -36,6 +37,11 @@ export async function POST(request: NextRequest) {
         subjectName
       }
     })
+
+    // Log activity
+    if (userId) {
+      await logActivity(userId, ActivityMessages.ADD_SUBJECT, `បន្ថែមមុខវិជ្ជា ${newSubject.subjectName}`)
+    }
 
     return NextResponse.json(newSubject, { status: 201 })
   } catch (error) {

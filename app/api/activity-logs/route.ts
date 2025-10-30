@@ -29,12 +29,14 @@ export async function GET(request: NextRequest) {
 
     // Format the response to match dashboard expectations
     const formattedLogs = activityLogs.map(log => ({
-      id: log.id,
+      activityId: log.id,
+      userId: log.userId,
       action: log.action,
       details: log.details,
       time: formatTimeAgo(log.timestamp),
       type: getActivityType(log.action),
       user: `${log.user.lastname} ${log.user.firstname}`,
+      userRole: log.user.role,
       timestamp: log.timestamp
     }))
 

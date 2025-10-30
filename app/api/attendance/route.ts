@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // GET - Fetch attendances by course and date
 export async function GET(request: Request) {
@@ -154,6 +155,21 @@ export async function POST(request: Request) {
       }
     })
 
+    // Log activity if userId is provided
+    if (recordedBy) {
+      // Try to find the user by firstname
+      const user = await prisma.user.findFirst({
+        where: { firstname: recordedBy }
+      })
+      if (user) {
+        await logActivity(
+          user.userId,
+          ActivityMessages.RECORD_ATTENDANCE,
+          `កត់ត្រាវត្តមាន ${attendance.student.lastName} ${attendance.student.firstName} - ${status}`
+        )
+      }
+    }
+
     return NextResponse.json(attendance, { status: 201 })
   } catch (error: unknown) {
     console.error('Error creating attendance:', error)
@@ -242,6 +258,18 @@ export async function PUT(request: Request) {
         course: true
       }
     })
+
+    // Log activity
+    if (recordedBy) {
+      const user = await prisma.user.findFirst({ where: { firstname: recordedBy } })
+      if (user) {
+        await logActivity(
+          user.userId,
+          ActivityMessages.UPDATE_ATTENDANCE,
+          `ធ្វើបច្ចុប្បន្នភាពវត្តមាន ${attendance.student.lastName} ${attendance.student.firstName} - ${status}`
+        )
+      }
+    }
 
     return NextResponse.json(attendance)
   } catch (error: unknown) {

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { writeFile, mkdir } from 'fs/promises'
+import path from 'path'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 const prisma = new PrismaClient()
 
@@ -12,27 +15,29 @@ export async function PUT(
   try {
     const { id } = await params
     const userId = parseInt(id)
-    const body: {
-      username?: string
-      firstname?: string
-      lastname?: string
-      phonenumber1?: string
-      phonenumber2?: string
-      role?: string
-      position?: string
-      photo?: string
-      status?: string
-      password?: string
-    } = await request.json()
+    
+    // Check if request is FormData (for file uploads) or JSON
+    const contentType = request.headers.get('content-type') || ''
+    let body: any = {}
+    
+    if (contentType.includes('multipart/form-data')) {
+      // Handle FormData for file uploads
+      const formData = await request.formData()
+      body = {
+        phonenumber1: formData.get('phonenumber1') as string,
+        phonenumber2: formData.get('phonenumber2') as string,
+        password: formData.get('password') as string,
+        photo: formData.get('photo') as File
+      }
+    } else {
+      // Handle JSON data
+      body = await request.json()
+    }
+    
     const { username, password, firstname, lastname, phonenumber1, phonenumber2, role, position, photo, status } = body
 
-    // Validate required fields
-    if (!username || !firstname || !lastname) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
+    // For profile updates, we don't require username, firstname, lastname if not provided
+    // Only validate if they are being updated
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -46,8 +51,8 @@ export async function PUT(
       )
     }
 
-    // Check if username already exists (excluding current user)
-    if (username !== existingUser.username) {
+    // Check if username already exists (excluding current user) - only if username is being updated
+    if (username && username !== existingUser.username) {
       const usernameExists = await prisma.user.findUnique({
         where: { username }
       })
@@ -60,18 +65,47 @@ export async function PUT(
       }
     }
 
-    // Prepare update data
-    const updateData: any = {
-      username,
-      firstname,
-      lastname,
-      phonenumber1: phonenumber1 || null,
-      phonenumber2: phonenumber2 || null,
-      role: role || 'teacher',
-      avatar: `${firstname.charAt(0)}${lastname.charAt(0)}`,
-      position: position || null,
-      photo: photo || null,
-      status: status || 'active'
+    // Handle photo upload if it's a File object
+    let photoUrl = null
+    if (photo instanceof File) {
+      // Save file to uploads directory
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
+      await mkdir(uploadsDir, { recursive: true })
+      
+      const bytes = await photo.arrayBuffer()
+      const buffer = Buffer.from(bytes)
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`
+      const filename = `${uniqueSuffix}-${photo.name}`
+      const filepath = path.join(uploadsDir, filename)
+      
+      await writeFile(filepath, buffer)
+      photoUrl = `/uploads/${filename}`
+    }
+
+    // Prepare update data - only update fields that are provided
+    const updateData: any = {}
+    
+    if (username) updateData.username = username
+    if (firstname) updateData.firstname = firstname
+    if (lastname) updateData.lastname = lastname
+    if (phonenumber1 !== undefined) updateData.phonenumber1 = phonenumber1 || null
+    if (phonenumber2 !== undefined) updateData.phonenumber2 = phonenumber2 || null
+    if (role) updateData.role = role
+    if (position !== undefined) updateData.position = position || null
+    if (status) updateData.status = status
+    
+    // Update avatar if firstname or lastname changed
+    if (firstname || lastname) {
+      const newFirstname = firstname || existingUser.firstname
+      const newLastname = lastname || existingUser.lastname
+      updateData.avatar = `${newFirstname.charAt(0)}${newLastname.charAt(0)}`
+    }
+    
+    // Update photo if provided
+    if (photoUrl) {
+      updateData.photo = photoUrl
+    } else if (photo && typeof photo === 'string') {
+      updateData.photo = photo
     }
 
     // Hash password if provided
@@ -102,7 +136,7 @@ export async function PUT(
     })
 
     const transformedUser = {
-      userid: updatedUser.userId,
+      id: updatedUser.userId,
       username: updatedUser.username,
       password: '',
       firstname: updatedUser.firstname,
@@ -118,6 +152,16 @@ export async function PUT(
       updatedAt: updatedUser.updatedAt,
       status: updatedUser.status
     }
+
+    // Log activity
+    if (password) {
+      await logActivity(userId, ActivityMessages.CHANGE_PASSWORD, `ផ្លាស់ប្តូរលេខសម្ងាត់`)
+    }
+    if (photoUrl) {
+      await logActivity(userId, ActivityMessages.UPLOAD_PROFILE_PHOTO, `ផ្ទុកឡើងរូបភាពប្រវត្តិរូប`)
+    }
+    // General edit log
+    await logActivity(userId, ActivityMessages.EDIT_USER, `កែប្រែព័ត៌មានអ្នកប្រើប្រាស់ ${updatedUser.lastname} ${updatedUser.firstname}`)
 
     return NextResponse.json({ user: transformedUser })
   } catch (error) {
@@ -154,6 +198,10 @@ export async function DELETE(
     await prisma.user.delete({
       where: { userId }
     })
+
+    // Log activity (use a system admin or the user performing delete)
+    // Note: This logs the deletion, userId here should be who performed the delete
+    await logActivity(userId, ActivityMessages.DELETE_USER, `លុបអ្នកប្រើប្រាស់ ${existingUser.lastname} ${existingUser.firstname}`)
 
     return NextResponse.json({ message: 'User deleted successfully' })
   } catch (error) {

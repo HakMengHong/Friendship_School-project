@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { Search, Crown, BookOpen, ClipboardList, User, LogOut, Settings, AlertCircle, RefreshCw, Edit, Save, X, Eye, EyeOff, Lock, Phone, AtSign, Mail, Camera } from "lucide-react"
+import { Search, Crown, BookOpen, ClipboardList, User, LogOut, Settings, AlertCircle, RefreshCw, Edit, Save, X, Eye, EyeOff, Lock, Phone, AtSign, Mail, Camera, UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -27,12 +27,14 @@ import { useRouter } from "next/navigation"
 interface TopBarProps {
   className?: string
   user?: UserType | null
+  onUserUpdate?: (updatedUser: UserType) => void
 }
 
-export function TopBar({ className, user }: TopBarProps) {
+export function TopBar({ className, user, onUserUpdate }: TopBarProps) {
   const pathname = usePathname()
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
+  
   const [showProfileEdit, setShowProfileEdit] = useState(false)
   const [profileLoading, setProfileLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -129,9 +131,29 @@ export function TopBar({ className, user }: TopBarProps) {
     }
   }
 
-  const handleLogout = () => {
-    logout()
-    router.push("/login")
+  const handleLogout = async () => {
+    try {
+      // Log logout activity before clearing session
+      if (user) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            username: `${user.lastname} ${user.firstname}`
+          })
+        })
+      }
+    } catch (error) {
+      console.error('Logout logging error:', error)
+      // Continue with logout even if logging fails
+    } finally {
+      // Clear local session data
+      logout()
+      router.push("/login")
+    }
   }
 
   const handleProfileClick = () => {
@@ -141,7 +163,7 @@ export function TopBar({ className, user }: TopBarProps) {
         phonenumber2: user.phonenumber2 || '',
         password: '',
         confirmPassword: '',
-        photo: user.avatar || '',
+        photo: user.photo || '',
         photoFile: null
       })
       setShowProfileEdit(true)
@@ -151,10 +173,35 @@ export function TopBar({ className, user }: TopBarProps) {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "បរាជ័យ",
+          description: "សូមជ្រើសរើសឯកសាររូបភាពប៉ុណ្ណោះ",
+          variant: "destructive"
+        })
+        // Reset file input
+        e.target.value = ''
+        return
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "បរាជ័យ",
+          description: "ទំហំឯកសារត្រូវតែតិចជាង 5MB",
+          variant: "destructive"
+        })
+        // Reset file input
+        e.target.value = ''
+        return
+      }
+
+      const previewUrl = URL.createObjectURL(file)
       setProfileData(prev => ({
         ...prev,
         photoFile: file,
-        photo: URL.createObjectURL(file)
+        photo: previewUrl
       }))
     }
   }
@@ -210,12 +257,29 @@ export function TopBar({ className, user }: TopBarProps) {
         })
 
         if (response.ok) {
+          const updatedUserData = await response.json()
           toast({
             title: "ជោគជ័យ",
             description: "ព័ត៌មានផ្ទាល់ខ្លួនត្រូវបានកែប្រែ"
           })
+          
+          // Reset file input
+          const fileInput = document.getElementById('photo') as HTMLInputElement
+          if (fileInput) {
+            fileInput.value = ''
+          }
+          
           setShowProfileEdit(false)
-          window.location.reload()
+          
+          // Update user data in parent component
+          if (onUserUpdate && updatedUserData.user) {
+            onUserUpdate(updatedUserData.user)
+          }
+          
+          // Refresh page to show updated photo immediately
+          setTimeout(() => {
+            window.location.reload()
+          }, 500)
         } else {
           const error = await response.json()
           toast({
@@ -234,13 +298,23 @@ export function TopBar({ className, user }: TopBarProps) {
       })
 
       if (response.ok) {
+        const updatedUserData = await response.json()
         toast({
           title: "ជោគជ័យ",
           description: "ព័ត៌មានផ្ទាល់ខ្លួនត្រូវបានកែប្រែ"
         })
+        
         setShowProfileEdit(false)
-        // Refresh the page to update user data
-        window.location.reload()
+        
+        // Update user data in parent component
+        if (onUserUpdate && updatedUserData.user) {
+          onUserUpdate(updatedUserData.user)
+        }
+        
+        // Refresh page to show updates immediately
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
       } else {
         const error = await response.json()
         toast({
@@ -325,11 +399,11 @@ export function TopBar({ className, user }: TopBarProps) {
               
               <div className="text-right hidden sm:block relative z-10">
                 <p className="text-xs md:text-sm font-semibold text-primary group-hover:text-primary/80 transition-colors duration-200 truncate max-w-20 md:max-w-24">
-                  {user ? `${user.lastname} ${user.firstname}` : "អ្នកប្រើប្រាស់"}
+                  {user ? `${user.lastname || ''} ${user.firstname || ''}`.trim() || 'អ្នកប្រើប្រាស់' : "កំពុងផ្ទុក..."}
                 </p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <p className="text-xs text-muted-foreground group-hover:text-muted-foreground/80 font-medium transition-colors duration-200">
-                    {user?.position || (user?.role === 'admin' ? 'នាយក' : 'គ្រូបង្រៀន')}
+                    {user?.position || (user?.role === 'admin' ? 'នាយក' : user?.role === 'teacher' ? 'គ្រូបង្រៀន' : 'អ្នកប្រើប្រាស់')}
                   </p>
                   {user?.role === 'admin' && (
                     <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/20 dark:to-yellow-800/10 rounded-full shadow-sm transition-all duration-300">
@@ -348,18 +422,36 @@ export function TopBar({ className, user }: TopBarProps) {
               
               {/* Compact Avatar */}
               <div className="relative w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-xl flex items-center justify-center text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden">
-                {/* Inner glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl"></div>
-                
                 {/* Avatar content */}
-                <span className="relative z-10 text-sm font-semibold">
-                  {user?.avatar || user?.firstname?.charAt(0) || "U"}
-                </span>
+                {user ? (
+                  user.photo && user.photo.trim() !== '' ? (
+                    <img 
+                      src={user.photo.startsWith('blob:') ? user.photo : 
+                            user.photo.startsWith('http') ? user.photo :
+                            user.photo.startsWith('/') ? user.photo :
+                            `/uploads/${user.photo}`} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover rounded-xl"
+                      onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        e.currentTarget.style.display = 'none'
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                      }}
+                    />
+                  ) : null
+                ) : null}
                 
-                {/* Online status indicator */}
-                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-sm transition-all duration-300">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                </div>
+                {/* Fallback initials or loading */}
+                <span className={`relative z-10 text-sm font-semibold ${user?.photo && user.photo.trim() !== '' ? 'hidden' : ''}`}>
+                  {user ? (
+                    user.firstname?.charAt(0)?.toUpperCase() || 
+                    user.lastname?.charAt(0)?.toUpperCase() || 
+                    user.username?.charAt(0)?.toUpperCase() || 
+                    "U"
+                  ) : (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  )}
+                </span>
               </div>
             </Button>
           </DropdownMenuTrigger>
@@ -408,81 +500,166 @@ export function TopBar({ className, user }: TopBarProps) {
 
       {/* Profile Edit Dialog */}
       <Dialog open={showProfileEdit} onOpenChange={setShowProfileEdit}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Edit className="w-5 h-5 text-primary" />
-              <span className="text-xl">កែប្រែព័ត៌មានផ្ទាល់ខ្លួន</span>
-            </DialogTitle>
-            <DialogDescription>
-              <span className="text-base">កែប្រែព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក</span>
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-w-5xl max-h-[95vh] bg-gradient-to-br from-white via-blue-50/40 to-purple-50/30 dark:from-gray-900 dark:via-blue-950/30 dark:to-purple-950/30 backdrop-blur-2xl border-0 shadow-3xl rounded-3xl flex flex-col animate-in fade-in-0 zoom-in-95 duration-500 overflow-visible">
+          {/* Ultra Modern Header with Enhanced Gradient */}
+          <div className="relative bg-gradient-to-r from-blue-600 via-purple-700 to-pink-600 text-white p-10 -m-8 mb-8 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/10" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/15 rounded-full -translate-y-24 translate-x-24 animate-pulse" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full translate-y-20 -translate-x-20 animate-pulse" />
+            <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-white/8 rounded-full -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+            <div className="absolute top-1/4 right-1/4 w-20 h-20 bg-white/5 rounded-full animate-bounce" />
+            
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <div className="p-4 bg-white/25 backdrop-blur-md rounded-3xl shadow-2xl group-hover:scale-110 transition-all duration-500 border border-white/20">
+                  <UserIcon className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <DialogTitle className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+                    កែប្រែព័ត៌មានផ្ទាល់ខ្លួន
+                  </DialogTitle>
+                  <DialogDescription className="text-white/95 text-lg font-medium drop-shadow-md">
+                    ធ្វើបច្ចុប្បន្នភាពព័ត៌មានផ្ទាល់ខ្លួន និងការកំណត់របស់អ្នក
+                  </DialogDescription>
+                </div>
+              </div>
+              <div className="text-right bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                <div className="text-white/80 text-sm font-medium">
+                  {new Date().toLocaleDateString('en-GB')}
+                </div>
+                <div className="text-white/70 text-xs">
+                  {new Date().toLocaleTimeString('km-KH', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <div className="space-y-6">
-            {/* Photo Upload */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center space-x-2">
-                  <Camera className="w-5 h-5 text-primary" />
-                  <span>រូបភាព</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  {/* Current Photo */}
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center text-white font-semibold shadow-lg overflow-hidden">
-                    {profileData.photo ? (
-                      <img 
-                        src={profileData.photo} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500 overflow-x-visible">
+            <form id="profile-form" onSubmit={(e) => { e.preventDefault(); handleProfileUpdate(); }} className="space-y-6 px-2">
+              {/* Profile Picture & Personal Information - Side by Side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Profile Section */}
+                <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-2xl p-6 border border-border/60 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <Camera className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-bold text-primary">
+                    រូបភាពប្រវត្តិ
+                  </h3>
+                </div>
+                
+                <div className="flex flex-col items-center gap-4">
+                  {/* Enhanced Avatar Preview */}
+                  <div className="relative group">
+                    {profileData.photo && profileData.photo.trim() !== '' ? (
+                      <div className="relative">
+                        <img
+                          src={profileData.photo.startsWith('blob:') ? profileData.photo : 
+                                profileData.photo.startsWith('http') ? profileData.photo :
+                                profileData.photo.startsWith('/') ? profileData.photo :
+                                `/uploads/${profileData.photo}`}
+                          alt="Profile"
+                          className="w-20 h-20 rounded-2xl object-cover border-4 border-white shadow-2xl group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setProfileData(prev => ({ ...prev, photoFile: null, photo: "" }))}
+                          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 rounded-full p-2 shadow-xl transition-all duration-200 hover:scale-110"
+                          aria-label="លុបរូបភាព"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
                     ) : (
-                      <span className="text-2xl">
-                        {user?.firstname?.charAt(0) || "U"}
-                      </span>
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 flex items-center justify-center text-white font-bold text-2xl shadow-2xl group-hover:scale-105 transition-transform duration-300">
+                        {user?.firstname?.charAt(0)?.toUpperCase() || 
+                         user?.lastname?.charAt(0)?.toUpperCase() || 
+                         user?.username?.charAt(0)?.toUpperCase() || 
+                         "U"}
+                      </div>
                     )}
                   </div>
                   
-                  {/* Upload Button */}
-                  <div className="flex-1">
-                    <Label htmlFor="photo" className="cursor-pointer">
-                      <div className="flex items-center space-x-2 p-3 border-2 border-dashed border-primary/30 rounded-lg hover:border-primary/50 transition-colors">
-                        <Camera className="w-5 h-5 text-primary" />
-                        <span className="text-base font-medium text-primary">
-                          ជ្រើសរើសរូបភាព
-                        </span>
-                      </div>
+                  {/* Enhanced Upload Controls */}
+                  <div className="w-full text-center">
+                    <Label htmlFor="photo" className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-white rounded-xl cursor-pointer transition-all duration-300 text-base font-semibold shadow-lg hover:shadow-xl hover:scale-105">
+                      <Camera className="w-5 h-5 mr-3" />
+                      <span>ជ្រើសរើសរូបភាព</span>
+                      <Input
+                        id="photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoChange}
+                        className="hidden"
+                      />
                     </Label>
-                    <Input
-                      id="photo"
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoChange}
-                      className="hidden"
-                    />
-                    <p className="text-sm text-muted-foreground mt-1">
-                      JPG, PNG, GIF (អតិបរមា 5MB)
+                    <p className="text-sm text-muted-foreground mt-3 leading-relaxed font-medium">
+                      អនុញ្ញាត JPG, PNG, GIF • អតិបរមា 5MB
                     </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Contact Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center space-x-2">
-                  <Phone className="w-5 h-5 text-primary" />
-                  <span>ព័ត៌មានទំនាក់ទំនង</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Personal Information */}
+              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-2xl p-6 border border-border/60 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <UserIcon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-bold text-primary">
+                    ព័ត៌មានផ្ទាល់ខ្លួន
+                  </h3>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Display Name */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold text-muted-foreground flex items-center gap-2">
+                      <UserIcon className="w-4 h-4 text-primary" />
+                      ឈ្មោះពេញ
+                    </Label>
+                    <div className="h-12 px-4 py-3 bg-muted/60 rounded-xl text-base font-semibold border border-border/40 shadow-sm">
+                      {user?.firstname} {user?.lastname}
+                    </div>
+                  </div>
+
+                  {/* Username */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold text-muted-foreground flex items-center gap-2">
+                      <UserIcon className="w-4 h-4 text-primary" />
+                      ឈ្មោះអ្នកប្រើ
+                    </Label>
+                    <div className="h-12 px-4 py-3 bg-muted/60 rounded-xl text-base font-semibold border border-border/40 shadow-sm">
+                      {user?.username}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Information & Password Change - Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Contact Information */}
+              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-2xl p-6 border border-border/60 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-bold text-primary">
+                    ព័ត៌មានទំនាក់ទំនង
+                  </h3>
+                </div>
+                
+                <div className="space-y-4">
                   {/* Phone 1 */}
                   <div className="space-y-2">
-                    <Label htmlFor="phonenumber1" className="text-base font-medium">
+                    <Label htmlFor="phonenumber1" className="text-base font-semibold text-muted-foreground flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-primary" />
                       លេខទូរស័ព្ទ <span className="text-red-500">*</span>
                     </Label>
                     <Input
@@ -490,13 +667,15 @@ export function TopBar({ className, user }: TopBarProps) {
                       value={profileData.phonenumber1}
                       onChange={(e) => setProfileData(prev => ({ ...prev, phonenumber1: e.target.value }))}
                       placeholder="បញ្ចូលលេខទូរស័ព្ទ"
-                      className="h-10"
+                      className="h-12 text-base rounded-xl border-2 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                      required
                     />
                   </div>
 
                   {/* Phone 2 */}
                   <div className="space-y-2">
-                    <Label htmlFor="phonenumber2" className="text-base font-medium">
+                    <Label htmlFor="phonenumber2" className="text-base font-semibold text-muted-foreground flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-primary" />
                       លេខទូរស័ព្ទទី២
                     </Label>
                     <Input
@@ -504,111 +683,134 @@ export function TopBar({ className, user }: TopBarProps) {
                       value={profileData.phonenumber2}
                       onChange={(e) => setProfileData(prev => ({ ...prev, phonenumber2: e.target.value }))}
                       placeholder="បញ្ចូលលេខទូរស័ព្ទទី២"
-                      className="h-10"
+                      className="h-12 text-base rounded-xl border-2 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Password Change */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center space-x-2">
-                  <Lock className="w-5 h-5 text-primary" />
-                  <span>ផ្លាស់ប្តូរពាក្យសម្ងាត់</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                  <div className="flex items-start space-x-2">
-                    <AlertCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <div className="text-base text-blue-700 dark:text-blue-300">
-                      <p className="font-medium">ព័ត៌មាន:</p>
-                      <p>ទុកទទេប្រសិនបើមិនចង់ផ្លាស់ប្តូរពាក្យសម្ងាត់</p>
+              {/* Password Change */}
+              <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-2xl p-6 border border-border/60 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <Lock className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-bold text-primary">
+                    ផ្លាស់ប្តូរពាក្យសម្ងាត់
+                  </h3>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Enhanced Info Banner */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                        <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="text-base text-blue-700 dark:text-blue-300">
+                        <p className="font-semibold">ព័ត៌មានសំខាន់:</p>
+                        <p>ទុកទទេប្រសិនបើមិនចង់ផ្លាស់ប្តូរពាក្យសម្ងាត់</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* New Password */}
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-base font-semibold text-muted-foreground flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-primary" />
+                        ពាក្យសម្ងាត់ថ្មី
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          value={profileData.password}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, password: e.target.value }))}
+                          placeholder="បញ្ចូលពាក្យសម្ងាត់ថ្មី"
+                          className="h-12 pr-12 text-base rounded-xl border-2 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-base font-semibold text-muted-foreground flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-primary" />
+                        បញ្ជាក់ពាក្យសម្ងាត់
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={profileData.confirmPassword}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                          placeholder="បញ្ជាក់ពាក្យសម្ងាត់ថ្មី"
+                          className="h-12 pr-12 text-base rounded-xl border-2 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* New Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-base font-medium">
-                      ពាក្យសម្ងាត់ថ្មី
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={profileData.password}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, password: e.target.value }))}
-                        placeholder="បញ្ចូលពាក្យសម្ងាត់ថ្មី"
-                        className="h-10 pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Confirm Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-base font-medium">
-                      បញ្ជាក់ពាក្យសម្ងាត់
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        value={profileData.confirmPassword}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        placeholder="បញ្ជាក់ពាក្យសម្ងាត់ថ្មី"
-                        className="h-10 pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+            </form>
           </div>
-
-          <DialogFooter className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowProfileEdit(false)}
-              disabled={profileLoading}
-            >
-              <X className="w-4 h-4 mr-2" />
-              បោះបង់
-            </Button>
-            <Button
-              onClick={handleProfileUpdate}
-              disabled={profileLoading || !profileData.phonenumber1}
-            >
-              {profileLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>កំពុងរក្សាទុក...</span>
+          
+          {/* Ultra Modern Enhanced Footer */}
+          <div className="flex justify-between items-center gap-6 pt-8 border-t-2 border-gradient-to-r from-gray-200/60 via-gray-300/40 to-gray-200/60 dark:from-gray-700/60 dark:via-gray-600/40 dark:to-gray-700/60 bg-gradient-to-r from-white via-gray-50/60 to-white dark:from-gray-900 dark:via-gray-800/60 dark:to-gray-900 px-6 -mx-8 -mb-8 p-10 animate-in slide-in-from-bottom-3 duration-700 delay-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-3">
+              <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full animate-pulse shadow-lg" />
+              <span className="font-medium">ព័ត៌មានផ្ទាល់ខ្លួនត្រូវបានរក្សាទុកដោយសុវត្ថិភាព</span>
+            </div>
+            <div className="flex gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowProfileEdit(false)}
+                className="px-8 py-4 rounded-2xl border-2 border-red-200 dark:border-red-700 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-600 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300 hover:scale-105 font-semibold shadow-lg hover:shadow-xl"
+              >
+                <div className="flex items-center gap-3">
+                  <X className="h-5 w-5" />
+                  បោះបង់
                 </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <Save className="w-4 h-4" />
-                  <span>រក្សាទុក</span>
+              </Button>
+              <Button
+                type="submit"
+                form="profile-form"
+                className="px-10 py-4 bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 hover:from-blue-600 hover:via-purple-700 hover:to-pink-700 text-white rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 font-bold"
+                disabled={profileLoading}
+              >
+                <div className="flex items-center gap-3">
+                  {profileLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      កំពុងរក្សាទុក...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-5 w-5" />
+                      កែប្រែ
+                    </>
+                  )}
                 </div>
-              )}
-            </Button>
-          </DialogFooter>
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

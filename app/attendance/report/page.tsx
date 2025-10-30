@@ -26,6 +26,7 @@ import {
   UserCheck
 } from "lucide-react"
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { getCurrentUser, User as AuthUser } from "@/lib/auth-service"
 
 // Types
 interface SchoolYear {
@@ -38,6 +39,9 @@ interface Course {
   courseName: string
   grade: string
   section: string
+  teacherId1: number | null
+  teacherId2: number | null
+  teacherId3: number | null
   schoolYear: {
     schoolYearId: number
     schoolYearCode: string
@@ -89,7 +93,7 @@ const REPORT_TYPES: ReportTypeConfig[] = [
 
 export default function AbsenceReportPage() {
   return (
-    <RoleGuard allowedRoles={['admin']}>
+    <RoleGuard allowedRoles={['admin', 'teacher']}>
       <div className="container mx-auto p-6 space-y-6">
         <AbsenceReportContent />
       </div>
@@ -111,6 +115,7 @@ function AbsenceReportContent() {
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
   const [attendanceDates, setAttendanceDates] = useState<{year: string, month: string, monthName: string}[]>([])
   const [isLoadingData, setIsLoadingData] = useState(true)
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   
   // Form State
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
@@ -209,11 +214,30 @@ function AbsenceReportContent() {
     }
   }, [])
 
-  // Filter courses by academic year
+  // Filter courses by academic year and teacher role
   const filterCoursesByAcademicYear = useCallback((academicYearCode: string) => {
-    const filtered = courses.filter(course => 
+    let filtered = courses.filter(course => 
       course.schoolYear.schoolYearCode === academicYearCode
     )
+    
+    // If user is a teacher, only show courses where they are assigned
+    if (currentUser && currentUser.role === 'teacher') {
+      const teacherId = currentUser.id
+      filtered = filtered.filter(course => 
+        course.teacherId1 === teacherId || 
+        course.teacherId2 === teacherId || 
+        course.teacherId3 === teacherId
+      )
+      
+      console.log('👨‍🏫 Teacher filter applied:', {
+        teacherId,
+        teacherName: `${currentUser.lastname}${currentUser.firstname}`,
+        totalCourses: courses.length,
+        filteredByYear: courses.filter(c => c.schoolYear.schoolYearCode === academicYearCode).length,
+        filteredByTeacher: filtered.length
+      })
+    }
+    
     // Sort courses numerically by grade
     const sorted = filtered.sort((a, b) => {
       const gradeA = parseInt(a.grade)
@@ -221,7 +245,7 @@ function AbsenceReportContent() {
       return gradeA - gradeB
     })
     setFilteredCourses(sorted)
-  }, [courses])
+  }, [courses, currentUser])
 
   // Debug logging
   useEffect(() => {
@@ -371,6 +395,15 @@ function AbsenceReportContent() {
     const fetchAllData = async () => {
       setIsLoadingData(true)
       try {
+        // Load current user
+        const user = getCurrentUser()
+        setCurrentUser(user)
+        console.log('👤 Current user loaded:', { 
+          username: user?.username, 
+          role: user?.role, 
+          id: user?.id
+        })
+        
         await Promise.all([
           fetchSchoolYears(),
           fetchCourses(),
@@ -416,7 +449,8 @@ function AbsenceReportContent() {
   }, [validationErrors])
 
   return (
-    <div>
+    <div className="min-h-screen animate-fade-in">
+      <div className="animate-fade-in">
       {/* Report Types Grid - Modern Card Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {REPORT_TYPES.map((type) => (
@@ -499,17 +533,20 @@ function AbsenceReportContent() {
 
       {/* Report Modal */}
       {showReportModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm animate-in fade-in duration-300">
-          <Card className="w-full max-w-lg shadow-2xl border-0 bg-gradient-to-br from-background to-muted/20">
-            <CardHeader>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-md animate-in fade-in duration-300">
+          <Card className="w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-primary/20 bg-gradient-to-br from-background via-background to-primary/5 animate-in zoom-in-95 duration-300">
+            <CardHeader className="space-y-1 pb-2 flex-shrink-0">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1 rounded-lg bg-primary/10">
-                    <UserCheck className="h-3 w-3 text-primary" />
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+                    <UserCheck className="h-6 w-6 text-white" />
                   </div>
-                  <CardTitle className="text-2xl font-bold tracking-wide text-center text-primary">
+                  <div>
+                    <CardTitle className="p-2 text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
                       បង្កើតរបាយការណ៍អវត្តមាន
                     </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-0.5">ជ្រើសរើសប្រភេទនិងព័ត៌មានរបាយការណ៍</p>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
@@ -518,67 +555,108 @@ function AbsenceReportContent() {
                     setShowReportModal(false)
                     setValidationErrors([])
                   }}
-                  className="h-5 w-5 p-0 hover:bg-muted hover:text-foreground text-muted-foreground transition-colors duration-200"
+                  className="h-8 w-8 p-0 rounded-full hover:bg-red-100 dark:hover:bg-red-950 hover:text-red-600 dark:hover:text-red-400 text-muted-foreground transition-all duration-200 hover:scale-110"
                   aria-label="បិទ"
                 >
-                  <X className="h-2.5 w-2.5" />
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-3">
-              <form onSubmit={generateReport} className="space-y-3">
+            {/* Fixed Tabs in Header */}
+            <div className="px-6 mt-1 pt-2 pl-2 pr-2">
+              <Tabs value={reportType} onValueChange={setReportType} className="w-full">
+                <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-muted/60 via-muted/50 to-muted/60 p-1.5 rounded-xl h-12 shadow-sm border border-border/50">
+                  <TabsTrigger 
+                    value="daily" 
+                    className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg transition-all duration-300 text-sm font-semibold hover:bg-muted/80 data-[state=active]:scale-[1.02]"
+                  >
+                    <Calendar className="mr-1.5 h-4 w-4" />
+                    ប្រចាំថ្ងៃ
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="monthly"
+                    className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg transition-all duration-300 text-sm font-semibold hover:bg-muted/80 data-[state=active]:scale-[1.02]"
+                  >
+                    <BarChart3 className="mr-1.5 h-4 w-4" />
+                    ប្រចាំខែ
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="semester"
+                    className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg transition-all duration-300 text-sm font-semibold hover:bg-muted/80 data-[state=active]:scale-[1.02]"
+                  >
+                    <GraduationCap className="mr-1.5 h-4 w-4" />
+                    ប្រចាំឆមាស
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="yearly"
+                    className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg transition-all duration-300 text-sm font-semibold hover:bg-muted/80 data-[state=active]:scale-[1.02]"
+                  >
+                    <TrendingUp className="mr-1.5 h-4 w-4" />
+                    ប្រចាំឆ្នាំ
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            <CardContent className="p-2 overflow-y-auto flex-1">
+              <form id="attendanceReportForm" onSubmit={generateReport} className="flex flex-col h-full">
+                <div className="space-y-3 flex-1">
+                {/* Validation Errors Display */}
+                {validationErrors.length > 0 && (
+                  <div className="bg-gradient-to-r from-red-50 via-red-50/80 to-red-50 dark:from-red-950/30 dark:via-red-950/20 dark:to-red-950/30 border-l-4 border-red-500 rounded-lg p-4 animate-in slide-in-from-top duration-300">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">សូមពិនិត្យព័ត៌មានខាងក្រោម៖</h3>
+                        <ul className="list-disc list-inside space-y-1">
+                          {validationErrors.map((error, index) => (
+                            <li key={index} className="text-sm text-red-700 dark:text-red-400">
+                              {error}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setValidationErrors([])}
+                        className="h-6 w-6 p-0 rounded-full hover:bg-red-200 dark:hover:bg-red-900 text-red-600 dark:text-red-400"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Report Type Selection */}
                 <div className="space-y-4">
                   
                   {isLoadingData && (
-                    <div className="flex items-center justify-center space-x-2 py-4 text-base text-muted-foreground">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      <span>កំពុងផ្ទុកទិន្នន័យ...</span>
+                    <div className="flex items-center justify-center space-x-2 py-6 text-base text-muted-foreground">
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      <span className="font-medium">កំពុងផ្ទុកទិន្នន័យ...</span>
                     </div>
                   )}
                   
                   <Tabs value={reportType} onValueChange={setReportType} className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-lg h-10">
-                      <TabsTrigger 
-                        value="daily" 
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
-                      >
-                        <Calendar className="mr-1 h-4 w-4 text-primary" />
-                        ប្រចាំថ្ងៃ
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="monthly"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
-                      >
-                        <BarChart3 className="mr-1 h-4 w-4 text-primary" />
-                        ប្រចាំខែ
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="semester"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
-                      >
-                        <GraduationCap className="mr-1 h-4 w-4 text-primary" />
-                        ប្រចាំឆមាស
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="yearly"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-200 text-base font-semibold"
-                      >
-                        <TrendingUp className="mr-1 h-4 w-4 text-primary" />
-                        ប្រចាំឆ្នាំ
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <div className="mt-6">
+                    <div className="mt-2">
                       {/* Daily Report Form */}
-                      <TabsContent value="daily" className="space-y-4 animate-in fade-in-50 duration-200">
-                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="startDate" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('startDate') ? 'text-red-500' : 'text-primary'}`}>
-                                <Calendar className="h-4 w-4" />
+                      <TabsContent value="daily" className="space-y-3 animate-in fade-in-50 duration-200">
+                        <div className="bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-indigo-50/50 dark:from-blue-950/20 dark:via-purple-950/10 dark:to-indigo-950/20 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-800/30 shadow-sm transition-all duration-300 hover:shadow-md">
+                          <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-blue-200/50 dark:border-blue-800/30">
+                            <div className="p-1.5 rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
+                              <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300">ជ្រើសរើសកាលបរិច្ឆេទ</h3>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2.5">
+                              <Label htmlFor="startDate" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('startDate') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <Calendar className="h-3.5 w-3.5" />
                                 <span>ថ្ងៃចាប់ផ្តើម</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                   id="startDate"
@@ -588,19 +666,19 @@ function AbsenceReportContent() {
                                   setStartDate(e.target.value)
                                   clearValidationErrors()
                                 }}
-                                className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('startDate') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}
                                   required
                                 />
                               </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="endDate" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('endDate') ? 'text-red-500' : 'text-primary'}`}>
-                                <Calendar className="h-4 w-4" />
+                            <div className="space-y-2.5">
+                              <Label htmlFor="endDate" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('endDate') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <Calendar className="h-3.5 w-3.5" />
                                 <span>ថ្ងៃបញ្ចប់</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                   id="endDate"
@@ -610,10 +688,10 @@ function AbsenceReportContent() {
                                   setEndDate(e.target.value)
                                   clearValidationErrors()
                                 }}
-                                className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('endDate') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}
                                   required
                                 />
@@ -623,23 +701,29 @@ function AbsenceReportContent() {
                       </TabsContent>
 
                       {/* Monthly Report Form */}
-                      <TabsContent value="monthly" className="space-y-4 animate-in fade-in-50 duration-200">
-                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="academicYear" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
-                                <GraduationCap className="h-4 w-4" />
+                      <TabsContent value="monthly" className="space-y-3 animate-in fade-in-50 duration-200">
+                        <div className="bg-gradient-to-br from-green-50/50 via-emerald-50/30 to-teal-50/50 dark:from-green-950/20 dark:via-emerald-950/10 dark:to-teal-950/20 rounded-2xl p-6 border border-green-200/50 dark:border-green-800/30 shadow-sm transition-all duration-300 hover:shadow-md">
+                          <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-green-200/50 dark:border-green-800/30">
+                            <div className="p-1.5 rounded-lg bg-green-500/10 dark:bg-green-500/20">
+                              <BarChart3 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            </div>
+                            <h3 className="text-sm font-semibold text-green-900 dark:text-green-300">ព័ត៌មានរបាយការណ៍ប្រចាំខែ</h3>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2.5">
+                              <Label htmlFor="academicYear" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('academicYear') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <GraduationCap className="h-3.5 w-3.5" />
                                 <span>ឆ្នាំសិក្សា</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={academicYear} onValueChange={(value) => {
                                 setAcademicYear(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('academicYear') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
                                   <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                                 </SelectTrigger>
@@ -652,23 +736,23 @@ function AbsenceReportContent() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="year" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('year') ? 'text-red-500' : 'text-primary'}`}>
-                                <Calendar className="h-4 w-4" />
+                            <div className="space-y-2.5">
+                              <Label htmlFor="year" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('year') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <Calendar className="h-3.5 w-3.5" />
                                 <span>ឆ្នាំ</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={year} onValueChange={(value) => {
                                 setYear(value)
                                 setMonth("") // Reset month when year changes
                                 clearValidationErrors()
-                              }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                              }} disabled={!academicYear}>
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('year') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
-                                  <SelectValue placeholder="ជ្រើសរើសឆ្នាំ" />
+                                  <SelectValue placeholder={academicYear ? "ជ្រើសរើសឆ្នាំ" : "សូមជ្រើសរើសឆ្នាំសិក្សាមុន"} />
                                   </SelectTrigger>
                                 <SelectContent>
                                   {attendanceDates.length > 0 ? (
@@ -687,22 +771,22 @@ function AbsenceReportContent() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="month" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('month') ? 'text-red-500' : 'text-primary'}`}>
-                                <CalendarDays className="h-4 w-4" />
+                            <div className="space-y-2.5">
+                              <Label htmlFor="month" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('month') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <CalendarDays className="h-3.5 w-3.5" />
                                 <span>ខែ</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={month} onValueChange={(value) => {
                                 setMonth(value)
                                 clearValidationErrors()
-                              }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                              }} disabled={!year}>
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('month') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
-                                  <SelectValue placeholder="ជ្រើសរើសខែ" />
+                                  <SelectValue placeholder={year ? "ជ្រើសរើសខែ" : "សូមជ្រើសរើសឆ្នាំមុន"} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {attendanceDates.length > 0 && year ? (
@@ -722,22 +806,22 @@ function AbsenceReportContent() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="class" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
-                                <Users className="h-4 w-4" />
+                            <div className="space-y-2.5">
+                              <Label htmlFor="class" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('class') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <Users className="h-3.5 w-3.5" />
                                 <span>ថ្នាក់</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={classFilter} onValueChange={(value) => {
                                 setClassFilter(value)
                                 clearValidationErrors()
-                              }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                              }} disabled={!month}>
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('class') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
-                                  <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                                  <SelectValue placeholder={month ? "ជ្រើសរើសថ្នាក់" : "សូមជ្រើសរើសខែមុន"} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {filteredCourses.map((course) => (
@@ -753,23 +837,29 @@ function AbsenceReportContent() {
                       </TabsContent>
 
                       {/* Semester Report Form */}
-                      <TabsContent value="semester" className="space-y-4 animate-in fade-in-50 duration-200">
-                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="academicYearSemester" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
-                                <GraduationCap className="h-4 w-4" />
+                      <TabsContent value="semester" className="space-y-3 animate-in fade-in-50 duration-200">
+                        <div className="bg-gradient-to-br from-orange-50/50 via-amber-50/30 to-yellow-50/50 dark:from-orange-950/20 dark:via-amber-950/10 dark:to-yellow-950/20 rounded-2xl p-6 border border-orange-200/50 dark:border-orange-800/30 shadow-sm transition-all duration-300 hover:shadow-md">
+                          <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-orange-200/50 dark:border-orange-800/30">
+                            <div className="p-1.5 rounded-lg bg-orange-500/10 dark:bg-orange-500/20">
+                              <GraduationCap className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                            </div>
+                            <h3 className="text-sm font-semibold text-orange-900 dark:text-orange-300">ព័ត៌មានរបាយការណ៍ប្រចាំឆមាស</h3>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2.5">
+                              <Label htmlFor="academicYearSemester" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('academicYear') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <GraduationCap className="h-3.5 w-3.5" />
                                 <span>ឆ្នាំសិក្សា</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={academicYear} onValueChange={(value) => {
                                 setAcademicYear(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('academicYear') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
                                   <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                                 </SelectTrigger>
@@ -782,22 +872,22 @@ function AbsenceReportContent() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="semester" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('semester') ? 'text-red-500' : 'text-primary'}`}>
-                                <FileText className="h-4 w-4" />
+                            <div className="space-y-2.5">
+                              <Label htmlFor="semester" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('semester') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <FileText className="h-3.5 w-3.5" />
                                 <span>ឆមាស</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={semester} onValueChange={(value) => {
                                 setSemester(value)
                                 clearValidationErrors()
-                              }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                              }} disabled={!academicYear}>
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('semester') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
-                                  <SelectValue placeholder="ជ្រើសរើសឆមាស" />
+                                  <SelectValue placeholder={academicYear ? "ជ្រើសរើសឆមាស" : "សូមជ្រើសរើសឆ្នាំសិក្សាមុន"} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="1">ឆមាសទី ១</SelectItem>
@@ -805,22 +895,22 @@ function AbsenceReportContent() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="classSemester" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
-                                <Users className="h-4 w-4" />
+                            <div className="space-y-2.5 md:col-span-2">
+                              <Label htmlFor="classSemester" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('class') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <Users className="h-3.5 w-3.5" />
                                 <span>ថ្នាក់</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={classFilter} onValueChange={(value) => {
                                 setClassFilter(value)
                                 clearValidationErrors()
-                              }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                              }} disabled={!semester}>
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('class') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
-                                  <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                                  <SelectValue placeholder={semester ? "ជ្រើសរើសថ្នាក់" : "សូមជ្រើសរើសឆមាសមុន"} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {filteredCourses.map((course) => (
@@ -836,23 +926,29 @@ function AbsenceReportContent() {
                       </TabsContent>
 
                       {/* Yearly Report Form */}
-                      <TabsContent value="yearly" className="space-y-4 animate-in fade-in-50 duration-200">
-                        <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="academicYearYearly" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('academicYear') ? 'text-red-500' : 'text-primary'}`}>
-                                <GraduationCap className="h-4 w-4" />
+                      <TabsContent value="yearly" className="space-y-3 animate-in fade-in-50 duration-200">
+                        <div className="bg-gradient-to-br from-purple-50/50 via-violet-50/30 to-indigo-50/50 dark:from-purple-950/20 dark:via-violet-950/10 dark:to-indigo-950/20 rounded-2xl p-6 border border-purple-200/50 dark:border-purple-800/30 shadow-sm transition-all duration-300 hover:shadow-md">
+                          <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-purple-200/50 dark:border-purple-800/30">
+                            <div className="p-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20">
+                              <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <h3 className="text-sm font-semibold text-purple-900 dark:text-purple-300">ព័ត៌មានរបាយការណ៍ប្រចាំឆ្នាំ</h3>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2.5">
+                              <Label htmlFor="academicYearYearly" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('academicYear') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <GraduationCap className="h-3.5 w-3.5" />
                                 <span>ឆ្នាំសិក្សា</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={academicYear} onValueChange={(value) => {
                                 setAcademicYear(value)
                                 clearValidationErrors()
                               }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('academicYear') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
                                   <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
                                 </SelectTrigger>
@@ -865,22 +961,22 @@ function AbsenceReportContent() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="classYearly" className={`flex items-center space-x-2 text-base font-semibold ${hasFieldError('class') ? 'text-red-500' : 'text-primary'}`}>
-                                <Users className="h-4 w-4" />
+                            <div className="space-y-2.5">
+                              <Label htmlFor="classYearly" className={`flex items-center space-x-2 text-sm font-bold ${hasFieldError('class') ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+                                <Users className="h-3.5 w-3.5" />
                                 <span>ថ្នាក់</span>
-                                <span className="text-red-500 font-bold">*</span>
+                                <span className="text-red-500">*</span>
                               </Label>
                               <Select value={classFilter} onValueChange={(value) => {
                                 setClassFilter(value)
                                 clearValidationErrors()
-                              }}>
-                                <SelectTrigger className={`h-10 text-base focus:ring-primary/20 transition-all duration-200 hover:scale-[1.02] ${
+                              }} disabled={!academicYear}>
+                                <SelectTrigger className={`h-10 text-sm font-medium focus:ring-2 focus:ring-offset-1 transition-all duration-200 ${
                                   hasFieldError('class') 
-                                    ? 'border-red-500 focus:border-red-500 bg-red-50/50 dark:bg-red-950/20' 
-                                    : 'border-border/50 focus:border-primary hover:border-primary/60 bg-background/50'
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-950/20' 
+                                    : 'border-border focus:border-primary focus:ring-primary/20 hover:border-primary/60 bg-background shadow-sm'
                                 }`}>
-                                  <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                                  <SelectValue placeholder={academicYear ? "ជ្រើសរើសថ្នាក់" : "សូមជ្រើសរើសឆ្នាំសិក្សាមុន"} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {filteredCourses.map((course) => (
@@ -900,74 +996,78 @@ function AbsenceReportContent() {
 
                 {/* Export Options */}
                 <div className="space-y-4">
-                  <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/20 rounded-xl p-6 border border-border/60 transition-all duration-300">
-                <div className="space-y-2">
-                      <Label htmlFor="format" className="flex items-center space-x-2 text-base font-semibold text-primary">
-                        <FileType className="h-4 w-4" />
-                        <span>ទម្រង់ឯកសារ</span>
-                        <span className="text-red-500 font-bold">*</span>
+                  <div className="bg-gradient-to-br from-slate-50/50 via-gray-50/30 to-zinc-50/50 dark:from-slate-950/20 dark:via-gray-950/10 dark:to-zinc-950/20 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800/30 shadow-sm transition-all duration-300">
+                    <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-slate-200/50 dark:border-slate-800/30">
+                      <div className="p-1.5 rounded-lg bg-slate-500/10 dark:bg-slate-500/20">
+                        <FileType className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      </div>
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-300">ទម្រង់ឯកសារ</h3>
+                    </div>
+                    <div className="space-y-2.5">
+                      <Label htmlFor="format" className="flex items-center space-x-2 text-sm font-bold text-foreground">
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>ជ្រើសរើសទម្រង់</span>
+                        <span className="text-red-500">*</span>
                     </Label>
                     <Select value={format} onValueChange={setFormat}>
-                      <SelectTrigger className="h-10 text-base border-border/50 focus:border-primary focus:ring-primary/20 hover:border-primary/60 hover:scale-[1.02] transition-all duration-200 bg-background/50">
+                      <SelectTrigger className="h-10 text-sm font-medium border-border focus:border-primary focus:ring-2 focus:ring-offset-1 focus:ring-primary/20 hover:border-primary/60 transition-all duration-200 bg-background shadow-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="pdf">
-                          <div className="flex items-center space-x-2">
-                            <FileText className="h-3 w-3 text-primary" />
-                            <span>PDF</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="excel">
-                          <div className="flex items-center space-x-2">
-                            <BarChart3 className="h-3 w-3 text-primary" />
-                            <span>Excel</span>
+                          <div className="flex items-center space-x-2.5">
+                            <FileText className="h-4 w-4 text-red-600" />
+                            <span className="font-medium">PDF ឯកសារ</span>
                           </div>
                         </SelectItem>
                       </SelectContent>
                     </Select>
                     </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-3 pt-4 border-t border-border/50 bg-gradient-to-r from-transparent via-muted/20 to-transparent -mx-6 px-6">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setShowReportModal(false)
-                      setValidationErrors([])
-                    }}
-                    className="h-10 px-6 text-base font-semibold hover:bg-muted hover:text-foreground text-muted-foreground border-border/50 hover:border-border hover:scale-[1.02] transition-all duration-200"
-                  >
-                    បោះបង់
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={isGenerating}
-                    className="h-10 px-6 text-base font-bold bg-primary hover:bg-primary/90 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        <span className="animate-pulse">កំពុងបង្កើត...</span>
-                      </>
-                    ) : (
-                      <>
-                        <UserCheck className="mr-2 h-4 w-4" />
-                        បង្កើតរបាយការណ៍
-                      </>
-                    )}
-                  </Button>
-                </div>
               </form>
             </CardContent>
+            {/* Fixed Footer Buttons */}
+            <div className="border-t border-border px-6 py-4 bg-background/95 supports-[backdrop-filter]:bg-background/60 backdrop-blur flex justify-end space-x-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  setShowReportModal(false)
+                  setValidationErrors([])
+                }}
+                className="h-11 px-8 text-base font-semibold rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-800 text-muted-foreground border-border transition-all duration-200 hover:scale-105 shadow-sm"
+              >
+                <X className="mr-2 h-4 w-4" />
+                បោះបង់
+              </Button>
+              <Button
+                type="submit"
+                form="attendanceReportForm"
+                size="lg"
+                disabled={isGenerating}
+                className="h-11 px-8 text-base font-bold rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-lg"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span className="animate-pulse">កំពុងបង្កើត...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-5 w-5" />
+                    បង្កើតរបាយការណ៍
+                  </>
+                )}
+              </Button>
+            </div>
           </Card>
         </div>
       )}
+      </div>
     </div>
   )
 }

@@ -1,3 +1,29 @@
+/**
+ * Monthly Grade Report Generator with Attendance Integration
+ * 
+ * This module generates monthly grade reports for students with automatic attendance penalty calculation.
+ * 
+ * ATTENDANCE PENALTY SYSTEM:
+ * - Base Grade Weight: 90%
+ * - Attendance Weight: 10%
+ * - Penalty Calculation: finalGrade = originalGrade × (1 - min(totalAbsences / 4, 1) × 0.1)
+ * 
+ * PENALTY SCALE:
+ * - 0 absences = 100% of grade (no penalty)
+ * - 1 absence  = 97.5% of grade (2.5% penalty)
+ * - 2 absences = 95% of grade (5% penalty)
+ * - 3 absences = 92.5% of grade (7.5% penalty)
+ * - 4+ absences = 90% of grade (10% penalty - maximum)
+ * 
+ * EXAMPLE:
+ * - Subject: គណិតវិទ្យា (Math)
+ * - Original Grade: 10
+ * - Total Absences (សរុប): 4 ដង
+ * - Final Grade: 10 × 0.9 = 9
+ * 
+ * NOTE: totalAbsences uses the weighted formula: (totalExcused × 0.5) + totalAbsent
+ */
+
 import puppeteer from 'puppeteer'
 import { generateHTMLFooter, formatDateKhmer, getGradeLabel, getLogoBase64, getStudentRegistrationCSS } from '../core/utils'
 import { ReportOptions } from '../core/types'
@@ -35,6 +61,7 @@ export interface MonthlyGradeReportData {
     averageGrade: number
     rank: number
     status: string
+    totalAbsences?: number  // Total absences for attendance penalty calculation
   }[]
   summary: {
     totalStudents: number
@@ -58,6 +85,19 @@ export interface MonthlyGradeReportData {
 // Helper Functions
 const round = (num: number, decimals: number = 1): string => {
   return Number(num.toFixed(decimals)).toFixed(decimals)
+}
+
+// Calculate attendance penalty and adjust grade
+// Formula: finalGrade = originalGrade × (1 - min(totalAbsences / 4, 1) × 0.1)
+// - 0 absences = 100% of grade (no penalty)
+// - 1 absence = 97.5% of grade (2.5% penalty)
+// - 2 absences = 95% of grade (5% penalty)
+// - 3 absences = 92.5% of grade (7.5% penalty)
+// - 4+ absences = 90% of grade (10% penalty - maximum)
+const applyAttendancePenalty = (originalGrade: number, totalAbsences: number = 0): number => {
+  const penaltyRate = Math.min(totalAbsences / 4, 1) * 0.1  // Max 10% penalty
+  const adjustedGrade = originalGrade * (1 - penaltyRate)
+  return adjustedGrade
 }
 
 const getGradeStatus = (average: number, gradeLevel: string): string => {
@@ -103,8 +143,9 @@ const isFemaleStudent = (gender: string): boolean => {
 
 const getStudentGrade = (student: Student, subjectName: string): string => {
   const subject = student.subjects.find(s => s.subjectName === subjectName)
-  const grade = subject?.grade || 0
-  return round(grade)
+  const originalGrade = subject?.grade || 0
+  const adjustedGrade = applyAttendancePenalty(originalGrade, student.totalAbsences || 0)
+  return round(adjustedGrade)
 }
 
 const calculateValidGrades = (students: Student[], gradeExtractor: (student: Student) => number): number[] => {
@@ -115,7 +156,8 @@ const calculateValidGrades = (students: Student[], gradeExtractor: (student: Stu
 
 const getStudentGradeNumber = (student: Student, subjectName: string): number => {
   const subject = student.subjects.find(s => s.subjectName === subjectName)
-  return subject?.grade || 0
+  const originalGrade = subject?.grade || 0
+  return applyAttendancePenalty(originalGrade, student.totalAbsences || 0)
 }
 
 const calculateAverage = (grades: number[]): string => {
@@ -141,14 +183,41 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
   const allSubjects = data.students.flatMap(student => student.subjects)
   const uniqueSubjects = Array.from(new Set(allSubjects.map(subject => subject.subjectName)))
   
-  // Sort students by total grade (highest first) for ranking
-  const sortedStudents = [...data.students].sort((a, b) => b.totalGrade - a.totalGrade)
-  const studentsWithRank = sortedStudents.map((student, index) => ({
+  // Calculate adjusted grades for all students first (for proper ranking)
+  const studentsWithAdjusted = data.students.map(student => ({
     ...student,
-    averageGrade: student.averageGrade,
-    rank: index + 1,
-    status: getGradeStatus(student.averageGrade, data.class || '9')
+    adjustedTotalGrade: applyAttendancePenalty(student.totalGrade, student.totalAbsences || 0),
+    adjustedAverageGrade: applyAttendancePenalty(student.averageGrade, student.totalAbsences || 0)
   }))
+  
+  // Sort students by adjusted total grade (highest first) for ranking
+  const sortedStudents = [...studentsWithAdjusted].sort((a, b) => b.adjustedTotalGrade - a.adjustedTotalGrade)
+  
+  // Assign ranks with proper tie handling
+  const studentsWithRank: any[] = []
+  let currentRank = 1
+  
+  sortedStudents.forEach((student, index) => {
+    if (index === 0) {
+      currentRank = 1
+    } else {
+      // Check if this student has the same adjusted total grade as the previous one
+      const currentTotal = student.adjustedTotalGrade
+      const previousTotal = sortedStudents[index - 1].adjustedTotalGrade
+      if (Math.abs(currentTotal - previousTotal) < 0.01) {
+        // Same total = same rank (tie), keep currentRank unchanged
+      } else {
+        // Different total = update rank to current position
+        currentRank = index + 1
+      }
+    }
+    
+    studentsWithRank.push({
+      ...student,
+      rank: currentRank,
+      status: getGradeStatus(student.adjustedAverageGrade, data.class || '9')
+    })
+  })
 
   // Helper functions for statistics
   const getFemaleStudents = (): Student[] => {
@@ -335,7 +404,7 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
     }
     
     th:nth-child(2), td:nth-child(2) { /* ឈ្មោះ */
-      width: 110px;
+      width: 117px;
     }
     
     th:nth-child(3), td:nth-child(3) { /* ភេទ */
@@ -344,11 +413,11 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
     
     /* Custom widths for last 4 columns */
     th:last-child, td:last-child { /* ចំណាត់ថ្នាក់ */
-      width: 50px;
+      width: 40px;
     }
     
     th:nth-last-child(2), td:nth-last-child(2) { /* និទ្ទេស */
-      width: 40px;
+      width: 35px;
     }
     
     th:nth-last-child(3), td:nth-last-child(3) { /* មធ្យមភាគ */
@@ -480,6 +549,7 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
     
     .approval-line, .signature-line {
       margin-bottom: 15px;
+      white-space: nowrap;
     }
     
     .approval-line:last-child, .signature-line:last-child {
@@ -561,18 +631,20 @@ export function generateMonthlyGradeReportHTML(data: MonthlyGradeReportData): st
         </tr>
       </thead>
       <tbody>
-        ${studentsWithRank.map((student, index) => `
+        ${studentsWithRank.map((student, index) => {
+          // Use pre-calculated adjusted values
+          return `
           <tr>
             <td class="student-number">${index + 1}</td>
             <td class="student-name">${student.lastName} ${student.firstName}</td>
             <td class="student-gender">${getGenderKhmer(student.gender)}</td>
             ${uniqueSubjects.map(subject => `<td>${getStudentGrade(student, subject)}</td>`).join('')}
-            <td><strong>${round(student.totalGrade, 2)}</strong></td>
-            <td><strong>${round(student.averageGrade, 2)}</strong></td>
+            <td><strong>${round(student.adjustedTotalGrade, 2)}</strong></td>
+            <td><strong>${round(student.adjustedAverageGrade, 2)}</strong></td>
             <td><strong>${student.status}</strong></td>
             <td><strong>${student.rank}</strong></td>
           </tr>
-        `).join('')}
+        `}).join('')}
         <tr class="summary-row">
           <td colspan="3" class="summary-text">សិស្សស្រីសរុប ${getFemaleStudentCount()} នាក់​</td>
           ${uniqueSubjects.map(subject => `<td>${getFemaleAverageForSubject(subject)}</td>`).join('')}

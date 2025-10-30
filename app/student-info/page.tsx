@@ -46,6 +46,7 @@ interface FamilyInfo {
   organizationHelp?: string;
   ownHouse?: boolean;
   religion?: string;
+  povertyCard?: string;
 }
 
 interface Enrollment {
@@ -135,7 +136,9 @@ import {
   MinusCircle,
   Save,
   RotateCcw,
-  Trash2
+  Trash2,
+  Loader2,
+  Upload
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
@@ -143,9 +146,34 @@ import { useToast } from "@/hooks/use-toast";
 // Helpers for displaying grade labels
 const getGradeLabel = (value?: string | null) => {
   if (!value) return "-";
-  const n = Number(value);
-  if (!Number.isFinite(n)) return value;
-  return `ថ្នាក់ទី ${n}`;
+  // Don't convert to number to preserve section letter (e.g., "8A" should stay "8A")
+  return `ថ្នាក់ទី ${value}`;
+};
+
+// Helper to get full class name with section from enrollment
+const getStudentFullClass = (student: Student): string => {
+  // Try to get class from active enrollment (includes section)
+  if (student.enrollments && student.enrollments.length > 0) {
+    const activeEnrollment = student.enrollments.find(e => !e.drop);
+    if (activeEnrollment?.course) {
+      return `${activeEnrollment.course.grade}${activeEnrollment.course.section}`;
+    }
+  }
+  // Fallback to student.class (might not have section)
+  return student.class || "-";
+};
+
+// Helper to get school year from enrollment
+const getStudentSchoolYear = (student: Student): string | undefined => {
+  // Try to get school year from active enrollment
+  if (student.enrollments && student.enrollments.length > 0) {
+    const activeEnrollment = student.enrollments.find(e => !e.drop);
+    if (activeEnrollment?.course?.schoolYear) {
+      return activeEnrollment.course.schoolYear.schoolYearCode;
+    }
+  }
+  // Fallback to student.schoolYear
+  return student.schoolYear;
 };
 
 // Helper for displaying course labels (grade + section)
@@ -159,18 +187,29 @@ const formatDate = (value?: string | Date | null) => {
   if (!value) return '-';
   const d = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return '-';
-  return d.toLocaleDateString('km-KH');
+  
+  // Format as DD/MM/YYYY
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  
+  return `${day}/${month}/${year}`;
 };
 
 const calculateAgeYears = (dob?: string | Date | null): number | null => {
   if (!dob) return null;
   const birth = typeof dob === 'string' ? new Date(dob) : dob;
   if (Number.isNaN(birth.getTime())) return null;
+  
   const today = new Date();
   let years = today.getFullYear() - birth.getFullYear();
   const m = today.getMonth() - birth.getMonth();
   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) years--;
-  return years < 0 ? null : years;
+  
+  // Return null for invalid ages (negative or unrealistic for school)
+  if (years < 0) return null;
+  
+  return years;
 };
 
 // Helper function for displaying status labels
@@ -184,6 +223,245 @@ const getStatusLabel = (status?: string | null) => {
       return 'បោះបង់ការសិក្សា';
     default:
       return status;
+  }
+};
+
+// Helper function for translating relations to Khmer
+const getRelationLabel = (relation?: string | null) => {
+  if (!relation) return '-';
+  
+  const relationLower = relation.toLowerCase().trim();
+  
+  switch (relationLower) {
+    case 'father':
+    case 'dad':
+      return 'ឪពុក';
+    case 'mother':
+    case 'mom':
+      return 'ម្តាយ';
+    case 'grandfather':
+      return 'ជីតា';
+    case 'grandmother':
+      return 'ជីដូន';
+    case 'uncle':
+      return 'មីង';
+    case 'aunt':
+      return 'មីង';
+    case 'brother':
+      return 'បងប្អូនប្រុស';
+    case 'sister':
+      return 'បងប្អូនស្រី';
+    case 'guardian':
+      return 'អាណាព្យាបាល';
+    case 'stepfather':
+      return 'ឪពុកចុង';
+    case 'stepmother':
+      return 'ម្តាយចុង';
+    default:
+      return relation; // Return original if no translation found
+  }
+};
+
+// Helper function for translating living with to Khmer
+const getLivingWithLabel = (livingWith?: string | null) => {
+  if (!livingWith) return '-';
+  
+  const livingLower = livingWith.toLowerCase().trim();
+  
+  switch (livingLower) {
+    case 'parents':
+    case 'both parents':
+      return 'មាតាបិតា';
+    case 'father':
+      return 'ឪពុក';
+    case 'mother':
+      return 'ម្តាយ';
+    case 'grandparents':
+      return 'ជីតា-ជីដូន';
+    case 'grandfather':
+      return 'ជីតា';
+    case 'grandmother':
+      return 'ជីដូន';
+    case 'uncle':
+      return 'មីង';
+    case 'aunt':
+      return 'មីង';
+    case 'siblings':
+      return 'បងប្អូន';
+    case 'relatives':
+      return 'សាច់ញាតិ';
+    case 'guardian':
+      return 'អាណាព្យាបាល';
+    case 'alone':
+      return 'នៅម្នាក់ឯង';
+    default:
+      return livingWith; // Return original if no translation found
+  }
+};
+
+// Helper function for translating living condition to Khmer
+const getLivingConditionLabel = (condition?: string | null) => {
+  if (!condition) return '-';
+  
+  const conditionLower = condition.toLowerCase().trim();
+  
+  switch (conditionLower) {
+    case 'poor':
+    case 'very poor':
+      return 'ក្រីក្រ';
+    case 'medium':
+    case 'average':
+    case 'moderate':
+      return 'មធ្យម';
+    case 'good':
+    case 'well':
+      return 'ល្អ';
+    case 'very good':
+    case 'excellent':
+      return 'ល្អប្រសើរ';
+    case 'rich':
+      return 'មាន';
+    default:
+      return condition; // Return original if no translation found
+  }
+};
+
+// Helper function for translating religion to Khmer
+const getReligionLabel = (religion?: string | null) => {
+  if (!religion) return '-';
+  
+  const religionLower = religion.toLowerCase().trim();
+  
+  switch (religionLower) {
+    case 'buddhism':
+    case 'buddhist':
+      return 'ព្រះពុទ្ធសាសនា';
+    case 'christianity':
+    case 'christian':
+      return 'គ្រិស្តសាសនា';
+    case 'islam':
+    case 'muslim':
+      return 'សាសនាឥស្លាម';
+    case 'hinduism':
+    case 'hindu':
+      return 'សាសនាហិណ្ឌូ';
+    case 'none':
+    case 'no religion':
+      return 'គ្មានសាសនា';
+    case 'other':
+      return 'ផ្សេងៗ';
+    default:
+      return religion; // Return original if no translation found
+  }
+};
+
+// Helper function for translating duration in KPC to Khmer
+const getDurationLabel = (duration?: string | null) => {
+  if (!duration) return '-';
+  
+  const durationLower = duration.toLowerCase().trim();
+  
+  // Handle year/month patterns
+  if (durationLower.includes('year')) {
+    const yearMatch = durationLower.match(/(\d+)\s*year/);
+    if (yearMatch) {
+      return `${yearMatch[1]} ឆ្នាំ`;
+    }
+  }
+  
+  if (durationLower.includes('month')) {
+    const monthMatch = durationLower.match(/(\d+)\s*month/);
+    if (monthMatch) {
+      return `${monthMatch[1]} ខែ`;
+    }
+  }
+  
+  // Common durations
+  switch (durationLower) {
+    case '1 year':
+      return '១ ឆ្នាំ';
+    case '2 years':
+      return '២ ឆ្នាំ';
+    case '3 years':
+      return '៣ ឆ្នាំ';
+    case '4 years':
+      return '៤ ឆ្នាំ';
+    case '5 years':
+      return '៥ ឆ្នាំ';
+    case '6 months':
+      return '៦ ខែ';
+    case 'less than 1 year':
+    case 'less than a year':
+      return 'តិចជាងមួយឆ្នាំ';
+    case 'more than 5 years':
+      return 'លើសពី៥ឆ្នាំ';
+    default:
+      // If it's just a number, add "ឆ្នាំ" (years)
+      if (/^\d+$/.test(duration.trim())) {
+        return `${duration.trim()} ឆ្នាំ`;
+      }
+      return duration; // Return original if no translation found
+  }
+};
+
+// Helper function for translating help frequency to Khmer
+const getFrequencyLabel = (frequency?: string | null) => {
+  if (!frequency) return '-';
+  
+  const frequencyLower = frequency.toLowerCase().trim();
+  
+  // Handle patterns with numbers
+  if (frequencyLower.includes('year')) {
+    const yearMatch = frequencyLower.match(/(\d+)\s*year/);
+    if (yearMatch) {
+      return `${yearMatch[1]} ឆ្នាំ`;
+    }
+  }
+  
+  if (frequencyLower.includes('month')) {
+    const monthMatch = frequencyLower.match(/(\d+)\s*month/);
+    if (monthMatch) {
+      return `${monthMatch[1]} ខែ`;
+    }
+  }
+  
+  if (frequencyLower.includes('week')) {
+    const weekMatch = frequencyLower.match(/(\d+)\s*week/);
+    if (weekMatch) {
+      return `${weekMatch[1]} សប្តាហ៍`;
+    }
+  }
+  
+  // Common frequencies
+  switch (frequencyLower) {
+    case 'year':
+    case 'yearly':
+    case 'per year':
+    case 'annual':
+    case 'annually':
+      return 'ក្នុងមួយឆ្នាំ';
+    case 'month':
+    case 'monthly':
+    case 'per month':
+      return 'ក្នុងមួយខែ';
+    case 'week':
+    case 'weekly':
+    case 'per week':
+      return 'ក្នុងមួយសប្តាហ៍';
+    case 'semester':
+    case 'per semester':
+      return 'ក្នុងមួយឆមាស';
+    case 'term':
+    case 'per term':
+      return 'ក្នុងមួយនិស្សិត';
+    case 'once':
+    case 'one time':
+      return 'មួយដង';
+    case 'daily':
+    case 'per day':
+      return 'ក្នុងមួយថ្ងៃ';
+    default:
+      return frequency; // Return original if no translation found
   }
 };
 
@@ -204,13 +482,25 @@ export default function StudentInfoPage() {
 
 function StudentInfoContent() {
   const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [activeTab, setActiveTab] = useState('basic');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByYearClass, setFilterByYearClass] = useState(true);
-  const [selectedYear, setSelectedYear] = useState('');
-  const [selectedClass, setSelectedClass] = useState('');
+  const [selectedYear, setSelectedYear] = useState(() => {
+    // Load from localStorage on initial render
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('studentInfo_selectedYear') || '';
+    }
+    return '';
+  });
+  const [selectedClass, setSelectedClass] = useState(() => {
+    // Load from localStorage on initial render
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('studentInfo_selectedClass') || '';
+    }
+    return '';
+  });
   
   // Drop Study Dialog State
   const [showDropDialog, setShowDropDialog] = useState(false);
@@ -228,6 +518,11 @@ function StudentInfoContent() {
   // Toast hook
   const { toast } = useToast();
 
+  // Photo upload states
+  const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showDeletePhotoDialog, setShowDeletePhotoDialog] = useState(false);
+
   // Remove Drop Study Dialog State
   const [showRemoveDropDialog, setShowRemoveDropDialog] = useState(false);
   const [selectedDropEnrollment, setSelectedDropEnrollment] = useState<Enrollment | null>(null);
@@ -236,6 +531,20 @@ function StudentInfoContent() {
   useEffect(() => {
     setSelectedClass('');
   }, [selectedYear]);
+
+  // Save filter state to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('studentInfo_selectedYear', selectedYear);
+    }
+  }, [selectedYear]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('studentInfo_selectedClass', selectedClass);
+    }
+  }, [selectedClass]);
+
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -263,7 +572,8 @@ function StudentInfoContent() {
               name: `${s.lastName} ${s.firstName}`,
               class: s.class,
               section: s.section,
-              schoolYear: s.schoolYear
+              schoolYear: s.schoolYear,
+              photo: s.photo // Add photo to debug log
             }))
           });
           setStudents(list);
@@ -357,17 +667,60 @@ function StudentInfoContent() {
       );
     }
     
-    // Sort results by name for better UX
+    // Sort results by Khmer alphabetical order
     result.sort((a, b) => {
-      const nameA = `${a.lastName || ''} ${a.firstName || ''}`.toLowerCase();
-      const nameB = `${b.lastName || ''} ${b.firstName || ''}`.toLowerCase();
-      return nameA.localeCompare(nameB);
+      // Khmer alphabet order: consonants + independent vowels
+      const khmerOrder = 'កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអអាឥឦឧឨឩឪឫឬឭឮឯឰឱឲឳ';
+      
+      const getKhmerSortValue = (char: string): number => {
+        const index = khmerOrder.indexOf(char);
+        return index === -1 ? 999 : index;
+      };
+      
+      const getSortKey = (text: string): number[] => {
+        return Array.from(text).map(char => getKhmerSortValue(char));
+      };
+      
+      // Compare last names first
+      const aLastKey = getSortKey(a.lastName || '');
+      const bLastKey = getSortKey(b.lastName || '');
+      
+      for (let i = 0; i < Math.max(aLastKey.length, bLastKey.length); i++) {
+        const aVal = aLastKey[i] || 999;
+        const bVal = bLastKey[i] || 999;
+        if (aVal !== bVal) return aVal - bVal;
+      }
+      
+      // If last names are equal, compare first names
+      const aFirstKey = getSortKey(a.firstName || '');
+      const bFirstKey = getSortKey(b.firstName || '');
+      
+      for (let i = 0; i < Math.max(aFirstKey.length, bFirstKey.length); i++) {
+        const aVal = aFirstKey[i] || 999;
+        const bVal = bFirstKey[i] || 999;
+        if (aVal !== bVal) return aVal - bVal;
+      }
+      
+      return 0;
     });
     
     setFilteredStudents(result);
   }, [students, searchTerm, selectedYear, selectedClass, courses]);
 
-
+  // Sync photo preview when selected student changes
+  useEffect(() => {
+    console.log('🖼️ Syncing photo preview for student:', {
+      studentId: selectedStudent?.studentId,
+      photo: selectedStudent?.photo,
+      name: selectedStudent ? `${selectedStudent.lastName} ${selectedStudent.firstName}` : 'None'
+    });
+    
+    if (selectedStudent?.photo) {
+      setPhotoPreview(selectedStudent.photo);
+    } else {
+      setPhotoPreview('');
+    }
+  }, [selectedStudent]);
 
   // Fetch filter data from database
   useEffect(() => {
@@ -441,6 +794,12 @@ function StudentInfoContent() {
   }, [showDropdown]);
 
   const handleStudentSelect = (student: Student) => {
+    console.log('👤 Student selected:', {
+      studentId: student.studentId,
+      name: `${student.lastName} ${student.firstName}`,
+      photo: student.photo,
+      hasPhoto: !!student.photo
+    });
     setSelectedStudent(student);
     setActiveTab('basic');
   };
@@ -705,10 +1064,270 @@ function StudentInfoContent() {
     }
   };
 
+  // Handle photo upload
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "កំហុស",
+        description: "សូមជ្រើសរើសរូបភាពតែប៉ុណ្ណោះ (JPG, PNG, GIF)",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "កំហុស",
+        description: "រូបភាពធំពេក។ ទំហំអតិបរមា 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to server
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const { filename } = await response.json();
+      const photoPath = `/uploads/${filename}`;
+      
+      // Update student photo in database
+      if (selectedStudent) {
+        const updateResponse = await fetch(`/api/students/${selectedStudent.studentId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            student: {
+              lastName: selectedStudent.lastName,
+              firstName: selectedStudent.firstName,
+              gender: selectedStudent.gender,
+              dob: selectedStudent.dob,
+              class: selectedStudent.class,
+              schoolYear: selectedStudent.schoolYear,
+              photo: photoPath,
+              studentHouseNumber: selectedStudent.studentHouseNumber,
+              studentVillage: selectedStudent.studentVillage,
+              studentDistrict: selectedStudent.studentDistrict,
+              studentProvince: selectedStudent.studentProvince,
+              studentBirthDistrict: selectedStudent.studentBirthDistrict,
+              phone: selectedStudent.phone,
+              religion: selectedStudent.religion,
+              health: selectedStudent.health,
+              emergencyContact: selectedStudent.emergencyContact,
+              vaccinated: selectedStudent.vaccinated,
+              previousSchool: selectedStudent.previousSchool,
+              transferReason: selectedStudent.transferReason,
+              needsClothes: selectedStudent.needsClothes,
+              needsMaterials: selectedStudent.needsMaterials,
+              needsTransport: selectedStudent.needsTransport,
+              registerToStudy: selectedStudent.registerToStudy,
+              registrationDate: selectedStudent.registrationDate,
+              status: selectedStudent.status
+            }
+          })
+        });
+
+        if (updateResponse.ok) {
+          console.log('✅ Photo uploaded successfully:', photoPath);
+          
+          // Update local state
+          const updatedStudent = {
+            ...selectedStudent,
+            photo: photoPath
+          };
+          setSelectedStudent(updatedStudent);
+          
+          // Refresh students list to show photo in dropdown
+          const studentsRes = await fetch('/api/students');
+          if (studentsRes.ok) {
+            const studentsData = await studentsRes.json();
+            console.log('📸 Refreshed students after photo upload:', 
+              studentsData.find((s: Student) => s.studentId === selectedStudent.studentId)?.photo
+            );
+            setStudents(Array.isArray(studentsData) ? studentsData : []);
+          }
+          
+          toast({
+            title: "ជោគជ័យ",
+            description: "រូបភាពត្រូវបានផ្ទុកឡើងដោយជោគជ័យ"
+          });
+          
+          // Reset file input to allow uploading another photo
+          const fileInput = document.getElementById('student-photo-upload') as HTMLInputElement;
+          if (fileInput) {
+            fileInput.value = '';
+          }
+        } else {
+          const errorText = await updateResponse.text();
+          console.error('❌ Photo upload failed:', {
+            status: updateResponse.status,
+            statusText: updateResponse.statusText,
+            error: errorText
+          });
+          
+          toast({
+            title: "កំហុស",
+            description: `មានបញ្ហាក្នុងការរក្សាទុករូបភាព (Status: ${updateResponse.status})`,
+            variant: "destructive"
+          });
+          
+          throw new Error(`Failed to update student photo: ${updateResponse.status} - ${errorText}`);
+        }
+      }
+    } catch (error) {
+      console.error('Photo upload error:', error);
+      toast({
+        title: "កំហុស",
+        description: "មានបញ្ហាក្នុងការផ្ទុករូបភាព",
+        variant: "destructive"
+      });
+      setPhotoPreview('');
+      
+      // Reset file input on error too
+      const fileInput = document.getElementById('student-photo-upload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  // Show delete photo confirmation dialog
+  const handleRemovePhoto = () => {
+    setShowDeletePhotoDialog(true);
+  };
+
+  // Confirm and delete photo
+  const confirmDeletePhoto = async () => {
+    if (!selectedStudent) return;
+
+    try {
+      setShowDeletePhotoDialog(false);
+      const updateResponse = await fetch(`/api/students/${selectedStudent.studentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          student: {
+            lastName: selectedStudent.lastName,
+            firstName: selectedStudent.firstName,
+            gender: selectedStudent.gender,
+            dob: selectedStudent.dob,
+            class: selectedStudent.class,
+            schoolYear: selectedStudent.schoolYear,
+            photo: null,
+            studentHouseNumber: selectedStudent.studentHouseNumber,
+            studentVillage: selectedStudent.studentVillage,
+            studentDistrict: selectedStudent.studentDistrict,
+            studentProvince: selectedStudent.studentProvince,
+            studentBirthDistrict: selectedStudent.studentBirthDistrict,
+            phone: selectedStudent.phone,
+            religion: selectedStudent.religion,
+            health: selectedStudent.health,
+            emergencyContact: selectedStudent.emergencyContact,
+            vaccinated: selectedStudent.vaccinated,
+            previousSchool: selectedStudent.previousSchool,
+            transferReason: selectedStudent.transferReason,
+            needsClothes: selectedStudent.needsClothes,
+            needsMaterials: selectedStudent.needsMaterials,
+            needsTransport: selectedStudent.needsTransport,
+            registerToStudy: selectedStudent.registerToStudy,
+            registrationDate: selectedStudent.registrationDate,
+            status: selectedStudent.status
+          }
+        })
+      });
+
+      if (updateResponse.ok) {
+        const updatedStudent = {
+          ...selectedStudent,
+          photo: undefined
+        };
+        setSelectedStudent(updatedStudent);
+        setPhotoPreview('');
+        
+        // Refresh students list to remove photo from dropdown
+        const studentsRes = await fetch('/api/students');
+        if (studentsRes.ok) {
+          const studentsData = await studentsRes.json();
+          setStudents(Array.isArray(studentsData) ? studentsData : []);
+        }
+        
+        toast({
+          title: "ជោគជ័យ",
+          description: "រូបភាពត្រូវបានលុបចេញ"
+        });
+        
+        // Reset file input to allow uploading a new photo
+        const fileInput = document.getElementById('student-photo-upload') as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = '';
+        }
+      } else {
+        throw new Error('Failed to remove photo');
+      }
+    } catch (error) {
+      console.error('Photo removal error:', error);
+      toast({
+        title: "កំហុស",
+        description: "មានបញ្ហាក្នុងការលុបរូបភាព",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Show loading screen when first loading data (wait for both students and filters)
+  if (loading || loadingFilters) {
+  return (
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30">
+        {/* Background Effects */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-purple-500/30 dark:from-blue-500/20 dark:to-purple-600/20 rounded-full blur-3xl opacity-60 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-500/30 dark:from-purple-500/20 dark:to-pink-600/20 rounded-full blur-3xl opacity-60 animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="text-center relative z-10">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl animate-pulse">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
+          </div>
+          <p className="text-slate-600 dark:text-slate-300 text-lg font-medium">កំពុងផ្ទុក...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 p-6">
+    <div className="min-h-screen animate-fade-in">
+      <div className="animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-6">
       {/* Search and Filter Section */}
       <Card className="hover:shadow-lg transition-all duration-200 border-0 shadow-md">
         {/* Decorative Background Elements */}
@@ -723,13 +1342,13 @@ function StudentInfoContent() {
               <Search className="h-7 w-7 text-white" />
                   </div>
                   <div>
-              <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">ស្វែងរកសិស្ស</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">🔍 ស្វែងរកព័ត៌មានសិស្ស</h2>
               <div className="flex items-center space-x-4 mt-3">
                 <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
-                      ព័ត៌មានសិស្ស
+                      📋 ព័ត៌មានពេញលេញ
                 </Badge>
                 <Badge variant="outline" className="bg-white/10 text-white border-white/30 backdrop-blur-sm px-3 py-1 text-sm font-medium">
-                  ការរកឃើញដោយស្វ័យប្រវត្តិ
+                  ✨ ការរកឃើញស្វ័យប្រវត្តិ
                   </Badge>
               </div>
               <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
@@ -777,15 +1396,23 @@ function StudentInfoContent() {
                               setShowDropdown(false);
                             }}
                           >
+                            {student.photo ? (
+                              <img 
+                                src={student.photo} 
+                                alt={`${student.lastName}${student.firstName}`}
+                                className="w-10 h-10 rounded-full object-cover mr-4 shadow-lg group-hover:scale-110 transition-transform duration-200 border-2 border-blue-200 dark:border-blue-700"
+                              />
+                            ) : (
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-200">
                               <User className="h-5 w-5 text-white" />
                               </div>
+                            )}
                             <div className="flex-1">
                               <p className="font-semibold text-gray-900 dark:text-white text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
                                 {student.lastName}{student.firstName}
                               </p>
                               <p className="text-base text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
-                                {getGradeLabel(student.class)}{student.schoolYear ? ` • ${student.schoolYear}` : ''}
+                                {getGradeLabel(getStudentFullClass(student))}{getStudentSchoolYear(student) ? ` (${getStudentSchoolYear(student)})` : ''}
                               </p>
                             </div>
                             <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 text-sm font-medium group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40 transition-colors duration-200">
@@ -814,14 +1441,6 @@ function StudentInfoContent() {
               </div>
                 <span>ឆ្នាំសិក្សា</span>
               </label>
-                  {loadingFilters && (
-                <div className="text-center py-4">
-                  <div className="inline-flex items-center space-x-3 text-lg text-gray-600 dark:text-gray-400">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500"></div>
-                    <span className="font-medium">កំពុងផ្ទុកជម្រើស...</span>
-                      </div>
-                    </div>
-                  )}
                       <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-purple-200 dark:border-purple-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 group-hover:shadow-lg text-purple-600 dark:text-purple-400">
                           <SelectValue placeholder="ជ្រើសរើសឆ្នាំសិក្សា" />
@@ -937,25 +1556,21 @@ function StudentInfoContent() {
               <CardContent className="pt-12">
                 <div className="flex flex-col items-center text-center space-y-6">
                   {/* Student Name & Info */}
-                      <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                      <div className="space-y-3">
+                        <h3 className="p-1 text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
                           {selectedStudent.lastName}{selectedStudent.firstName}
                         </h3>
                         <div className="flex items-center justify-center space-x-2">
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700">
+                      <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 border-blue-300 dark:from-blue-900/20 dark:to-purple-900/20 dark:text-blue-400 dark:border-blue-600 shadow-sm">
                             ID: {selectedStudent.studentId}
                           </Badge>
                         </div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm flex items-center justify-center space-x-2">
-                      <span className="flex items-center space-x-1">
-                        <Calendar className="h-3 w-3" />
-                        <span>{(calculateAgeYears(selectedStudent.dob) ?? '-') + ' ឆ្នាំ'}</span>
+                    <p className="text-gray-700 dark:text-gray-300 text-base text-center font-medium">
+                      <span className={calculateAgeYears(selectedStudent.dob) !== null && calculateAgeYears(selectedStudent.dob)! < 4 ? 'text-red-600 dark:text-red-400 font-bold' : ''}>
+                        អាយុ {(calculateAgeYears(selectedStudent.dob) ?? '-')} ឆ្នាំ{calculateAgeYears(selectedStudent.dob) !== null && calculateAgeYears(selectedStudent.dob)! < 4 && ' ⚠️'}
                       </span>
-                      <span>•</span>
-                      <span className="flex items-center space-x-1">
-                        <User className="h-3 w-3" />
-                        <span>{selectedStudent.gender === 'male' ? 'ប្រុស' : selectedStudent.gender === 'female' ? 'ស្រី' : '-'}</span>
-                      </span>
+                      {' '}
+                      <span>ភេទ{selectedStudent.gender === 'male' ? 'ប្រុស' : selectedStudent.gender === 'female' ? 'ស្រី' : '-'}</span>
                         </p>
                       </div>
                   
@@ -998,14 +1613,14 @@ function StudentInfoContent() {
                           <GraduationCap className="h-3 w-3" />
                           <span>ថ្នាក់:</span>
                         </span>
-                              <span className="font-bold text-gray-900 dark:text-white text-sm">{getGradeLabel(selectedStudent.class)}</span>
+                              <span className="font-bold text-gray-900 dark:text-white text-sm">{getGradeLabel(getStudentFullClass(selectedStudent))}</span>
                             </div>
                       <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 text-sm flex items-center space-x-2">
                           <Calendar className="h-3 w-3" />
                           <span>ឆ្នាំសិក្សា:</span>
                         </span>
-                              <span className="font-bold text-gray-900 dark:text-white text-sm">{selectedStudent.schoolYear || '-'}</span>
+                              <span className="font-bold text-gray-900 dark:text-white text-sm">{getStudentSchoolYear(selectedStudent) || '-'}</span>
                             </div>
                       {/* Register to Study */}
                             {selectedStudent.registerToStudy !== undefined && (
@@ -1068,7 +1683,7 @@ function StudentInfoContent() {
                           </div>
                           <div className="space-y-2">
                             <p className="text-sm text-red-700 dark:text-red-300">
-                              <span className="font-medium">ឈ្មោះ:</span> {selectedStudent?.lastName}{selectedStudent?.firstName} ID({selectedStudent?.studentId}) {getGradeLabel(selectedStudent?.class)}
+                              <span className="font-medium">ឈ្មោះ:</span> {selectedStudent?.lastName}{selectedStudent?.firstName} ID({selectedStudent?.studentId}) {getGradeLabel(getStudentFullClass(selectedStudent))}
                             </p>
                           </div>
                         </div>
@@ -1290,7 +1905,7 @@ function StudentInfoContent() {
                                         ))
                                       ) : (
                                         <SelectItem value="" disabled>
-                                          កំពុងផ្ទុកឆមាស...
+                                          មិនមានឆមាស
                                         </SelectItem>
                                       )}
                                     </SelectContent>
@@ -1429,7 +2044,7 @@ function StudentInfoContent() {
                             ឈ្មោះ: {selectedStudent?.lastName}{selectedStudent?.firstName} (ID: {selectedStudent?.studentId})
                           </p>
                           <p className="text-sm text-green-700 dark:text-green-300">
-                            ថ្នាក់: {getGradeLabel(selectedStudent?.class)}
+                            ថ្នាក់: {getGradeLabel(getStudentFullClass(selectedStudent))}
                           </p>
                         </div>
 
@@ -1497,6 +2112,61 @@ function StudentInfoContent() {
                     </DialogContent>
                   </Dialog>
 
+                  {/* Delete Photo Confirmation Dialog */}
+                  <Dialog open={showDeletePhotoDialog} onOpenChange={setShowDeletePhotoDialog}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-full">
+                          <Trash2 className="h-8 w-8 text-red-600 dark:text-red-400" />
+                        </div>
+                        <DialogTitle className="text-center text-xl font-bold text-gray-900 dark:text-white">
+                          លុបរូបភាព
+                        </DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="space-y-4 py-4">
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                          <p className="text-center text-gray-700 dark:text-gray-300 text-base leading-relaxed">
+                            តើអ្នកពិតជាចង់លុបរូបភាពនេះមែនទេ?
+                          </p>
+                          <p className="text-center text-red-600 dark:text-red-400 text-sm mt-2 font-medium">
+                            រូបភាពនឹងត្រូវបានលុបចេញជាអចិន្ត្រៃយ៍
+                          </p>
+                        </div>
+
+                        {photoPreview && (
+                          <div className="flex justify-center">
+                            <img 
+                              src={photoPreview} 
+                              alt="Preview" 
+                              className="w-32 h-32 object-cover rounded-lg border-2 border-red-200 dark:border-red-700 shadow-md"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex space-x-3 pt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowDeletePhotoDialog(false)}
+                          className="flex-1 h-12 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          បោះបង់
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={confirmDeletePhoto}
+                          className="flex-1 h-12 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          លុបរូបភាព
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
                   {/* Contact Information */}
                   <div className="w-full bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/10 rounded-xl p-5 shadow-sm border border-orange-200/50 dark:border-orange-800/30">
                     <div className="flex items-center space-x-3 mb-4">
@@ -1520,48 +2190,70 @@ function StudentInfoContent() {
           {/* Main Content Area */}
           <div className="lg:col-span-3 space-y-6">
             {/* Modern Tabs Navigation */}
-            <Card className="hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-r from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-800/50 dark:to-gray-800 overflow-hidden">
-              <CardContent className="p-0">
-                <nav className="flex bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800">
+            <div className="relative group">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-indigo-50/30 dark:from-blue-950/20 dark:via-purple-950/15 dark:to-indigo-950/20 rounded-3xl -z-10" />
+              
+              <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700">
+                <CardContent>
+                  <nav className="flex gap-2 bg-gradient-to-r from-gray-50/50 via-white/50 to-gray-50/50 dark:from-gray-800/50 dark:via-gray-800/30 dark:to-gray-800/50 rounded-2xl">
                   {tabs.map((tab, index) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex-1 px-6 py-4 text-sm font-semibold flex items-center justify-center space-x-3 border-b-3 transition-all duration-300 relative group ${
+                        className={`flex-1 px-5 py-3 text-sm font-semibold flex items-center justify-center space-x-3 rounded-xl transition-all duration-500 relative group/tab overflow-hidden ${
                         activeTab === tab.id 
-                          ? 'border-blue-500 text-blue-600 bg-white dark:bg-gray-900 shadow-lg' 
-                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-900'
+                            ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 text-white shadow-xl shadow-blue-500/30 dark:shadow-blue-500/20 scale-105' 
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 hover:shadow-md hover:scale-102'
                       }`}
                     >
-                      {/* Active Tab Indicator */}
+                        {/* Animated Background Shine Effect */}
                       {activeTab === tab.id && (
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                          <>
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+                          </>
                       )}
                       
-                      <div className={`p-2 rounded-lg transition-all duration-300 ${
+                        {/* Icon Container */}
+                        <div className={`relative p-2 rounded-lg transition-all duration-500 ${
                         activeTab === tab.id 
-                          ? 'bg-blue-100 dark:bg-blue-900/20 shadow-sm' 
-                          : 'bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/10'
+                            ? 'bg-white/20 shadow-lg backdrop-blur-sm scale-110' 
+                            : 'bg-gray-100 dark:bg-gray-700 group-hover/tab:bg-blue-100 dark:group-hover/tab:bg-blue-900/30 group-hover/tab:scale-110'
+                        }`}>
+                          <div className={`transition-all duration-500 ${
+                            activeTab === tab.id ? 'text-white' : 'text-gray-600 dark:text-gray-400 group-hover/tab:text-blue-600 dark:group-hover/tab:text-blue-400'
                       }`}>
                         {tab.icon}
                       </div>
-                      <span className="hidden sm:inline font-medium">{tab.label}</span>
-                      
-                      {/* Hover Effect */}
-                      <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${
-                        activeTab === tab.id 
-                          ? 'bg-blue-50/50 dark:bg-blue-900/10' 
-                          : 'bg-transparent group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/5'
-                      }`}></div>
+                        </div>
+                        
+                        {/* Label */}
+                        <span className={`hidden sm:inline font-bold transition-all duration-500 relative z-10 ${
+                          activeTab === tab.id ? 'text-white' : ''
+                        }`}>
+                          {tab.label}
+                        </span>
+                        
+                        {/* Active Indicator Dot */}
+                        {activeTab === tab.id && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full shadow-lg animate-pulse"></div>
+                        )}
+                        
+                        {/* Bottom Glow */}
+                        {activeTab === tab.id && (
+                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 blur-md"></div>
+                        )}
                     </button>
                   ))}
                 </nav>
               </CardContent>
             </Card>
+            </div>
 
             {/* Modern Tab Content */}
             <Card className="hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-white dark:from-gray-800 dark:via-gray-800/30 dark:to-gray-800">
-              <CardContent className="p-8">
+              <CardContent className="p-1">
                 {activeTab === 'basic' && (
                   <div className="space-y-6">
                     <div className="flex items-center space-x-3 mb-6">
@@ -1599,7 +2291,7 @@ function StudentInfoContent() {
                           </div>
                           <span className="text-base font-semibold text-purple-800 dark:text-purple-200">ថ្នាក់ទី</span>
                         </div>
-                        <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{getGradeLabel(selectedStudent.class)}</p>
+                        <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{getGradeLabel(getStudentFullClass(selectedStudent))}</p>
                       </div>
                       
                       <div className="group bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/10 p-5 rounded-xl shadow-sm border border-orange-200/50 dark:border-orange-800/30 hover:shadow-md transition-all duration-300">
@@ -1650,6 +2342,82 @@ function StudentInfoContent() {
                           <span className="text-base font-semibold text-pink-800 dark:text-pink-200">មូលហេតុផ្លាស់ទី</span>
                         </div>
                         <p className="text-lg font-bold text-pink-900 dark:text-pink-100">{selectedStudent.transferReason || '-'}</p>
+                      </div>
+                    </div>
+
+                    {/* Student Photo Upload Section */}
+                    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-3 mb-6">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                          <User className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <h4 className="text-xl font-bold text-gray-900 dark:text-white">រូបថតសិស្ស</h4>
+                      </div>
+                      
+                      <div className="flex items-start space-x-6">
+                        {/* Photo Preview */}
+                        <div className="flex-shrink-0">
+                          {(photoPreview || selectedStudent.photo) ? (
+                            <div className="relative group/photo">
+                              <img 
+                                src={photoPreview || selectedStudent.photo || ''} 
+                                alt="Student Photo" 
+                                className="w-40 h-40 object-cover rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleRemovePhoto}
+                                className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg opacity-0 group-hover/photo:opacity-100"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-40 h-40 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 shadow-inner">
+                              <User className="h-20 w-20 text-gray-400 dark:text-gray-500" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Upload Controls */}
+                        <div className="flex-grow space-y-4">
+                          <div className="relative">
+                            <input
+                              type="file"
+                              id="student-photo-upload"
+                              accept="image/*"
+                              onChange={handlePhotoUpload}
+                              className="hidden"
+                              disabled={uploadingPhoto}
+                            />
+                            <label
+                              htmlFor="student-photo-upload"
+                              className={`inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg cursor-pointer transition-all duration-200 shadow-md hover:shadow-lg ${
+                                uploadingPhoto ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
+                            >
+                              <Upload className="h-5 w-5" />
+                              <span className="font-medium">{uploadingPhoto ? 'កំពុងផ្ទុក...' : 'ជ្រើសរើសរូបភាព'}</span>
+                            </label>
+                          </div>
+                          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">📝 ចំណាំ:</p>
+                            <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                              <li>• ទម្រង់ដែលគាំទ្រ: JPG, PNG, GIF</li>
+                              <li>• ទំហំអតិបរមា: 5MB</li>
+                              <li>• រូបភាពនឹងត្រូវបានរក្សាទុកទៅក្នុងប្រព័ន្ធដោយស្វ័យប្រវត្តិ</li>
+                            </ul>
+                          </div>
+                          {(photoPreview || selectedStudent.photo) && (
+                            <button
+                              type="button"
+                              onClick={handleRemovePhoto}
+                              className="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 underline font-medium"
+                            >
+                              🗑️ លុបរូបភាព
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1887,7 +2655,7 @@ function StudentInfoContent() {
                             </div>
                             <span className="text-base font-semibold text-blue-800 dark:text-blue-200">នៅជាមួយអ្នកណា</span>
                           </div>
-                          <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{selectedStudent.family.livingWith || '-'}</p>
+                          <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{getLivingWithLabel(selectedStudent.family.livingWith)}</p>
                         </div>
                         
                         <div className="group bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 p-5 rounded-xl shadow-sm border border-green-200/50 dark:border-green-800/30 hover:shadow-md transition-all duration-300">
@@ -1907,7 +2675,7 @@ function StudentInfoContent() {
                             </div>
                             <span className="text-base font-semibold text-purple-800 dark:text-purple-200">រយៈពេលនៅកំពង់ចាម</span>
                           </div>
-                          <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{selectedStudent.family.durationInKPC || '-'}</p>
+                          <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{getDurationLabel(selectedStudent.family.durationInKPC)}</p>
                         </div>
                         
                         <div className="group bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/10 p-5 rounded-xl shadow-sm border border-orange-200/50 dark:border-orange-800/30 hover:shadow-md transition-all duration-300">
@@ -1917,7 +2685,7 @@ function StudentInfoContent() {
                             </div>
                             <span className="text-base font-semibold text-orange-800 dark:text-orange-200">ជីវភាព</span>
                           </div>
-                          <p className="text-lg font-bold text-orange-900 dark:text-orange-100">{selectedStudent.family.livingCondition || '-'}</p>
+                          <p className="text-lg font-bold text-orange-900 dark:text-orange-100">{getLivingConditionLabel(selectedStudent.family.livingCondition)}</p>
                         </div>
                         
                         <div className="group bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/10 p-5 rounded-xl shadow-sm border border-red-200/50 dark:border-red-800/30 hover:shadow-md transition-all duration-300">
@@ -1947,7 +2715,7 @@ function StudentInfoContent() {
                             </div>
                             <span className="text-base font-semibold text-pink-800 dark:text-pink-200">សាសនា</span>
                           </div>
-                          <p className="text-lg font-bold text-pink-900 dark:text-pink-100">{selectedStudent.family.religion || '-'}</p>
+                          <p className="text-lg font-bold text-pink-900 dark:text-pink-100">{getReligionLabel(selectedStudent.family.religion)}</p>
                         </div>
                         
                         <div className="group bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-900/10 p-5 rounded-xl shadow-sm border border-yellow-200/50 dark:border-yellow-800/30 hover:shadow-md transition-all duration-300">
@@ -1987,7 +2755,21 @@ function StudentInfoContent() {
                             </div>
                             <span className="text-base font-semibold text-emerald-800 dark:text-emerald-200">ក្នុងមួយ</span>
                           </div>
-                          <p className="text-lg font-bold text-emerald-900 dark:text-emerald-100">{selectedStudent.family.helpFrequency || '-'}</p>
+                          <p className="text-lg font-bold text-emerald-900 dark:text-emerald-100">{getFrequencyLabel(selectedStudent.family.helpFrequency)}</p>
+                        </div>
+                        
+                        <div className="group bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/20 dark:to-rose-900/10 p-5 rounded-xl shadow-sm border border-rose-200/50 dark:border-rose-800/30 hover:shadow-md transition-all duration-300">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="p-2 bg-rose-200 dark:bg-rose-800 rounded-lg">
+                              <Award className="h-4 w-4 text-rose-700 dark:text-rose-300" />
+                            </div>
+                            <span className="text-base font-semibold text-rose-800 dark:text-rose-200">ប័ណ្ឌក្រីក្រ</span>
+                          </div>
+                          <p className="text-lg font-bold text-rose-900 dark:text-rose-100">
+                            {selectedStudent.family.povertyCard 
+                              ? (selectedStudent.family.povertyCard.toLowerCase() === 'yes' ? 'មាន' : selectedStudent.family.povertyCard.toLowerCase() === 'no' ? 'គ្មាន' : selectedStudent.family.povertyCard)
+                              : '-'}
+                          </p>
                         </div>
                       </div>
                     ) : (
@@ -2015,9 +2797,9 @@ function StudentInfoContent() {
                               <div>
                                 <p className="text-base text-gray-600 dark:text-gray-400 font-medium">អាណាព្យាបាល {index + 1}</p>
                                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                  {guardian.firstName} {guardian.lastName}
+                                  {guardian.lastName} {guardian.firstName}
                                 </p>
-                                <p className="text-base text-blue-600 dark:text-blue-400 font-medium">{guardian.relation}</p>
+                                <p className="text-base text-blue-600 dark:text-blue-400 font-medium">{getRelationLabel(guardian.relation)}</p>
                               </div>
                             </div>
 
@@ -2038,7 +2820,7 @@ function StudentInfoContent() {
                                   </div>
                                   <div className="flex justify-between items-center">
                                     <span className="text-sm text-gray-600 dark:text-gray-400">ត្រូវជា:</span>
-                                    <span className="text-base font-medium text-gray-900 dark:text-white">{guardian.relation || '-'}</span>
+                                    <span className="text-base font-medium text-gray-900 dark:text-white">{getRelationLabel(guardian.relation)}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
                                     <span className="text-sm text-gray-600 dark:text-gray-400">លេខទូរស័ព្ទ:</span>
@@ -2148,22 +2930,71 @@ function StudentInfoContent() {
           </div>
         </div>
       ) : (
-        <Card className="hover:shadow-lg transition-all duration-200 border-0 shadow-md">
-          <CardContent className="p-12 text-center">
-            <div className="mx-auto max-w-md">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <User className="h-10 w-10 text-white" />
+        <div className="relative group">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-indigo-50/50 dark:from-blue-950/20 dark:via-purple-950/15 dark:to-indigo-950/20 rounded-3xl -z-10" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1),transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05),transparent_70%)]" />
+          
+          <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700">
+            <CardContent className="p-10 text-center">
+              <div className="mx-auto max-w-lg">
+                {/* Animated Icon Container */}
+                <div className="relative mb-5">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="relative w-28 h-28 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                    <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-75"></div>
+                    <User className="h-14 w-14 text-white relative z-10" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">រកមិនឃើញព័ត៌មានសិស្ស</h3>
-              <p className="text-base text-gray-600 dark:text-gray-400 mb-6">សូមជ្រើសរើសសិស្សដើម្បីមើលព័ត៌មានលម្អិត</p>
-              <Button size="sm" className="flex items-center gap-2 mx-auto px-6 py-2" variant="gradient">
-                <Search className="h-4 w-4" />
-                ស្វែងរកសិស្ស
+                </div>
+                
+                {/* Modern Text */}
+                <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4 group-hover:scale-105 transition-transform duration-300">
+                  រកមិនឃើញព័ត៌មានសិស្ស
+                </h3>
+                <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                  សូមជ្រើសរើសសិស្សពីខាងលើ ដើម្បីមើលព័ត៌មានលម្អិត
+                </p>
+                
+                {/* Instruction Steps */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 mb-8 border border-blue-200/50 dark:border-blue-800/50">
+                  <p className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-4">
+                    🔍 របៀបស្វែងរក:
+                  </p>
+                  <div className="space-y-3 text-left">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">1</div>
+                      <span className="text-base text-gray-700 dark:text-gray-300">ជ្រើសរើស <strong className="text-blue-600 dark:text-blue-400">ឆ្នាំសិក្សា</strong></span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">2</div>
+                      <span className="text-base text-gray-700 dark:text-gray-300">ជ្រើសរើស <strong className="text-purple-600 dark:text-purple-400">ថ្នាក់រៀន</strong></span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">3</div>
+                      <span className="text-base text-gray-700 dark:text-gray-300">ឬ <strong className="text-indigo-600 dark:text-indigo-400">វាយបញ្ចូលឈ្មោះ</strong> ដើម្បីស្វែងរក</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Action Button */}
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 hover:from-blue-600 hover:via-purple-600 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-6 text-lg font-semibold rounded-xl group-hover:scale-105"
+                  onClick={() => {
+                    const searchInput = document.querySelector('input[placeholder*="ឈ្មោះសិស្ស"]') as HTMLInputElement;
+                    if (searchInput) searchInput.focus();
+                  }}
+                >
+                  <Search className="h-5 w-5 mr-2 animate-pulse" />
+                  ចាប់ផ្តើមស្វែងរកសិស្ស
               </Button>
             </div>
           </CardContent>
         </Card>
+        </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }

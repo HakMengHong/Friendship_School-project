@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // GET specific subject
 export async function GET(
@@ -40,7 +41,7 @@ export async function PUT(
     const { id: idString } = await params
     const id = parseInt(idString)
     const body = await request.json()
-    const { subjectName } = body
+    const { subjectName, userId } = body
 
     if (!subjectName) {
       return NextResponse.json(
@@ -55,6 +56,11 @@ export async function PUT(
         subjectName
       }
     })
+
+    // Log activity
+    if (userId) {
+      await logActivity(userId, ActivityMessages.EDIT_SUBJECT, `កែប្រែមុខវិជ្ជា ${updatedSubject.subjectName}`)
+    }
 
     return NextResponse.json(updatedSubject)
   } catch (error) {
@@ -74,6 +80,8 @@ export async function DELETE(
   try {
     const { id: idString } = await params
     const id = parseInt(idString)
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
 
     // Validate ID
     if (isNaN(id)) {
@@ -110,6 +118,11 @@ export async function DELETE(
     await prisma.subject.delete({
       where: { subjectId: id }
     })
+
+    // Log activity
+    if (userId) {
+      await logActivity(parseInt(userId), ActivityMessages.DELETE_SUBJECT, `លុបមុខវិជ្ជា ${existingSubject.subjectName}`)
+    }
 
     return NextResponse.json({ message: 'Subject deleted successfully' })
   } catch (error) {

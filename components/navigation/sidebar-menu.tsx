@@ -47,7 +47,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "ផ្ទាំងគ្រប់គ្រង",
         href: "/dashboard",
         requiredRole: "admin" as const,
-        badge: "Admin",
         subItems: [
           { id: "admin-users", label: "គ្រប់គ្រងអ្នកប្រើប្រាស់", href: "/dashboard/users", icon: Shield },
           { id: "admin-academic", label: "ការគ្រប់គ្រងថ្នាក់", href: "/dashboard/academic-management", icon: BookOpen },
@@ -63,7 +62,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "អវត្តមានសិស្ស",
         href: "/attendance",
         requiredRole: "admin" as const,
-        badge: "Live",
         subItems: [
           { id: "admin-attendance-daily", label: "អវត្តមានប្រចាំថ្ងៃ", href: "/attendance/daily", icon: Zap },
           { id: "admin-attendance-report", label: "របាយការណ៍អវត្តមាន", href: "/attendance/report", icon: BarChart2 },
@@ -76,7 +74,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "ពិន្ទុសិស្ស",
         href: "/grade",
         requiredRole: "admin" as const,
-        badge: "Analytics",
         subItems: [
           { id: "admin-add-grade", label: "បញ្ចូលពិន្ទុសិស្ស", href: "/grade/addgrade", icon: Zap },
           { id: "admin-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/grade/report", icon: BarChart2 },
@@ -90,7 +87,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "ព័ត៌មានសិស្ស",
         href: "/student-info",
         requiredRole: "admin" as const,
-        badge: "Data",
         subItems: [
           { id: "admin-student-info-list", label: "បញ្ជីឈ្មោះសិស្ស", href: "/student-info/list", icon: UserIcon },
         ],
@@ -102,7 +98,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "ចុះឈ្មោះសិស្ស",
         href: "/register-student",
         requiredRole: "admin" as const,
-        badge: "New",
       },
 
       // Teacher Attendance
@@ -112,7 +107,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "អវត្តមានប្រចាំថ្ងៃ",
         href: "/attendance/daily",
         requiredRole: "teacher" as const,
-        badge: "Live",
       },
       // Teacher Grade
       {
@@ -121,7 +115,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "ពិន្ទុសិស្ស",
         href: "/grade/addgrade",
         requiredRole: "teacher" as const,
-        badge: "Analytics",
         subItems: [
           { id: "teacher-grade-report", label: "របាយការណ៍ពិន្ទុ", href: "/grade/report", icon: BarChart2 }
         ],
@@ -133,7 +126,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "ព័ត៌មានសិស្ស",
         href: "/student-info",
         requiredRole: "teacher" as const,
-        badge: "Data",
       },
       // Teacher Register Student
       {
@@ -142,7 +134,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
         label: "ចុះឈ្មោះសិស្ស",
         href: "/register-student",
         requiredRole: "teacher" as const,
-        badge: "New",
       },
     ]
 
@@ -364,16 +355,6 @@ export function SidebarMenu({ className }: SidebarMenuProps) {
                       <div className="flex items-center justify-between w-full ml-3">
                         <span className="truncate group-hover:text-gray-700 transition-colors duration-300">{item.label}</span>
                         <div className="flex items-center gap-2">
-                          {item.badge && (
-                            <span className={cn(
-                              "px-2 py-0.5 text-xs font-bold rounded-full transition-all duration-300",
-                              active 
-                                ? "bg-white/20 text-white" 
-                                : "bg-primary/10 text-primary group-hover:bg-primary/20"
-                            )}>
-                              {item.badge}
-                            </span>
-                          )}
                           {hasSubItems && (
                             <ChevronDown
                               className={cn(

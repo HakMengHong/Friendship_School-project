@@ -25,7 +25,10 @@ import {
   CalendarDays,
   Hash,
   TrendingUp,
-  User as UserIcon
+  User as UserIcon,
+  Upload,
+  FileSpreadsheet,
+  XCircle
 } from "lucide-react"
 import {
   Table,
@@ -45,7 +48,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
-import { getCurrentUser } from "@/lib/auth-service"
+import { getCurrentUser, User as AuthUser } from "@/lib/auth-service"
 
 // Database types
 interface SchoolYear {
@@ -65,6 +68,9 @@ interface Course {
   grade: string
   section: string
   schoolYear: SchoolYear
+  teacherId1: number | null
+  teacherId2: number | null
+  teacherId3: number | null
 }
 
 interface Subject {
@@ -203,6 +209,7 @@ function AddScoreContent() {
   const [semesters, setSemesters] = useState<Semester[]>([])
   const [courses, setCourses] = useState<Course[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
 
   const [students, setStudents] = useState<Student[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
@@ -263,6 +270,24 @@ function AddScoreContent() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [gradeToDelete, setGradeToDelete] = useState<Grade | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Excel functionality states
+  const [excelImportDialogOpen, setExcelImportDialogOpen] = useState(false)
+  const [excelTemplateDialogOpen, setExcelTemplateDialogOpen] = useState(false)
+  const [excelFile, setExcelFile] = useState<File | null>(null)
+  const [excelImporting, setExcelImporting] = useState(false)
+  const [selectedTemplateSubjects, setSelectedTemplateSubjects] = useState<string[]>([])
+  
+  // Import popup states
+  const [importResultDialogOpen, setImportResultDialogOpen] = useState(false)
+  const [importResult, setImportResult] = useState<{
+    success: boolean
+    message: string
+    created: number
+    updated: number
+    errors: number
+    errorDetails?: string[]
+  } | null>(null)
 
   // Score validation and formatting
   const validateScore = (value: string) => {
@@ -583,7 +608,14 @@ function AddScoreContent() {
   useEffect(() => {
     fetchInitialData()
     
-
+    // Load current user
+    const user = getCurrentUser()
+    setCurrentUser(user)
+    console.log('👤 Current user loaded:', { 
+      username: user?.username, 
+      role: user?.role, 
+      id: user?.id
+    })
     
     // Auto-select current month and year
     const { month, year } = getCurrentDate()
@@ -768,10 +800,6 @@ function AddScoreContent() {
     }
   }, [bulkMode, selectedSubject, selectedStudent, selectedCourse, selectedSemester, selectedMonth, selectedGradeYear, grades])
 
-  // Debug: Log bulkScores changes
-  useEffect(() => {
-    console.log('🔍 bulkScores state changed:', bulkScores)
-  }, [bulkScores])
 
   const fetchInitialData = async () => {
     try {
@@ -1098,6 +1126,137 @@ function AddScoreContent() {
     setGradeToDelete(null)
   }
 
+  // Excel functionality functions
+
+  const handleExcelTemplateDownload = async () => {
+    if (!selectedCourse || !selectedSemester || !selectedSchoolYear || selectedTemplateSubjects.length === 0) {
+      toast({
+        title: "ការព្រមាន",
+        description: "សូមជ្រើសរើសថ្នាក់ សម័យសិក្សា និងមុខវិជ្ជាយ៉ាងហោចណាស់មួយ",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      // Create comma-separated string of subject IDs
+      const subjectIds = selectedTemplateSubjects.join(',')
+      const response = await fetch(`/api/grades/template-excel?courseId=${selectedCourse}&semesterId=${selectedSemester}&schoolYearId=${selectedSchoolYear}&subjectIds=${subjectIds}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to download template')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `grade_template_${new Date().toISOString().split('T')[0]}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast({
+        title: "ជោគជ័យ",
+        description: `គំរូ Excel ត្រូវបានទាញយកដោយជោគជ័យ (${selectedTemplateSubjects.length} មុខវិជ្ជា)`,
+      })
+
+      setExcelTemplateDialogOpen(false)
+      setSelectedTemplateSubjects([])
+    } catch (error) {
+      console.error('Error downloading template:', error)
+      toast({
+        title: "មានបញ្ហា",
+        description: "មិនអាចទាញយកគំរូ Excel បាន",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleExcelImport = async () => {
+    if (!excelFile || !selectedCourse || !selectedSemester || !selectedSchoolYear) {
+      toast({
+        title: "ការព្រមាន",
+        description: "សូមជ្រើសរើសឯកសារ Excel ជាមុន",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setExcelImporting(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', excelFile)
+      formData.append('courseId', selectedCourse)
+      formData.append('semesterId', selectedSemester)
+      formData.append('schoolYearId', selectedSchoolYear)
+      formData.append('userId', getCurrentUser()?.id?.toString() || '')
+
+      const response = await fetch('/api/grades/import-excel', {
+        method: 'POST',
+        body: formData
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to import grades')
+      }
+
+      // Set import result and show popup
+      setImportResult({
+        success: result.success || true,
+        message: result.message || "ពិន្ទុត្រូវបាននាំចូលដោយជោគជ័យ",
+        created: result.results?.created || 0,
+        updated: result.results?.updated || 0,
+        errors: result.results?.errors || 0,
+        errorDetails: result.errors || []
+      })
+      setImportResultDialogOpen(true)
+
+      // Refresh grades after import
+      if (bulkMode) {
+        fetchGradesForCourse()
+      } else {
+        fetchGrades()
+      }
+
+      setExcelImportDialogOpen(false)
+      setExcelFile(null)
+    } catch (error) {
+      console.error('Error importing grades:', error)
+      
+      // Set error result and show popup
+      setImportResult({
+        success: false,
+        message: "មិនអាចនាំចូលពិន្ទុពី Excel បាន",
+        created: 0,
+        updated: 0,
+        errors: 1,
+        errorDetails: [error instanceof Error ? error.message : 'Unknown error']
+      })
+      setImportResultDialogOpen(true)
+    } finally {
+      setExcelImporting(false)
+    }
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        setExcelFile(file)
+      } else {
+        toast({
+          title: "ការព្រមាន",
+          description: "សូមជ្រើសរើសឯកសារ Excel (.xlsx ឬ .xls)",
+          variant: "destructive"
+        })
+      }
+    }
+  }
+
   const handleSchoolYearChange = (value: string) => {
     setSelectedSchoolYear(value)
     setSelectedCourse("")
@@ -1127,25 +1286,91 @@ function AddScoreContent() {
     // You can add additional logic here if needed
   }
 
-  // Filter courses based on selected school year, or show all if none selected
-  const filteredCourses = selectedSchoolYear 
-    ? courses.filter(course => course.schoolYear.schoolYearId.toString() === selectedSchoolYear)
-    : courses
+  // Filter courses based on selected school year and teacher role
+  const filteredCourses = (() => {
+    let filtered = selectedSchoolYear 
+      ? courses.filter(course => course.schoolYear.schoolYearId.toString() === selectedSchoolYear)
+      : courses
+    
+    // If user is a teacher, only show courses where they are assigned
+    if (currentUser && currentUser.role === 'teacher') {
+      const teacherId = currentUser.id
+      filtered = filtered.filter(course => 
+        course.teacherId1 === teacherId || 
+        course.teacherId2 === teacherId || 
+        course.teacherId3 === teacherId
+      )
+      
+      console.log('👨‍🏫 Teacher filter applied:', {
+        teacherId,
+        teacherName: `${currentUser.lastname}${currentUser.firstname}`,
+        totalCourses: courses.length,
+        filteredBySchoolYear: selectedSchoolYear ? courses.filter(c => c.schoolYear.schoolYearId.toString() === selectedSchoolYear).length : courses.length,
+        filteredByTeacher: filtered.length,
+        assignedCourses: filtered.map(c => ({ 
+          id: c.courseId, 
+          name: `ថ្នាក់ទី ${c.grade}${c.section}`,
+          teacherId1: c.teacherId1,
+          teacherId2: c.teacherId2,
+          teacherId3: c.teacherId3
+        }))
+      })
+    }
+    
+    return filtered
+  })()
     
   // Debug filtered courses
   console.log('🔍 Filtered Courses:', {
     selectedSchoolYear,
+    userRole: currentUser?.role,
     totalCourses: courses.length,
     filteredCount: filteredCourses.length,
     filteredCourses: filteredCourses.map(c => ({ id: c.courseId, name: `ថ្នាក់ទី ${c.grade}${c.section}`, schoolYear: c.schoolYear?.schoolYearCode }))
   })
 
-  // Filter students based on search term
-  const filteredStudents = students.filter(student => {
-    if (!searchTerm) return true
-    const fullName = `${student.lastName} ${student.firstName}`.toLowerCase()
-    return fullName.includes(searchTerm.toLowerCase())
-  })
+  // Filter students based on search term and sort by Khmer order
+  const filteredStudents = students
+    .filter(student => {
+      if (!searchTerm) return true
+      const fullName = `${student.lastName} ${student.firstName}`.toLowerCase()
+      return fullName.includes(searchTerm.toLowerCase())
+    })
+    .sort((a, b) => {
+      // Khmer alphabet order: consonants + independent vowels
+      const khmerOrder = 'កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអអាឥឦឧឨឩឪឫឬឭឮឯឰឱឲឳ';
+      
+      const getKhmerSortValue = (char: string): number => {
+        const index = khmerOrder.indexOf(char);
+        return index === -1 ? 999 : index;
+      };
+      
+      const getSortKey = (text: string): number[] => {
+        return Array.from(text).map(char => getKhmerSortValue(char));
+      };
+      
+      // Compare last names first
+      const aLastKey = getSortKey(a.lastName || '');
+      const bLastKey = getSortKey(b.lastName || '');
+      
+      for (let i = 0; i < Math.max(aLastKey.length, bLastKey.length); i++) {
+        const aVal = aLastKey[i] || 999;
+        const bVal = bLastKey[i] || 999;
+        if (aVal !== bVal) return aVal - bVal;
+      }
+      
+      // If last names are equal, compare first names
+      const aFirstKey = getSortKey(a.firstName || '');
+      const bFirstKey = getSortKey(b.firstName || '');
+      
+      for (let i = 0; i < Math.max(aFirstKey.length, bFirstKey.length); i++) {
+        const aVal = aFirstKey[i] || 999;
+        const bVal = bFirstKey[i] || 999;
+        if (aVal !== bVal) return aVal - bVal;
+      }
+      
+      return 0;
+    })
 
   // Filter grades based on month and year
   const filteredGrades = grades.filter(grade => {
@@ -1172,13 +1397,43 @@ function AddScoreContent() {
     return monthMatch && yearMatch
   })
 
+  // Helper function to calculate average based on grade level
+  const calculateAverageByGradeLevel = (sumGrade: number, countGrade: number, gradeLevel: string): number => {
+    const level = parseInt(gradeLevel)
+    
+    if (isNaN(level)) {
+      // If grade level is not a number, use simple average
+      return countGrade > 0 ? sumGrade / countGrade : 0
+    }
+    
+    // Grade 1-6: sumGrade / countGrade
+    if (level >= 1 && level <= 6) {
+      return countGrade > 0 ? sumGrade / countGrade : 0
+    }
+    // Grade 7-8: sumGrade / 14
+    else if (level >= 7 && level <= 8) {
+      return sumGrade / 14
+    }
+    // Grade 9: sumGrade / 8.4
+    else if (level === 9) {
+      return sumGrade / 8.4
+    }
+    // Default fallback for other grades (10-12)
+    else {
+      return countGrade > 0 ? sumGrade / countGrade : 0
+    }
+  }
+
   // Calculate stats based on filtered grades
   const totalGrades = filteredGrades.length
   const totalPoints = filteredGrades.reduce((sum, grade) => {
     const gradeValue = typeof grade.grade === 'number' ? grade.grade : 0
     return sum + gradeValue
   }, 0)
-  const averageScore = totalGrades > 0 ? (totalPoints / totalGrades).toFixed(2) : "0.00"
+  
+  // Get the grade level from selected student
+  const studentGradeLevel = selectedStudent ? getStudentGradeLevel(selectedStudent) : '1'
+  const averageScore = calculateAverageByGradeLevel(totalPoints, totalGrades, studentGradeLevel).toFixed(2)
 
   if (loading) {
     return (
@@ -1215,7 +1470,7 @@ function AddScoreContent() {
   return (
     <div className="min-h-screen animate-fade-in">
       <div className="animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-8 p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
 
           {/* Modern Filter Section */}
           <div className="relative group">
@@ -1311,9 +1566,9 @@ function AddScoreContent() {
                           <span>ថ្នាក់</span>
                           <span className="text-red-500 text-base">*</span>
                         </label>
-                        <Select value={selectedCourse} onValueChange={handleCourseChange}>
+                        <Select value={selectedCourse} onValueChange={handleCourseChange} disabled={!selectedSchoolYear}>
                           <SelectTrigger className="h-12 bg-gradient-to-r from-white via-white/95 to-white/90 dark:from-gray-800 dark:via-gray-800/95 dark:to-gray-800/90 border-2 border-green-200 dark:border-green-700 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 group-hover:shadow-lg text-green-600 dark:text-green-400">
-                            <SelectValue placeholder="ជ្រើសរើសថ្នាក់" />
+                            <SelectValue placeholder={selectedSchoolYear ? "ជ្រើសរើសថ្នាក់" : "សូមជ្រើសរើសឆ្នាំសិក្សាមុន"} />
                           </SelectTrigger>
                           <SelectContent className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl">
                             {filteredCourses.map((course) => (
@@ -1403,6 +1658,78 @@ function AddScoreContent() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Excel Import/Export Section */}
+          {selectedCourse && selectedSemester && selectedSchoolYear && (
+            <div className="relative group">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 via-teal-50/20 to-cyan-50/30 dark:from-emerald-950/20 dark:via-teal-950/15 dark:to-cyan-950/20 rounded-3xl -z-10" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.05),transparent_50%)]" />
+              
+              <Card className="relative overflow-hidden border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-700 group-hover:scale-[1.02]">
+                <CardHeader className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 text-white p-4">
+                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700" />
+                  
+                  <div className="relative z-10 flex items-center space-x-4">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                      <FileSpreadsheet className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl md:text-2xl font-bold text-white group-hover:scale-105 transition-transform duration-300">
+                        ការនាំចេញ/នាំចូល Excel
+                      </h2>
+                      <div className="h-1.5 w-12 bg-white/40 rounded-full mt-3 group-hover:w-16 transition-all duration-500" />
+                      <p className="text-white/90 mt-2 text-base md:text-lg">
+                        នាំចេញពិន្ទុទៅ Excel ឬនាំចូលពិន្ទុពី Excel
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Download Template Button */}
+                    <Button
+                      onClick={() => setExcelTemplateDialogOpen(true)}
+                      className="h-16 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    >
+                      <FileSpreadsheet className="h-6 w-6 mr-3" />
+                      ទាញយកគំរូ
+                    </Button>
+
+                    {/* Import Grades Button */}
+                    <Button
+                      onClick={() => setExcelImportDialogOpen(true)}
+                      className="h-16 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    >
+                      <Upload className="h-6 w-6 mr-3" />
+                      នាំចូលពិន្ទុ
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4 p-4 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200/30 dark:border-emerald-700/30 rounded-xl">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                        <AlertCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-emerald-800 dark:text-emerald-200 mb-1">
+                          ការណែនាំ
+                        </h4>
+                        <ul className="text-sm text-emerald-700 dark:text-emerald-300 space-y-1">
+                          <li>• ទាញយកគំរូ: ទាញយកគំរូ Excel សម្រាប់បញ្ចូលពិន្ទុ</li>
+                          <li>• នាំចូលពិន្ទុ: ផ្ទុកឡើងឯកសារ Excel ដែលមានពិន្ទុ</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Main Content - 30/70 Layout */}
           <div className="grid grid-cols-1 xl:grid-cols-[4fr_6fr] gap-8">
@@ -1656,34 +1983,6 @@ function AddScoreContent() {
                             <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
                               បញ្ចូលពិន្ទុសម្រាប់សិស្សច្រើននាក់
                             </Badge>
-                            <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                              Debug: {Object.keys(bulkScores).length} scores
-                            </Badge>
-                            <Button
-                              type="button"
-                              onClick={() => {
-                                console.log('🔍 Manual trigger of initializeBulkScores')
-                                initializeBulkScores()
-                              }}
-                              className="h-8 px-3 text-xs bg-yellow-500 hover:bg-yellow-600 text-white"
-                            >
-                              Test Init
-                            </Button>
-                            <Button
-                              type="button"
-                              onClick={() => {
-                                console.log('🔍 Manual test: Setting test bulk scores')
-                                const testScores = {
-                                  1: { score: "85", comment: "Test comment 1" },
-                                  2: { score: "92", comment: "Test comment 2" }
-                                }
-                                console.log('🔍 Setting test scores:', testScores)
-                                setBulkScores(testScores)
-                              }}
-                              className="h-8 px-3 text-xs bg-purple-500 hover:bg-purple-600 text-white"
-                            >
-                              Test Data
-                            </Button>
                           </div>
                         </div>
                         
@@ -2248,6 +2547,318 @@ function AddScoreContent() {
                     លុបពិន្ទុ
                   </>
                 )}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Excel Import Dialog */}
+      <Dialog open={excelImportDialogOpen} onOpenChange={setExcelImportDialogOpen}>
+        <DialogContent className="max-w-lg bg-gradient-to-br from-white via-purple-50/30 to-pink-50/20 dark:from-gray-900 dark:via-purple-950/30 dark:to-pink-950/20 backdrop-blur-xl border-0 shadow-2xl dark:shadow-purple-900/20 rounded-2xl">
+          <DialogHeader className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/40 rounded-xl shadow-lg dark:shadow-purple-900/20">
+                <Upload className="h-6 w-6 text-purple-600 dark:text-purple-300" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold text-purple-800 dark:text-purple-200">
+                  នាំចូលពិន្ទុពី Excel
+                </DialogTitle>
+                <DialogDescription className="text-purple-700 dark:text-purple-300 font-medium">
+                  ជ្រើសរើសឯកសារ Excel ដើម្បីនាំចូលពិន្ទុ
+                </DialogDescription>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border border-purple-200 dark:border-purple-700 rounded-xl shadow-sm dark:shadow-purple-900/10">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-purple-800 dark:text-purple-200 mb-2">
+                    ជ្រើសរើសឯកសារ Excel
+                  </label>
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileChange}
+                    className="w-full p-3 border-2 border-purple-200 dark:border-purple-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
+                  />
+                  {excelFile && (
+                    <div className="mt-2 p-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-700 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <span className="text-sm text-green-700 dark:text-green-300 font-medium">
+                          ឯកសារត្រូវបានជ្រើសរើស: {excelFile.name}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="text-xs text-purple-600 dark:text-purple-400 space-y-1">
+                  <div className="font-semibold">ការណែនាំ:</div>
+                  <ul className="space-y-1 ml-4">
+                    <li>• ឯកសារត្រូវជា Excel (.xlsx ឬ .xls)</li>
+                    <li>• ប្រើគំរូដែលទាញយកពីប្រព័ន្ធ</li>
+                    <li>• កុំកែប្រែឈ្មោះសិស្ស ឬរចនាសម្ព័ន្ធ</li>
+                    <li>• ពិន្ទុត្រូវជាលេខពី 0 ដល់ 100</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          <DialogFooter className="flex justify-between items-center gap-4 pt-6 border-t-2 border-purple-200/50 dark:border-purple-700/50 bg-gradient-to-r from-white via-purple-50/50 to-white dark:from-gray-900 dark:via-purple-950/30 dark:to-gray-900 px-4 -mx-6 -mb-6 p-6">
+            <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+              ពិន្ទុដែលមានរួចហើយនឹងត្រូវបានធ្វើបច្ចុប្បន្នភាព
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setExcelImportDialogOpen(false)
+                  setExcelFile(null)
+                }}
+                disabled={excelImporting}
+                className="px-6 py-2 bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-600 text-purple-600 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-sm dark:shadow-purple-900/10"
+              >
+                បោះបង់
+              </Button>
+              <Button
+                onClick={handleExcelImport}
+                disabled={excelImporting || !excelFile}
+                className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 dark:from-purple-600 dark:to-pink-700 dark:hover:from-purple-700 dark:hover:to-pink-800 text-white rounded-xl font-semibold shadow-lg dark:shadow-purple-900/30 hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {excelImporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    កំពុងនាំចូល...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    នាំចូលពិន្ទុ
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Result Popup Dialog */}
+      <Dialog open={importResultDialogOpen} onOpenChange={setImportResultDialogOpen}>
+        <DialogContent className="max-w-2xl bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/20 dark:from-gray-900 dark:via-emerald-950/30 dark:to-teal-950/20 backdrop-blur-xl border-0 shadow-2xl dark:shadow-emerald-900/20 rounded-2xl">
+          <DialogHeader className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className={`p-3 rounded-xl shadow-lg ${
+                importResult?.success 
+                  ? 'bg-emerald-100 dark:bg-emerald-900/40' 
+                  : 'bg-red-100 dark:bg-red-900/40'
+              }`}>
+                {importResult?.success ? (
+                  <CheckCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-300" />
+                ) : (
+                  <XCircle className="h-6 w-6 text-red-600 dark:text-red-300" />
+                )}
+              </div>
+              <div>
+                <DialogTitle className={`text-xl font-bold ${
+                  importResult?.success 
+                    ? 'text-emerald-800 dark:text-emerald-200' 
+                    : 'text-red-800 dark:text-red-200'
+                }`}>
+                  {importResult?.success ? 'នាំចូលជោគជ័យ' : 'នាំចូលមានបញ្ហា'}
+                </DialogTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  លទ្ធផលនៃការនាំចូលពិន្ទុ
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Message */}
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl border border-blue-200 dark:border-blue-700">
+              <p className="text-gray-800 dark:text-gray-200 font-medium">
+                {importResult?.message}
+              </p>
+            </div>
+
+            {/* Statistics */}
+            {importResult && (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 rounded-xl border border-emerald-200 dark:border-emerald-700">
+                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {importResult.created}
+                  </div>
+                  <div className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+                    បានបង្កើត
+                  </div>
+                </div>
+                <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-xl border border-blue-200 dark:border-blue-700">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {importResult.updated}
+                  </div>
+                  <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                    បានកែប្រែ
+                  </div>
+                </div>
+                <div className="text-center p-4 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950/30 dark:to-pink-950/30 rounded-xl border border-red-200 dark:border-red-700">
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {importResult.errors}
+                  </div>
+                  <div className="text-sm text-red-700 dark:text-red-300 font-medium">
+                    មានបញ្ហា
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Error Details */}
+            {importResult?.errorDetails && importResult.errorDetails.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-red-700 dark:text-red-300 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  ព័ត៌មានបញ្ហា:
+                </h4>
+                <div className="max-h-32 overflow-y-auto space-y-2">
+                  {importResult.errorDetails.map((error, index) => (
+                    <div key={index} className="p-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-700 rounded-lg">
+                      <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {importResult?.success && importResult.created + importResult.updated > 0 && (
+              <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 rounded-xl border border-emerald-200 dark:border-emerald-700">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <p className="text-emerald-700 dark:text-emerald-300 font-medium">
+                    ពិន្ទុត្រូវបាននាំចូលដោយជោគជ័យ! សូមពិនិត្យមើលក្នុងបញ្ជីពិន្ទុ។
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              onClick={() => setImportResultDialogOpen(false)}
+              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              យល់ព្រម
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Excel Template Dialog */}
+      <Dialog open={excelTemplateDialogOpen} onOpenChange={setExcelTemplateDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 dark:from-gray-900 dark:via-blue-950/30 dark:to-indigo-950/20 backdrop-blur-xl border-0 shadow-2xl dark:shadow-blue-900/20 rounded-2xl overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0 space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/40 rounded-xl shadow-lg dark:shadow-blue-900/20">
+                <FileSpreadsheet className="h-6 w-6 text-blue-600 dark:text-blue-300" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold text-blue-800 dark:text-blue-200">
+                  ទាញយកគំរូ Excel
+                </DialogTitle>
+                <DialogDescription className="text-blue-700 dark:text-blue-300 font-medium">
+                  ជ្រើសរើសមុខវិជ្ជាមួយ ឬច្រើនដើម្បីបង្កើតគំរូ Excel
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto px-1 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 dark:scrollbar-thumb-blue-600 dark:scrollbar-track-blue-900">
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200 dark:border-blue-700 rounded-xl shadow-sm dark:shadow-blue-900/10">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                    ជ្រើសរើសមុខវិជ្ជា (អាចជ្រើសរើសច្រើន)
+                  </label>
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+                    {subjects.map((subject) => (
+                      <div key={subject.subjectId} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                        <input
+                          type="checkbox"
+                          id={`subject-${subject.subjectId}`}
+                          checked={selectedTemplateSubjects.includes(subject.subjectId.toString())}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedTemplateSubjects(prev => [...prev, subject.subjectId.toString()])
+                            } else {
+                              setSelectedTemplateSubjects(prev => prev.filter(id => id !== subject.subjectId.toString()))
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label 
+                          htmlFor={`subject-${subject.subjectId}`}
+                          className="text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer flex-1"
+                        >
+                          {subject.subjectName}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {selectedTemplateSubjects.length > 0 && (
+                    <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                      <div className="text-sm font-medium text-green-800 dark:text-green-200">
+                        មុខវិជ្ជាដែលបានជ្រើសរើស: {selectedTemplateSubjects.length}
+                      </div>
+                      <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                        {subjects
+                          .filter(subject => selectedTemplateSubjects.includes(subject.subjectId.toString()))
+                          .map(subject => subject.subjectName)
+                          .join(', ')}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="text-xs text-blue-600 dark:text-blue-400 space-y-1">
+                  <div className="font-semibold">ការណែនាំ:</div>
+                  <ul className="space-y-1 ml-4">
+                    <li>• ជ្រើសរើសមុខវិជ្ជាមួយ ឬច្រើនដើម្បីបង្កើតគំរូ</li>
+                    <li>• គំរូនឹងមានវគ្គផ្សេងៗសម្រាប់មុខវិជ្ជានីមួយៗ</li>
+                    <li>• បំពេញពិន្ទុក្នុងគំរូ បន្ទាប់មកនាំចូល</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="flex-shrink-0 flex justify-between items-center gap-4 pt-6 border-t-2 border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-r from-white via-blue-50/50 to-white dark:from-gray-900 dark:via-blue-950/30 dark:to-gray-900 px-4 -mx-6 -mb-6 p-6">
+            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+              គំរូនឹងមានវគ្គផ្សេងៗសម្រាប់មុខវិជ្ជាដែលជ្រើសរើស
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setExcelTemplateDialogOpen(false)
+                  setSelectedTemplateSubjects([])
+                }}
+                className="px-6 py-2 bg-white dark:bg-gray-800 border-2 border-blue-200 dark:border-blue-600 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-sm dark:shadow-blue-900/10"
+              >
+                បោះបង់
+              </Button>
+              <Button
+                onClick={handleExcelTemplateDownload}
+                disabled={selectedTemplateSubjects.length === 0}
+                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-600 dark:to-indigo-700 dark:hover:from-blue-700 dark:hover:to-indigo-800 text-white rounded-xl font-semibold shadow-lg dark:shadow-blue-900/30 hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                ទាញយកគំរូ ({selectedTemplateSubjects.length})
               </Button>
             </div>
           </DialogFooter>

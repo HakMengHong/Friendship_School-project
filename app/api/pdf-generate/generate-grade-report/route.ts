@@ -1,3 +1,4 @@
+// UPDATED: 2025-10-30 - Apply attendance penalty to ALL months including last month (yearly subject calculation)
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { pdfManager } from '@/lib/pdf-generators/core/pdf-manager'
@@ -5,6 +6,7 @@ import { ReportType } from '@/lib/pdf-generators/core/types'
 import { MonthlyGradeReportData } from '@/lib/pdf-generators/reports/grade-report-monthly'
 import { SemesterGradeReportData } from '@/lib/pdf-generators/reports/grade-report-semester'
 import { YearlyGradeReportData } from '@/lib/pdf-generators/reports/grade-report-yearly'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // Helper Functions
 function getLetterGrade(score: number, gradeNum: number): string {
@@ -91,6 +93,99 @@ function calculateSemesterAverage(
   return { lastMonthAverage, previousMonthsAverage, overallAverage }
 }
 
+/**
+ * Calculate semester averages with per-month attendance penalties
+ * Applies attendance penalty to ALL months including the last month
+ * 
+ * @param grades - All grades for the semester
+ * @param semesterText - Semester identifier (e.g., 'ឆមាសទី ១')
+ * @param gradeNum - Grade level for calculation formula
+ * @param studentId - Student ID for attendance lookup
+ * @param calculateAbsences - Function to calculate absences for a date range
+ * @returns Object containing lastMonthAverage (with penalty), previousMonthsAverage (with penalties), and overallAverage
+ */
+async function calculateSemesterAverageWithAttendance(
+  grades: any[],
+  semesterText: string,
+  gradeNum: number,
+  studentId: number,
+  calculateAbsences: (studentId: number, startDate: Date, endDate: Date) => Promise<number>
+): Promise<{ lastMonthAverage: number; previousMonthsAverage: number; overallAverage: number }> {
+  const dates = [...new Set(grades.map(g => g.gradeDate))].filter(Boolean)
+  const sortedDates = sortDatesByYearMonth(dates)
+  
+  if (sortedDates.length === 0) {
+    return { lastMonthAverage: 0, previousMonthsAverage: 0, overallAverage: 0 }
+  }
+
+  const lastMonth = sortedDates[sortedDates.length - 1]
+  const previousMonths = sortedDates.slice(0, -1)
+
+  // Last month calculation (base grade, will apply penalty later)
+  const lastMonthGrades = grades.filter(g => g.gradeDate === lastMonth)
+  const lastMonthTotal = lastMonthGrades.reduce((sum, g) => sum + (g.grade || 0), 0)
+  const uniqueSubjects = new Set(lastMonthGrades.map(g => g.subject?.subjectName)).size
+  const lastMonthBaseAverage = calculateGradeAverage(lastMonthTotal, gradeNum, uniqueSubjects)
+
+  // Previous months calculation WITH PER-MONTH ATTENDANCE PENALTIES
+  const monthlyAveragesWithPenalty: number[] = []
+  
+  for (const month of previousMonths) {
+    // Get grades for this month
+    const monthGrades = grades.filter(g => g.gradeDate === month)
+    if (monthGrades.length === 0) continue
+    
+    const monthTotal = monthGrades.reduce((sum, g) => sum + (g.grade || 0), 0)
+    const monthUniqueSubjects = new Set(monthGrades.map(g => g.subject?.subjectName)).size
+    // Use grade-specific formula (1-6: /subjects, 7-8: /14, 9: /8.4)
+    const monthAverage = calculateGradeAverage(monthTotal, gradeNum, monthUniqueSubjects)
+    
+    // Calculate attendance for this specific month
+    const [monthStr, yearStr] = month.split('/')
+    const monthNum = parseInt(monthStr)
+    const yearNum = parseInt('20' + yearStr)
+    const monthStart = new Date(yearNum, monthNum - 1, 1)
+    const monthEnd = new Date(yearNum, monthNum, 0, 23, 59, 59)
+    
+    const monthAbsences = await calculateAbsences(studentId, monthStart, monthEnd)
+    
+    // Apply attendance penalty: Up to 10% deduction (every 4 absences = 10% penalty, max 10%)
+    // Perfect attendance (0 absences) = 100% of grade, Maximum penalty = 90% of grade
+    const penaltyRate = Math.min(monthAbsences / 4, 1) * 0.1
+    const adjustedMonthAverage = monthAverage * (1 - penaltyRate)
+    
+    monthlyAveragesWithPenalty.push(adjustedMonthAverage)
+    
+    console.log(`    Month ${month}: Avg ${monthAverage.toFixed(2)}, Absences ${monthAbsences.toFixed(2)}, Adjusted ${adjustedMonthAverage.toFixed(2)}`)
+  }
+
+  // Average of all previous months (already adjusted for attendance per month)
+  const previousMonthsAverage = monthlyAveragesWithPenalty.length > 0 
+    ? monthlyAveragesWithPenalty.reduce((sum, avg) => sum + avg, 0) / monthlyAveragesWithPenalty.length 
+    : 0
+  
+  // Apply attendance penalty to LAST MONTH as well
+  const [lastMonthStr, lastYearStr] = lastMonth.split('/')
+  const lastMonthNum = parseInt(lastMonthStr)
+  const lastYearNum = parseInt('20' + lastYearStr)
+  const lastMonthStart = new Date(lastYearNum, lastMonthNum - 1, 1)
+  const lastMonthEnd = new Date(lastYearNum, lastMonthNum, 0, 23, 59, 59)
+  
+  const lastMonthAbsences = await calculateAbsences(studentId, lastMonthStart, lastMonthEnd)
+  const lastMonthPenaltyRate = Math.min(lastMonthAbsences / 4, 1) * 0.1
+  const lastMonthAverage = lastMonthBaseAverage * (1 - lastMonthPenaltyRate)
+  
+  console.log(`    Last Month ${lastMonth}: Base Avg ${lastMonthBaseAverage.toFixed(2)}, Absences ${lastMonthAbsences.toFixed(2)}, Adjusted ${lastMonthAverage.toFixed(2)}`)
+  
+  // Overall average includes last month (with penalty) + previous months average (with penalties)
+  const overallAverage = (lastMonthAverage + previousMonthsAverage) / 2
+
+  console.log(`    Previous Months Avg (with per-month attendance): ${previousMonthsAverage.toFixed(2)}`)
+  console.log(`    Overall Semester Avg: ${overallAverage.toFixed(2)}`)
+
+  return { lastMonthAverage, previousMonthsAverage, overallAverage }
+}
+
 function createSubjectObject(grade: any, gradeNum: number) {
   return {
     subjectName: grade.subject?.subjectName || 'Unknown Subject',
@@ -149,10 +244,50 @@ function createSafeFilename(reportType: string, academicYear: string, className?
     .replace(/\s+/g, '-')
 }
 
+/**
+ * Calculate total absences for a student within a date range
+ * Uses weighted formula: (totalExcused × 0.5) + totalAbsent
+ * @param studentId - Student ID
+ * @param startDate - Start date of period
+ * @param endDate - End date of period
+ * @returns Total absences (weighted)
+ */
+async function calculateStudentAbsences(studentId: number, startDate: Date, endDate: Date): Promise<number> {
+  const attendanceRecords = await prisma.attendance.findMany({
+    where: {
+      studentId,
+      attendanceDate: {
+        gte: startDate,
+        lte: endDate
+      }
+    }
+  })
+
+  let totalAbsent = 0
+  let totalExcused = 0
+
+  attendanceRecords.forEach(record => {
+    const sessionCount = record.session === 'FULL' ? 2 : 1
+    
+    switch (record.status) {
+      case 'absent':
+        totalAbsent += sessionCount
+        break
+      case 'excused':
+        totalExcused += sessionCount
+        break
+    }
+  })
+
+  // Apply weighted formula: excused counts as 0.5, absent counts as 1
+  const totalAbsences = (totalExcused * 0.5) + totalAbsent
+  return totalAbsences
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { reportType, academicYear, month, year, semester, class: className, startDate, endDate } = body
+    const { reportType, academicYear, month, year, semester, class: className, startDate, endDate, userId } = body
 
     // Validate required fields
     if (!reportType || !academicYear) {
@@ -269,7 +404,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Process student data
-    const processedStudents = students.map(student => {
+    const processedStudents = await Promise.all(students.map(async student => {
       const gradeNum = parseInt(student.class) || 0
       let filteredGrades = student.grades
       let semesterData: any = {}
@@ -294,10 +429,14 @@ export async function POST(request: NextRequest) {
         const lastMonthSubjects = lastMonthGrades.map(grade => createSubjectObject(grade, gradeNum))
         const lastMonthTotal = lastMonthSubjects.reduce((sum, subject) => sum + subject.grade, 0)
         
-        const { lastMonthAverage, previousMonthsAverage, overallAverage } = calculateSemesterAverage(
+        // Use attendance-aware calculation that applies penalties per-month
+        console.log(`  Calculating semester averages for student ${student.studentId} with per-month attendance:`)
+        const { lastMonthAverage, previousMonthsAverage, overallAverage } = await calculateSemesterAverageWithAttendance(
           [...lastMonthGrades, ...previousMonthsGrades],
           semesterText,
-          gradeNum
+          gradeNum,
+          student.studentId,
+          calculateStudentAbsences
         )
         
         semesterData = {
@@ -319,8 +458,8 @@ export async function POST(request: NextRequest) {
           if (grade.subject?.subjectName) allSubjects.add(grade.subject.subjectName)
         })
         
-        // Calculate average grade for each subject using semester logic
-        yearlySubjects = Array.from(allSubjects).map(subjectName => {
+        // Calculate average grade for each subject using semester logic WITH ATTENDANCE PENALTIES
+        yearlySubjects = await Promise.all(Array.from(allSubjects).map(async subjectName => {
           const sem1SubjectGrades = semester1Grades.filter(g => g.subject?.subjectName === subjectName)
           const sem2SubjectGrades = semester2Grades.filter(g => g.subject?.subjectName === subjectName)
           
@@ -333,25 +472,79 @@ export async function POST(request: NextRequest) {
           const sem1LastMonth = sem1SortedDates[sem1SortedDates.length - 1]
           const sem2LastMonth = sem2SortedDates[sem2SortedDates.length - 1]
           
-          const sem1LastMonthGrade = sem1SubjectGrades.find(g => g.gradeDate === sem1LastMonth)?.grade || 0
-          const sem2LastMonthGrade = sem2SubjectGrades.find(g => g.gradeDate === sem2LastMonth)?.grade || 0
+          const sem1LastMonthBaseGrade = sem1SubjectGrades.find(g => g.gradeDate === sem1LastMonth)?.grade || 0
+          const sem2LastMonthBaseGrade = sem2SubjectGrades.find(g => g.gradeDate === sem2LastMonth)?.grade || 0
           
           const sem1PreviousMonths = sem1SortedDates.slice(0, -1)
           const sem2PreviousMonths = sem2SortedDates.slice(0, -1)
           
-          const sem1PreviousMonthsGrades = sem1PreviousMonths.map(month => 
-            sem1SubjectGrades.find(g => g.gradeDate === month)?.grade || 0
-          )
-          const sem2PreviousMonthsGrades = sem2PreviousMonths.map(month => 
-            sem2SubjectGrades.find(g => g.gradeDate === month)?.grade || 0
-          )
+          // Calculate Semester 1 previous months WITH ATTENDANCE PENALTY
+          const sem1AdjustedMonthGrades: number[] = []
+          for (const month of sem1PreviousMonths) {
+            const monthGrade = sem1SubjectGrades.find(g => g.gradeDate === month)?.grade || 0
+            
+            // Get attendance for this month
+            const [monthStr, yearStr] = month.split('/')
+            const monthNum = parseInt(monthStr)
+            const yearNum = parseInt('20' + yearStr)
+            const monthStart = new Date(yearNum, monthNum - 1, 1)
+            const monthEnd = new Date(yearNum, monthNum, 0, 23, 59, 59)
+            
+            const monthAbsences = await calculateStudentAbsences(typeof student.studentId === 'string' ? parseInt(student.studentId) : student.studentId, monthStart, monthEnd)
+            const penaltyRate = Math.min(monthAbsences / 4, 1) * 0.1
+            const adjustedGrade = monthGrade * (1 - penaltyRate)
+            sem1AdjustedMonthGrades.push(adjustedGrade)
+          }
           
-          const sem1PreviousMonthsAverage = sem1PreviousMonthsGrades.length > 0 
-            ? sem1PreviousMonthsGrades.reduce((sum, grade) => sum + grade, 0) / sem1PreviousMonthsGrades.length 
+          // Calculate Semester 2 previous months WITH ATTENDANCE PENALTY
+          const sem2AdjustedMonthGrades: number[] = []
+          for (const month of sem2PreviousMonths) {
+            const monthGrade = sem2SubjectGrades.find(g => g.gradeDate === month)?.grade || 0
+            
+            // Get attendance for this month
+            const [monthStr, yearStr] = month.split('/')
+            const monthNum = parseInt(monthStr)
+            const yearNum = parseInt('20' + yearStr)
+            const monthStart = new Date(yearNum, monthNum - 1, 1)
+            const monthEnd = new Date(yearNum, monthNum, 0, 23, 59, 59)
+            
+            const monthAbsences = await calculateStudentAbsences(typeof student.studentId === 'string' ? parseInt(student.studentId) : student.studentId, monthStart, monthEnd)
+            const penaltyRate = Math.min(monthAbsences / 4, 1) * 0.1
+            const adjustedGrade = monthGrade * (1 - penaltyRate)
+            sem2AdjustedMonthGrades.push(adjustedGrade)
+          }
+          
+          const sem1PreviousMonthsAverage = sem1AdjustedMonthGrades.length > 0 
+            ? sem1AdjustedMonthGrades.reduce((sum, grade) => sum + grade, 0) / sem1AdjustedMonthGrades.length 
             : 0
-          const sem2PreviousMonthsAverage = sem2PreviousMonthsGrades.length > 0 
-            ? sem2PreviousMonthsGrades.reduce((sum, grade) => sum + grade, 0) / sem2PreviousMonthsGrades.length 
+          const sem2PreviousMonthsAverage = sem2AdjustedMonthGrades.length > 0 
+            ? sem2AdjustedMonthGrades.reduce((sum, grade) => sum + grade, 0) / sem2AdjustedMonthGrades.length 
             : 0
+          
+          // Apply attendance penalty to LAST MONTH as well
+          let sem1LastMonthGrade = sem1LastMonthBaseGrade
+          if (sem1LastMonth) {
+            const [monthStr, yearStr] = sem1LastMonth.split('/')
+            const monthNum = parseInt(monthStr)
+            const yearNum = parseInt('20' + yearStr)
+            const monthStart = new Date(yearNum, monthNum - 1, 1)
+            const monthEnd = new Date(yearNum, monthNum, 0, 23, 59, 59)
+            const monthAbsences = await calculateStudentAbsences(typeof student.studentId === 'string' ? parseInt(student.studentId) : student.studentId, monthStart, monthEnd)
+            const penaltyRate = Math.min(monthAbsences / 4, 1) * 0.1
+            sem1LastMonthGrade = sem1LastMonthBaseGrade * (1 - penaltyRate)
+          }
+          
+          let sem2LastMonthGrade = sem2LastMonthBaseGrade
+          if (sem2LastMonth) {
+            const [monthStr, yearStr] = sem2LastMonth.split('/')
+            const monthNum = parseInt(monthStr)
+            const yearNum = parseInt('20' + yearStr)
+            const monthStart = new Date(yearNum, monthNum - 1, 1)
+            const monthEnd = new Date(yearNum, monthNum, 0, 23, 59, 59)
+            const monthAbsences = await calculateStudentAbsences(typeof student.studentId === 'string' ? parseInt(student.studentId) : student.studentId, monthStart, monthEnd)
+            const penaltyRate = Math.min(monthAbsences / 4, 1) * 0.1
+            sem2LastMonthGrade = sem2LastMonthBaseGrade * (1 - penaltyRate)
+          }
           
           const sem1SubjectGrade = (sem1LastMonthGrade + sem1PreviousMonthsAverage) / 2
           const sem2SubjectGrade = (sem2LastMonthGrade + sem2PreviousMonthsAverage) / 2
@@ -364,11 +557,23 @@ export async function POST(request: NextRequest) {
             percentage: (subjectAverage / 100) * 100,
             letterGrade: getLetterGrade(subjectAverage, gradeNum)
           }
-        })
+        }))
         
-        // Calculate semester averages
-        const sem1Result = calculateSemesterAverage(semester1Grades, 'ឆមាសទី ១', gradeNum)
-        const sem2Result = calculateSemesterAverage(semester2Grades, 'ឆមាសទី ២', gradeNum)
+        // Calculate semester averages WITH ATTENDANCE
+        const sem1Result = await calculateSemesterAverageWithAttendance(
+          semester1Grades,
+          'ឆមាសទី ១',
+          gradeNum,
+          typeof student.studentId === 'string' ? parseInt(student.studentId) : student.studentId,
+          calculateStudentAbsences
+        )
+        const sem2Result = await calculateSemesterAverageWithAttendance(
+          semester2Grades,
+          'ឆមាសទី ២',
+          gradeNum,
+          typeof student.studentId === 'string' ? parseInt(student.studentId) : student.studentId,
+          calculateStudentAbsences
+        )
         
         averageGrade = (sem1Result.overallAverage + sem2Result.overallAverage) / 2
         
@@ -388,6 +593,27 @@ export async function POST(request: NextRequest) {
         averageGrade = calculateGradeAverage(totalGrade, gradeNum, subjects.length)
       }
 
+      // Calculate attendance for monthly and semester reports
+      let totalAbsences = 0
+      if (reportType === 'monthly' && month && year) {
+        const monthStart = new Date(parseInt(year), parseInt(month) - 1, 1)
+        const monthEnd = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59)
+        totalAbsences = await calculateStudentAbsences(student.studentId, monthStart, monthEnd)
+      } else if (reportType === 'semester' && semester) {
+        // Calculate attendance for LAST MONTH of semester only (same as grades)
+        // This ensures consistency: if grades are from last month, attendance penalty should be too
+        if (lastSemesterMonth) {
+          const [monthStr, yearStr] = lastSemesterMonth.split('/')
+          const monthNum = parseInt(monthStr)
+          const yearNum = parseInt('20' + yearStr)
+          
+          const monthStart = new Date(yearNum, monthNum - 1, 1)
+          const monthEnd = new Date(yearNum, monthNum, 0, 23, 59, 59)
+          
+          totalAbsences = await calculateStudentAbsences(student.studentId, monthStart, monthEnd)
+        }
+      }
+
       return {
         studentId: student.studentId.toString(),
         firstName: student.firstName,
@@ -400,9 +626,10 @@ export async function POST(request: NextRequest) {
         averageGrade,
         rank: 0,
         status: averageGrade >= 50 ? 'pass' : 'fail',
+        totalAbsences,  // Add attendance data for penalty calculation
         ...semesterData
       }
-    })
+    }))
 
     // Calculate ranks
     processedStudents.sort((a, b) => b.averageGrade - a.averageGrade)
@@ -492,6 +719,15 @@ export async function POST(request: NextRequest) {
 
     result = await pdfManager.generatePDF(reportTypeEnum, reportData)
     const safeFilename = createSafeFilename(reportType, academicYear, className)
+
+    // Log activity
+    if (userId) {
+      await logActivity(
+        userId,
+        ActivityMessages.GENERATE_GRADE_REPORT,
+        `បង្កើតរបាយការណ៍ពិន្ទុ ${reportType} - ${className || 'ទាំងអស់'}`
+      )
+    }
 
     return new NextResponse(result.buffer as BodyInit, {
       status: 200,

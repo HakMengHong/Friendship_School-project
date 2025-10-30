@@ -450,7 +450,6 @@ enum ReportType {
 GET    /api/classes               // Get available class grades
 POST   /api/export-excel          // Export data to Excel
 GET    /api/activity-logs         // Get system activity logs
-GET    /api/learning-quality      // Get learning quality metrics
 POST   /api/upload                // File upload endpoint
 ```
 

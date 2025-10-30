@@ -186,8 +186,8 @@ export const getVaccinationKhmer = (vaccinated: boolean): string => {
 export const getAttendanceStatusKhmer = (status: string): string => {
   const statusMap: { [key: string]: string } = {
     'present': 'មក',
-    'absent': 'អវត្តមាន',
-    'late': 'មកយឺត',
+    'absent': 'អវត្តមាន(ឥតច្បាប់)',
+    'late': 'យឺត',
     'excused': 'អវត្តមាន(មានច្បាប់)'
   }
   return statusMap[status] || status

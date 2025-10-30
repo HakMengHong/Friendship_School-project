@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // GET - Fetch all users
 export async function GET(request: NextRequest) {
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { username, password, firstname, lastname, phonenumber1, phonenumber2, role, position, photo } = body
+    const { username, password, firstname, lastname, phonenumber1, phonenumber2, role, position, photo, createdBy } = body
 
     // Validate required fields
     if (!username || !password || !firstname || !lastname) {
@@ -103,6 +104,15 @@ export async function POST(request: NextRequest) {
       createdAt: newUser.createdAt,
       updatedAt: newUser.updatedAt,
       status: newUser.status
+    }
+
+    // Log activity
+    if (createdBy) {
+      await logActivity(
+        createdBy,
+        ActivityMessages.ADD_USER,
+        `បន្ថែមអ្នកប្រើប្រាស់ ${newUser.lastname} ${newUser.firstname} - តួនាទី: ${newUser.role}`
+      )
     }
 
     return NextResponse.json({ user: transformedUser, users: [transformedUser] }, { status: 201 })

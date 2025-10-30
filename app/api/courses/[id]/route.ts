@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 const prisma = new PrismaClient()
 
@@ -42,7 +43,7 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { schoolYearId, grade, section, courseName, teacherId1, teacherId2, teacherId3 } = body
+    const { schoolYearId, grade, section, courseName, teacherId1, teacherId2, teacherId3, userId } = body
 
     if (!schoolYearId || !grade || !section) {
       return NextResponse.json(
@@ -84,6 +85,11 @@ export async function PUT(
       }
     })
 
+    // Log activity
+    if (userId) {
+      await logActivity(userId, ActivityMessages.EDIT_COURSE, `កែប្រែថ្នាក់ ${updatedCourse.courseName}`)
+    }
+
     return NextResponse.json(updatedCourse)
   } catch (error) {
     console.error('Error updating course:', error)
@@ -101,6 +107,13 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+    
+    // Get course info before deleting
+    const course = await prisma.course.findUnique({
+      where: { courseId: parseInt(id) }
+    })
     
     // Check if there are enrollments using this course
     const enrollmentsCount = await prisma.enrollment.count({
@@ -117,6 +130,11 @@ export async function DELETE(
     await prisma.course.delete({
       where: { courseId: parseInt(id) }
     })
+
+    // Log activity
+    if (userId && course) {
+      await logActivity(parseInt(userId), ActivityMessages.DELETE_COURSE, `លុបថ្នាក់ ${course.courseName}`)
+    }
 
     return NextResponse.json({ message: 'Course deleted successfully' })
   } catch (error) {

@@ -33,10 +33,7 @@ export const authenticateUser = async (username: string, password: string): Prom
   try {
     // Find user by username
     const dbUser = await prisma.user.findUnique({
-      where: { username },
-      include: {
-        courses: true
-      }
+      where: { username }
     })
 
     if (!dbUser) {
@@ -74,7 +71,7 @@ export const authenticateUser = async (username: string, password: string): Prom
       lastLogin: dbUser.lastLogin || undefined,
       photo: dbUser.photo || undefined,
       status: dbUser.status,
-      assignedClass: dbUser.courses[0]?.courseId?.toString() || undefined
+      assignedClass: undefined
     }
 
     return user
@@ -95,9 +92,6 @@ export const getAllUsers = async (): Promise<User[]> => {
         ],
         status: 'active'
       },
-      include: {
-        courses: true
-      },
       orderBy: [
         { role: 'asc' },
         { firstname: 'asc' }
@@ -117,7 +111,7 @@ export const getAllUsers = async (): Promise<User[]> => {
       lastLogin: dbUser.lastLogin || undefined,
       photo: dbUser.photo || undefined,
       status: dbUser.status,
-      assignedClass: dbUser.courses[0]?.courseId?.toString() || undefined
+      assignedClass: undefined
     }))
   } catch (error) {
     console.error('Error fetching users:', error)

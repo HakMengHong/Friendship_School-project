@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logActivity, ActivityMessages } from '@/lib/activity-logger';
 
 // GET - Fetch individual student with complete data
 export async function GET(
@@ -49,6 +50,7 @@ export async function PUT(
       guardians,      // [{ name, relation, ... }]
       familyInfo,     // { fatherName, ... }
       scholarships,   // [{ type, amount, ... }]
+      userId
     } = data;
 
 
@@ -62,10 +64,10 @@ export async function PUT(
       dob: student.dob ? new Date(student.dob) : new Date(),
       class: student.class,
       schoolYear: student.schoolYear, // Add school year field
+      photo: student.photo || null, // Add photo field
       registerToStudy: student.registerToStudy || false,
       studentHouseNumber: student.studentHouseNumber,
       studentVillage: student.studentVillage,
-      studentCommune: student.studentCommune,
       studentDistrict: student.studentDistrict,
       studentProvince: student.studentProvince,
       studentBirthDistrict: student.studentBirthDistrict,
@@ -183,6 +185,15 @@ export async function PUT(
         scholarships: true
       }
     });
+
+    // Log activity
+    if (userId && finalStudent) {
+      await logActivity(
+        userId,
+        ActivityMessages.EDIT_STUDENT,
+        `កែប្រែព័ត៌មានសិស្ស ${finalStudent.lastName} ${finalStudent.firstName}`
+      )
+    }
 
     return NextResponse.json({ student: finalStudent });
   } catch (error) {
