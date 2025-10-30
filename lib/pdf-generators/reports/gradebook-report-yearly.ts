@@ -78,20 +78,30 @@ function calculateSubjectRanks(students: any[]): Record<string, Record<string, s
 
 // Calculate student data with proper ranking and status
 function calculateStudentData(student: any, classLevel: string) {
-  // Calculate total grade (sum of all subject grades)
-  const totalGrade = student.subjects.reduce((sum: number, subject: any) => sum + (subject.grade || 0), 0)
+  // API already supplies attendance-adjusted subject grades and precomputed totals/averages
+  // Preserve provided values to avoid double-applying penalties or changing divisors
+  const totalGrade = typeof student.totalGrade === 'number'
+    ? student.totalGrade
+    : student.subjects.reduce((sum: number, subject: any) => sum + (subject.grade || 0), 0)
   
-  // Calculate average grade
-  const averageGrade = student.subjects.length > 0 ? totalGrade / student.subjects.length : 0
+  const averageGrade = typeof student.averageGrade === 'number'
+    ? student.averageGrade
+    : (student.semester1Average && student.semester2Average)
+      ? (student.semester1Average + student.semester2Average) / 2
+      : (student.subjects && student.subjects.length > 0 ? totalGrade / student.subjects.length : 0)
   
-  // Get status using the same logic as grade-report-yearly.ts
+  // Calculate status for overall, semester 1, and semester 2
   const status = getGradeStatus(averageGrade, classLevel)
+  const semester1Status = getGradeStatus(student.semester1Average || 0, classLevel)
+  const semester2Status = getGradeStatus(student.semester2Average || 0, classLevel)
   
   return {
     ...student,
-    totalGrade: totalGrade,
-    averageGrade: averageGrade,
-    status: status
+    totalGrade,
+    averageGrade,
+    status,
+    semester1Status,
+    semester2Status
   }
 }
 
@@ -301,16 +311,17 @@ export function generateYearlyGradebookReportHTML(data: YearlyGradebookReportDat
     }
 
     .student-photo {
-      width: 120px;
-      height: 120px;
+      width: 96px;
+      height: 128px;
       object-fit: cover;
       border-radius: 0;
       border: 2px solid #333;
+      margin-right: 20px;
     }
 
     .photo-placeholder {
-      width: 120px;
-      height: 120px;
+      width: 96px;
+      height: 128px;
       border: 2px solid #333;
       border-radius: 0;
       display: flex;
@@ -318,6 +329,7 @@ export function generateYearlyGradebookReportHTML(data: YearlyGradebookReportDat
       justify-content: center;
       font-size: 9px;
       background: #f5f5f5;
+      margin-right: 20px;
     }
 
     .subject-table {
@@ -418,6 +430,8 @@ export function generateYearlyGradebookReportHTML(data: YearlyGradebookReportDat
     .signature-line {
       height: 20px;
       margin-bottom: 10px;
+      white-space: nowrap;
+      font-size: 9pt;
     }
   </style>
 </head>
@@ -484,14 +498,14 @@ export function generateYearlyGradebookReportHTML(data: YearlyGradebookReportDat
           <td class="grade-value" style="width: 25%;">មធ្យមភាគឆមាសទី ១</td>
           <td class="grade-value" style="width: 25%;">${round(processedStudent.semester1Average || 0, 2)}</td>
           <td class="grade-value" style="width: 25%;">${processedStudent.semester1Rank || 'N/A'}</td>
-          <td class="grade-value" style="width: 25%;">${processedStudent.status}</td>
+          <td class="grade-value" style="width: 25%;">${processedStudent.semester1Status || processedStudent.status}</td>
         </tr>
         
         <tr class="summary-row">
           <td class="grade-value" style="width: 25%;">មធ្យមភាគឆមាសទី ២</td>
           <td class="grade-value" style="width: 25%;">${round(processedStudent.semester2Average || 0, 2)}</td>
           <td class="grade-value" style="width: 25%;">${processedStudent.semester2Rank || 'N/A'}</td>
-          <td class="grade-value" style="width: 25%;">${processedStudent.status}</td>
+          <td class="grade-value" style="width: 25%;">${processedStudent.semester2Status || processedStudent.status}</td>
         </tr>
         
         <tr class="summary-row">
@@ -503,7 +517,7 @@ export function generateYearlyGradebookReportHTML(data: YearlyGradebookReportDat
         
         <!-- Attendance Row -->
         <tr class="attendance-row">
-          <td colspan="4">អវត្តមានប្រចាំឆ្នាំ ច្បាប់: ${processedStudent.attendance.excused} ដង ឥតច្បាប់: ${processedStudent.attendance.absent} ដង យឺត: ${processedStudent.attendance.late} ដង</td>
+          <td colspan="4">អវត្តមានប្រចាំឆ្នាំ ${data.academicYear} យឺត: ${processedStudent.attendance.late} ដង ច្បាប់: ${processedStudent.attendance.excused} ដង ឥតច្បាប់: ${processedStudent.attendance.absent} ដង សរុប: ${round((processedStudent.attendance.excused * 0.5) + processedStudent.attendance.absent, 1)} ដង</td>
         </tr>
       </tbody>
     </table>
@@ -553,12 +567,12 @@ export async function generateYearlyGradebookReportPDF(data: YearlyGradebookRepo
     
     // Set content with better options
     await page.setContent(html, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000
+      waitUntil: 'domcontentloaded', // Changed from networkidle0 for faster rendering
+      timeout: 90000 // Increased timeout for complex calculations
     })
     
-    // Wait a bit more for fonts to load
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Wait for fonts to render
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -599,12 +613,12 @@ export async function generateCombinedYearlyGradebookPDF(individualReports: Year
     
     // Set content with better options
     await page.setContent(combinedHTML, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000
+      waitUntil: 'domcontentloaded', // Changed from networkidle0 for faster rendering
+      timeout: 90000 // Increased timeout for complex calculations
     })
     
-    // Wait a bit more for fonts to load
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Wait for fonts to render
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
     const pdfBuffer = await page.pdf({
       format: 'A4',

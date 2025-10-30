@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // GET: Fetch all enrollments
 export async function GET() {
@@ -32,7 +33,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { courseId, studentIds } = body
+    const { courseId, studentIds, userId } = body
 
     if (!courseId || !studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
       return NextResponse.json(
@@ -110,6 +111,17 @@ export async function POST(request: NextRequest) {
         student: true
       }
     })
+
+    // Log activity for each enrolled student
+    if (userId && createdEnrollments.length > 0) {
+      for (const enrollment of createdEnrollments) {
+        await logActivity(
+          userId,
+          ActivityMessages.ENROLL_STUDENT,
+          `ចុះឈ្មោះសិស្ស ${enrollment.student.lastName} ${enrollment.student.firstName} ចូលថ្នាក់ ${enrollment.course.courseName}`
+        )
+      }
+    }
 
     return NextResponse.json({
       message: `Successfully enrolled ${enrollments.count} students`,

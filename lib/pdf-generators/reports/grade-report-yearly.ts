@@ -143,12 +143,33 @@ export function generateYearlyGradeReportHTML(data: YearlyGradeReportData): stri
   
   // Sort students by total grade (highest first) for ranking
   const sortedStudents = [...data.students].sort((a, b) => b.totalGrade - a.totalGrade)
-  const studentsWithRank = sortedStudents.map((student, index) => ({
-    ...student,
-    averageGrade: student.averageGrade,
-    rank: index + 1,
-    status: getGradeStatus(student.averageGrade, data.class || '9')
-  }))
+  
+  // Assign ranks with proper tie handling
+  const studentsWithRank: any[] = []
+  let currentRank = 1
+  
+  sortedStudents.forEach((student, index) => {
+    if (index === 0) {
+      currentRank = 1
+    } else {
+      // Check if this student has the same total grade as the previous one
+      const currentTotal = student.totalGrade
+      const previousTotal = sortedStudents[index - 1].totalGrade
+      if (Math.abs(currentTotal - previousTotal) < 0.01) {
+        // Same total = same rank (tie), keep currentRank unchanged
+      } else {
+        // Different total = update rank to current position
+        currentRank = index + 1
+      }
+    }
+    
+    studentsWithRank.push({
+      ...student,
+      averageGrade: student.averageGrade,
+      rank: currentRank,
+      status: getGradeStatus(student.averageGrade, data.class || '9')
+    })
+  })
 
   // Helper functions for statistics
   const getFemaleStudents = (): Student[] => {
@@ -349,7 +370,7 @@ export function generateYearlyGradeReportHTML(data: YearlyGradeReportData): stri
     }
     
     th:nth-child(2), td:nth-child(2) { /* ឈ្មោះ */
-      width: 110px;
+      width: 117px;
     }
     
     th:nth-child(3), td:nth-child(3) { /* ភេទ */
@@ -358,11 +379,11 @@ export function generateYearlyGradeReportHTML(data: YearlyGradeReportData): stri
     
     /* Custom widths for last 6 columns */
     th:last-child, td:last-child { /* ចំណាត់ថ្នាក់ប្រចាំឆ្នាំ */
-      width: 50px;
+      width: 40px;
     }
 
     th:nth-last-child(2), td:nth-last-child(2) { /* និទ្ទេសប្រចាំឆ្នាំ */
-      width: 40px;
+      width: 35px;
     }
 
     th:nth-last-child(3), td:nth-last-child(3) { /* មធ្យមភាគប្រចាំឆ្នាំ */
@@ -502,6 +523,7 @@ export function generateYearlyGradeReportHTML(data: YearlyGradeReportData): stri
     
     .approval-line, .signature-line {
       margin-bottom: 15px;
+      white-space: nowrap;
     }
     
     .approval-line:last-child, .signature-line:last-child {

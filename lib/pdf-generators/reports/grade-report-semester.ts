@@ -43,6 +43,7 @@ export interface SemesterGradeReportData {
     previousMonthsAverage?: number
     monthlyAverage?: number
     overallSemesterAverage?: number
+    totalAbsences?: number  // Total weighted absences for attendance penalty calculation
   }[]
   summary: {
     totalStudents: number
@@ -111,13 +112,15 @@ const isFemaleStudent = (gender: string): boolean => {
 
 const getStudentGrade = (student: Student, subjectName: string): string => {
   const subject = student.subjects.find(s => s.subjectName === subjectName)
-  const grade = subject?.grade || 0
-  return round(grade)
+  const originalGrade = subject?.grade || 0
+  const adjustedGrade = applyAttendancePenalty(originalGrade, student.totalAbsences || 0)
+  return round(adjustedGrade)
 }
 
 const getStudentGradeNumber = (student: Student, subjectName: string): number => {
   const subject = student.subjects.find(s => s.subjectName === subjectName)
-  return subject?.grade || 0
+  const originalGrade = subject?.grade || 0
+  return applyAttendancePenalty(originalGrade, student.totalAbsences || 0)
 }
 
 const calculateValidGrades = (students: Student[], gradeExtractor: (student: Student) => number): number[] => {
@@ -140,6 +143,46 @@ const getReportDate = (): string => {
   return `ថ្ងៃទី ${day} ខែ ${month} ឆ្នាំ ${year}`
 }
 
+/**
+ * ATTENDANCE-BASED GRADE PENALTY SYSTEM (SEMESTER REPORT)
+ * 
+ * Applies a weighted penalty to grades based on student absences during the semester.
+ * 
+ * Formula: adjustedGrade = originalGrade × (1 - penaltyRate)
+ * Where: penaltyRate = min(totalAbsences / 4, 1) × 0.1
+ * 
+ * Penalty Structure:
+ * - Grade Weight: 90% (original grade with penalty)
+ * - Attendance Weight: 10% (penalty based on absences)
+ * - For every 4 absences, lose 10% of the grade
+ * - 1 absence = 2.5% penalty
+ * - 2 absences = 5% penalty
+ * - 3 absences = 7.5% penalty
+ * - 4+ absences = 10% penalty (capped)
+ * 
+ * Absence Calculation (totalAbsences):
+ * - excused (អវត្តមាន(មានច្បាប់)): 0.5 per session
+ * - absent (អវត្តមាន(ឥតច្បាប់)): 1.0 per session
+ * - late (យឺត): NOT included in penalty calculation
+ * 
+ * Where session = AM/PM/FULL:
+ * - AM or PM = 1 session
+ * - FULL = 2 sessions
+ * 
+ * totalAbsences = (excused × 0.5) + absent
+ * 
+ * Examples:
+ * - Original grade: 50, Absences: 0 → Adjusted: 50.0 (100%)
+ * - Original grade: 50, Absences: 2 → Adjusted: 47.5 (95%)
+ * - Original grade: 50, Absences: 4 → Adjusted: 45.0 (90%)
+ * - Original grade: 40.3, Absences: 3 → Adjusted: 37.27 (92.5%)
+ */
+const applyAttendancePenalty = (originalGrade: number, totalAbsences: number = 0): number => {
+  const penaltyRate = Math.min(totalAbsences / 4, 1) * 0.1  // Max 10% penalty
+  const adjustedGrade = originalGrade * (1 - penaltyRate)
+  return adjustedGrade
+}
+
 export function generateSemesterGradeReportHTML(data: SemesterGradeReportData): string {
   const logoBase64 = getLogoBase64(data.class)
   const reportDate = getReportDate()
@@ -160,25 +203,67 @@ export function generateSemesterGradeReportHTML(data: SemesterGradeReportData): 
     const overallSemesterAverage = student.overallSemesterAverage || 0
     const lastMonthTotal = student.lastMonthTotal || student.totalGrade
     
-    const semesterStatus = getGradeStatus(overallSemesterAverage, student.class)
-    
     return {
       ...student,
       totalGrade: lastMonthTotal,
       averageGrade: semesterAverage,
       monthlyAverage: monthlyAverage,
       overallSemesterAverage: overallSemesterAverage,
-      status: semesterStatus,
+      status: '',
       rank: 0
     }
   })
 
-  // Sort students by overall semester average (highest first) for ranking
-  const sortedStudents = [...studentsWithSemesterData].sort((a, b) => b.overallSemesterAverage - a.overallSemesterAverage)
-  const studentsWithRank = sortedStudents.map((student, index) => ({
-    ...student,
-    rank: index + 1
-  }))
+  // Apply attendance penalty to create adjusted grades for ranking
+  // NOTE: previousMonthsAverage (monthlyAverage) is already calculated with per-month attendance penalties in the API
+  const studentsWithAdjusted = studentsWithSemesterData.map(student => {
+    // Last-month values (totalGrade, averageGrade) are already attendance-adjusted by the API
+    const adjustedAverageGrade = student.averageGrade
+    const adjustedMonthlyAverage = student.monthlyAverage || 0  // Already adjusted per month in API
+    
+    // Calculate overall semester average from the ADJUSTED values (not from original overallSemesterAverage)
+    const adjustedOverallSemesterAverage = (adjustedAverageGrade + adjustedMonthlyAverage) / 2
+    
+    return {
+      ...student,
+      adjustedTotalGrade: student.totalGrade,
+      adjustedAverageGrade: adjustedAverageGrade,
+      adjustedMonthlyAverage: adjustedMonthlyAverage,
+      adjustedOverallSemesterAverage: adjustedOverallSemesterAverage
+    }
+  })
+
+  // Sort students by adjusted overall semester average (highest first) for ranking
+  const sortedStudents = [...studentsWithAdjusted].sort((a, b) => b.adjustedOverallSemesterAverage - a.adjustedOverallSemesterAverage)
+  
+  // Assign ranks with proper tie handling
+  const studentsWithRank: any[] = []
+  let currentRank = 1
+  
+  sortedStudents.forEach((student, index) => {
+    if (index === 0) {
+      currentRank = 1
+    } else {
+      // Check if this student has the same adjusted overall semester average as the previous one
+      const currentAvg = student.adjustedOverallSemesterAverage
+      const previousAvg = sortedStudents[index - 1].adjustedOverallSemesterAverage
+      if (Math.abs(currentAvg - previousAvg) < 0.01) {
+        // Same average = same rank (tie), keep currentRank unchanged
+      } else {
+        // Different average = update rank to current position
+        currentRank = index + 1
+      }
+    }
+    
+    // Calculate status based on adjusted overall semester average
+    const semesterStatus = getGradeStatus(student.adjustedOverallSemesterAverage, student.class)
+    
+    studentsWithRank.push({
+      ...student,
+      rank: currentRank,
+      status: semesterStatus
+    })
+  })
 
   // Helper functions for statistics
   const getFemaleStudents = (): Student[] => {
@@ -197,28 +282,34 @@ export function generateSemesterGradeReportHTML(data: SemesterGradeReportData): 
   }
 
   const getFemaleTotalAverage = (): string => {
-    const validGrades = calculateValidGrades(data.students, student => student.totalGrade)
+    const femaleStudents = studentsWithRank.filter(student => isFemaleStudent(student.gender))
+    const validGrades = femaleStudents
+      .map(student => student.adjustedTotalGrade)
+      .filter(grade => typeof grade === 'number' && !isNaN(grade) && grade >= 0)
     return calculateAverage(validGrades)
   }
 
   const getFemaleOverallAverage = (): string => {
-    const validGrades = calculateValidGrades(studentsWithRank, student => {
-      return student.overallSemesterAverage || 0
-    })
+    const femaleStudents = studentsWithRank.filter(student => isFemaleStudent(student.gender))
+    const validGrades = femaleStudents
+      .map(student => student.adjustedOverallSemesterAverage || 0)
+      .filter(grade => typeof grade === 'number' && !isNaN(grade) && grade >= 0)
     return calculateAverage(validGrades)
   }
 
   const getFemaleSemesterAverage = (): string => {
-    const validGrades = calculateValidGrades(studentsWithRank, student => {
-      return student.averageGrade
-    })
+    const femaleStudents = studentsWithRank.filter(student => isFemaleStudent(student.gender))
+    const validGrades = femaleStudents
+      .map(student => student.adjustedAverageGrade)
+      .filter(grade => typeof grade === 'number' && !isNaN(grade) && grade >= 0)
     return calculateAverage(validGrades)
   }
 
   const getFemaleMonthlyAverage = (): string => {
-    const validGrades = calculateValidGrades(studentsWithRank, student => {
-      return student.monthlyAverage || 0
-    })
+    const femaleStudents = studentsWithRank.filter(student => isFemaleStudent(student.gender))
+    const validGrades = femaleStudents
+      .map(student => student.adjustedMonthlyAverage || 0)
+      .filter(grade => typeof grade === 'number' && !isNaN(grade) && grade >= 0)
     return calculateAverage(validGrades)
   }
 
@@ -379,7 +470,7 @@ export function generateSemesterGradeReportHTML(data: SemesterGradeReportData): 
     }
     
     th:nth-child(2), td:nth-child(2) { /* ឈ្មោះ */
-      width: 110px;
+      width: 117px;
     }
     
     th:nth-child(3), td:nth-child(3) { /* ភេទ */
@@ -388,11 +479,11 @@ export function generateSemesterGradeReportHTML(data: SemesterGradeReportData): 
     
     /* Custom widths for summary columns */
     th:last-child, td:last-child { /* ចំណាត់ថ្នាក់ប្រចាំឆមាស */
-      width: 50px;
+      width: 40px;
     }
     
     th:nth-last-child(2), td:nth-last-child(2) { /* និទ្ទេសប្រចាំឆមាស */
-      width: 40px;
+      width: 35px;
     }
     
     th:nth-last-child(3), td:nth-last-child(3) { /* មធ្យមភាគប្រចាំឆមាស */
@@ -621,10 +712,10 @@ export function generateSemesterGradeReportHTML(data: SemesterGradeReportData): 
             <td class="student-name">${student.lastName} ${student.firstName}</td>
             <td class="student-gender">${getGenderKhmer(student.gender)}</td>
             ${uniqueSubjects.map(subject => `<td>${getStudentGrade(student, subject)}</td>`).join('')}
-            <td><strong>${round(student.totalGrade, 2)}</strong></td>
-            <td><strong>${round(student.averageGrade, 2)}</strong></td>
-            <td><strong>${round(student.monthlyAverage || 0, 2)}</strong></td>
-            <td><strong>${round(student.overallSemesterAverage || 0, 2)}</strong></td>
+            <td><strong>${round(student.adjustedTotalGrade, 2)}</strong></td>
+            <td><strong>${round(student.adjustedAverageGrade, 2)}</strong></td>
+            <td><strong>${round(student.adjustedMonthlyAverage || 0, 2)}</strong></td>
+            <td><strong>${round(student.adjustedOverallSemesterAverage || 0, 2)}</strong></td>
             <td><strong>${student.status}</strong></td>
             <td><strong>${student.rank}</strong></td>
           </tr>
@@ -714,7 +805,13 @@ export async function generateSemesterGradeReportPDF(data: SemesterGradeReportDa
   
   try {
     const page = await browser.newPage()
-    await page.setContent(html, { waitUntil: 'networkidle0' })
+    await page.setContent(html, { 
+      waitUntil: 'domcontentloaded', // Changed from networkidle0 for faster rendering
+      timeout: 90000 // Increased timeout for complex calculations
+    })
+    
+    // Wait for fonts to render
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
     const pdfBuffer = await page.pdf({
       format: 'A4',

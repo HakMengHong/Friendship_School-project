@@ -27,6 +27,54 @@ export interface StudentIDCardBackData {
   courseName?: string
   section?: string
   guardian?: GuardianBackInfo
+  guardians?: GuardianBackInfo[]  // Support multiple guardians
+}
+
+// Function to convert relation to Khmer
+function getRelationKhmer(relation: string): string {
+  const relationMap: { [key: string]: string } = {
+    'father': 'ឪពុក',
+    'mother': 'ម្តាយ',
+    'guardian': 'អាណាព្យាបាល',
+    'grandfather': 'ជីតា',
+    'grandmother': 'ជីដូន',
+    'uncle': 'មីង',
+    'aunt': 'មីង',
+    'sibling': 'បងប្អូន',
+    'other': 'ផ្សេងៗ'
+  }
+  
+  // Convert to lowercase for matching
+  const lowerRelation = relation?.toLowerCase() || ''
+  return relationMap[lowerRelation] || relation || 'មិនមាន'
+}
+
+// Function to generate guardian table rows
+function generateGuardiansRows(data: StudentIDCardBackData): string {
+  // Use guardians array if available, otherwise fall back to single guardian
+  const guardiansList = data.guardians && data.guardians.length > 0 
+    ? data.guardians 
+    : data.guardian 
+      ? [data.guardian] 
+      : []
+  
+  if (guardiansList.length === 0) {
+    return `
+      <tr>
+        <td>មិនមាន</td>
+        <td>មិនមាន</td>
+        <td>មិនមាន</td>
+      </tr>
+    `
+  }
+  
+  return guardiansList.map(guardian => `
+    <tr>
+      <td>${guardian.name || 'មិនមាន'}</td>
+      <td>${getRelationKhmer(guardian.relation)}</td>
+      <td>${formatPhoneNumber(guardian.phone) || 'មិនមាន'}</td>
+    </tr>
+  `).join('')
 }
 
 export interface BulkStudentIDCardBackData {
@@ -202,17 +250,13 @@ export function generateStudentIDCardBackHTML(data: StudentIDCardBackData): stri
       <table class="back-contact-table">
         <thead>
           <tr>
-            <th>ឈ្នោះ</th>
+            <th>ឈ្មោះអាណាព្យាបាល</th>
             <th>ត្រូវជា</th>
             <th>លេខទូរស័ព្ទ</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>${data.guardian?.name || 'មិនមាន'}</td>
-            <td>${data.guardian?.relation || 'មិនមាន'}</td>
-            <td>${formatPhoneNumber(data.guardian?.phone) || 'មិនមាន'}</td>
-          </tr>
+          ${generateGuardiansRows(data)}
         </tbody>
       </table>
     </div>
@@ -340,8 +384,21 @@ export async function generateStudentIDCardBackPDF(data: StudentIDCardBackData, 
   
   try {
     const page = await browser.newPage()
+    
+    // Set a longer timeout for page loading (60 seconds)
+    page.setDefaultNavigationTimeout(60000)
+    page.setDefaultTimeout(60000)
+    
     await page.setViewport({ width: 282, height: 407 })
-    await page.setContent(html, { waitUntil: 'networkidle0' })
+    
+    // Use 'domcontentloaded' instead of 'networkidle0' for faster loading
+    await page.setContent(html, { 
+      waitUntil: 'domcontentloaded',
+      timeout: 60000 
+    })
+    
+    // Wait a bit for base64 images to render
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 300)))
     
     const pdfBuffer = await page.pdf({
       width: '282px',
@@ -372,8 +429,21 @@ export async function generateBulkStudentIDCardBackPDF(data: BulkStudentIDCardBa
   
   try {
     const page = await browser.newPage()
+    
+    // Set a longer timeout for page loading (60 seconds)
+    page.setDefaultNavigationTimeout(60000)
+    page.setDefaultTimeout(60000)
+    
     await page.setViewport({ width: 794, height: 1123 }) // A4 size in pixels at 96 DPI
-    await page.setContent(html, { waitUntil: 'networkidle0' })
+    
+    // Use 'domcontentloaded' instead of 'networkidle0' for faster loading
+    await page.setContent(html, { 
+      waitUntil: 'domcontentloaded',
+      timeout: 60000 
+    })
+    
+    // Wait a bit for base64 images to render
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
     
     const pdfBuffer = await page.pdf({
       format: 'A4',

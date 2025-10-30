@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logActivity, ActivityMessages } from '@/lib/activity-logger';
 
 export async function GET() {
   try {
@@ -29,7 +30,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { schoolYearCode } = body
+    const { schoolYearCode, userId } = body
 
     if (!schoolYearCode) {
       return NextResponse.json(
@@ -43,6 +44,11 @@ export async function POST(request: NextRequest) {
         schoolYearCode
       }
     })
+
+    // Log activity
+    if (userId) {
+      await logActivity(userId, ActivityMessages.ADD_SCHOOL_YEAR, `បង្កើតឆ្នាំសិក្សា ${newSchoolYear.schoolYearCode}`)
+    }
 
     return NextResponse.json(newSchoolYear, { status: 201 })
   } catch (error) {

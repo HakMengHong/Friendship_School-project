@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../../lib/prisma'
 import bcrypt from 'bcryptjs'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // Security configuration constants
-const MAX_FAILED_ATTEMPTS = 5
-const LOCKOUT_THRESHOLD = 3
-const LOCKOUT_DURATION = 10 * 60 * 1000 // 10 minutes in milliseconds
+const MAX_FAILED_ATTEMPTS = 7
+const LOCKOUT_THRESHOLD = 5
+const LOCKOUT_DURATION = 5 * 60 * 1000 // 5 minutes in milliseconds
+const PROGRESSIVE_LOCKOUT_DURATION = 10 * 60 * 1000 // 10 minutes for progressive lockout
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json()
@@ -55,9 +57,59 @@ export async function POST(request: NextRequest) {
       // Increment failed login attempts
       const newFailedAttempts = (user.failedLoginAttempts || 0) + 1
       
-      // Check if this is the maximum failed attempt
-      if (newFailedAttempts >= MAX_FAILED_ATTEMPTS) {
-        // Deactivate the account
+      // Progressive lockout system
+      if (newFailedAttempts === 5) {
+        // 5th attempt - 5 minute lockout
+        const lockoutTime = new Date(Date.now() + LOCKOUT_DURATION)
+        await prisma.user.update({
+          where: { userId: user.userId },
+          data: {
+            failedLoginAttempts: newFailedAttempts,
+            lastFailedLogin: new Date(),
+            accountLockedUntil: lockoutTime
+          }
+        })
+
+        const lockoutTimeString = lockoutTime.toLocaleString('km-KH', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        })
+
+        return NextResponse.json(
+          { error: `គណនីត្រូវបានចាក់សោដោយសារព្យាយាមចូលខុសច្រើនដង។ សូមព្យាយាមម្តងទៀតនៅពេល: ${lockoutTimeString}` },
+          { status: 423 } // 423 Locked
+        )
+      } else if (newFailedAttempts === 6) {
+        // 6th attempt - 10 minute lockout
+        const lockoutTime = new Date(Date.now() + PROGRESSIVE_LOCKOUT_DURATION)
+        await prisma.user.update({
+          where: { userId: user.userId },
+          data: {
+            failedLoginAttempts: newFailedAttempts,
+            lastFailedLogin: new Date(),
+            accountLockedUntil: lockoutTime
+          }
+        })
+
+        const lockoutTimeString = lockoutTime.toLocaleString('km-KH', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        })
+
+        return NextResponse.json(
+          { error: `គណនីត្រូវបានចាក់សោដោយសារព្យាយាមចូលខុសច្រើនដង។ សូមព្យាយាមម្តងទៀតនៅពេល: ${lockoutTimeString}` },
+          { status: 423 } // 423 Locked
+        )
+      } else if (newFailedAttempts >= 7) {
+        // 7th+ attempt - Account deactivated
         await prisma.user.update({
           where: { userId: user.userId },
           data: {
@@ -73,20 +125,17 @@ export async function POST(request: NextRequest) {
           { status: 423 } // 423 Locked
         )
       } else {
-        // Set temporary lockout for 15 minutes after threshold failed attempts
-        const lockoutUntil = newFailedAttempts >= LOCKOUT_THRESHOLD ? 
-          new Date(Date.now() + LOCKOUT_DURATION) : null
-        
+        // Before 5th attempt - show remaining attempts
         await prisma.user.update({
           where: { userId: user.userId },
           data: {
             failedLoginAttempts: newFailedAttempts,
             lastFailedLogin: new Date(),
-            accountLockedUntil: lockoutUntil
+            accountLockedUntil: null
           }
         })
 
-        const remainingAttempts = MAX_FAILED_ATTEMPTS - newFailedAttempts
+        const remainingAttempts = 5 - newFailedAttempts
         return NextResponse.json(
           { error: `ឈ្មោះឬលេខកូដសម្ងាត់មិនត្រឹមត្រូវ។ នៅសល់ ${remainingAttempts} ដង។` },
           { status: 401 }
@@ -104,6 +153,9 @@ export async function POST(request: NextRequest) {
         accountLockedUntil: null
       }
     })
+
+    // Log successful login activity
+    await logActivity(user.userId, ActivityMessages.LOGIN, `${user.lastname} ${user.firstname}`)
 
     // Return user data (without password) with session timestamps
     const now = Date.now()

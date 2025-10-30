@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { pdfManager } from '@/lib/pdf-generators/core/pdf-manager'
 import { ReportType } from '@/lib/pdf-generators/core/types'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 export async function POST(request: NextRequest) {
   try {
-    const { studentId } = await request.json()
+    const { studentId, userId } = await request.json()
 
     if (!studentId) {
       return NextResponse.json(
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
       lastName: student.lastName,
       gender: student.gender,
       dob: student.dob.toISOString().split('T')[0],
-      age: student.age?.toString() || '',
+      age: (student as any).age?.toString() || '',
       class: student.class,
       phone: student.phone || '',
       emergencyContact: student.emergencyContact || '',
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
         helpFrequency: student.family?.helpFrequency || '',
         knowSchool: student.family?.knowSchool || '',
         organizationHelp: student.family?.organizationHelp || '',
-        childrenInCare: student.family?.childrenInCare || ''
+        childrenInCare: (student.family as any)?.childrenInCare || ''
       },
       generatedAt: new Date().toISOString()
     }
@@ -102,8 +103,17 @@ export async function POST(request: NextRequest) {
       .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters
       .replace(/\s+/g, '-') // Replace spaces with hyphens
 
+    // Log activity
+    if (userId) {
+      await logActivity(
+        userId,
+        ActivityMessages.GENERATE_REGISTRATION_FORM,
+        `បង្កើតទម្រង់ចុះឈ្មោះសិស្ស ${student.lastName} ${student.firstName}`
+      )
+    }
+
     // Stream PDF directly to client
-    return new NextResponse(result.buffer, {
+    return new NextResponse(result.buffer as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

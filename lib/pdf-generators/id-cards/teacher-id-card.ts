@@ -11,8 +11,7 @@ export interface TeacherIDCardData {
   position?: string
   phone?: string
   email?: string
-  photo?: string
-  avatar?: string
+  // photo field removed - always show 3x4 placeholder for manual photo attachment
   generatedAt: string
 }
 
@@ -127,7 +126,7 @@ function generateTeacherCardHTML(teacher: TeacherIDCardData, isBulk: boolean = f
       <div class="id-card-content">
         <div class="teacher-photo-section">
           <div class="teacher-photo" style="width: ${photoSize.width}px; height: ${photoSize.height}px;">
-            ${teacher.photo ? `<img src="${teacher.photo}" alt="Teacher Photo" />` : '<div class="photo-placeholder">3x4</div>'}
+            <div class="photo-placeholder">3x4</div>
           </div>
         </div>
         
@@ -646,6 +645,10 @@ export async function generateTeacherIDCardPDF(data: TeacherIDCardData, options?
   try {
     const page = await browser.newPage()
     
+    // Set a longer timeout for page loading (60 seconds)
+    page.setDefaultNavigationTimeout(60000)
+    page.setDefaultTimeout(60000)
+    
     await page.setViewport({
         width: 280 * 4,
         height: 397 * 4,
@@ -653,7 +656,14 @@ export async function generateTeacherIDCardPDF(data: TeacherIDCardData, options?
     })
 
       const html = generateTeacherIDCardHTML(data)
-    await page.setContent(html, { waitUntil: 'networkidle0' })
+    // Use 'domcontentloaded' instead of 'networkidle0' for faster loading
+    await page.setContent(html, { 
+      waitUntil: 'domcontentloaded',
+      timeout: 60000 
+    })
+    
+    // Wait a bit for base64 images to render
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 300)))
 
     const pdfBuffer = await page.pdf({
       printBackground: true,
@@ -695,6 +705,10 @@ export async function generateBulkTeacherIDCardPDF(data: BulkTeacherIDCardData, 
   try {
     const page = await browser.newPage()
     
+    // Set a longer timeout for page loading (60 seconds)
+    page.setDefaultNavigationTimeout(60000)
+    page.setDefaultTimeout(60000)
+    
     await page.setViewport({
         width: 210 * 4,
         height: 297 * 4,
@@ -702,7 +716,14 @@ export async function generateBulkTeacherIDCardPDF(data: BulkTeacherIDCardData, 
       })
 
       const html = generateBulkTeacherIDCardHTML(data)
-    await page.setContent(html, { waitUntil: 'networkidle0' })
+    // Use 'domcontentloaded' instead of 'networkidle0' for faster loading
+    await page.setContent(html, { 
+      waitUntil: 'domcontentloaded',
+      timeout: 60000 
+    })
+    
+    // Wait a bit for base64 images to render
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
 
     const pdfBuffer = await page.pdf({
         format: 'A4',

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // GET - Fetch all students with complete data
 export async function GET(request: NextRequest) {
@@ -15,7 +16,11 @@ export async function GET(request: NextRequest) {
               scholarships: true,
               enrollments: {
                 include: {
-                  course: true,
+                  course: {
+                    include: {
+                      schoolYear: true
+                    }
+                  },
                   dropSemester: true
                 }
               } as any
@@ -36,7 +41,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { student, guardians, familyInfo } = body
+    const { student, guardians, familyInfo, userId } = body
 
     // Validate required fields
     if (!student || !student.firstName || !student.lastName || !student.gender || !student.dob || !student.class) {
@@ -57,6 +62,7 @@ export async function POST(request: NextRequest) {
           dob: new Date(student.dob),
           class: student.class,
           schoolYear: student.schoolYear || '2024-2025',
+          photo: student.photo || null, // Add photo field
           registerToStudy: student.registerToStudy || false,
           studentHouseNumber: student.studentHouseNumber || null,
           studentVillage: student.studentVillage || null,
@@ -134,6 +140,15 @@ export async function POST(request: NextRequest) {
         }
       })
     })
+
+    // Log activity
+    if (userId && result) {
+      await logActivity(
+        userId,
+        ActivityMessages.ADD_STUDENT,
+        `បន្ថែមសិស្ស ${result.lastName} ${result.firstName} - ថ្នាក់ទី${result.class}`
+      )
+    }
 
     return NextResponse.json({ student: result }, { status: 201 })
   } catch (error) {

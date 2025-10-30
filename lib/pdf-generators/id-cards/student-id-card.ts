@@ -16,7 +16,6 @@ export interface StudentIDCardData {
   dob: string
   class: string
   classDisplay?: string
-  photo?: string
   phone?: string
   schoolYear: string
   studentIdNumber: string
@@ -95,7 +94,7 @@ function generateCardHTML(student: StudentIDCardData): string {
       <!-- Photo -->
       <div class="photo-section">
         <div class="student-photo">
-          ${student.photo ? `<img src="${student.photo}" alt="Student Photo" />` : '<div class="photo-placeholder">3x4</div>'}
+          <div class="photo-placeholder">3x4</div>
         </div>
       </div>
       
@@ -114,7 +113,7 @@ function generateCardHTML(student: StudentIDCardData): string {
 }
 
 // Standardized CSS for both single and bulk generation
-function getIDCardCSS(): string {
+function getIDCardCSS(backgroundLogoBase64?: string): string {
   return `
     * {
       box-sizing: border-box;
@@ -187,7 +186,7 @@ function getIDCardCSS(): string {
       box-sizing: border-box;
     }
     
-    /* Background Pattern */
+    /* Background Pattern with School Logo (Primary 1-6, High 7-9) */
     .id-card-container::before {
       content: '';
       position: absolute;
@@ -196,8 +195,15 @@ function getIDCardCSS(): string {
       right: 0;
       bottom: 0;
       background: 
-        radial-gradient(circle at 20% 80%, rgba(0, 0, 0, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.03) 0%, transparent 50%);
+        ${backgroundLogoBase64 ? `url("${backgroundLogoBase64}")` : 'none'},
+        radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+      background-size: 85%, 100%, 100%;
+      background-position: center, 0 0, 0 0;
+      background-repeat: no-repeat, no-repeat, no-repeat;
+      filter: blur(2px);
+      opacity: 0.7;
+      z-index: 1;
       pointer-events: none;
     }
     
@@ -429,6 +435,9 @@ export function generateStudentIDCardHTML(data: StudentIDCardData): string {
     throw new Error(`Invalid student data: ${validation.errors.join(', ')}`)
   }
 
+  // Use the same school logo as background (Primary for 1-6, High for 7-9)
+  const backgroundLogoBase64 = getLogoBase64(data.class)
+
   const html = `
 <!DOCTYPE html>
 <html lang="km">
@@ -437,7 +446,7 @@ export function generateStudentIDCardHTML(data: StudentIDCardData): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ប័ណ្ណសម្គាល់ខ្លួនសិស្សសាលាមិត្តភាព</title>
   <style>
-    ${getIDCardCSS()}
+    ${getIDCardCSS(backgroundLogoBase64)}
   </style>
 </head>
 <body>
@@ -475,6 +484,10 @@ export function generateBulkStudentIDCardHTML(data: BulkStudentIDCardData): stri
   if (validationErrors.length > 0) {
     throw new Error(`Invalid student data: ${validationErrors.join('; ')}`)
   }
+
+  // Use the first student's grade to determine background logo (Primary for 1-6, High for 7-9)
+  // In bulk generation, students are usually from the same class/grade
+  const backgroundLogoBase64 = getLogoBase64(data.students[0].class)
 
   // Split students into pages of 4 (2x2 grid)
   const studentsPerPage = 4
@@ -514,7 +527,7 @@ export function generateBulkStudentIDCardHTML(data: BulkStudentIDCardData): stri
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ប័ណ្ណសម្គាល់ខ្លួនសិស្សសាលាមិត្តភាព</title>
   <style>
-    ${getIDCardCSS()}
+    ${getIDCardCSS(backgroundLogoBase64)}
   </style>
 </head>
 <body>
@@ -528,7 +541,6 @@ export function generateBulkStudentIDCardHTML(data: BulkStudentIDCardData): stri
 
 export async function generateStudentIDCardPDF(data: StudentIDCardData, options?: ReportOptions): Promise<PDFResult> {
   try {
-    const mergedOptions = mergeReportOptions(options)
     const html = generateStudentIDCardHTML(data)
     
     const browser = await puppeteer.launch({
@@ -538,8 +550,21 @@ export async function generateStudentIDCardPDF(data: StudentIDCardData, options?
     
     try {
       const page = await browser.newPage()
+      
+      // Set a longer timeout for page loading (60 seconds)
+      page.setDefaultNavigationTimeout(60000)
+      page.setDefaultTimeout(60000)
+      
       await page.setViewport({ width: 282, height: 407 })
-      await page.setContent(html, { waitUntil: 'networkidle0' })
+      
+      // Use 'domcontentloaded' instead of 'networkidle0' for faster loading
+      await page.setContent(html, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 60000 
+      })
+      
+      // Wait a bit for base64 images to render
+      await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 300)))
       
       const pdfBuffer = await page.pdf({
         width: '282px',
@@ -563,7 +588,6 @@ export async function generateStudentIDCardPDF(data: StudentIDCardData, options?
 
 export async function generateBulkStudentIDCardPDF(data: BulkStudentIDCardData, options?: ReportOptions): Promise<PDFResult> {
   try {
-    const mergedOptions = mergeReportOptions(options)
     const html = generateBulkStudentIDCardHTML(data)
     
     const browser = await puppeteer.launch({
@@ -573,8 +597,21 @@ export async function generateBulkStudentIDCardPDF(data: BulkStudentIDCardData, 
     
     try {
       const page = await browser.newPage()
+      
+      // Set a longer timeout for page loading (60 seconds)
+      page.setDefaultNavigationTimeout(60000)
+      page.setDefaultTimeout(60000)
+      
       await page.setViewport({ width: 794, height: 1123 }) // A4 size in pixels at 96 DPI
-      await page.setContent(html, { waitUntil: 'networkidle0' })
+      
+      // Use 'domcontentloaded' instead of 'networkidle0' for faster loading
+      await page.setContent(html, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 60000 
+      })
+      
+      // Wait a bit for base64 images to render
+      await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
       
       const pdfBuffer = await page.pdf({
         format: 'A4',

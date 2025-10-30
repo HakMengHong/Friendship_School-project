@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 const prisma = new PrismaClient()
 
@@ -42,7 +43,7 @@ export async function PUT(
     const { id: idStr } = await params
     const id = parseInt(idStr)
     const body = await request.json()
-    const { schoolYearCode } = body
+    const { schoolYearCode, userId } = body
 
     if (!schoolYearCode) {
       return NextResponse.json(
@@ -57,6 +58,11 @@ export async function PUT(
         schoolYearCode
       }
     })
+
+    // Log activity
+    if (userId) {
+      await logActivity(userId, ActivityMessages.EDIT_SCHOOL_YEAR, `កែប្រែឆ្នាំសិក្សា ${updatedSchoolYear.schoolYearCode}`)
+    }
 
     return NextResponse.json(updatedSchoolYear)
   } catch (error) {
@@ -76,6 +82,13 @@ export async function DELETE(
   try {
     const { id: idStr } = await params
     const id = parseInt(idStr)
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+
+    // Get school year info before deleting
+    const schoolYear = await prisma.schoolYear.findUnique({
+      where: { schoolYearId: id }
+    })
 
     // Check if there are courses using this school year
     const coursesCount = await prisma.course.count({
@@ -92,6 +105,11 @@ export async function DELETE(
     await prisma.schoolYear.delete({
       where: { schoolYearId: id }
     })
+
+    // Log activity
+    if (userId && schoolYear) {
+      await logActivity(parseInt(userId), ActivityMessages.DELETE_SCHOOL_YEAR, `លុបឆ្នាំសិក្សា ${schoolYear.schoolYearCode}`)
+    }
 
     return NextResponse.json({ message: 'School year deleted successfully' })
   } catch (error) {

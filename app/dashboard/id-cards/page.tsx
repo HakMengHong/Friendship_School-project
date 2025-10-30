@@ -714,8 +714,8 @@ export default function IDCardsPage() {
 
 
   return (
-    <div>
-      <div>  
+    <div className="min-h-screen animate-fade-in">
+      <div className="animate-fade-in">  
 
         {/* ID Card Generation Options */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

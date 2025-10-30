@@ -28,6 +28,7 @@ import {
 import { Plus, Edit, Trash2, User as UserIcon, Users, Shield, UserCheck, Search, Eye, EyeOff, Upload, X, ToggleLeft, Info, Sparkles, BarChart3, Activity, BookOpen, Camera, Phone, AtSign, Mail, Lock, Save, Check, CheckCircle, ChevronDown, ClipboardList } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
+import { getCurrentUser } from "@/lib/auth-service";
 // Removed separate component imports - now consolidated
 interface User {
   userId: number;
@@ -164,7 +165,7 @@ function AdminUsersContent() {
   };
 
   // Handle add/edit user submit
-  const handleUserFormSubmit = async (data: UserFormData, isEdit: boolean): Promise<boolean> => {
+  const handleUserFormSubmit = async (data: UserFormData, isEdit: boolean): Promise<{ success: boolean; updatedUser?: any }> => {
     setFormLoading(true);
     setTimeout(() => {}, 0); // allow loading state to show
     try {
@@ -179,15 +180,22 @@ function AdminUsersContent() {
       const result = await res.json();
       if (!res.ok) {
         toast({ title: "បរាជ័យ", description: result.error || "មានបញ្ហា", variant: "destructive" });
-        return false;
+        return { success: false };
       }
+      
+      // Reset file input
+      const fileInput = document.getElementById('photo-upload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      
       // Refresh list on success; dialog will close from form after showing inline message
-      fetchUsers();
+      await fetchUsers();
       toast({ title: isEdit ? "កែប្រែជោគជ័យ" : "បន្ថែមជោគជ័យ", description: isEdit ? "ព័ត៌មានត្រូវបានកែប្រែ" : "អ្នកប្រើថ្មីត្រូវបានបន្ថែម" });
-      return true;
+      return { success: true, updatedUser: result.user };
     } catch (e) {
       toast({ title: "បរាជ័យ", description: "មានបញ្ហាក្នុងការផ្ញើទិន្នន័យ", variant: "destructive" });
-      return false;
+      return { success: false };
     } finally {
       setFormLoading(false);
     }
@@ -216,6 +224,8 @@ function AdminUsersContent() {
         description: "សូមជ្រើសរើសឯកសាររូបភាពប៉ុណ្ណោះ", 
         variant: "destructive" 
       });
+      // Reset file input
+      e.target.value = '';
       return;
     }
 
@@ -226,6 +236,8 @@ function AdminUsersContent() {
         description: "ទំហំឯកសារត្រូវតែតិចជាង 5MB", 
         variant: "destructive" 
       });
+      // Reset file input
+      e.target.value = '';
       return;
     }
 
@@ -258,12 +270,17 @@ function AdminUsersContent() {
         title: "ជោគជ័យ", 
         description: "រូបភាពត្រូវបានផ្ទុកឡើង", 
       });
+      
+      // Reset file input to allow re-upload
+      e.target.value = '';
     } catch (err) {
       toast({ 
         title: "បរាជ័យ", 
         description: "មិនអាចផ្ទុករូបភាពបានទេ", 
         variant: "destructive" 
       });
+      // Reset file input on error
+      e.target.value = '';
     } finally {
       setIsUploading(false);
     }
@@ -332,13 +349,52 @@ function AdminUsersContent() {
     }
 
     setSubmitMessage(null);
-    const ok = await handleUserFormSubmit(submitData, isEdit);
-    if (ok) {
+    const result = await handleUserFormSubmit(submitData, isEdit);
+    if (result.success) {
       setSubmitMessage({ type: "success", text: isEdit ? "កែប្រែជោគជ័យ" : "បន្ថែមជោគជ័យ" });
+      
+      // Check if we edited the current logged-in user
+      const currentUser = getCurrentUser();
+      const isCurrentUser = isEdit && editUser && currentUser && editUser.userId === currentUser.id;
+      
+      // Debug logging
+      console.log('🔍 Edit Check:', {
+        isEdit,
+        editUserId: editUser?.userId,
+        currentUserId: currentUser?.id,
+        isCurrentUser,
+        updatedUserData: result.updatedUser
+      });
+      
+      // If we edited the current user, update localStorage with new data
+      if (isCurrentUser && result.updatedUser) {
+        console.log('✅ Updating localStorage for current user');
+        const updatedUserForStorage = {
+          id: result.updatedUser.userId,
+          username: result.updatedUser.username,
+          firstname: result.updatedUser.firstname,
+          lastname: result.updatedUser.lastname,
+          role: result.updatedUser.role,
+          position: result.updatedUser.position,
+          photo: result.updatedUser.photo,
+          phonenumber1: result.updatedUser.phonenumber1,
+          phonenumber2: result.updatedUser.phonenumber2,
+        };
+        localStorage.setItem('currentUser', JSON.stringify(updatedUserForStorage));
+      }
+      
       // Close after a short delay so the user can read the message
       setTimeout(() => {
         setSubmitMessage(null);
         setFormDialogOpen(false);
+        
+        // If we edited the current user, refresh to update topbar
+        if (isCurrentUser) {
+          console.log('✅ Refreshing page - edited current user');
+          window.location.reload();
+        } else {
+          console.log('ℹ️ No refresh - edited different user');
+        }
       }, 1200);
     } else {
       setSubmitMessage({ type: "error", text: isEdit ? "កែប្រែមិនជោគជ័យ" : "បន្ថែមមិនជោគជ័យ" });
@@ -611,8 +667,9 @@ function AdminUsersContent() {
   
   return (
     <div className="min-h-screen animate-fade-in">
-      {/* Enhanced Statistics Overview */}
-      <div className="relative mb-6">
+      <div className="animate-fade-in">
+        {/* Enhanced Statistics Overview */}
+        <div className="relative mb-6">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-purple-950/20 rounded-3xl -z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.05),transparent_50%)]" />
@@ -915,6 +972,22 @@ function AdminUsersContent() {
                             >
                               <Info className="w-4 h-4" />
                             </Button>
+                            {user.accountLockedUntil && (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => handleResetAttempts(user)}
+                                className="h-8 w-8 hover:bg-orange-100 dark:hover:bg-orange-900/30 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 rounded-xl transition-all duration-300 hover:scale-110"
+                                aria-label="រំសាយការចាក់សោ"
+                                disabled={skipLockoutLoading === user.userId}
+                              >
+                                {skipLockoutLoading === user.userId ? (
+                                  <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                  <Lock className="w-4 h-4" />
+                                )}
+                              </Button>
+                            )}
                             <Button
                               size="icon"
                               variant="ghost"
@@ -1667,6 +1740,7 @@ function AdminUsersContent() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

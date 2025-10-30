@@ -66,7 +66,7 @@ interface Enrollment {
   enrollmentId: number
   studentId: number
   courseId: number
-  enrollmentDate: string
+  createdAt: string
   drop: boolean
   dropDate?: string
   student: Student
@@ -727,23 +727,23 @@ function ViewStudentClassContent() {
                                     {student.photo ? (
                                       <img 
                                         src={student.photo} 
-                                        alt={`${student.firstName} ${student.lastName}`}
+                                        alt={`${student.lastName} ${student.firstName}`}
                                         className="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-gray-700"
                                       />
                                     ) : (
                                       <span className="text-lg font-semibold text-indigo-600 dark:text-indigo-300">
-                                        {student.firstName.charAt(0)}{student.lastName.charAt(0)}
+                                        {student.lastName.charAt(0)}{student.firstName.charAt(0)}
                                       </span>
                                     )}
                                   </div>
                                   
                                   <div className="flex-1">
                                     <div className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors duration-300">
-                                      {student.firstName} {student.lastName}
+                                      {student.lastName} {student.firstName}
                                     </div>
                                     <div className="text-sm text-gray-600 dark:text-gray-400 font-medium space-y-1">
-                                      <div>ថ្នាក់ទី {student.class} • {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender}</div>
-                                      <div>ឆ្នាំសិក្សា: {student.schoolYear} • ថ្ងៃចុះឈ្មោះ: {new Date(enrollment.enrollmentDate).toLocaleDateString('km-KH')}</div>
+                                      <div>ថ្នាក់ទី {enrollment.course.grade}{enrollment.course.section} • ភេទ {student.gender === 'male' ? 'ប្រុស' : student.gender === 'female' ? 'ស្រី' : student.gender}</div>
+                                      <div>ឆ្នាំសិក្សា: {enrollment.course.schoolYear.schoolYearCode} • ថ្ងៃចុះឈ្មោះ: {new Date(enrollment.createdAt).toLocaleDateString('km-KH')}</div>
                                     </div>
                                   </div>
                                 </div>

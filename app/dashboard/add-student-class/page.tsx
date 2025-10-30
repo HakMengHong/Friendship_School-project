@@ -394,9 +394,10 @@ function AddStudentClassContent() {
 
   return (
     <div className="min-h-screen animate-fade-in">
-      {/* Enhanced Error Message */}
-      {error && (
-        <div className="relative mb-6">
+      <div className="animate-fade-in">
+        {/* Enhanced Error Message */}
+        {error && (
+          <div className="relative mb-6">
           <div className="bg-gradient-to-r from-red-50 via-red-50/80 to-red-50 dark:from-red-950/20 dark:via-red-950/10 dark:to-red-950/20 backdrop-blur-xl border-2 border-red-200 dark:border-red-800 rounded-2xl p-6 shadow-xl">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
@@ -1237,6 +1238,7 @@ function AddStudentClassContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   )
 }

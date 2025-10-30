@@ -137,10 +137,10 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
     
     /* Custom styles for attendance report - not using getStudentRegistrationCSS to avoid font conflicts */
     
-    /* Page setup for A4 with 5mm margins */
+    /* Page setup for A4 with custom margins: top/bottom 10mm, left/right 5mm */
     @page {
       size: A4;
-      margin: 10mm 10mm 10mm 10mm;
+      margin: 10mm 5mm 10mm 5mm;
     }
     
     /* Base document styles */
@@ -151,7 +151,6 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
       padding: 0;
       box-sizing: border-box;
       background: white;
-      min-height: 100vh;
     }
     
     /* Custom styles for the new layout */
@@ -160,6 +159,8 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 10px;
+      page-break-after: avoid;
+      page-break-inside: avoid;
     }
     
     .logo-section {
@@ -205,6 +206,7 @@ export const generateAttendanceReportHTML = (data: AttendanceReportData): string
       font-size: 18px;
       margin: 2px 0;
       font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
+      page-break-after: avoid;
     }
     
     .report-title-line1 {
@@ -297,12 +299,42 @@ function generateClassGroupedTables(data: AttendanceReportData): string {
   return sortedClasses.map(className => {
     const classStudents = studentsByClass[className]
       .sort((a, b) => {
-        // Sort by last name first, then first name
-        const nameA = `${a.lastName} ${a.firstName}`.toLowerCase()
-        const nameB = `${b.lastName} ${b.firstName}`.toLowerCase()
-        return nameA.localeCompare(nameB, 'km')
+        // Khmer alphabet order: consonants + independent vowels
+        // ក ខ គ ឃ ង ច ឆ ជ ឈ ញ ដ ឋ ឌ ឍ ណ ត ថ ទ ធ ន ប ផ ព ភ ម យ រ ល វ ស ហ ឡ អ
+        // ស្រៈពេញតួ: អ អា ឥ ឦ ឧ ឨ ឩ ឪ ឫ ឬ ឭ ឮ ឯ ឰ ឱ ឲ ឳ
+        const khmerOrder = 'កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអអាឥឦឧឨឩឪឫឬឭឮឯឰឱឲឳ';
+        const getKhmerSortValue = (char: string): number => {
+          const index = khmerOrder.indexOf(char);
+          return index === -1 ? 999 : index;
+        };
+        
+        const getSortKey = (text: string): number[] => {
+          return Array.from(text).map(char => getKhmerSortValue(char));
+        };
+        
+        // Compare last names first
+        const aLastKey = getSortKey(a.lastName);
+        const bLastKey = getSortKey(b.lastName);
+        
+        for (let i = 0; i < Math.max(aLastKey.length, bLastKey.length); i++) {
+          const aVal = aLastKey[i] || 999;
+          const bVal = bLastKey[i] || 999;
+          if (aVal !== bVal) return aVal - bVal;
+        }
+        
+        // If last names are equal, compare first names
+        const aFirstKey = getSortKey(a.firstName);
+        const bFirstKey = getSortKey(b.firstName);
+        
+        for (let i = 0; i < Math.max(aFirstKey.length, bFirstKey.length); i++) {
+          const aVal = aFirstKey[i] || 999;
+          const bVal = bFirstKey[i] || 999;
+          if (aVal !== bVal) return aVal - bVal;
+        }
+        
+        return 0;
       })
-    const classLabel = getGradeLabel(className)
+    const classLabel = getClassLabelWithSection(className)
     
     return `
       <div class="class-section">
@@ -384,19 +416,19 @@ export const generateAttendanceReportPDF = async (
       printBackground: true,
       margin: {
         top: '10mm',
-        right: '10mm',
+        right: '5mm',
         bottom: '10mm',
-        left: '10mm'
+        left: '5mm'
       },
       preferCSSPageSize: true,
       displayHeaderFooter: true,
       headerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 5mm 0 0; margin: 0;">
           បញ្ជីអវត្តមានសិស្ស
         </div>
       `,
       footerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 5mm 0 0; margin: 0;">
           ទំព័រទី <span class="pageNumber"></span> នៃ <span class="totalPages"></span>
         </div>
       `
@@ -413,6 +445,19 @@ export const generateAttendanceReportPDF = async (
 }
 
 // Helper functions
+function getClassLabelWithSection(className: string): string {
+  // Handle multiple formats: "5A", "5-A", "5 A", "5", etc.
+  const match = className.match(/^(\d+)[-\s]?([A-Z]?)$/i);
+  if (match) {
+    const grade = match[1];
+    const section = match[2].toUpperCase();
+    return section ? `ថ្នាក់ទី ${grade}${section}` : `ថ្នាក់ទី ${grade}`;
+  }
+  
+  // Fallback to getGradeLabel if format doesn't match
+  return getGradeLabel(className);
+}
+
 function getDateRangeText(data: AttendanceReportData): string {
   if (data.startDate && data.endDate) {
     const startDate = new Date(data.startDate)

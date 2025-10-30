@@ -11,6 +11,7 @@ import {
   processStudentData,
   processTeacherData
 } from '@/lib/pdf-generators/id-cards/utils'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 // Request body types
 interface StudentIDCardRequest {
@@ -20,6 +21,7 @@ interface StudentIDCardRequest {
   classId?: string
   courseId?: number
   schoolYear?: string
+  userId?: number
 }
 
 interface TeacherIDCardRequest {
@@ -27,6 +29,7 @@ interface TeacherIDCardRequest {
   variant: 'single' | 'bulk'
   userIds: number[]
   schoolYear?: string
+  userId?: number
 }
 
 type IDCardRequest = StudentIDCardRequest | TeacherIDCardRequest
@@ -68,7 +71,7 @@ async function handleStudentIDCardGeneration(
   request: StudentIDCardRequest, 
   schoolYear: string
 ) {
-  const { variant, studentIds, classId, courseId } = request
+  const { variant, studentIds, classId, courseId, userId } = request
 
   // Validate student-specific parameters
   if (variant === 'single' && (!studentIds || studentIds.length !== 1)) {
@@ -123,6 +126,15 @@ async function handleStudentIDCardGeneration(
       filename = createSafeFilename('student', 'bulk', students.length)
     }
 
+    // Log activity
+    if (userId) {
+      await logActivity(
+        userId,
+        ActivityMessages.GENERATE_STUDENT_ID_CARD,
+        `បង្កើតប័ណ្ណសំគាល់សិស្ស (${variant}) - ${students.length} សិស្ស`
+      )
+    }
+
     return createPDFResponse(result.buffer, filename)
 
   } catch (error) {
@@ -140,7 +152,7 @@ async function handleTeacherIDCardGeneration(
   request: TeacherIDCardRequest,
   schoolYear: string
 ) {
-  const { variant, userIds } = request
+  const { variant, userIds, userId } = request
 
   // Validate teacher-specific parameters
   if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
@@ -179,6 +191,15 @@ async function handleTeacherIDCardGeneration(
       }
       result = await pdfManager.generatePDF(ReportType.BULK_TEACHER_ID_CARD, bulkTeacherIdCardData)
       filename = createSafeFilename('teacher', 'bulk', teachers.length)
+    }
+
+    // Log activity
+    if (userId) {
+      await logActivity(
+        userId,
+        ActivityMessages.GENERATE_TEACHER_ID_CARD,
+        `បង្កើតប័ណ្ណសំគាល់គ្រូ (${variant}) - ${teachers.length} គ្រូ`
+      )
     }
 
     return createPDFResponse(result.buffer, filename)

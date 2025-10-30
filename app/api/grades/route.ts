@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logActivity, ActivityMessages } from '@/lib/activity-logger';
 
 // GET: Fetch grades
 export async function GET(request: NextRequest) {
@@ -20,9 +21,9 @@ export async function GET(request: NextRequest) {
       if (semesterId) whereClause.semesterId = parseInt(semesterId);
     } else if (today === 'true') {
       // Handle today filter
-      const today = new Date();
-      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      const todayDate = new Date();
+      const todayStart = new Date(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
+      const todayEnd = new Date(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate() + 1);
       
       whereClause = {
         createdAt: {
@@ -48,7 +49,8 @@ export async function GET(request: NextRequest) {
         },
         course: {
           select: {
-            courseName: true
+            courseName: true,
+            grade: true
           }
         },
         semester: {
@@ -99,8 +101,21 @@ export async function POST(request: NextRequest) {
         grade,
         gradeComment,
         userId
+      },
+      include: {
+        student: true,
+        subject: true
       }
     });
+
+    // Log activity
+    if (userId) {
+      await logActivity(
+        userId,
+        ActivityMessages.ADD_GRADE,
+        `បញ្ចូលពិន្ទុ ${newGrade.student.lastName} ${newGrade.student.firstName} - ${newGrade.subject.subjectName}: ${grade}`
+      )
+    }
 
     return NextResponse.json(newGrade, { status: 201 });
   } catch (error) {
@@ -131,8 +146,21 @@ export async function PUT(request: NextRequest) {
         gradeComment,
         userId,
         lastEdit: new Date()
+      },
+      include: {
+        student: true,
+        subject: true
       }
     });
+
+    // Log activity
+    if (userId) {
+      await logActivity(
+        userId,
+        ActivityMessages.EDIT_GRADE,
+        `កែប្រែពិន្ទុ ${updatedGrade.student.lastName} ${updatedGrade.student.firstName} - ${updatedGrade.subject.subjectName}: ${grade}`
+      )
+    }
 
     return NextResponse.json(updatedGrade);
   } catch (error) {
@@ -146,14 +174,33 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const gradeId = searchParams.get('gradeId');
+    const userId = searchParams.get('userId');
 
     if (!gradeId) {
       return NextResponse.json({ error: 'Grade ID is required' }, { status: 400 });
     }
 
+    // Get grade info before deleting
+    const grade = await prisma.grade.findUnique({
+      where: { gradeId: parseInt(gradeId) },
+      include: {
+        student: true,
+        subject: true
+      }
+    });
+
     await prisma.grade.delete({
       where: { gradeId: parseInt(gradeId) }
     });
+
+    // Log activity
+    if (userId && grade) {
+      await logActivity(
+        parseInt(userId),
+        ActivityMessages.DELETE_GRADE,
+        `លុបពិន្ទុ ${grade.student.lastName} ${grade.student.firstName} - ${grade.subject.subjectName}`
+      )
+    }
 
     return NextResponse.json({ message: 'Grade deleted successfully' });
   } catch (error) {

@@ -11,6 +11,95 @@ function round(num: number, decimals: number = 1): string {
   return Number(num.toFixed(decimals)).toFixed(decimals)
 }
 
+/**
+ * ATTENDANCE-BASED GRADE PENALTY SYSTEM (SEMESTER GRADEBOOK)
+ * 
+ * Applies a weighted penalty to grades based on student absences during the last month of semester.
+ * 
+ * Formula: adjustedGrade = originalGrade × (1 - penaltyRate)
+ * Where: penaltyRate = min(totalAbsences / 4, 1) × 0.1
+ * 
+ * Penalty Structure:
+ * - Grade Weight: 90% (original grade with penalty)
+ * - Attendance Weight: 10% (penalty based on absences)
+ * - For every 4 absences, lose 10% of the grade
+ * - 1 absence = 2.5% penalty
+ * - 2 absences = 5% penalty
+ * - 3 absences = 7.5% penalty
+ * - 4+ absences = 10% penalty (capped)
+ * 
+ * Absence Calculation (totalAbsences):
+ * - excused (អវត្តមាន(មានច្បាប់)): 0.5 per session
+ * - absent (អវត្តមាន(ឥតច្បាប់)): 1.0 per session
+ * - late (យឺត): NOT included in penalty calculation
+ * 
+ * Where session = AM/PM/FULL:
+ * - AM or PM = 1 session
+ * - FULL = 2 sessions
+ * 
+ * totalAbsences = (excused × 0.5) + absent
+ * 
+ * Examples:
+ * - Original grade: 50, Absences: 0 → Adjusted: 50.0 (100%)
+ * - Original grade: 50, Absences: 2 → Adjusted: 47.5 (95%)
+ * - Original grade: 50, Absences: 4 → Adjusted: 45.0 (90%)
+ * - Original grade: 40.3, Absences: 3 → Adjusted: 37.27 (92.5%)
+ */
+const applyAttendancePenalty = (originalGrade: number, totalAbsences: number = 0): number => {
+  const penaltyRate = Math.min(totalAbsences / 4, 1) * 0.1  // Max 10% penalty
+  const adjustedGrade = originalGrade * (1 - penaltyRate)
+  return adjustedGrade
+}
+
+// Helper function to determine maxScore based on grade level and subject
+// Database subjects: គណិតវិទ្យា, ភាសាខ្មែរ, តែងសេចក្តី, សរសេរតាមអាន, រូបវិទ្យា, គីមីវិទ្យា, ជីវវិទ្យា, 
+//                    ផែនដីវិទ្យា, សីលធម៌-ពលរដ្ឋវិទ្យា, ភូមិវិទ្យា, ប្រវត្តិវិទ្យា, អង់គ្លេស
+function getSubjectMaxScore(subjectName: string, gradeNum: number): number {
+  // Grade 1-6: maxScore = 10
+  if (gradeNum >= 1 && gradeNum <= 6) {
+    return 10
+  }
+  
+  // Grade 7-8: maxScore = 50, BUT ភាសាខ្មែរ (Khmer) and គណិតវិទ្យា (Math) = 100
+  if (gradeNum >= 7 && gradeNum <= 8) {
+    // Match exact subject names from database
+    if (subjectName === 'គណិតវិទ្យា') return 100  // Math
+    if (subjectName === 'ភាសាខ្មែរ') return 100   // Khmer
+    return 50  // All other subjects
+  }
+  
+  // Grade 9: Each subject has specific maxScore (exact database names)
+  if (gradeNum === 9) {
+    if (subjectName === 'តែងសេចក្តី') return 50           // Writing composition
+    if (subjectName === 'សរសេរតាមអាន') return 50         // Dictation
+    if (subjectName === 'គណិតវិទ្យា') return 100         // Math
+    if (subjectName === 'រូបវិទ្យា') return 35           // Physics
+    if (subjectName === 'គីមីវិទ្យា') return 25          // Chemistry
+    if (subjectName === 'ជីវវិទ្យា') return 35           // Biology
+    if (subjectName === 'ផែនដីវិទ្យា') return 25         // Earth Science
+    if (subjectName === 'សីលធម៌-ពលរដ្ឋវិទ្យា') return 35  // Civic Education
+    if (subjectName === 'ភូមិវិទ្យា') return 32           // Geography
+    if (subjectName === 'ប្រវត្តិវិទ្យា') return 33       // History
+    if (subjectName === 'អង់គ្លេស') return 50            // English
+    return 50 // Default for unknown subjects
+  }
+  
+  // Default fallback
+  return 100
+}
+
+// Helper function to get letter grade based on adjusted score and maxScore
+function getLetterGrade(score: number, maxScore: number): string {
+  const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0
+  
+  if (percentage >= 90) return 'A'   // ល្អ​ប្រសើរ >= 90%
+  if (percentage >= 80) return 'B'   // ល្អ​ណាស់ >= 80%
+  if (percentage >= 70) return 'C'   // ល្អ >= 70%
+  if (percentage >= 60) return 'D'   // ល្អ​បង្គួរ >= 60%
+  if (percentage >= 50) return 'E'   // ល្អ​បង្គួរ >= 50%
+  return 'F' // ខ្សោយ < 50%
+}
+
 // Grade status calculation (same as grade-report-semester.ts)
 function getGradeStatus(average: number, gradeLevel: string): string {
   const gradeNum = parseInt(gradeLevel) || 0
@@ -44,7 +133,7 @@ function getGradeStatus(average: number, gradeLevel: string): string {
   return 'F'
 }
 
-// Calculate subject ranks for all students (same as monthly)
+// Calculate subject ranks for all students (with attendance penalty applied)
 function calculateSubjectRanks(students: any[]): Record<string, Record<string, string>> {
   const subjectRanks: Record<string, Record<string, string>> = {}
   
@@ -60,23 +149,44 @@ function calculateSubjectRanks(students: any[]): Record<string, Record<string, s
   
   // Calculate ranks for each subject
   allSubjects.forEach(subjectName => {
-    // Get all students' grades for this subject
+    // Get all students' grades for this subject WITH ATTENDANCE PENALTY
     const subjectGrades = students
       .map(student => {
         const subject = student.subjects?.find((s: any) => s.subjectName === subjectName)
-        return subject ? {
+        if (!subject) return null
+        
+        // Get total absences for this student
+        const totalAbsences = student.totalAbsences || 0
+        
+        // Apply attendance penalty to subject grade
+        const originalGrade = subject.grade || 0
+        const adjustedGrade = applyAttendancePenalty(originalGrade, totalAbsences)
+        
+        return {
           studentId: student.studentId,
-          grade: subject.grade || 0
-        } : null
+          grade: adjustedGrade  // Use adjusted grade for ranking
+        }
       })
       .filter(Boolean)
-      .sort((a, b) => (b?.grade || 0) - (a?.grade || 0)) // Sort by grade descending
+      .sort((a, b) => (b?.grade || 0) - (a?.grade || 0)) // Sort by adjusted grade descending
     
-    // Assign ranks
+    // Assign ranks with proper tie handling
     subjectRanks[subjectName] = {}
+    let currentRank = 1
     subjectGrades.forEach((studentGrade, index) => {
       if (studentGrade) {
-        subjectRanks[subjectName][studentGrade.studentId] = (index + 1).toString()
+        // Check if this student has the same grade as the previous one
+        if (index > 0 && Math.abs((studentGrade.grade || 0) - (subjectGrades[index - 1]?.grade || 0)) < 0.01) {
+          // Same grade as previous = same rank (tie)
+          const previousStudentId = subjectGrades[index - 1]?.studentId
+          if (previousStudentId) {
+            subjectRanks[subjectName][studentGrade.studentId] = subjectRanks[subjectName][previousStudentId]
+          }
+        } else {
+          // Different grade = update current rank to current position
+          currentRank = index + 1
+          subjectRanks[subjectName][studentGrade.studentId] = currentRank.toString()
+        }
       }
     })
   })
@@ -135,7 +245,15 @@ export interface SemesterGradebookReportData {
     monthlyRank?: string
     overallRank?: string
     status: string
+    totalAbsences?: number  // Total weighted absences for attendance penalty calculation (last month only)
     attendance: {
+      absent: number
+      late: number
+      excused: number
+      total: number
+      rate: number
+    }
+    fullSemesterAttendance?: {  // NEW: All months in semester (for display)
       absent: number
       late: number
       excused: number
@@ -158,10 +276,52 @@ export function generateSemesterGradebookReportHTML(data: SemesterGradebookRepor
     const semesterName = data.semester === '1' ? 'ឆមាសទី ១' : data.semester === '2' ? 'ឆមាសទី ២' : data.semester
     const reportDate = formatDateKhmer(new Date())
     
-    // Process student data with proper calculations
+    // Calculate total absences from attendance data (for penalty)
+    const totalAbsences = data.student.totalAbsences || 
+      ((data.student.attendance.excused * 0.5) + data.student.attendance.absent)
+    
+    // Get class level for maxScore calculation
     const classLevel = data.class || '1'
-    const processedStudent = calculateStudentData(data.student, classLevel)
+    const gradeNum = parseInt(classLevel)
+    
+    // Apply attendance penalty to subject grades and recalculate letter grades
+    const adjustedSubjects = data.student.subjects.map(subject => {
+      const adjustedGrade = applyAttendancePenalty(subject.grade, totalAbsences)
+      const correctMaxScore = getSubjectMaxScore(subject.subjectName, gradeNum)
+      return {
+        ...subject,
+        originalGrade: subject.grade,
+        grade: adjustedGrade,
+        maxGrade: correctMaxScore,  // Update with correct maxScore
+        letterGrade: getLetterGrade(adjustedGrade, correctMaxScore)  // Recalculate based on adjusted grade
+      }
+    })
+    
+    // Process student data with adjusted grades
+    const studentWithAdjustedGrades = {
+      ...data.student,
+      subjects: adjustedSubjects
+    }
+    const processedStudent = calculateStudentData(studentWithAdjustedGrades, classLevel)
     const studentRank = processedStudent.rank || '1'
+    
+    // Calculate adjusted averages following grade-report-semester.ts logic
+    // 1. Last month average (មធ្យមភាគឆមាស) - apply penalty to last month
+    const adjustedAverageGrade = applyAttendancePenalty(
+      data.student.averageGrade, 
+      totalAbsences
+    )
+    
+    // 2. Previous months average (មធ្យមភាគខែប្រចាំឆមាស) - already has per-month penalties from API
+    const adjustedMonthlyAverage = data.student.monthlyAverage || 0
+    
+    // 3. Overall semester average (មធ្យមភាគប្រចាំឆមាស) - calculate from adjusted values
+    const adjustedOverallSemesterAverage = (adjustedAverageGrade + adjustedMonthlyAverage) / 2
+    
+    // Calculate separate status (និទ្ទេស) for each average row
+    const semesterStatus = getGradeStatus(adjustedAverageGrade, classLevel)  // For មធ្យមភាគឆមាស
+    const monthlyStatus = getGradeStatus(adjustedMonthlyAverage, classLevel)  // For មធ្យមភាគខែប្រចាំឆមាស
+    const overallStatus = getGradeStatus(adjustedOverallSemesterAverage, classLevel)  // For មធ្យមភាគប្រចាំឆមាស
     
     // Validate student data
     if (!processedStudent.firstName || !processedStudent.lastName) {
@@ -169,6 +329,17 @@ export function generateSemesterGradebookReportHTML(data: SemesterGradebookRepor
     }
     
     console.log(`Generating HTML for student: ${processedStudent.firstName} ${processedStudent.lastName}`)
+    console.log(`Total absences (for grade penalty - last month only): ${totalAbsences}, Penalty applied: ${Math.min(totalAbsences / 4, 1) * 10}%`)
+    console.log(`Full semester attendance (for display):`, {
+      late: data.student.fullSemesterAttendance?.late || processedStudent.attendance.late,
+      excused: data.student.fullSemesterAttendance?.excused || processedStudent.attendance.excused,
+      absent: data.student.fullSemesterAttendance?.absent || processedStudent.attendance.absent,
+      total: ((data.student.fullSemesterAttendance?.excused || processedStudent.attendance.excused) * 0.5) + (data.student.fullSemesterAttendance?.absent || processedStudent.attendance.absent)
+    })
+    console.log(`Adjusted Semester Average: ${adjustedAverageGrade.toFixed(2)} - Status: ${semesterStatus}`)
+    console.log(`Adjusted Monthly Average: ${adjustedMonthlyAverage.toFixed(2)} - Status: ${monthlyStatus}`)
+    console.log(`Adjusted Overall Semester Average: ${adjustedOverallSemesterAverage.toFixed(2)} - Status: ${overallStatus}`)
+    console.log(`Subject letter grades recalculated based on adjusted scores`)
   
   return `
 <!DOCTYPE html>
@@ -281,16 +452,17 @@ export function generateSemesterGradebookReportHTML(data: SemesterGradebookRepor
     }
 
     .student-photo {
-      width: 120px;
-      height: 120px;
+      width: 96px;
+      height: 128px;
       object-fit: cover;
       border-radius: 0;
       border: 2px solid #333;
+      margin-right: 20px;
     }
 
     .photo-placeholder {
-      width: 120px;
-      height: 120px;
+      width: 96px;
+      height: 128px;
       border: 2px solid #333;
       border-radius: 0;
       display: flex;
@@ -298,6 +470,7 @@ export function generateSemesterGradebookReportHTML(data: SemesterGradebookRepor
       justify-content: center;
       font-size: 9px;
       background: #f5f5f5;
+      margin-right: 20px;
     }
 
     .subject-table {
@@ -398,6 +571,8 @@ export function generateSemesterGradebookReportHTML(data: SemesterGradebookRepor
     .signature-line {
       height: 20px;
       margin-bottom: 10px;
+      white-space: nowrap;
+      font-size: 9pt;
     }
   </style>
 </head>
@@ -462,28 +637,28 @@ export function generateSemesterGradebookReportHTML(data: SemesterGradebookRepor
         
         <tr class="summary-row">
           <td class="grade-value" style="width: 25%;">មធ្យមភាគឆមាស</td>
-          <td class="grade-value" style="width: 25%;">${round(processedStudent.averageGrade, 2)}</td>
+          <td class="grade-value" style="width: 25%;">${round(adjustedAverageGrade, 2)}</td>
           <td class="grade-value" style="width: 25%;">${processedStudent.semesterRank || 'N/A'}</td>
-          <td class="grade-value" style="width: 25%;">${processedStudent.status}</td>
+          <td class="grade-value" style="width: 25%;">${semesterStatus}</td>
         </tr>
         
         <tr class="summary-row">
           <td class="grade-value" style="width: 25%;">មធ្យមភាគខែប្រចាំឆមាស</td>
-          <td class="grade-value" style="width: 25%;">${round(processedStudent.monthlyAverage || 0, 2)}</td>
+          <td class="grade-value" style="width: 25%;">${round(adjustedMonthlyAverage, 2)}</td>
           <td class="grade-value" style="width: 25%;">${processedStudent.monthlyRank || 'N/A'}</td>
-          <td class="grade-value" style="width: 25%;">${processedStudent.status}</td>
+          <td class="grade-value" style="width: 25%;">${monthlyStatus}</td>
         </tr>
         
         <tr class="summary-row">
           <td class="grade-value" style="width: 25%;">មធ្យមភាគប្រចាំឆមាស</td>
-          <td class="grade-value" style="width: 25%;">${round(((processedStudent.monthlyAverage || 0) + processedStudent.averageGrade) / 2, 2)}</td>
+          <td class="grade-value" style="width: 25%;">${round(adjustedOverallSemesterAverage, 2)}</td>
           <td class="grade-value" style="width: 25%;">${processedStudent.overallRank || 'N/A'}</td>
-          <td class="grade-value" style="width: 25%;">${processedStudent.status}</td>
+          <td class="grade-value" style="width: 25%;">${overallStatus}</td>
         </tr>
         
         <!-- Attendance Row -->
         <tr class="attendance-row">
-          <td colspan="4">អវត្តមានប្រចាំឆមាស ${semesterName} ច្បាប់: ${processedStudent.attendance.excused} ដង ឥតច្បាប់: ${processedStudent.attendance.absent} ដង យឺត: ${processedStudent.attendance.late} ដង</td>
+          <td colspan="4">អវត្តមានប្រចាំឆមាស ${semesterName} យឺត: ${(data.student.fullSemesterAttendance?.late || processedStudent.attendance.late)} ដង ច្បាប់: ${(data.student.fullSemesterAttendance?.excused || processedStudent.attendance.excused)} ដង ឥតច្បាប់: ${(data.student.fullSemesterAttendance?.absent || processedStudent.attendance.absent)} ដង សរុប: ${round(((data.student.fullSemesterAttendance?.excused || processedStudent.attendance.excused) * 0.5) + (data.student.fullSemesterAttendance?.absent || processedStudent.attendance.absent), 1)} ដង</td>
         </tr>
       </tbody>
     </table>
@@ -540,12 +715,12 @@ export async function generateSemesterGradebookReportPDF(data: SemesterGradebook
     
     // Set content with better options
     await page.setContent(html, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000
+      waitUntil: 'domcontentloaded', // Changed from networkidle0 for faster rendering
+      timeout: 90000 // Increased timeout for complex calculations
     })
     
-    // Wait a bit more for fonts to load
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Wait for fonts to render
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -586,12 +761,12 @@ export async function generateCombinedSemesterGradebookPDF(individualReports: Se
     
     // Set content with better options
     await page.setContent(combinedHTML, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000
+      waitUntil: 'domcontentloaded', // Changed from networkidle0 for faster rendering
+      timeout: 90000 // Increased timeout for complex calculations
     })
     
-    // Wait a bit more for fonts to load
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Wait for fonts to render
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
     const pdfBuffer = await page.pdf({
       format: 'A4',

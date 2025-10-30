@@ -25,6 +25,7 @@ export * from './reports/grade-report-semester'
 export * from './reports/grade-report-yearly'
 // Removed export - using gradebook-report-monthly-specific.ts instead
 export * from './reports/student-list-report'
+export * from './reports/student-details-report'
 export * from './id-cards/student-id-card'
 export * from './id-cards/student-id-card-back'
 export * from './id-cards/teacher-id-card'

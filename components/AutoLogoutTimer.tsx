@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { getCurrentUser } from '@/lib/auth-service'
 
 interface AutoLogoutTimerProps {
   timeoutMinutes?: number
@@ -52,8 +53,28 @@ export function AutoLogoutTimer({
   }, [])
 
   // Handle logout
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     setIsActive(false)
+    
+    try {
+      // Log auto-logout activity
+      const user = getCurrentUser()
+      if (user) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            username: `${user.lastname} ${user.firstname} (Auto-logout)`
+          })
+        })
+      }
+    } catch (error) {
+      console.error('Auto-logout logging error:', error)
+    }
+    
     if (onLogout) {
       onLogout()
     }

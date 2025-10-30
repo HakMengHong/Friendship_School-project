@@ -130,10 +130,10 @@ export const generateMonthlyAttendanceReportHTML = (data: MonthlyAttendanceRepor
       font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
-    /* Page setup for A4 with 10mm margins */
+    /* Page setup for A4 with custom margins: top/bottom 10mm, left/right 5mm */
     @page {
       size: A4;
-      margin: 10mm 10mm 10mm 10mm;
+      margin: 10mm 5mm 10mm 5mm;
     }
     
     /* Base document styles */
@@ -144,7 +144,6 @@ export const generateMonthlyAttendanceReportHTML = (data: MonthlyAttendanceRepor
       padding: 0;
       box-sizing: border-box;
       background: white;
-      min-height: 100vh;
     }
     
     /* Custom styles for monthly report layout */
@@ -153,6 +152,8 @@ export const generateMonthlyAttendanceReportHTML = (data: MonthlyAttendanceRepor
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 10px;
+      page-break-after: avoid;
+      page-break-inside: avoid;
     }
     
     .logo-section {
@@ -198,6 +199,7 @@ export const generateMonthlyAttendanceReportHTML = (data: MonthlyAttendanceRepor
       font-size: 18px;
       margin: 2px 0;
       font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
+      page-break-after: avoid;
     }
     
     .report-title-single {
@@ -247,17 +249,19 @@ export const generateMonthlyAttendanceReportHTML = (data: MonthlyAttendanceRepor
     }
     
     .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
       gap: 15px;
     }
     
     .summary-item {
       text-align: center;
-      padding: 10px;
+      padding: 10px 20px;
       background-color: white;
       border: 1px solid #ccc;
       border-radius: 5px;
+      flex: 1;
     }
     
     .summary-label {
@@ -356,16 +360,20 @@ export const generateMonthlyAttendanceReportHTML = (data: MonthlyAttendanceRepor
       <div class="summary-title">សរុបរបាយការណ៍ខែ ${getMonthName(data.month)}</div>
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-label">អវត្តមាន(មានច្បាប់)សរុប</div>
+          <div class="summary-label">យឺត</div>
+          <div class="summary-value">${data.totalLate} ដង</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">អវត្តមាន(មានច្បាប់)</div>
           <div class="summary-value">${data.totalExcused} ដង</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">អវត្តមានសរុប</div>
+          <div class="summary-label">អវត្តមាន(ឥតច្បាប់)</div>
           <div class="summary-value">${data.totalAbsent} ដង</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">យឺតសរុប</div>
-          <div class="summary-value">${data.totalLate} ដង</div>
+          <div class="summary-label">សរុប</div>
+          <div class="summary-value">${(data.totalExcused * 0.5) + data.totalAbsent} ដង</div>
         </div>
       </div>
     </div>
@@ -406,9 +414,40 @@ function generateClassGroupedTables(data: MonthlyAttendanceReportData): string {
   return sortedClasses.map(className => {
     const classStudents = studentsByClass[className]
       .sort((a, b) => {
-        const nameA = `${a.lastName} ${a.firstName}`.toLowerCase()
-        const nameB = `${b.lastName} ${b.firstName}`.toLowerCase()
-        return nameA.localeCompare(nameB, 'km')
+        // Khmer alphabet order: consonants + independent vowels
+        // ក ខ គ ឃ ង ច ឆ ជ ឈ ញ ដ ឋ ឌ ឍ ណ ត ថ ទ ធ ន ប ផ ព ភ ម យ រ ល វ ស ហ ឡ អ
+        // ស្រៈពេញតួ: អ អា ឥ ឦ ឧ ឨ ឩ ឪ ឫ ឬ ឭ ឮ ឯ ឰ ឱ ឲ ឳ
+        const khmerOrder = 'កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអអាឥឦឧឨឩឪឫឬឭឮឯឰឱឲឳ';
+        const getKhmerSortValue = (char: string): number => {
+          const index = khmerOrder.indexOf(char);
+          return index === -1 ? 999 : index;
+        };
+        
+        const getSortKey = (text: string): number[] => {
+          return Array.from(text).map(char => getKhmerSortValue(char));
+        };
+        
+        // Compare last names first
+        const aLastKey = getSortKey(a.lastName);
+        const bLastKey = getSortKey(b.lastName);
+        
+        for (let i = 0; i < Math.max(aLastKey.length, bLastKey.length); i++) {
+          const aVal = aLastKey[i] || 999;
+          const bVal = bLastKey[i] || 999;
+          if (aVal !== bVal) return aVal - bVal;
+        }
+        
+        // If last names are equal, compare first names
+        const aFirstKey = getSortKey(a.firstName);
+        const bFirstKey = getSortKey(b.firstName);
+        
+        for (let i = 0; i < Math.max(aFirstKey.length, bFirstKey.length); i++) {
+          const aVal = aFirstKey[i] || 999;
+          const bVal = bFirstKey[i] || 999;
+          if (aVal !== bVal) return aVal - bVal;
+        }
+        
+        return 0;
       })
     const classLabel = getGradeLabel(className)
 
@@ -520,19 +559,19 @@ export const generateMonthlyAttendanceReportPDF = async (
       printBackground: true,
       margin: {
         top: '10mm',
-        right: '10mm',
+        right: '5mm',
         bottom: '10mm',
-        left: '10mm'
+        left: '5mm'
       },
       preferCSSPageSize: true,
       displayHeaderFooter: true,
       headerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 5mm 0 0; margin: 0;">
           បញ្ជីអវត្តមានសិស្ស
         </div>
       `,
       footerTemplate: `
-        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 10mm 0 0; margin: 0;">
+        <div style="font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif; font-size: 8pt; color: #000; text-align: right; width: 100%; padding: 0 5mm 0 0; margin: 0;">
           ទំព័រទី <span class="pageNumber"></span> នៃ <span class="totalPages"></span>
         </div>
       `

@@ -269,7 +269,7 @@ function LoginForm() {
                     setUsername(cleanValue)
                   }}
                   onFocus={() => setOpen(true)}
-                  className="h-14 text-base border-2 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 rounded-xl bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm hover:border-blue-400 hover:shadow-lg focus:shadow-xl"
+                  className="h-12 text-base border-2 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 rounded-xl bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm hover:border-blue-400 hover:shadow-lg focus:shadow-xl"
                   required
                   disabled={isLoading}
                 />
@@ -283,12 +283,12 @@ function LoginForm() {
                 </button>
 
                 {open && (
-                  <div className="absolute top-full left-0 right-0 z-50 mt-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl hover:shadow-3xl animate-fade-in max-h-48 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-2xl shadow-2xl hover:shadow-3xl animate-fade-in max-h-48 overflow-y-auto">
                     {filteredUsers.length > 0 ? (
                       filteredUsers.map((user) => (
                         <div
                           key={user.name}
-                          className="flex items-center px-5 py-4 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 cursor-pointer transition-all duration-300 border-b border-slate-100/50 dark:border-slate-700/50 last:border-b-0 group/user"
+                          className="flex items-center px-4 py-3 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 cursor-pointer transition-all duration-300 border-b border-slate-100/50 dark:border-slate-700/50 last:border-b-0 group/user"
                           onClick={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
@@ -303,7 +303,7 @@ function LoginForm() {
                             {user.avatar}
                           </div>
                           <div className="flex-1">
-                            <div className="font-semibold text-slate-900 dark:text-white text-lg group-hover/user:text-blue-600 dark:group-hover/user:text-blue-400 transition-colors duration-300">{user.name}</div>
+                            <div className="text-slate-900 dark:text-white text-lg group-hover/user:text-blue-600 dark:group-hover/user:text-blue-400 transition-colors duration-300">{user.name}</div>
                             <div className="flex items-center gap-2">
                             <div className="text-sm text-slate-500 dark:text-slate-400 hidden">{user.role}</div>
                               {user.userRole === 'admin' && (
@@ -340,7 +340,7 @@ function LoginForm() {
                   placeholder="លេខកូដសម្ងាត់"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-14 text-base border-2 border-slate-200 dark:border-slate-600 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 transition-all duration-300 rounded-xl bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm hover:border-purple-400 hover:shadow-lg focus:shadow-xl"
+                  className="h-12 text-base border-2 border-slate-200 dark:border-slate-600 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 transition-all duration-300 rounded-xl bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm hover:border-purple-400 hover:shadow-lg focus:shadow-xl"
                   required
                   disabled={isLoading}
                 />

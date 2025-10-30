@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { logActivity, ActivityMessages } from '@/lib/activity-logger';
 
 const prisma = new PrismaClient();
 
@@ -12,6 +13,7 @@ export async function PUT(
     const resolvedParams = await params;
     const enrollmentId = parseInt(resolvedParams.id);
     const body = await request.json();
+    const { userId } = body;
     
     console.log('🔄 Updating enrollment:', {
       enrollmentId,
@@ -37,6 +39,23 @@ export async function PUT(
     });
 
     console.log('✅ Enrollment updated successfully:', updatedEnrollment);
+
+    // Log activity
+    if (userId) {
+      if (body.drop) {
+        await logActivity(
+          userId,
+          ActivityMessages.DROP_STUDENT,
+          `ដកសិស្ស ${updatedEnrollment.student.lastName} ${updatedEnrollment.student.firstName} ចេញពីថ្នាក់ ${updatedEnrollment.course.courseName} - ${body.dropReason || 'មូលហេតុមិនបញ្ជាក់'}`
+        )
+      } else {
+        await logActivity(
+          userId,
+          ActivityMessages.UPDATE_ENROLLMENT,
+          `ធ្វើបច្ចុប្បន្នភាពការចុះឈ្មោះ ${updatedEnrollment.student.lastName} ${updatedEnrollment.student.firstName}`
+        )
+      }
+    }
 
     return NextResponse.json(updatedEnrollment);
   } catch (error) {

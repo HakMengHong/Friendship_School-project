@@ -47,6 +47,10 @@ ChartJS.register(
   Legend
 )
 
+// Set default font for all Chart.js charts
+ChartJS.defaults.font.family = "'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif"
+ChartJS.defaults.font.size = 14
+
 interface SchoolYear {
   schoolYearId: number
   schoolYearCode: string
@@ -205,6 +209,11 @@ function AbsenceContent() {
     }
   }
 
+  const refreshToToday = () => {
+    const today = new Date().toISOString().split('T')[0]
+    setSelectedDate(today)
+  }
+
   // Filter courses based on selected school year
   const filteredCourses = useMemo(() => 
     selectedSchoolYear 
@@ -241,7 +250,7 @@ function AbsenceContent() {
     labels: ['អវត្តមាន(ឥតច្បាប់)', 'យឺត', 'អវត្តមាន(មានច្បាប់)'],
     datasets: [
       {
-        label: 'ចំនួនសិស្ស',
+        label: '',
         data: [statistics.totalAbsent, statistics.totalLate, statistics.totalExcused],
         backgroundColor: [
           'rgba(244, 63, 94, 0.7)',
@@ -260,11 +269,23 @@ function AbsenceContent() {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
       legend: {
-        position: 'top' as const,
+        display: false
       },
       tooltip: {
+        titleFont: {
+          family: "'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif",
+          size: 15,
+          weight: 'bold' as const
+        },
+        bodyFont: {
+          family: "'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif",
+          size: 14,
+          weight: 'normal' as const
+        },
+        padding: 12,
         callbacks: {
           label: function(tooltipItem: any) {
             return `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y} នាក់`
@@ -273,11 +294,38 @@ function AbsenceContent() {
       }
     },
     scales: {
+      x: {
+        grid: {
+          display: false
+        },
+        ticks: {
+          font: {
+            family: "'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif",
+            size: 14,
+            weight: 'normal' as const
+          },
+          padding: 8
+        }
+      },
       y: {
         beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        },
         ticks: {
+          font: {
+            family: "'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif",
+            size: 14,
+            weight: 'normal' as const
+          },
+          padding: 8,
+          stepSize: 1,
           callback: function(tickValue: any) {
-            return `${tickValue} នាក់`
+            // Only show whole numbers
+            if (Number.isInteger(tickValue)) {
+              return `${tickValue} ដង`
+            }
+            return ''
           }
         }
       }
@@ -322,12 +370,13 @@ function AbsenceContent() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto space-y-4">
+    <div className="min-h-screen animate-fade-in">
+      <div className="animate-fade-in">
+        <div className="container mx-auto space-y-4">
         {/* Modern Header */}
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-indigo-500/20 rounded-3xl -z-10" />
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
           </div>
             <div className="flex items-center gap-3">
@@ -343,7 +392,7 @@ function AbsenceContent() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={fetchAttendances}
+                onClick={refreshToToday}
                 disabled={loadingAttendances}
                 className="flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 hover:bg-white dark:hover:bg-slate-700 transition-all duration-300"
               >
@@ -579,7 +628,7 @@ function AbsenceContent() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Chart Section */}
             <div className="lg:col-span-2">
-              <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80`}>
+              <Card className={`h-full flex flex-col backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80`}>
                 <CardHeader className="p-6 bg-gradient-to-r from-purple-500 via-pink-600 to-rose-600 text-white rounded-t-xl">
                   <CardTitle className="text-white flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -598,8 +647,8 @@ function AbsenceContent() {
                     </div>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="h-80">
+                <CardContent className="p-6 flex-1 flex flex-col">
+                  <div className="flex-1 flex items-center justify-center" style={{ fontFamily: "'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif" }}>
                     <Bar data={chartData} options={chartOptions} />
                   </div>
                   <div className="mt-4 text-sm text-muted-foreground text-center">
@@ -611,7 +660,7 @@ function AbsenceContent() {
 
           {/* Quick Insights */}
           <div className="space-y-6">
-            <Card className={`backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80`}>
+            <Card className={`h-full flex flex-col backdrop-blur-sm border-0 shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/80`}>
               <CardHeader className="p-6 bg-gradient-to-r from-blue-500 via-cyan-600 to-teal-600 text-white rounded-t-xl">
                 <CardTitle className="text-white flex items-center space-x-3">
                   <div className="p-2 bg-white/20 rounded-lg">
@@ -620,18 +669,9 @@ function AbsenceContent() {
                   <span className="text-xl text-white">ការវិភាគរហ័ស</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
+              <CardContent className="pt-6 space-y-4 flex-1 flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="group flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl hover:shadow-md transition-all duration-200">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                        <AlertCircle className="h-4 w-4 text-red-500" />
-                      </div>
-                      <span className="text-sm font-medium text-red-700 dark:text-red-300">អវត្តមានឥតច្បាប់</span>
-                    </div>
-                    <span className="text-xl font-bold text-red-600 dark:text-red-400">{statistics.totalAbsent}</span>
-                  </div>
-                  
+                  {/* 1. យឺត (Late) */}
                   <div className="group flex items-center justify-between p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-xl hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-yellow-500/10 rounded-lg group-hover:scale-110 transition-transform">
@@ -642,14 +682,26 @@ function AbsenceContent() {
                     <span className="text-xl font-bold text-yellow-600 dark:text-yellow-400">{statistics.totalLate}</span>
                   </div>
                   
-                  <div className="group flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl hover:shadow-md transition-all duration-200">
+                  {/* 2. អវត្តមាន(មានច្បាប់) */}
+                  <div className="group flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                        <UserCheck className="h-4 w-4 text-green-500" />
+                      <div className="p-2 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                        <UserCheck className="h-4 w-4 text-blue-500" />
                       </div>
-                      <span className="text-sm font-medium text-green-700 dark:text-green-300">អវត្តមានច្បាប់</span>
+                      <span className="text-sm font-medium text-blue-700 dark:text-blue-300">អវត្តមាន(មានច្បាប់)</span>
                     </div>
-                    <span className="text-xl font-bold text-green-600 dark:text-green-400">{statistics.totalExcused}</span>
+                    <span className="text-xl font-bold text-blue-600 dark:text-blue-400">{statistics.totalExcused}</span>
+                  </div>
+                  
+                  {/* 3. អវត្តមាន(ឥតច្បាប់) */}
+                  <div className="group flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                        <AlertCircle className="h-4 w-4 text-red-500" />
+                      </div>
+                      <span className="text-sm font-medium text-red-700 dark:text-red-300">អវត្តមាន(ឥតច្បាប់)</span>
+                    </div>
+                    <span className="text-xl font-bold text-red-600 dark:text-red-400">{statistics.totalAbsent}</span>
                   </div>
                 </div>
                 
@@ -668,6 +720,93 @@ function AbsenceContent() {
         </div>
         </div>
 
+        {/* Student Attendance Table */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 rounded-3xl -z-10" />
+          
+          <Card className="backdrop-blur-sm border-0 shadow-xl bg-white/80 dark:bg-slate-800/80">
+            <CardHeader className="p-6 bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 text-white rounded-t-xl">
+              <CardTitle className="text-white flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-xl text-white">បញ្ជីវត្តមានសិស្ស</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge className="bg-white/20 text-white">
+                    {filteredAttendances.length} កំណត់ត្រា
+                  </Badge>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-gray-200 dark:border-gray-700">
+                      <TableHead className="text-base font-semibold">ល.រ</TableHead>
+                      <TableHead className="text-base font-semibold">ឈ្មោះសិស្ស</TableHead>
+                      <TableHead className="text-base font-semibold">ថ្នាក់</TableHead>
+                      <TableHead className="text-base font-semibold">វេន</TableHead>
+                      <TableHead className="text-base font-semibold">ស្ថានភាព</TableHead>
+                      <TableHead className="text-base font-semibold">មូលហេតុ</TableHead>
+                      <TableHead className="text-base font-semibold">កត់ត្រាដោយ</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAttendances.length > 0 ? (
+                      filteredAttendances.map((attendance, index) => (
+                        <TableRow 
+                          key={attendance.attendanceId}
+                          className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 transition-all duration-200"
+                        >
+                          <TableCell className="text-base">{index + 1}</TableCell>
+                          <TableCell className="text-base font-medium">
+                            {attendance.student.lastName} {attendance.student.firstName}
+                          </TableCell>
+                          <TableCell className="text-base text-gray-600 dark:text-gray-400">
+                            {attendance.course.courseName}
+                          </TableCell>
+                          <TableCell className="text-base">
+                            <Badge variant="outline">
+                              {attendance.session === 'AM' ? 'ព្រឹក' : 
+                               attendance.session === 'PM' ? 'រសៀល' : 'ពេញម៉ោង'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {getStatusBadge(attendance.status)}
+                          </TableCell>
+                          <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                            {attendance.reason || '-'}
+                          </TableCell>
+                          <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                            {attendance.recordedBy || '-'}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-12">
+                          <div className="flex flex-col items-center gap-3">
+                            <Users className="h-12 w-12 text-gray-300 dark:text-gray-600" />
+                            <p className="text-base text-gray-500 dark:text-gray-400">
+                              មិនមានកត់ត្រាវត្តមាន
+                            </p>
+                            <p className="text-sm text-gray-400 dark:text-gray-500">
+                              សូមជ្រើសរើសថ្ងៃ និងថ្នាក់រៀនដើម្បីមើលទិន្នន័យ
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Modern Footer */}
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-slate-50/50 via-blue-50/50 to-indigo-50/50 dark:from-slate-800/50 dark:via-slate-700/50 dark:to-slate-800/50 rounded-2xl -z-10" />
@@ -679,7 +818,7 @@ function AbsenceContent() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={fetchAttendances} 
+                onClick={refreshToToday} 
                 disabled={loadingAttendances}
                 className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/20 hover:bg-white dark:hover:bg-slate-700 transition-all duration-300"
               >
@@ -697,6 +836,7 @@ function AbsenceContent() {
               </Button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

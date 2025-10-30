@@ -242,9 +242,8 @@ export async function fetchTeacherData(userIds: number[]) {
         role: true,
         position: true,
         phonenumber1: true,
-        phonenumber2: true,
-        photo: true,
-        avatar: true
+        phonenumber2: true
+        // photo and avatar removed - not needed for ID cards
       }
     })
 
@@ -288,7 +287,7 @@ export async function processStudentData(students: any[], schoolYear?: string) {
       }
     }
 
-    // Get guardian information (first guardian or default)
+    // Get guardian information (first guardian or default for backward compatibility)
     const guardian = student.guardians && student.guardians.length > 0 ? student.guardians[0] : null
     const guardianInfo = guardian ? {
       name: `${guardian.lastName || ''} ${guardian.firstName || ''}`.trim(),
@@ -299,6 +298,15 @@ export async function processStudentData(students: any[], schoolYear?: string) {
       relation: '',
       phone: ''
     }
+
+    // Get all guardians information for ID card back
+    const guardiansInfo = student.guardians && student.guardians.length > 0
+      ? student.guardians.map((g: any) => ({
+          name: `${g.lastName || ''} ${g.firstName || ''}`.trim(),
+          relation: g.relation || '',
+          phone: g.phone || ''
+        }))
+      : []
 
     return {
       studentId: student.studentId,
@@ -317,6 +325,7 @@ export async function processStudentData(students: any[], schoolYear?: string) {
       courseName: courseInfo.courseName,
       section: courseInfo.section,
       guardian: guardianInfo,
+      guardians: guardiansInfo,  // Add all guardians for ID card back
       generatedAt: new Date().toISOString()
     }
   }))
@@ -338,8 +347,7 @@ export function processTeacherData(teachers: any[]) {
       role: teacher.role,
       position: teacher.position,
       phone: phoneText,
-      photo: teacher.photo,
-      avatar: teacher.avatar,
+      // photo and avatar removed - always show 3x4 placeholder for manual photo attachment
       generatedAt: new Date().toISOString()
     }
   })

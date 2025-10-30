@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PDFManager } from '@/lib/pdf-generators/core/pdf-manager'
 import { ReportType } from '@/lib/pdf-generators/core/types'
-import { StudentListReportData } from '@/lib/pdf-generators/reports/student-list-report'
+import { StudentListReportData, generateStudentListReportPDF } from '@/lib/pdf-generators/reports/student-list-report'
+import { StudentDetailsReportData, generateStudentDetailsReportPDF } from '@/lib/pdf-generators/reports/student-details-report'
 import { prisma } from '@/lib/prisma'
+import { logActivity, ActivityMessages } from '@/lib/activity-logger'
 
 const pdfManager = new PDFManager()
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { reportType, academicYear, class: className, format } = body
+    const { reportType, academicYear, class: className, format, userId } = body
 
     // Fetch student data based on report type
     let studentListData: StudentListReportData
@@ -18,9 +20,6 @@ export async function POST(request: NextRequest) {
       case 'class-list':
         studentListData = await generateClassListData(academicYear, className)
         break
-      case 'all-students':
-        studentListData = await generateAllStudentsData(academicYear)
-        break
       case 'student-details':
         studentListData = await generateStudentDetailsData(academicYear, className)
         break
@@ -28,29 +27,58 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid report type' }, { status: 400 })
     }
 
-    // Generate PDF
-    const result = await pdfManager.generatePDF(
-      ReportType.STUDENT_LIST_REPORT,
-      studentListData,
-      {
-        format: format === 'excel' ? 'A4' : 'A4',
-        orientation: 'portrait',
-        margins: {
-          top: '15mm',
-          right: '15mm',
-          bottom: '15mm',
-          left: '15mm'
-        },
-        includeHeader: true,
-        includeFooter: true
-      }
-    )
+    // Generate PDF based on report type
+    let result
+    if (reportType === 'student-details') {
+      // Use student details report generator with landscape orientation
+      result = await generateStudentDetailsReportPDF(
+        studentListData as StudentDetailsReportData,
+        {
+          format: 'A4',
+          orientation: 'landscape',
+          margins: {
+            top: '15mm',
+            right: '5mm',
+            bottom: '15mm',
+            left: '5mm'
+          },
+          includeHeader: true,
+          includeFooter: true
+        }
+      )
+    } else {
+      // Use student list report generator with portrait orientation
+      result = await generateStudentListReportPDF(
+        studentListData,
+        {
+          format: 'A4',
+          orientation: 'portrait',
+          margins: {
+            top: '15mm',
+            right: '15mm',
+            bottom: '15mm',
+            left: '15mm'
+          },
+          includeHeader: true,
+          includeFooter: true
+        }
+      )
+    }
 
 
     // Create safe filename for download
     const safeFilename = `student-list-report-${reportType}-${academicYear}-${className || 'all'}.pdf`
       .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters
       .replace(/\s+/g, '-') // Replace spaces with hyphens
+
+    // Log activity
+    if (userId) {
+      await logActivity(
+        userId,
+        ActivityMessages.GENERATE_STUDENT_LIST,
+        `បង្កើតបញ្ជីសិស្ស ${className || 'ទាំងអស់'}`
+      )
+    }
 
     // Stream PDF directly to client
     return new NextResponse(result.buffer as BodyInit, {
@@ -148,46 +176,6 @@ async function generateClassListData(academicYear: string, className?: string): 
   return processStudentData(students, 'class-list', academicYear, actualClassName)
 }
 
-// Generate all students data
-async function generateAllStudentsData(academicYear: string): Promise<StudentListReportData> {
-  // Get students through enrollments for the specific academic year
-  const enrollments = await prisma.enrollment.findMany({
-    where: {
-      course: {
-        schoolYear: {
-          schoolYearCode: academicYear
-        }
-      }
-    },
-    include: {
-      student: {
-        include: {
-          guardians: true,
-          family: true
-        }
-      },
-      course: {
-        select: {
-          grade: true,
-          section: true
-        }
-      }
-    },
-    orderBy: [
-      { student: { firstName: 'asc' } }
-    ]
-  })
-
-  // Extract students from enrollments
-  const students = enrollments.map(enrollment => ({
-    ...enrollment.student,
-    // Update the student's class to match the course they're enrolled in
-    class: `${enrollment.course.grade}${enrollment.course.section}`
-  }))
-
-  return processStudentData(students, 'all-students', academicYear)
-}
-
 // Generate student details data
 async function generateStudentDetailsData(academicYear: string, className?: string): Promise<StudentListReportData> {
   let actualClassName = className
@@ -267,12 +255,12 @@ async function generateStudentDetailsData(academicYear: string, className?: stri
 // Process student data into report format
 function processStudentData(
   students: any[], 
-  reportType: 'class-list' | 'all-students' | 'student-details',
+  reportType: 'class-list' | 'student-details',
   academicYear: string,
   className?: string
 ): StudentListReportData {
   const processedStudents = students.map(student => {
-    const guardian = student.guardians?.[0] // Get first guardian
+    const guardians = student.guardians || [] // Get all guardians
     const family = student.family // Get family info
 
     return {
@@ -291,6 +279,7 @@ function processStudentData(
       health: student.health || '',
       studentHouseNumber: student.studentHouseNumber || '',
       studentVillage: student.studentVillage || '',
+      studentCommune: student.studentCommune || '',
       studentDistrict: student.studentDistrict || '',
       studentProvince: student.studentProvince || '',
       studentBirthDistrict: student.studentBirthDistrict || '',
@@ -300,7 +289,7 @@ function processStudentData(
       needsClothes: student.needsClothes || false,
       needsMaterials: student.needsMaterials || false,
       needsTransport: student.needsTransport || false,
-      guardian: guardian ? {
+      guardians: guardians.map((guardian: any) => ({
         firstName: guardian.firstName,
         lastName: guardian.lastName,
         relation: guardian.relation,
@@ -315,7 +304,7 @@ function processStudentData(
         birthDistrict: guardian.birthDistrict,
         believeJesus: guardian.believeJesus,
         church: guardian.church
-      } : undefined,
+      })),
       family: family ? {
         livingWith: family.livingWith,
         ownHouse: family.ownHouse,
@@ -451,8 +440,6 @@ function getReportTitle(reportType: string, className?: string): string {
   switch (reportType) {
     case 'class-list':
       return className ? `បញ្ជីឈ្មោះថ្នាក់ ${className}` : 'បញ្ជីឈ្មោះតាមថ្នាក់'
-    case 'all-students':
-      return 'បញ្ជីឈ្មោះសិស្សទាំងអស់'
     case 'student-details':
       return className ? `ព័ត៌មានលម្អិតសិស្សថ្នាក់ ${className}` : 'ព័ត៌មានលម្អិតសិស្ស'
     default:

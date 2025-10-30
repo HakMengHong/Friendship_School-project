@@ -37,7 +37,7 @@ function formatDateShort(date: string | Date): string {
 
 // Student list report data interfaces
 export interface StudentListReportData {
-  reportType: 'class-list' | 'all-students' | 'student-details'
+  reportType: 'class-list' | 'student-details'
   title: string
   academicYear: string
   class?: string
@@ -59,6 +59,7 @@ export interface StudentListReportData {
     health: string
     studentHouseNumber: string
     studentVillage: string
+    studentCommune: string
     studentDistrict: string
     studentProvince: string
     studentBirthDistrict: string
@@ -68,7 +69,7 @@ export interface StudentListReportData {
     needsClothes: boolean
     needsMaterials: boolean
     needsTransport: boolean
-    guardian?: {
+    guardians?: Array<{
       firstName: string
       lastName: string
       relation: string
@@ -83,7 +84,7 @@ export interface StudentListReportData {
       birthDistrict: string
       believeJesus: boolean
       church: string
-    }
+    }>
     family?: {
       livingWith: string
       ownHouse: boolean
@@ -196,6 +197,11 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
       font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
     
+    .student-table td.name-cell {
+      text-align: left;
+      padding-left: 12px;
+    }
+    
     .student-table th {
       background-color: #f0f0f0;
       font-weight: bold;
@@ -221,6 +227,7 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
     
     .signature-line {
       margin: 5px 0;
+      white-space: nowrap;
       font-size: 14px;
       font-family: 'Khmer OS Siemreap', 'Khmer MEF2', 'Arial Unicode MS', sans-serif;
     }
@@ -259,10 +266,47 @@ export const generateStudentListReportHTML = (data: StudentListReportData): stri
         </tr>
       </thead>
       <tbody>
-        ${data.students.map((student, index) => `
+        ${[...data.students]
+          .sort((a, b) => {
+            // Khmer alphabet order: consonants + independent vowels
+            // ក ខ គ ឃ ង ច ឆ ជ ឈ ញ ដ ឋ ឌ ឍ ណ ត ថ ទ ធ ន ប ផ ព ភ ម យ រ ល វ ស ហ ឡ អ
+            // ស្រៈពេញតួ: អ អា ឥ ឦ ឧ ឨ ឩ ឪ ឫ ឬ ឭ ឮ ឯ ឰ ឱ ឲ ឳ
+            const khmerOrder = 'កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអអាឥឦឧឨឩឪឫឬឭឮឯឰឱឲឳ';
+            const getKhmerSortValue = (char: string): number => {
+              const index = khmerOrder.indexOf(char);
+              return index === -1 ? 999 : index;
+            };
+            
+            const getSortKey = (text: string): number[] => {
+              return Array.from(text).map(char => getKhmerSortValue(char));
+            };
+            
+            // Compare last names first
+            const aLastKey = getSortKey(a.lastName);
+            const bLastKey = getSortKey(b.lastName);
+            
+            for (let i = 0; i < Math.max(aLastKey.length, bLastKey.length); i++) {
+              const aVal = aLastKey[i] || 999;
+              const bVal = bLastKey[i] || 999;
+              if (aVal !== bVal) return aVal - bVal;
+            }
+            
+            // If last names are equal, compare first names
+            const aFirstKey = getSortKey(a.firstName);
+            const bFirstKey = getSortKey(b.firstName);
+            
+            for (let i = 0; i < Math.max(aFirstKey.length, bFirstKey.length); i++) {
+              const aVal = aFirstKey[i] || 999;
+              const bVal = bFirstKey[i] || 999;
+              if (aVal !== bVal) return aVal - bVal;
+            }
+            
+            return 0;
+          })
+          .map((student, index) => `
           <tr>
             <td>${index + 1}</td>
-            <td>${student.lastName} ${student.firstName}</td>
+            <td class="name-cell">${student.lastName} ${student.firstName}</td>
             <td>${getGenderKhmer(student.gender)}</td>
             <td>${student.studentId}</td>
             <td>${formatDateShort(student.dob)}</td>
@@ -363,8 +407,6 @@ function getReportTypeText(type: string): string {
   switch (type) {
     case 'class-list':
       return 'បញ្ជីឈ្មោះតាមថ្នាក់'
-    case 'all-students':
-      return 'បញ្ជីឈ្មោះសិស្សទាំងអស់'
     case 'student-details':
       return 'ព័ត៌មានលម្អិតសិស្ស'
     default:
